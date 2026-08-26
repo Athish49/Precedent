@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 
 from app.core.config import get_settings
 from app.main import app
+from tests.fake_llm import FakeLLMGateway
 
 
 @pytest.fixture(autouse=True)
@@ -18,3 +19,15 @@ def _base_env(monkeypatch: pytest.MonkeyPatch) -> None:
 @pytest.fixture
 def client() -> TestClient:
     return TestClient(app)
+
+
+@pytest.fixture
+def fake_llm() -> FakeLLMGateway:
+    """Return a pre-configured :class:`FakeLLMGateway` instance.
+
+    Tests that need specific responses should configure the gateway directly::
+
+        fake = fake_llm  # from fixture
+        fake._structured["my_task"] = MyModel(...)
+    """
+    return FakeLLMGateway()
