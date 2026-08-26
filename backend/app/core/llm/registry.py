@@ -11,10 +11,12 @@ if TYPE_CHECKING:
 
 _FAST_MODEL = "claude-haiku-4-5-20251001"
 _SMART_MODEL = "claude-sonnet-4-6"
+_POWERFUL_MODEL = "claude-opus-4-8"
 
 _TIER: dict[str, str] = {
     "fast": _FAST_MODEL,
     "smart": _SMART_MODEL,
+    "powerful": _POWERFUL_MODEL,
 }
 
 # ---------------------------------------------------------------------------
@@ -35,6 +37,8 @@ _TASK_TIER: dict[str, str] = {
     "contract_summary": "smart",
     "obligation_extract": "smart",
     "negotiation_suggest": "smart",
+    # Powerful / batch tasks
+    "playbook.bootstrap": "powerful",
 }
 
 

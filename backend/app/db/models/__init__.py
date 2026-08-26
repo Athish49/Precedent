@@ -1,5 +1,6 @@
 from app.db.models.clause import Clause, ClauseEmbedding
 from app.db.models.contract import Contract, ContractMetadata, ContractVersion, Party
+from app.db.models.playbook import Playbook, PlaybookRule
 
 __all__ = [
     "Clause",
@@ -8,4 +9,6 @@ __all__ = [
     "ContractMetadata",
     "ContractVersion",
     "Party",
+    "Playbook",
+    "PlaybookRule",
 ]
