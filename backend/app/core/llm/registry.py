@@ -48,6 +48,8 @@ _TASK_TIER: dict[str, str] = {
     "summarize_redlines": "smart",
     # Powerful / batch tasks
     "playbook.bootstrap": "powerful",
+    # Renewal + compliance tasks
+    "renewal_compliance": "smart",
     # Q&A tasks
     "qa_answer": "smart",
     # Intelligence tasks
