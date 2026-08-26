@@ -38,6 +38,11 @@ _TASK_TIER: dict[str, str] = {
     "contract_summary": "smart",
     "obligation_extract": "smart",
     "negotiation_suggest": "smart",
+    # Drafting tasks
+    "drafting_clause": "smart",
+    "drafting_document_polish": "smart",
+    "drafting_precedent": "smart",
+    "drafting_memo": "smart",
     # Powerful / batch tasks
     "playbook.bootstrap": "powerful",
 }
