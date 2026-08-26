@@ -43,8 +43,16 @@ _TASK_TIER: dict[str, str] = {
     "drafting_document_polish": "smart",
     "drafting_precedent": "smart",
     "drafting_memo": "smart",
+    # Summarization tasks
+    "summarize_contract": "smart",
+    "summarize_redlines": "smart",
     # Powerful / batch tasks
     "playbook.bootstrap": "powerful",
+    # Q&A tasks
+    "qa_answer": "smart",
+    # Intelligence tasks
+    "easy_prompt": "smart",
+    "research_synthesize": "smart",
 }
 
 
