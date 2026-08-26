@@ -4,6 +4,7 @@ from app.db.models.contract import Contract, ContractMetadata, ContractVersion, 
 from app.db.models.nms import DecisionEvent
 from app.db.models.playbook import Playbook, PlaybookRule
 from app.db.models.redline import Redline
+from app.db.models.review_run import ReviewRun
 
 __all__ = [
     "Clause",
@@ -17,5 +18,6 @@ __all__ = [
     "Playbook",
     "PlaybookRule",
     "Redline",
+    "ReviewRun",
     "RiskScore",
 ]
