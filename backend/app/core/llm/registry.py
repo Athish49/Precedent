@@ -33,6 +33,7 @@ _TASK_TIER: dict[str, str] = {
     "search.nl_to_filter": "fast",
     # Smart / complex tasks
     "clause_analysis": "smart",
+    "redline_generate": "smart",
     "risk_score": "smart",
     "contract_summary": "smart",
     "obligation_extract": "smart",
