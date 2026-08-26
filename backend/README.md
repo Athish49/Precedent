@@ -19,9 +19,9 @@ uvicorn app.main:app --reload
 ```
 
 ## Layout
-`app/api` (thin routers) · `app/services/s1..s9` (deterministic + orchestration logic) · `app/core` (config, llm gateway, embeddings, storage, diff) · `app/db` (models, repositories, views) · `app/schemas` (Pydantic) · `app/workflows` (review pipeline, gate, version comparison) · `migrations` · `scripts` · `tests`.
+`app/api` (thin routers) · `app/services/{document_processing,contract_analysis,redline,drafting,intelligence,playbook,repository,obligations,analytics}` · `app/core` (config, llm gateway, embeddings, storage, diff) · `app/db` (models, repositories, views) · `app/schemas` (Pydantic) · `app/workflows` (review pipeline, gate, version comparison) · `migrations` · `scripts` · `tests`.
 
 ## Rules
 - LLM calls only through `app/core/llm/` — no service imports `anthropic` directly.
-- `s1_document_processing` and `s9_analytics` never import `core/llm` (they are deterministic).
+- `document_processing` (S1) and `analytics` (S9) never import `core/llm` (they are deterministic).
 - Never regenerate `char_start`/`char_end` or `clause_type` downstream — carry them from S1.
