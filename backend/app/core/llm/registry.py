@@ -28,6 +28,7 @@ _TASK_TIER: dict[str, str] = {
     "chunk_classify": "fast",
     "entity_extract_simple": "fast",
     "section_label": "fast",
+    "search.nl_to_filter": "fast",
     # Smart / complex tasks
     "clause_analysis": "smart",
     "risk_score": "smart",
