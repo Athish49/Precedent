@@ -55,6 +55,8 @@ _TASK_TIER: dict[str, str] = {
     # Intelligence tasks
     "easy_prompt": "smart",
     "research_synthesize": "smart",
+    # Version tasks
+    "version_semantic_summary": "smart",
 }
 
 

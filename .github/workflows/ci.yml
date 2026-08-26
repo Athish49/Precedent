@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]" --extra-index-url https://pypi.org/simple 2>/dev/null || pip install -e "." && pip install pytest pytest-asyncio httpx ruff mypy
+
+      - name: Ruff lint
+        run: ruff check app tests
+
+      - name: Guard — import anthropic only in app/core/llm/
+        run: |
+          bad=$(grep -r "import anthropic" app/ --include="*.py" \
+                | grep -v "^app/core/llm/" || true)
+          if [ -n "$bad" ]; then
+            echo "ERROR: 'import anthropic' found outside app/core/llm/:"
+            echo "$bad"
+            exit 1
+          fi
+
+      - name: Guard — app/services/document_processing never imports core/llm
+        run: |
+          bad=$(grep -r "core[./]llm\|core\.llm\|from app\.core\.llm" \
+                app/services/document_processing/ --include="*.py" || true)
+          if [ -n "$bad" ]; then
+            echo "ERROR: app/services/document_processing imports core/llm:"
+            echo "$bad"
+            exit 1
+          fi
+
+      - name: Guard — app/services/analytics never imports core/llm
+        run: |
+          bad=$(grep -r "core[./]llm\|core\.llm\|from app\.core\.llm" \
+                app/services/analytics/ --include="*.py" || true)
+          if [ -n "$bad" ]; then
+            echo "ERROR: app/services/analytics imports core/llm:"
+            echo "$bad"
+            exit 1
+          fi
+
+      - name: Pytest
+        env:
+          DATABASE_URL: "postgresql+psycopg://user:pass@localhost/testdb"
+          ANTHROPIC_API_KEY: "sk-ant-test"
+        run: pytest tests/ -q --tb=short

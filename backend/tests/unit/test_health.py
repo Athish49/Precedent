@@ -10,3 +10,8 @@ def test_health_ok() -> None:
     body = response.json()
     assert body["status"] == "ok"
     assert "db" in body
+    assert "embedding_model" in body
+    assert "storage" in body
+    assert isinstance(body["db"], bool)
+    assert isinstance(body["embedding_model"], bool)
+    assert isinstance(body["storage"], bool)
