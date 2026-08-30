@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.errors import AppError
 from app.db.base import get_session_factory
+from app.db.repositories.contract_repo import get_contract as repo_get_contract
 from app.db.repositories.contract_repo import list_contracts as repo_list_contracts
 from app.db.repositories.search_repo import faceted_search, full_text_search
 from app.services.repository.service import list_versions, store_version
@@ -81,6 +82,15 @@ class ContractVersionResponse(BaseModel):
 
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
+
+
+@router.get("/repository/contracts/{contract_id}", response_model=ContractSummary)
+async def get_contract(contract_id: uuid.UUID, session: SessionDep) -> ContractSummary:
+    """Fetch a single contract by ID."""
+    contract = await repo_get_contract(session, contract_id)
+    if contract is None:
+        raise AppError(404, "contract_not_found", f"Contract {contract_id} not found")
+    return ContractSummary.model_validate(contract)
 
 
 @router.get(

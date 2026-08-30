@@ -160,6 +160,34 @@ async def process(
     await session.flush()
 
     # 9. Persist metadata
+    extended = {
+        "initial_term_days": meta_dto.initial_term_days,
+        "renewal_term_days": meta_dto.renewal_term_days,
+        "dispute_resolution": meta_dto.dispute_resolution,
+        "arbitration_venue": meta_dto.arbitration_venue,
+        "indemnification_cap": meta_dto.indemnification_cap,
+        "total_contract_value": meta_dto.total_contract_value,
+        "currency": meta_dto.currency,
+        "notice_address": meta_dto.notice_address,
+        "termination_for_convenience": meta_dto.termination_for_convenience,
+        "termination_notice_days": meta_dto.termination_notice_days,
+        "warranty_period_days": meta_dto.warranty_period_days,
+        "confidentiality_period_years": meta_dto.confidentiality_period_years,
+        "ip_ownership": meta_dto.ip_ownership,
+        "assignment_allowed": meta_dto.assignment_allowed,
+        "non_compete_months": meta_dto.non_compete_months,
+        "non_solicitation_months": meta_dto.non_solicitation_months,
+        "sla_uptime_percent": meta_dto.sla_uptime_percent,
+        "sla_response_time_hours": meta_dto.sla_response_time_hours,
+        "data_processing_agreement": meta_dto.data_processing_agreement,
+        "gdpr_applicable": meta_dto.gdpr_applicable,
+        "force_majeure": meta_dto.force_majeure,
+        "entire_agreement": meta_dto.entire_agreement,
+        "amendments_require_writing": meta_dto.amendments_require_writing,
+        "limitation_of_liability_exclusions": meta_dto.limitation_of_liability_exclusions,
+        "survival_clauses": meta_dto.survival_clauses,
+        **meta_dto.extracted,
+    }
     meta_row = ContractMetadata(
         contract_id=contract_id,
         parties=meta_dto.parties,
@@ -172,7 +200,7 @@ async def process(
         payment_terms=meta_dto.payment_terms,
         financial_fields=meta_dto.financial_fields,
         milestone_dates=[d.isoformat() for d in meta_dto.milestone_dates],
-        extracted=meta_dto.extracted,
+        extracted=extended,
     )
     session.add(meta_row)
     await session.commit()
