@@ -266,14 +266,33 @@ export interface RenewalRow {
 // ─── Analytics response types ─────────────────────────────────────────────────
 
 export interface PortfolioRisk {
-  score: number;
-  distribution: { severity: Severity; count: number }[];
+  total_contracts: number;
+  total_high_flags: number;
+  total_medium_flags: number;
+  total_low_flags: number;
+  total_flags: number;
+  avg_weighted_flag_score: number | null;
+  avg_risk_score: number | null;
+  contracts_high_severity: number;
+  contracts_medium_severity: number;
+  contracts_low_severity: number;
 }
 
-export interface ContractValue {
-  total: number;
-  groups: { key: string; value: number }[];
+export interface ContractValueRow {
+  contract_id: string;
+  title: string;
+  contract_type: string | null;
+  counterparty_id: string | null;
+  counterparty_name: string | null;
+  total_value: string | null;
+  currency: string | null;
+  annual_value: string | null;
+  effective_date: string | null;
+  expiry_date: string | null;
+  status: ContractStatus;
 }
+
+export type ContractValue = ContractValueRow[];
 
 export interface AnalyticsTabular {
   columns: string[];

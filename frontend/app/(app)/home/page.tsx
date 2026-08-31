@@ -51,13 +51,19 @@ function PortfolioRiskCard() {
       {data && (
         <div className="space-y-3">
           <div className="flex items-end gap-1">
-            <span className="text-4xl font-bold">{data.score}</span>
-            <span className="mb-1 text-sm text-muted-foreground">/100</span>
+            <span className="text-4xl font-bold">{data.total_contracts}</span>
+            <span className="mb-1 text-sm text-muted-foreground">contracts</span>
           </div>
           <div className="space-y-1">
-            {data.distribution.map((d) => (
+            {(
+              [
+                { severity: 'high' as Severity, count: data.contracts_high_severity },
+                { severity: 'medium' as Severity, count: data.contracts_medium_severity },
+                { severity: 'low' as Severity, count: data.contracts_low_severity },
+              ] as { severity: Severity; count: number }[]
+            ).map((d) => (
               <div key={d.severity} className="flex items-center gap-2 text-xs">
-                <SeverityIndicator severity={d.severity as Severity} />
+                <SeverityIndicator severity={d.severity} />
                 <span className="capitalize text-muted-foreground">{d.severity}:</span>
                 <span className="font-medium">{d.count}</span>
               </div>
@@ -237,18 +243,20 @@ function ContractValueCard() {
     <CardShell title="Contract Value">
       {isLoading && <Skeleton />}
       {error && <p className="text-xs text-destructive">Unable to load.</p>}
-      {data && (
-        <div className="space-y-3">
-          <p className="text-3xl font-bold">${data.total.toLocaleString()}</p>
-          <dl className="space-y-1">
-            {data.groups.slice(0, 5).map((g) => (
-              <div key={g.key} className="flex items-center justify-between text-xs">
-                <dt className="capitalize text-muted-foreground">{g.key}</dt>
-                <dd className="font-medium">${g.value.toLocaleString()}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
+      {data && data.length === 0 && (
+        <p className="text-xs text-muted-foreground">No contract value data yet.</p>
+      )}
+      {data && data.length > 0 && (
+        <ul className="space-y-1">
+          {data.slice(0, 5).map((r) => (
+            <li key={r.contract_id} className="flex items-center justify-between text-xs">
+              <span className="min-w-0 flex-1 truncate text-muted-foreground">{r.title}</span>
+              <span className="ml-2 font-medium">
+                {r.total_value ? `${r.currency ?? '$'}${Number(r.total_value).toLocaleString()}` : '—'}
+              </span>
+            </li>
+          ))}
+        </ul>
       )}
     </CardShell>
   );

@@ -44,31 +44,34 @@ function PortfolioRiskCard() {
   if (isLoading) return <Card title="Portfolio Risk"><p className="text-xs text-muted-foreground">Loading…</p></Card>;
   if (error || !data) return <Card title="Portfolio Risk"><p className="text-xs text-destructive">Error loading data</p></Card>;
 
-  const maxCount = Math.max(...data.distribution.map((d) => d.count), 1);
-  const severities: Severity[] = ['high', 'medium', 'low'];
+  const distribution: { severity: Severity; count: number }[] = [
+    { severity: 'high', count: data.contracts_high_severity },
+    { severity: 'medium', count: data.contracts_medium_severity },
+    { severity: 'low', count: data.contracts_low_severity },
+  ];
+  const maxCount = Math.max(...distribution.map((d) => d.count), 1);
 
   return (
     <Card title="Portfolio Risk">
-      <p className="mb-3 text-3xl font-bold tabular-nums">{data.score}<span className="ml-1 text-sm font-normal text-muted-foreground">/100</span></p>
+      <p className="mb-3 text-3xl font-bold tabular-nums">
+        {data.total_contracts}
+        <span className="ml-1 text-sm font-normal text-muted-foreground">contracts</span>
+      </p>
       <div className="space-y-2">
-        {severities.map((sev) => {
-          const entry = data.distribution.find((d) => d.severity === sev);
-          const count = entry?.count ?? 0;
-          return (
-            <button
-              key={sev}
-              type="button"
-              onClick={() => router.push('/repository?severity=' + sev)}
-              className="flex w-full items-center gap-2 text-left"
-            >
-              <SeverityIndicator severity={sev} />
-              <div className="flex-1">
-                <Bar pct={(count / maxCount) * 100} />
-              </div>
-              <span className="w-6 text-right text-xs tabular-nums text-muted-foreground">{count}</span>
-            </button>
-          );
-        })}
+        {distribution.map(({ severity: sev, count }) => (
+          <button
+            key={sev}
+            type="button"
+            onClick={() => router.push('/repository?severity=' + sev)}
+            className="flex w-full items-center gap-2 text-left"
+          >
+            <SeverityIndicator severity={sev} />
+            <div className="flex-1">
+              <Bar pct={(count / maxCount) * 100} />
+            </div>
+            <span className="w-6 text-right text-xs tabular-nums text-muted-foreground">{count}</span>
+          </button>
+        ))}
       </div>
     </Card>
   );
@@ -83,23 +86,25 @@ function ContractValueCard() {
 
   return (
     <Card title="Contract Value">
-      <p className="mb-3 text-3xl font-bold tabular-nums">${data.total.toLocaleString()}</p>
-      <div className="space-y-2">
-        {data.groups.map((g) => (
-          <button
-            key={g.key}
-            type="button"
-            onClick={() => router.push('/repository?contract_type=' + g.key)}
-            className="flex w-full items-center gap-2 text-left"
-          >
-            <span className="w-24 shrink-0 truncate text-xs text-muted-foreground capitalize">{g.key.replace(/_/g, ' ')}</span>
-            <div className="flex-1">
-              <Bar pct={data.total > 0 ? (g.value / data.total) * 100 : 0} />
-            </div>
-            <span className="w-20 text-right text-xs tabular-nums text-muted-foreground">${g.value.toLocaleString()}</span>
-          </button>
-        ))}
-      </div>
+      {data.length === 0 ? (
+        <p className="text-xs text-muted-foreground">No contract value data yet.</p>
+      ) : (
+        <div className="space-y-2">
+          {data.slice(0, 8).map((r) => (
+            <button
+              key={r.contract_id}
+              type="button"
+              onClick={() => router.push('/contracts/' + r.contract_id)}
+              className="flex w-full items-center gap-2 text-left"
+            >
+              <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">{r.title}</span>
+              <span className="w-20 text-right text-xs tabular-nums text-muted-foreground">
+                {r.total_value ? `${r.currency ?? '$'}${Number(r.total_value).toLocaleString()}` : '—'}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
     </Card>
   );
 }
