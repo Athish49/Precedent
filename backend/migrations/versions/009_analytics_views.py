@@ -11,8 +11,8 @@ from collections.abc import Sequence
 
 from alembic import op
 
-revision: str = "c3d4e5f6a7b8"
-down_revision: str | None = "b2c3d4e5f6a7"
+revision: str = "i9j0k1l2m3n4"
+down_revision: str | None = "h8i9j0k1l2m3"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
@@ -94,8 +94,8 @@ def upgrade() -> None:
             SUM(medium_count)                  AS total_medium_flags,
             SUM(low_count)                     AS total_low_flags,
             SUM(total_flags)                   AS total_flags,
-            ROUND(AVG(weighted_flag_score), 2) AS avg_weighted_flag_score,
-            ROUND(AVG(risk_score), 4)          AS avg_risk_score,
+            ROUND(AVG(weighted_flag_score)::numeric, 2) AS avg_weighted_flag_score,
+            ROUND(AVG(risk_score)::numeric, 4)          AS avg_risk_score,
             COUNT(*) FILTER (WHERE max_clause_severity = 'high')   AS contracts_high_severity,
             COUNT(*) FILTER (WHERE max_clause_severity = 'medium') AS contracts_medium_severity,
             COUNT(*) FILTER (WHERE max_clause_severity = 'low')    AS contracts_low_severity

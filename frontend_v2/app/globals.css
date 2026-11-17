@@ -1,0 +1,167 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-primary: #0a0a0a;
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --text-muted: rgba(255, 255, 255, 0.45);
+  --accent-dot: #10b981;
+  --button-primary-bg: #ffffff;
+  --button-primary-text: #0a0a0a;
+  --border-color: rgba(255, 255, 255, 0.08);
+}
+
+html,
+body {
+  background-color: #0a0a0a;
+  color: #ffffff;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ── Type scale (mirrors Harvey's responsive scale, using our fonts) ───────── */
+.tx-h1 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.0125em;
+  font-size: 3rem; /* 48px */
+}
+.tx-h2 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  font-size: 2.25rem; /* 36px */
+}
+.tx-h3 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  font-size: 1.75rem; /* 28px */
+}
+/* Sans medium heading — Harvey's heading-4, used for section/block titles */
+.tx-h4 {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  font-size: 1.75rem; /* 28px */
+}
+.tx-lead {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  line-height: 1.3;
+  font-size: 1.25rem; /* 20px */
+}
+.tx-body {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  line-height: 1.3;
+  font-size: 1rem; /* 16px */
+}
+@media (min-width: 768px) {
+  .tx-h1 { font-size: 4.5rem; } /* 72px */
+  .tx-h2 { font-size: 3rem; }   /* 48px */
+  .tx-h3 { font-size: 2rem; }   /* 32px */
+  .tx-h4 { font-size: 2rem; }   /* 32px */
+}
+@media (min-width: 1024px) {
+  .tx-h1 { font-size: 5rem; }   /* 80px */
+  .tx-h2 { font-size: 3.5rem; } /* 56px */
+  .tx-h3 { font-size: 2.25rem; }/* 36px */
+  .tx-h4 { font-size: 2.5rem; } /* 40px */
+}
+
+/* ── Page container + 12-col grid (max-width + responsive gutters) ──────────── */
+.page-container {
+  width: 100%;
+  margin-inline: auto;
+  max-width: 1728px;
+  padding-inline: 1.75rem; /* 28px */
+}
+@media (min-width: 768px) { .page-container { padding-inline: 2rem; } }
+@media (min-width: 1024px) { .page-container { padding-inline: 2.25rem; } }
+@media (min-width: 1280px) { .page-container { padding-inline: 2.5rem; } }
+
+/* ── Sticky-stacking capability blocks (desktop only) ──────────────────────── */
+/* Every block pins at the same offset; later blocks (later in DOM) slide up and
+   cover the previous one, which stays fixed underneath — the Harvey effect. */
+.cap-stack-item {
+  background: var(--bg-primary);
+}
+@media (min-width: 1024px) {
+  .cap-stack-item {
+    position: sticky;
+    top: 88px;
+    max-height: calc(100vh - 88px - 1.5rem);
+    overflow: hidden;
+  }
+}
+
+/* ── Scroll-reveal (driven by IntersectionObserver adding .is-in) ─────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+.reveal.is-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Progress line for the auto-rotating capabilities tabs */
+@keyframes tab-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Slow drift for gradient meshes behind stat bands */
+@keyframes mesh-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(3%, -3%, 0) scale(1.08);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+/* Respect reduced-motion: freeze reveals and looping animations */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .animate-marquee,
+  [data-motion] {
+    animation: none !important;
+  }
+}
