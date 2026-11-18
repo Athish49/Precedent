@@ -1,0 +1,7 @@
+# Failing fixture: edits applied to a copy of fixtures/valid by test_playbook_models.py.
+description: 'Cross-check: expected_position_rung is a fallback rung of the rule.'
+file: playbooks/saas_msa_vendor/risk.yaml
+edits:
+- path: [rules, 0, test_cases, 2, expected_position_rung]
+  set: 5
+expect: {code: test_case.rung, message: not a fallback rung, rule_key: limitation_of_liability.cap_amount}

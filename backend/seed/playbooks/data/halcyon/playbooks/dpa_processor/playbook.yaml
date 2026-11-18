@@ -1,0 +1,26 @@
+key: halcyon-dpa-processor
+name: Halcyon Data Processing Addendum (Processor)
+practice_area: dpa
+layer: agreement
+party_role: vendor
+paper_scope: both
+jurisdiction: global
+precedence: 20
+owner_role: privacy_counsel
+parent: halcyon-baseline
+applies_when: null
+review_cadence_days: 90
+description: >
+  Positions for the data processing addendum under which Halcyon acts as
+  Processor for Personal Data that Customer, as Controller, submits to the
+  Services. Written to be regime-neutral: it carries the same obligations
+  regardless of which Applicable Data Protection Law governs a given Customer,
+  so it stands on its own for a US state privacy law deal and is tightened
+  further by the HIPAA and GDPR overlays where those regimes apply.
+version:
+  version: "1.0"
+  effective_from: 2026-01-15
+  change_summary: Initial published version.
+  created_by: Privacy Counsel
+  approved_by: General Counsel
+rule_files: [rules.yaml]

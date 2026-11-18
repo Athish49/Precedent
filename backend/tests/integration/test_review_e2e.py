@@ -22,7 +22,9 @@ def _make_contract(contract_type: str = "nda") -> MagicMock:
     return c
 
 
-def _make_flag(contract_id: uuid.UUID, severity: str = "medium") -> FlagDTO:
+def _make_flag(
+    contract_id: uuid.UUID, severity: str = "medium", zone: str | None = None
+) -> FlagDTO:
     return FlagDTO(
         id=uuid.uuid4(),
         contract_id=contract_id,
@@ -32,17 +34,21 @@ def _make_flag(contract_id: uuid.UUID, severity: str = "medium") -> FlagDTO:
         source="llm",
         char_start=0,
         char_end=50,
-        detail={"description": "Non-standard clause"},
+        detail={"description": "Non-standard clause", "clause_type": "indemnification"},
         matched_rule_id=None,
         created_at=datetime.now(UTC),
+        zone=zone,
     )
 
 
-def _make_risk(score: float = 0.3, max_severity: str = "medium") -> RiskDTO:
+def _make_risk(
+    score: float = 0.3, max_severity: str = "medium", max_zone: str | None = None
+) -> RiskDTO:
     return RiskDTO(
         score=score,
         max_clause_severity=max_severity,
-        weights_version="v1",
+        weights_version="v2",
+        max_zone=max_zone,
     )
 
 
@@ -50,6 +56,7 @@ def _make_pipeline(
     score: float = 0.25,
     max_severity: str = "medium",
     flag_type: str = "non_standard",
+    zone: str | None = None,
 ) -> PipelineResult:
     contract_id = uuid.uuid4()
     flag = FlagDTO(
@@ -61,11 +68,12 @@ def _make_pipeline(
         source="llm",
         char_start=0,
         char_end=50,
-        detail={"description": "Clause"},
+        detail={"description": "Clause", "clause_type": "indemnification"},
         matched_rule_id=None,
         created_at=datetime.now(UTC),
+        zone=zone,
     )
-    risk = _make_risk(score=score, max_severity=max_severity)
+    risk = _make_risk(score=score, max_severity=max_severity, max_zone=zone)
     analysis = AnalysisResult(flags=[flag], risk=risk)
     return PipelineResult(
         contract_id=contract_id,
@@ -75,8 +83,17 @@ def _make_pipeline(
     )
 
 
-def _gate_patches(run: MagicMock):
-    """Return context managers that patch both gate repo calls."""
+def _gate_patches(run: MagicMock, contract: MagicMock | None = None):
+    """Return context managers that patch gate.py's repo calls.
+
+    ``evaluate_gate`` (task 4.5 rewrite) resolves an approver for any
+    yellow/red worst zone, which means it also reaches ``contract_repo`` (for
+    escalation-matrix context) and ``authority_repo`` (no escalation
+    policies loaded — there is no seed data in these tests, which is exactly
+    the "no approver configured" case the gate must still handle without
+    crashing or blocking).
+    """
+    contract = contract or MagicMock(context={})
     return (
         patch(
             f"{_GATE_MODULE}.review_run_repo.create_review_run",
@@ -87,6 +104,16 @@ def _gate_patches(run: MagicMock):
             f"{_GATE_MODULE}.review_run_repo.complete_review_run",
             new_callable=AsyncMock,
             return_value=run,
+        ),
+        patch(
+            f"{_GATE_MODULE}.contract_repo.get_contract",
+            new_callable=AsyncMock,
+            return_value=contract,
+        ),
+        patch(
+            f"{_GATE_MODULE}.authority_repo.list_escalation_policies",
+            new_callable=AsyncMock,
+            return_value=[],
         ),
     )
 
@@ -159,15 +186,15 @@ async def test_review_pipeline_e2e():
 
 
 @pytest.mark.asyncio
-async def test_gate_escalates_on_high_severity():
-    """Risk score=0.8, max_severity='high' → escalated via hard-stop."""
-    pipeline = _make_pipeline(score=0.8, max_severity="high")
+async def test_gate_escalates_on_red_zone():
+    """A flag in the red zone escalates, with no approver configured (no seed data)."""
+    pipeline = _make_pipeline(score=0.8, max_severity="high", zone="red")
 
     run = MagicMock()
     run.id = uuid.uuid4()
 
-    p1, p2 = _gate_patches(run)
-    with p1, p2:
+    p1, p2, p3, p4 = _gate_patches(run)
+    with p1, p2, p3, p4:
         session = AsyncMock()
         session.flush = AsyncMock()
         session.commit = AsyncMock()
@@ -177,19 +204,21 @@ async def test_gate_escalates_on_high_severity():
 
     assert gate.gate_decision == "escalated"
     assert gate.contract_id == pipeline.contract_id
-    assert "hard_stop" in gate.gate_reason
+    assert gate.gate_reason["worst_zone"] == "red"
+    assert gate.gate_reason["approver_role"] is None
+    assert gate.gate_reason["approver_source"] == "none_configured"
 
 
 @pytest.mark.asyncio
 async def test_gate_auto_applies_low_risk():
-    """Risk score=0.2, no hard stops → auto_applied."""
-    pipeline = _make_pipeline(score=0.2, max_severity="medium")
+    """No flag carries a zone (none breach the playbook) → auto_applied."""
+    pipeline = _make_pipeline(score=0.2, max_severity="medium", zone=None)
 
     run = MagicMock()
     run.id = uuid.uuid4()
 
-    p1, p2 = _gate_patches(run)
-    with p1, p2:
+    p1, p2, p3, p4 = _gate_patches(run)
+    with p1, p2, p3, p4:
         session = AsyncMock()
         session.flush = AsyncMock()
         session.commit = AsyncMock()
@@ -198,5 +227,5 @@ async def test_gate_auto_applies_low_risk():
         gate = await evaluate_gate(session, pipeline)
 
     assert gate.gate_decision == "auto_applied"
-    assert gate.gate_reason["hard_stop"] is None
-    assert gate.gate_reason["aggregate_score"] == pytest.approx(0.2)
+    assert gate.gate_reason["worst_zone"] is None
+    assert gate.gate_reason["quality_failure"] is False

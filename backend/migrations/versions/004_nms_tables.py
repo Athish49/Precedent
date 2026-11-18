@@ -11,22 +11,28 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
+from app.core.config import get_settings
+
 revision: str = "d4e5f6a7b8c9"
 down_revision: str | None = "c3d4e5f6a7b8"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
+# Hand-written SQL names the project schema explicitly (taken from settings)
+# instead of relying on the migration's search path.
+_SCHEMA = get_settings().db_schema
+
 # counterparty_pattern view SQL (Data_Model §7)
-_VIEW_SQL = """
-CREATE VIEW counterparty_pattern AS
+_VIEW_SQL = f"""
+CREATE VIEW {_SCHEMA}.counterparty_pattern AS
 SELECT counterparty_id, clause_type,
        count(*) FILTER (WHERE outcome='accepted')::float / NULLIF(count(*),0) AS accept_rate,
        (array_agg(final_text ORDER BY created_at DESC) FILTER (WHERE final_text IS NOT NULL))[1] AS last_closed_text
-FROM decision_event
+FROM {_SCHEMA}.decision_event
 GROUP BY counterparty_id, clause_type
 """
 
-_DROP_VIEW_SQL = "DROP VIEW IF EXISTS counterparty_pattern"
+_DROP_VIEW_SQL = f"DROP VIEW IF EXISTS {_SCHEMA}.counterparty_pattern"
 
 
 def upgrade() -> None:

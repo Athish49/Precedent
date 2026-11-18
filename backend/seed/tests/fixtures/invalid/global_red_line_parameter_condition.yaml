@@ -1,0 +1,9 @@
+# Failing fixture: edits applied to a copy of fixtures/valid by test_playbook_models.py.
+description: 'Cross-check: a global red line cannot use a parameter condition.'
+file: authority.yaml
+edits:
+- path: [global_red_lines, 0, condition_type]
+  set: parameter
+- path: [global_red_lines, 0, condition]
+  set: {parameter_key: cap_multiple_months, op: is_absent}
+expect: {code: red_line.global_parameter, message: global red line}

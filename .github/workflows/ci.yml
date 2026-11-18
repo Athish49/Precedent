@@ -56,8 +56,36 @@ jobs:
             exit 1
           fi
 
+      # backend/seed/ is optional and must be deletable. Mirrors
+      # tests/unit/test_seed_isolation.py; passes whether or not seed/ exists.
+      - name: Guard — nothing outside seed/ uses seed/
+        run: |
+          bad=$(grep -rnE --include="*.py" \
+                -e '^[[:space:]]*(import|from)[[:space:]]+seed([.[:space:],;]|$)' \
+                -e '(^|[^A-Za-z0-9_.-])seed/' \
+                -e "[\"']seed[\"']" \
+                -e "([\"']|-m[[:space:]]+)seed\.[A-Za-z_]" \
+                app migrations scripts tests \
+                | grep -v "^tests/unit/test_seed_isolation\.py:" || true)
+          if [ -n "$bad" ]; then
+            echo "ERROR: app, migrations, scripts or tests import from or point into seed/:"
+            echo "$bad"
+            exit 1
+          fi
+
+      - name: Seed tests (only when backend/seed exists)
+        if: ${{ hashFiles('backend/seed/tests/**') != '' }}
+        run: |
+          pip install "pyyaml>=6.0"
+          pytest seed/tests -q --tb=short
+
       - name: Pytest
         env:
           DATABASE_URL: "postgresql+psycopg://user:pass@localhost/testdb"
           ANTHROPIC_API_KEY: "sk-ant-test"
+          # Placeholders: cloud storage settings are required, tests never reach a bucket.
+          OBJECT_STORAGE_ENDPOINT: "https://storage.invalid"
+          OBJECT_STORAGE_BUCKET: "test-bucket"
+          OBJECT_STORAGE_ACCESS_KEY: "test-access-key"
+          OBJECT_STORAGE_SECRET_KEY: "test-secret-key"
         run: pytest tests/ -q --tb=short

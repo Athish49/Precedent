@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 from app.core.llm.schemas.redline import AlternativeProposal, RedlineOut
 from app.schemas.analysis import FlagDTO
+from app.schemas.playbook import RulePositionResponse
 from app.services.redline import llm_call as llm_call_module
 from app.services.redline.llm_call import generate_redline
 from tests.fake_llm import FakeLLMGateway
@@ -66,6 +67,33 @@ def _canned_redline(
 def _make_fake(redline: RedlineOut | None = None) -> FakeLLMGateway:
     return FakeLLMGateway(
         structured_responses={"redline_generate": redline or _canned_redline()}
+    )
+
+
+def _position(
+    rung: int = 1,
+    label: str = "Fallback 1: 18-month cap",
+    language: str = "Liability shall not exceed 18 months of Fees.",
+    zone: str = "yellow",
+) -> RulePositionResponse:
+    from datetime import UTC, datetime
+
+    now = datetime.now(UTC)
+    return RulePositionResponse(
+        id=uuid.uuid4(),
+        rule_id=uuid.uuid4(),
+        kind="fallback",
+        rung=rung,
+        label=label,
+        language=language,
+        summary=None,
+        zone=zone,
+        approver_role_id=None,
+        conditions=None,
+        give_get=None,
+        internal_note=None,
+        created_at=now,
+        updated_at=now,
     )
 
 
@@ -268,3 +296,78 @@ def test_flag_detail_explanation_in_user_message() -> None:
 
     user_msgs = [m for m in captured[0] if m.get("role") == "user"]
     assert any("Unlimited indemnification scope." in m["content"] for m in user_msgs)
+
+
+# ---------------------------------------------------------------------------
+# fallback_positions (task 4.6 item 1): alternatives come from the
+# playbook's own fallback rungs, in rung order, never invented.
+# ---------------------------------------------------------------------------
+
+
+def test_fallback_positions_listed_in_prompt_in_rung_order() -> None:
+    f1 = _position(rung=1, label="Fallback 1: 18-month cap")
+    f2 = _position(rung=2, label="Fallback 2: 24-month cap")
+    captured: list[list[dict]] = []
+
+    class _Cap(FakeLLMGateway):
+        def call_structured(self, task, messages, response_model, cache_prefix=None):
+            captured.append(messages)
+            return super().call_structured(task, messages, response_model, cache_prefix)
+
+    fake = _Cap(
+        structured_responses={
+            "redline_generate": RedlineOut(
+                replacement_text="Preferred text.",
+                alternatives=[
+                    AlternativeProposal(label="A", text="18-month version."),
+                    AlternativeProposal(label="B", text="24-month version."),
+                ],
+                explanation="Explanation.",
+                counterparty_comment="Comment.",
+            )
+        }
+    )
+    with patch.object(llm_call_module, "gateway", fake):
+        generate_redline("text", _flag(), "Preferred lang.", "ctx", "firm", [f1, f2])
+
+    user_msgs = [m for m in captured[0] if m.get("role") == "user"]
+    content = "\n".join(m["content"] for m in user_msgs)
+    assert "Fallback 1: 18-month cap" in content
+    assert "Fallback 2: 24-month cap" in content
+    # Rung order preserved in the prompt text.
+    assert content.index("Fallback 1") < content.index("Fallback 2")
+
+
+def test_fallback_positions_reconciled_onto_returned_alternatives() -> None:
+    f1 = _position(rung=1, label="Fallback 1")
+    f2 = _position(rung=2, label="Fallback 2")
+
+    fake = _make_fake(
+        RedlineOut(
+            replacement_text="Preferred text.",
+            alternatives=[
+                AlternativeProposal(label="A", text="Model wording for rung 1."),
+                AlternativeProposal(label="B", text="Model wording for rung 2."),
+            ],
+            explanation="Explanation.",
+            counterparty_comment="Comment.",
+        )
+    )
+    with patch.object(llm_call_module, "gateway", fake):
+        result = generate_redline("text", _flag(), None, "ctx", "balanced", [f1, f2])
+
+    assert [a.position_id for a in result.alternatives] == [f1.id, f2.id]
+    assert [a.rung for a in result.alternatives] == [1, 2]
+    assert result.alternatives[0].text == "Model wording for rung 1."
+
+
+def test_no_fallback_positions_alternatives_get_sequential_rungs() -> None:
+    """Free-form path (no rule matched): alternatives still get a rung
+    number (so toggle_fallback has something to step through), but no
+    position_id since no real playbook position backs them."""
+    fake = _make_fake()
+    with patch.object(llm_call_module, "gateway", fake):
+        result = generate_redline("text", _flag(), None, "ctx", "balanced")
+
+    assert [a.rung for a in result.alternatives] == [1, 2]
+    assert all(a.position_id is None for a in result.alternatives)

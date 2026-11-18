@@ -1,0 +1,7 @@
+# Failing fixture: edits applied to a copy of fixtures/valid by test_playbook_models.py.
+description: 'Cross-check: fallback rungs are 1..n with no gaps.'
+file: playbooks/saas_msa_vendor/risk.yaml
+edits:
+- path: [rules, 0, positions, 2, rung]
+  set: 3
+expect: {code: position.rung_sequence, message: '[1, 3]', rule_key: limitation_of_liability.cap_amount}

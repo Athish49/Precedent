@@ -6,7 +6,10 @@ def test_base_metadata_tables() -> None:
     expected = {
         "party", "contract", "contract_metadata", "clause", "clause_embedding", "contract_version"
     }
-    assert expected.issubset(Base.metadata.tables.keys())
+    # Table keys carry the project schema (see test_schema_partitioning.py).
+    schema = Base.metadata.schema
+    assert schema
+    assert {f"{schema}.{name}" for name in expected}.issubset(Base.metadata.tables.keys())
 
 
 def test_init_db_creates_session_factory() -> None:

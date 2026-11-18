@@ -19,8 +19,14 @@ class Redline(Base):
             "stance_mode IN ('light','balanced','firm')",
             name="ck_redline_stance_mode",
         ),
+        # Widened by migration 012 (task 1.3; plan section 4) from
+        # "IN ('preferred','fallback')" to allow any fallback rung, e.g.
+        # 'fallback_1', 'fallback_2', ... Existing application code (e.g.
+        # app/services/redline/operations.py) still writes the bare literal
+        # "fallback" when toggling — see that migration's docstring and this
+        # task's report for why that is flagged, not fixed, here.
         CheckConstraint(
-            "position IN ('preferred','fallback')",
+            "position = 'preferred' OR position ~ '^fallback_[0-9]+$'",
             name="ck_redline_position",
         ),
         CheckConstraint(
@@ -41,6 +47,18 @@ class Redline(Base):
     flag_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
     # review_run_id has no FK — review_run table is created in a later task
     review_run_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    # New columns (task 1.3; plan section 4). Nullable; the redline-from-the-
+    # ladder feature (task 4.6) is what sets them.
+    position_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("rule_position.id", name="fk_redline_position"),
+        nullable=True,
+    )
+    objection_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("rule_objection.id", name="fk_redline_objection"),
+        nullable=True,
+    )
     stance_mode: Mapped[str] = mapped_column(Text, nullable=False)
     position: Mapped[str] = mapped_column(Text, nullable=False)
     replacement_text: Mapped[str] = mapped_column(Text, nullable=False)

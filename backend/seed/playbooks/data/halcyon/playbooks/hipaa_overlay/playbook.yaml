@@ -1,0 +1,26 @@
+key: halcyon-hipaa-overlay
+name: Halcyon HIPAA Business Associate Overlay
+practice_area: hipaa
+layer: overlay
+party_role: vendor
+paper_scope: both
+jurisdiction: US
+precedence: 30
+owner_role: privacy_counsel
+parent: null
+applies_when: {regimes: [hipaa]}
+review_cadence_days: 180
+description: >
+  Business associate terms that apply on top of the SaaS agreement and the
+  data processing addendum whenever Halcyon creates, receives, maintains or
+  transmits PHI for a Covered Entity. The overlay adds the terms that 45
+  C.F.R. Parts 160 and 164 require in a business associate agreement and
+  overrides the general data return and breach notification positions with
+  the HIPAA versions.
+version:
+  version: "1.0"
+  effective_from: 2026-01-15
+  change_summary: Initial published version.
+  created_by: Privacy Counsel
+  approved_by: General Counsel
+rule_files: [rules.yaml]

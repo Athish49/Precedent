@@ -19,8 +19,10 @@ class ReviewRun(Base):
             "trigger IN ('manual','upload_event')",
             name="ck_review_run_trigger",
         ),
+        # Gains 'needs_approval' by migration 012 (task 1.3; plan section 4)
+        # for the yellow-zone routing outcome (plan section 5.3).
         CheckConstraint(
-            "gate_decision IN ('auto_applied','escalated')",
+            "gate_decision IN ('auto_applied','escalated','needs_approval')",
             name="ck_review_run_gate_decision",
         ),
         CheckConstraint(
@@ -39,6 +41,10 @@ class ReviewRun(Base):
     trigger: Mapped[str] = mapped_column(Text, nullable=False)
     gate_decision: Mapped[str | None] = mapped_column(Text, nullable=True)
     gate_reason: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    # New column (task 1.3; plan section 4). Nullable; the playbooks pinned
+    # for reproducibility (plan section 5.1 step 4) are recorded here once
+    # the resolution engine (task 4.2) runs.
+    playbook_version_ids: Mapped[list | None] = mapped_column(JSONB, nullable=True)
     status: Mapped[str] = mapped_column(Text, nullable=False, default="running")
     started_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False

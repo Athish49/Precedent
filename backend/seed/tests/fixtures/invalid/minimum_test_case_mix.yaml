@@ -1,0 +1,9 @@
+# Failing fixture: edits applied to a copy of fixtures/valid by test_playbook_models.py.
+description: 'Per-rule minimum: the test cases include a deviation.'
+file: playbooks/saas_msa_vendor/risk.yaml
+edits:
+- path: [rules, 0, test_cases, 3, expected_outcome]
+  set: compliant
+- path: [rules, 0, test_cases, 3, expected_zone]
+  set: green
+expect: {code: minimum.test_case_mix, message: deviation, rule_key: limitation_of_liability.cap_amount}

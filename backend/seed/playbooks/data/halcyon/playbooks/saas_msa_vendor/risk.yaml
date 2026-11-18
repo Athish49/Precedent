@@ -1,0 +1,2532 @@
+rules:
+  - rule_key: limitation_of_liability.cap_amount
+    title: Aggregate liability cap
+    required: true
+    risk_weight: 10
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Each party's total liability is capped at the Fees paid in the 12 months
+      before the claim, rising only on larger deals and only with the named
+      approvals.
+    risk_rationale: >
+      Halcyon's median contract is $165k a year against $10M of cyber and
+      technology errors and omissions cover and $2M of general liability
+      cover. An uncapped or high-multiple cap on one contract can exceed the
+      revenue from that customer many times over and is not insurable, so the
+      cap is the single most important number in the agreement.
+    detection_guidance: >
+      Look for "aggregate liability", "total liability", "shall not exceed",
+      "limited to", followed by an amount, a multiple such as "two times", or
+      a look-back period such as "the twelve months preceding the claim". A
+      liability clause with no monetary limit is a deviation, not a missing
+      clause; an agreement with no liability clause at all is a missing
+      clause.
+    source_ref: Halcyon Risk Policy RP-04; cyber and technology E&O aggregate limit
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: 12-month cap
+        zone: green
+        summary: Mutual cap at 12 months of Fees.
+        language: >
+          Except for the Excluded Claims, each party's total aggregate
+          liability arising out of or related to this Agreement shall not
+          exceed the Fees paid and payable by Customer in the twelve (12)
+          months preceding the first event giving rise to the liability.
+      - kind: fallback
+        rung: 1
+        label: 18-month cap
+        zone: yellow
+        approver_role: commercial_counsel
+        conditions: {deal_value_band: [mid, enterprise, strategic]}
+        give_get: Ask for a thirty-six (36) month initial term or annual Fees paid in advance.
+        summary: Mutual cap at 18 months of Fees.
+        language: >
+          Except for the Excluded Claims, each party's total aggregate
+          liability arising out of or related to this Agreement shall not
+          exceed the Fees paid and payable by Customer in the eighteen (18)
+          months preceding the first event giving rise to the liability.
+      - kind: fallback
+        rung: 2
+        label: 24-month cap
+        zone: yellow
+        approver_role: general_counsel
+        conditions: {deal_value_band: [enterprise, strategic]}
+        give_get: Require that all indemnities and the data breach super-cap sit inside this cap.
+        summary: Mutual cap at 24 months of Fees.
+        language: >
+          Except for the Excluded Claims, each party's total aggregate
+          liability arising out of or related to this Agreement shall not
+          exceed the Fees paid and payable by Customer in the twenty-four (24)
+          months preceding the first event giving rise to the liability.
+      - kind: fallback
+        rung: 3
+        label: 36-month cap, strategic deals only
+        zone: yellow
+        approver_role: general_counsel
+        conditions: {deal_value_band: [strategic]}
+        give_get: Require a thirty-six (36) month minimum initial term and annual Fees paid in advance for the full term.
+        internal_note: >
+          Confirm with the CFO before offering this rung; it is the ceiling
+          the risk appetite allows and is reserved for strategic accounts.
+        summary: Mutual cap at 36 months of Fees, reserved for strategic accounts.
+        language: >
+          Except for the Excluded Claims, each party's total aggregate
+          liability arising out of or related to this Agreement shall not
+          exceed the Fees paid and payable by Customer in the thirty-six (36)
+          months preceding the first event giving rise to the liability.
+      - kind: acceptable_variant
+        label: Fixed-sum cap at or below 12 months of Fees
+        zone: green
+        summary: A dollar cap no higher than 12 months of Fees.
+        language: >
+          Except for the Excluded Claims, the total aggregate liability of
+          each party arising out of or related to this Agreement shall not
+          exceed the greater of (a) the Fees paid in the prior twelve (12)
+          months and (b) US$[amount].
+    parameters:
+      - key: cap_multiple_months
+        label: Cap as months of Fees
+        value_type: number
+        unit: months
+        direction: lower_is_better
+        preferred_value: 12
+        green_limit: 12
+        yellow_limit: 24
+        extraction_hint: >
+          Convert "1x annual fees" to 12, "2x" to 24, "3x" to 36. A fixed sum
+          is converted using the contract's annual Fees when known.
+        context_overrides:
+          - when: {deal_value_band: [strategic]}
+            yellow_limit: 36
+    red_lines:
+      - key: lol-cap-above-ceiling
+        description: A finite cap stated above 36 months of Fees, the highest rung any approver may give.
+        condition_type: parameter
+        condition: {parameter_key: cap_multiple_months, op: gt, value: 36}
+        action: block
+        rationale: >
+          36 months of Fees on a strategic deal, approved by the General
+          Counsel with the CFO, is the ceiling the risk appetite allows
+          against $10M of cyber and technology E&O cover; a higher finite
+          multiple is treated the same as no cap at all for insurance
+          purposes.
+    objections:
+      - objection: Twelve months of fees does not cover our exposure if patient data is lost.
+        their_rationale: A breach affecting patients costs far more than one year of the subscription.
+        response: >
+          We address data incidents separately through a dedicated, higher
+          cap, so the general cap does not need to carry that risk. The
+          general cap covers ordinary contract claims, where twelve months of
+          Fees is the market position for software of this kind.
+        talking_points:
+          - Point to the data breach super-cap at 2x annual Fees.
+          - The cap is mutual and also protects Customer.
+        recommended_position: {rule_key: limitation_of_liability.data_breach_super_cap, rung: 0}
+        frequency: common
+        counterparty_profile: Large hospital systems
+      - objection: Our procurement policy requires every vendor to accept at least two years of fees.
+        their_rationale: The policy is applied to all suppliers regardless of what they provide.
+        response: >
+          We can move above twelve months where the deal supports it. For an
+          agreement of this size we can offer eighteen months of Fees,
+          provided the initial term is thirty-six months.
+        talking_points:
+          - Ask whether the policy distinguishes software from hardware or construction services.
+          - Offer the 18-month cap in return for a longer initial term.
+        recommended_position: {rule_key: limitation_of_liability.cap_amount, rung: 1}
+        frequency: occasional
+    dependencies:
+      - related_rule_key: limitation_of_liability.data_breach_super_cap
+        relation: trade_against
+        note: Offer the data breach super-cap before raising the general cap; raising both at once gives away more than either concession needs.
+      - related_rule_key: term.initial_term
+        relation: trade_against
+        note: Rungs 1 to 3 each ask for a longer initial term or prepayment in return for a higher cap.
+    test_cases:
+      - name: Standard 12-month cap
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Neither party's aggregate liability under this Agreement shall
+          exceed the fees paid by Customer in the twelve months before the
+          claim arose.
+      - name: Fixed-sum cap equal to one year of fees
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          The liability of each party under this Agreement is limited to the
+          greater of the fees paid in the previous twelve months and
+          US$150,000.
+      - name: 24-month cap on an enterprise deal
+        context: {deal_value_band: enterprise}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          In no event shall either party's cumulative liability under this
+          Agreement exceed two times the annual Fees payable by Customer.
+      - name: Five times annual fees
+        context: {deal_value_band: mid, regimes: [hipaa]}
+        expected_outcome: deviation
+        expected_zone: red
+        sample_text: >
+          Each party's aggregate liability shall not exceed five times the
+          fees paid by Customer in the year before the claim.
+      - name: Trap - negated wording
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Nothing in this Agreement shall impose unlimited liability on
+          either party; each party's liability is limited to the fees paid in
+          the preceding twelve months.
+
+  - rule_key: limitation_of_liability.cap_carve_outs
+    title: Cap carve-outs
+    required: true
+    risk_weight: 9
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Only fraud, wilful misconduct, breach of payment obligations and the IP
+      infringement indemnity sit outside the aggregate cap; every other claim,
+      including data and confidentiality claims, stays inside it.
+    risk_rationale: >
+      Each carve-out reopens uncapped exposure against Halcyon's $10M of
+      cyber and technology E&O cover and $2M of general liability cover. A
+      carve-out for "any breach" of the data protection or confidentiality
+      terms removes the cap from the exact claims Halcyon is most likely to
+      face across its roughly 310 hospital and clinic customers.
+    detection_guidance: >
+      Look for "the limitations in this section shall not apply to", "except
+      for", "Excluded Claims" or "nothing in this Agreement limits liability
+      for", followed by a list. Read each listed item separately; a carve-out
+      list that is shorter than the preferred list is still compliant. A cap
+      section with no carve-out list at all is a missing clause, not a
+      deviation.
+    source_ref: Halcyon Risk Policy RP-04
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Four carve-outs
+        zone: green
+        summary: Fraud, wilful misconduct, payment obligations and the IP indemnity sit outside the cap.
+        language: >
+          The limitations in this Section shall not apply to (a) a party's
+          fraud or wilful misconduct, (b) Customer's payment obligations
+          under this Agreement, or (c) Halcyon's indemnification obligations
+          under the IP Infringement Indemnity ("Excluded Claims").
+      - kind: fallback
+        rung: 1
+        label: Add a narrow confidentiality carve-out
+        zone: yellow
+        approver_role: general_counsel
+        conditions: {counterparty_tier: [tier_1]}
+        give_get: Require the carve-out to exclude Customer Data and to be capped at the general cap's upper rung.
+        summary: Add an uncapped confidentiality breach carve-out that excludes Customer Data.
+        language: >
+          In addition to the Excluded Claims, the limitations in this Section
+          shall not apply to a party's breach of its confidentiality
+          obligations under this Agreement, excluding any breach involving
+          Customer Data, which remains subject to the data breach super-cap.
+      - kind: fallback
+        rung: 2
+        label: Widen the fraud and misconduct carve-out to each party's personnel
+        zone: yellow
+        approver_role: general_counsel
+        give_get: Require written notice and an opportunity to cure before any claim under the widened carve-out.
+        summary: Extend the fraud and wilful misconduct carve-out to acts of a party's employees and contractors.
+        language: >
+          For purposes of the Excluded Claims, a party's fraud or wilful
+          misconduct includes the fraud or wilful misconduct of its employees
+          and subcontractors acting within the scope of their engagement.
+      - kind: acceptable_variant
+        label: Carve-outs listed as "Excepted Liabilities"
+        zone: green
+        summary: The same four categories under a different heading.
+        language: >
+          The Excepted Liabilities, being fraud, wilful misconduct, unpaid
+          Fees and Halcyon's obligations under the infringement indemnity,
+          are not subject to the limitations of liability set out in this
+          Section.
+    parameters:
+      - key: carve_out_scope
+        label: Categories excluded from the general cap
+        value_type: enum
+        direction: set_membership
+        preferred_value: [fraud, wilful_misconduct, payment_obligations, ip_indemnity]
+        allowed_values: [fraud, wilful_misconduct, payment_obligations, ip_indemnity, confidentiality_breach_excl_customer_data, any_breach_of_agreement, data_breach]
+        green_limit: [fraud, wilful_misconduct, payment_obligations, ip_indemnity]
+        yellow_limit: [confidentiality_breach_excl_customer_data]
+        extraction_hint: >
+          List every category the clause excludes from the cap. "any_breach_of_agreement"
+          or "data_breach" appearing in the list is never green or yellow.
+    red_lines:
+      - key: lol-carveouts-databreach-uncapped
+        description: A carve-out that makes liability for a data breach or confidentiality breach involving Customer Data unlimited.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause lists a carve-out from the liability cap that covers a
+            data breach, security incident, or breach of confidentiality
+            involving Customer Data, so that liability for that category is
+            unlimited.
+        action: block
+        rationale: >
+          Data and confidentiality claims are the categories most likely to
+          be large relative to a $165k median contract; an uncapped carve-out
+          for them cannot be insured under the $10M cyber and technology E&O
+          policy and is covered instead by the dedicated, bounded super-cap.
+    objections:
+      - objection: Every carve-out list we see from other vendors includes data breaches.
+        their_rationale: Hospital procurement teams compare vendor paper and expect data claims to be unlimited.
+        response: >
+          We do not leave data claims uncapped by any vendor's standard, but
+          we address them through a dedicated cap set at a multiple of annual
+          Fees rather than removing the limit altogether. That gives Customer
+          a meaningfully higher number without leaving Halcyon uninsurable.
+        talking_points:
+          - Offer the data breach super-cap in the same conversation.
+          - Ask to see the vendor paper referenced, if any, before conceding.
+        recommended_position: {rule_key: limitation_of_liability.data_breach_super_cap, rung: 0}
+        frequency: common
+        counterparty_profile: Large hospital systems with standardised procurement paper
+      - objection: Confidentiality breaches should also be uncapped, not just fraud and non-payment.
+        their_rationale: Large counterparties treat any confidentiality breach as equivalent to fraud.
+        response: >
+          We can add a confidentiality carve-out that excludes Customer Data,
+          which is already protected by its own cap, so the two carve-outs do
+          not overlap and create unlimited exposure through the back door.
+        talking_points:
+          - Keep Customer Data inside the data breach super-cap, not the new carve-out.
+          - This rung needs General Counsel sign-off and is reserved for tier-1 counterparties.
+        recommended_position: {rule_key: limitation_of_liability.cap_carve_outs, rung: 1}
+        frequency: occasional
+    dependencies:
+      - related_rule_key: limitation_of_liability.cap_amount
+        relation: read_with
+        note: Read the carve-out list against the general cap; a carve-out is meaningless unless the cap it escapes is already set.
+      - related_rule_key: indemnification.ip_infringement_indemnity
+        relation: requires
+        note: The IP indemnity carve-out in rung 0 only works if the indemnity itself is in the agreement.
+    test_cases:
+      - name: Standard four carve-outs
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          The cap in this Section does not limit a party's liability for
+          fraud, wilful misconduct, Customer's unpaid fees, or Vendor's
+          obligations under the infringement indemnity.
+      - name: Excepted Liabilities, same four categories
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          The Excepted Liabilities are fraud, wilful misconduct, non-payment
+          of fees and the indemnity for third-party intellectual property
+          claims; none of these is subject to the limitation of liability.
+      - name: Confidentiality carve-out excluding Customer Data on a tier-1 account
+        context: {counterparty_tier: tier_1}
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: yellow
+        sample_text: >
+          The limitations above do not apply to a party's breach of its
+          confidentiality duties, other than a breach involving Customer
+          Data, which is governed by the data protection cap.
+      - name: Carve-out for any breach of the agreement
+        expected_outcome: deviation
+        expected_zone: red
+        sample_text: >
+          The cap set out above shall not apply to any breach of this
+          Agreement by either party.
+      - name: Carve-out reaching Customer Data breaches
+        expected_outcome: red_line
+        expected_red_line_key: lol-carveouts-databreach-uncapped
+        expected_zone: red
+        sample_text: >
+          Liability arising from a breach of the security or confidentiality
+          obligations relating to Customer Data is not subject to any limit
+          of liability in this Agreement.
+
+  - rule_key: limitation_of_liability.consequential_damages_exclusion
+    title: Consequential damages exclusion
+    required: true
+    risk_weight: 8
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Neither party is liable to the other for indirect, special, incidental
+      or consequential damages, or for lost profits, revenue, data or
+      goodwill, except for the same categories excluded from the aggregate
+      cap.
+    risk_rationale: >
+      Lost profits, revenue and goodwill claims from a hospital system or
+      physician group can run far above the fees on a $165k median contract
+      and are not the kind of loss Halcyon's $10M cyber and technology E&O
+      cover is priced to absorb. The exclusion must be mutual so it also
+      protects Halcyon from the same categories of claim.
+    detection_guidance: >
+      Look for "in no event shall either party be liable for any indirect,
+      incidental, special, consequential or punitive damages" or "loss of
+      profits, revenue, data or goodwill", often in capital letters. Check
+      whether it reads "neither party" or names only one party, and whether
+      its own exceptions match the cap carve-outs. Absence of the clause
+      entirely is a missing clause and leaves both parties exposed to
+      consequential claims.
+    source_ref: Halcyon Risk Policy RP-04
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Mutual exclusion matching the cap carve-outs
+        zone: green
+        summary: Mutual exclusion of consequential damages, with exceptions that mirror the cap carve-outs.
+        language: >
+          Except for the Excluded Claims, in no event shall either party be
+          liable to the other for any indirect, incidental, special,
+          consequential or punitive damages, or for any loss of profits,
+          revenue, data or goodwill, arising out of or related to this
+          Agreement, however caused and regardless of the theory of
+          liability, even if advised of the possibility of such damages.
+      - kind: fallback
+        rung: 1
+        label: One-way exclusion favouring Customer
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: Require that the general liability cap drop to 12 months of Fees in exchange.
+        summary: The exclusion applies only against claims made against Halcyon, not against Customer.
+        language: >
+          Except for the Excluded Claims, in no event shall Halcyon be liable
+          to Customer for any indirect, incidental, special, consequential or
+          punitive damages, or for any loss of profits, revenue, data or
+          goodwill, arising out of or related to this Agreement.
+      - kind: fallback
+        rung: 2
+        label: Narrow the loss-of-data carve-out instead of removing mutuality
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: Keep the exclusion mutual in exchange for naming "loss of Customer Data" as a recoverable, but capped, direct loss.
+        summary: Mutual exclusion stays, but Customer Data loss is reclassified as a direct loss subject to the general cap.
+        language: >
+          Except for the Excluded Claims, in no event shall either party be
+          liable to the other for any indirect, incidental, special,
+          consequential or punitive damages, or for any loss of profits,
+          revenue or goodwill; for purposes of this Agreement, loss of
+          Customer Data recoverable as a direct loss is subject to the
+          general limitation of liability.
+      - kind: acceptable_variant
+        label: Exclusion stated as a single combined sentence with the cap
+        zone: green
+        summary: Same mutual exclusion and carve-outs, drafted inside the liability cap sentence rather than as a separate paragraph.
+        language: >
+          Except for the Excluded Claims, neither party shall be liable to
+          the other for consequential, incidental, special or punitive
+          damages or for lost profits, revenue, data or goodwill, and each
+          party's total liability is otherwise capped as set out above.
+    parameters:
+      - key: exclusion_is_mutual
+        label: Exclusion applies to both parties
+        value_type: boolean
+        direction: exact
+        preferred_value: true
+        green_limit: true
+        extraction_hint: >
+          True when the exclusion binds both Halcyon and Customer equally.
+          False when only one party is protected or when the exceptions to
+          the exclusion differ between the parties.
+    red_lines:
+      - key: lol-consequential-removed
+        description: The consequential damages exclusion is deleted or carved out for a broad category of claim.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause removes the exclusion of indirect, incidental,
+            special or consequential damages entirely, or carves out a broad
+            category of claim such as "any breach of this Agreement" or "any
+            data-related claim" from an otherwise mutual exclusion.
+        action: block
+        rationale: >
+          Without this exclusion, a single customer's claim for lost revenue
+          or goodwill is uncapped in kind even where the aggregate cap
+          applies to it in amount, and such claims are excluded from
+          Halcyon's $10M cyber and technology E&O policy as consequential
+          loss.
+    objections:
+      - objection: This exclusion should not apply to us; only the vendor should be barred from claiming lost profits.
+        their_rationale: Customer sees itself as the party more likely to suffer business interruption losses.
+        response: >
+          We can make the exclusion one-way in Customer's favour where the
+          deal supports it, in exchange for bringing the general cap back
+          down to twelve months of Fees, since the two concessions address
+          the same risk from different directions.
+        talking_points:
+          - A one-way exclusion is a real concession and is priced against the general cap.
+          - Most of Halcyon's own exposure to lost profits is remote given the product's scope.
+        recommended_position: {rule_key: limitation_of_liability.consequential_damages_exclusion, rung: 1}
+        frequency: occasional
+      - objection: Loss of our patient data should not be treated as merely "consequential" and excluded.
+        their_rationale: Counterparty's security team wants data loss treated as a direct, recoverable loss.
+        response: >
+          We agree data loss deserves its own treatment, which is why we
+          address it through the dedicated data breach super-cap rather than
+          leaving it to turn on whether a court calls it direct or
+          consequential. We can also reclassify data loss as a direct loss
+          inside the general cap if that is the easier path for your counsel.
+        talking_points:
+          - Point to the data breach super-cap as the primary remedy for data loss.
+          - Rung 2 reclassifies data loss as direct without breaking mutuality.
+        recommended_position: {rule_key: limitation_of_liability.consequential_damages_exclusion, rung: 2}
+        frequency: common
+        counterparty_profile: Large hospital systems
+    dependencies:
+      - related_rule_key: limitation_of_liability.cap_amount
+        relation: read_with
+        note: The Excluded Claims referenced here must match the carve-out list in the cap_amount and cap_carve_outs rules exactly.
+      - related_rule_key: limitation_of_liability.data_breach_super_cap
+        relation: conflicts_with
+        note: Reclassifying Customer Data loss as a direct loss (rung 2) must not be combined with also claiming it under the super-cap for the same incident.
+    test_cases:
+      - name: Standard mutual exclusion
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Except for the Excluded Claims, neither party shall be liable to
+          the other for indirect, special, incidental, consequential or
+          punitive damages, or for lost profits, revenue, data or goodwill.
+      - name: Exclusion combined into the cap sentence
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Each party's liability is capped as stated above, and in no event
+          shall either party owe the other consequential, incidental or
+          punitive damages or lost profits, revenue, data or goodwill, except
+          for the Excluded Claims.
+      - name: One-way exclusion favouring Customer
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: yellow
+        sample_text: >
+          Vendor shall not be liable to Customer for any indirect, special,
+          incidental or consequential damages or for lost profits, revenue
+          or goodwill; this exclusion does not limit claims brought by
+          Vendor.
+      - name: Exclusion carved out for any breach
+        expected_outcome: deviation
+        expected_zone: red
+        sample_text: >
+          The exclusion of consequential damages above shall not apply to
+          any breach of this Agreement by either party.
+      - name: Trap - mutual exclusion phrased with a double negative
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          It is not the case that either party may recover consequential,
+          incidental, special or punitive damages, or lost profits, revenue,
+          data or goodwill, from the other, except for the Excluded Claims.
+
+  - rule_key: limitation_of_liability.data_breach_super_cap
+    title: Data breach super-cap
+    required: false
+    risk_weight: 9
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: true
+    judgment_note: >
+      Weigh the volume and sensitivity of the Customer Data actually at
+      issue, not only the stated multiple; a 3x cap on a tier-1 account with
+      special category data may warrant more scrutiny than the multiple
+      alone suggests.
+    applies_when: {data_sensitivity: [personal_data, phi, special_category]}
+    position_summary: >
+      Liability for a breach of the data protection and security obligations
+      has its own cap of twice the annual Fees, in place of the general cap,
+      with a dollar ceiling once the multiple rises.
+    risk_rationale: >
+      Customers that send PHI or other personal data expect more than the
+      general cap for data incidents. A separate cap of twice the annual
+      Fees meets that expectation while keeping the exposure on a median
+      $165k contract comfortably inside the $10M cyber and technology E&O
+      policy, and the dollar ceiling keeps even a strategic account's
+      exposure bounded in absolute terms.
+    detection_guidance: >
+      Look for a second, higher limit tied to "data breach", "Security
+      Incident", "breach of the data protection obligations" or "Data
+      Protection Claims", often called a "super cap" or "enhanced cap", and
+      check whether it is in addition to or instead of the general cap. If
+      data claims are listed as an exclusion from every cap instead, that is
+      a red line on this rule, not a missing clause.
+    source_ref: Halcyon Risk Policy RP-04
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Super-cap at 2x annual Fees
+        zone: green
+        summary: Data breach liability capped at twice the annual Fees, in place of the general cap.
+        language: >
+          Halcyon's total aggregate liability arising out of a breach of its
+          obligations under the Data Protection section of this Agreement
+          shall not exceed two (2) times the Fees paid and payable by
+          Customer in the twelve (12) months preceding the first event
+          giving rise to the liability, and this limit applies in place of,
+          and not in addition to, the general limit of liability.
+      - kind: fallback
+        rung: 1
+        label: Super-cap at 2.5x annual Fees
+        zone: yellow
+        approver_role: general_counsel
+        give_get: Ask Customer to accept the standard breach notification timeline in exchange.
+        summary: Data breach liability capped at two and a half times the annual Fees.
+        language: >
+          Halcyon's total aggregate liability arising out of a breach of its
+          obligations under the Data Protection section of this Agreement
+          shall not exceed two and one-half (2.5) times the Fees paid and
+          payable by Customer in the twelve (12) months preceding the first
+          event giving rise to the liability, and this limit applies in
+          place of, and not in addition to, the general limit of liability.
+      - kind: fallback
+        rung: 2
+        label: Super-cap at 3x annual Fees, ceiling of US$5,000,000
+        zone: yellow
+        approver_role: general_counsel
+        conditions: {deal_value_band: [enterprise, strategic]}
+        give_get: Require a thirty-six (36) month initial term.
+        internal_note: Confirm the dollar ceiling with the CFO before offering this rung.
+        summary: Data breach liability capped at three times the annual Fees and never above US$5M.
+        language: >
+          Halcyon's total aggregate liability arising out of a breach of its
+          obligations under the Data Protection section of this Agreement
+          shall not exceed the lesser of (a) three (3) times the Fees paid
+          and payable by Customer in the twelve (12) months preceding the
+          first event giving rise to the liability and (b) US$5,000,000, and
+          this limit applies in place of, and not in addition to, the
+          general limit of liability.
+      - kind: acceptable_variant
+        label: Super-cap stated as 24 months of Fees
+        zone: green
+        summary: The same limit expressed as a period of Fees rather than a multiple.
+        language: >
+          For claims arising from a Security Incident affecting Customer
+          Data, Halcyon's aggregate liability shall be limited to the Fees
+          paid and payable in the twenty-four (24) months before the claim
+          arose, which limit replaces the general limit of liability for
+          those claims.
+    parameters:
+      - key: super_cap_multiple
+        label: Super-cap as a multiple of annual Fees
+        value_type: number
+        unit: multiple of annual Fees
+        direction: lower_is_better
+        preferred_value: 2
+        green_limit: 2
+        yellow_limit: 3
+        extraction_hint: >
+          Convert a period of Fees to a multiple of annual Fees: 24 months is
+          2, 36 months is 3. A fixed sum is converted using the annual Fees
+          when known.
+      - key: super_cap_ceiling_usd
+        label: Dollar ceiling on the super-cap
+        value_type: currency_usd
+        direction: lower_is_better
+        preferred_value: 5000000
+        green_limit: 5000000
+        yellow_limit: 5000000
+        extraction_hint: >
+          The fixed dollar amount, if the clause states one. Leave empty when
+          the super-cap is stated only as a multiple or period of Fees with
+          no dollar ceiling.
+    red_lines:
+      - key: sbc-above-3x
+        description: A data breach cap above three times the annual Fees or above the US$5,000,000 ceiling.
+        condition_type: parameter
+        condition: {parameter_key: super_cap_multiple, op: gt, value: 3}
+        action: block
+        rationale: >
+          Three times annual Fees, capped at US$5,000,000, is the level the
+          General Counsel may approve under the risk policy; above it the
+          exposure on a strategic account can exceed what the $10M cyber and
+          technology E&O policy is sized to cover alongside other open
+          claims.
+    objections:
+      - objection: Twice the fees is nowhere near the cost of notifying our patients after a breach.
+        their_rationale: Notification, credit monitoring and regulatory costs scale with the number of patients affected, not with fees.
+        response: >
+          We understand that breach costs follow patient volume rather than
+          contract size. We can increase the dedicated cap to two and a half
+          times the annual Fees, which is already well above what we offer
+          for any other category of claim.
+        talking_points:
+          - Explain that the super-cap sits on top of Halcyon's SOC 2 Type II, ISO 27001 and HITRUST r2 controls.
+          - Offer rung 1 before discussing a dollar figure.
+        recommended_position: {rule_key: limitation_of_liability.data_breach_super_cap, rung: 1}
+        frequency: common
+        counterparty_profile: Large hospital systems
+      - objection: Data breaches should be uncapped because the risk is entirely within your control.
+        their_rationale: Halcyon runs the systems, so Halcyon should carry the whole risk of a data incident.
+        response: >
+          No software vendor of our size can insure unlimited liability, and
+          we will not promise what we could not pay. The dedicated cap is set
+          by reference to the cover we actually hold, so it is a limit
+          Customer can rely on being paid in full.
+        talking_points:
+          - Halcyon holds $10M of cyber and technology E&O cover across about 310 customers.
+          - Security is shared; Customer controls its own users, credentials and configuration.
+        frequency: occasional
+    dependencies:
+      - related_rule_key: limitation_of_liability.cap_amount
+        relation: read_with
+        note: The super-cap replaces the general cap for data claims; check both limits together so they are not stacked.
+      - related_rule_key: breach_notification.notification_timeline
+        relation: trade_against
+        note: Rung 1's give-get trades a higher super-cap for Customer accepting the standard notification timeline rather than a shorter one.
+    test_cases:
+      - name: Super-cap at twice annual fees
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Vendor's liability for breach of its data protection obligations is
+          limited to twice the annual fees and replaces the general cap for
+          those claims.
+      - name: Super-cap as 24 months of fees
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          For security incident claims, Vendor's liability shall not exceed
+          the fees paid in the two years before the incident, in lieu of the
+          general limitation.
+      - name: Three times fees with a dollar ceiling on a strategic deal
+        context: {deal_value_band: strategic, data_sensitivity: phi}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Liability for data breaches is capped at the lower of three times
+          the annual fees and five million US dollars.
+      - name: Super-cap added on top of the general cap
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Vendor's liability for data breaches shall not exceed twice the
+          annual fees, which amount is in addition to the general limitation
+          of liability.
+      - name: Trap - super-cap expressed as a floor, not a ceiling
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Vendor's liability for a breach of its data protection obligations
+          shall be no less protective to Customer than, and shall replace,
+          the general limitation, and in any event shall not exceed twice
+          the annual fees.
+
+  - rule_key: indemnification.ip_infringement_indemnity
+    title: IP infringement indemnity
+    required: true
+    risk_weight: 9
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Halcyon defends and indemnifies Customer against third-party claims
+      that the Services, as provided and used in accordance with the
+      Documentation, infringe a patent, copyright, trade mark or trade
+      secret, subject to standard exclusions and a procure-or-refund remedy.
+    risk_rationale: >
+      Halcyon Engage runs on a single multi-tenant code base serving about
+      310 customers, so an infringement exposure is shared across the whole
+      book, not one contract. The indemnity is priced into Halcyon Risk
+      Policy RP-04 on the assumption that it does not extend to
+      combinations, modifications or Customer-supplied materials that
+      Halcyon did not choose.
+    detection_guidance: >
+      Look for "defend, indemnify and hold harmless" paired with "infringes"
+      or "misappropriates" and "intellectual property rights of a third
+      party", usually followed by a list of exclusions and a "procure,
+      modify or refund" remedy. If the indemnity section has no infringement
+      indemnity at all, that is a missing clause, not a deviation.
+    source_ref: Halcyon Risk Policy RP-04
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Standard infringement indemnity with exclusions and procure-or-refund remedy
+        zone: green
+        summary: Halcyon defends infringement claims against the Services as provided; excludes combinations and Customer-supplied materials.
+        language: >
+          Halcyon shall defend Customer against any third-party claim that
+          the Services, when used in accordance with the Documentation and
+          this Agreement, infringe or misappropriate that third party's
+          patent, copyright, trade mark or trade secret, and shall indemnify
+          Customer against damages and costs finally awarded, except to the
+          extent the claim arises from (a) a combination of the Services
+          with products, data or processes not provided by Halcyon, (b)
+          modification of the Services by anyone other than Halcyon, or (c)
+          Customer's breach of this Agreement. If the Services are, or in
+          Halcyon's opinion are likely to be, held infringing, Halcyon may at
+          its option procure the right to continue use, modify the Services
+          to be non-infringing, or terminate the affected Services and
+          refund prepaid, unused Fees.
+      - kind: fallback
+        rung: 1
+        label: Extend to combinations Halcyon specified
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: Require written notice and sole control of the defence in exchange.
+        summary: The indemnity also covers combinations with third-party products that Halcyon's Documentation specifies or recommends.
+        language: >
+          The indemnity in this Section also applies to a claim arising from
+          the combination of the Services with a third-party product,
+          provided that the Documentation specifies or recommends that
+          combination; Halcyon shall have sole control of the defence and
+          settlement of any claim it indemnifies, and Customer shall give
+          prompt written notice of the claim.
+      - kind: fallback
+        rung: 2
+        label: Remove the "in Halcyon's opinion" threshold for the remedy
+        zone: yellow
+        approver_role: commercial_counsel
+        conditions: {counterparty_tier: [tier_1]}
+        give_get: Require that any substitute Services remain materially equivalent under the performance warranty.
+        summary: Halcyon's procure-modify-refund remedy triggers on an actual adverse ruling or settlement, not only Halcyon's own opinion.
+        language: >
+          If the Services are held to infringe by a court of competent
+          jurisdiction, or Halcyon agrees to settle such a claim, Halcyon
+          may, at its option, procure the right for Customer to continue
+          using the Services, modify the Services to be non-infringing
+          without materially reducing their functionality, or terminate the
+          affected Services and refund prepaid, unused Fees.
+      - kind: acceptable_variant
+        label: Indemnity drafted as "Infringement Claims" with the same exclusions
+        zone: green
+        summary: Same scope and remedy under different defined-term labels.
+        language: >
+          Halcyon will defend and indemnify Customer against Infringement
+          Claims, meaning third-party claims that the Services as delivered
+          infringe a patent, copyright, trade mark or trade secret, excluding
+          claims arising from unauthorised modification, combination with
+          non-Halcyon products, or Customer's own breach, and subject to
+          Halcyon's right to procure, modify or refund as set out above.
+    red_lines:
+      - key: ip-indemnity-any-breach
+        description: The indemnity is extended to cover any breach of the Agreement rather than only third-party infringement claims.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause requires Halcyon to indemnify Customer for any breach
+            of the Agreement, any claim relating to the Services generally,
+            or any first-party loss, rather than being limited to
+            third-party claims that the Services infringe intellectual
+            property rights.
+        action: block
+        rationale: >
+          A general indemnity for "any breach" duplicates and effectively
+          removes the liability cap for the whole agreement, which is priced
+          against $10M of cyber and technology E&O cover and a $165k median
+          contract; it is covered instead by ordinary breach of contract
+          remedies subject to the cap.
+    objections:
+      - objection: The indemnity should cover any infringement claim, not only ones about the Services "as provided".
+        their_rationale: Customer's counsel wants to avoid arguing over whether its use matched the Documentation.
+        response: >
+          We can extend the indemnity to combinations that our own
+          Documentation specifies, which covers the integrations we actively
+          support, in exchange for sole control of the defence so we can
+          manage the exposure across all affected customers consistently.
+        talking_points:
+          - Sole control of the defence protects Customer as much as Halcyon, since Halcyon bears the cost.
+          - The combination carve-out only excludes products Halcyon did not choose.
+        recommended_position: {rule_key: indemnification.ip_infringement_indemnity, rung: 1}
+        frequency: common
+        counterparty_profile: Large hospital systems with in-house integration teams
+      - objection: Why does the remedy depend on Halcyon's own opinion that the Services are likely infringing?
+        their_rationale: Counterparty's counsel reads the "in Halcyon's opinion" standard as letting Halcyon avoid the remedy indefinitely.
+        response: >
+          We can tie the remedy to an actual court ruling or settlement
+          instead of Halcyon's own view, which removes the subjectivity your
+          counsel is flagging without changing the remedy itself.
+        talking_points:
+          - This rung needs commercial counsel sign-off and is offered on tier-1 accounts.
+          - The substitute remedy is still procure, modify or refund, unchanged.
+        recommended_position: {rule_key: indemnification.ip_infringement_indemnity, rung: 2}
+        frequency: occasional
+    dependencies:
+      - related_rule_key: limitation_of_liability.cap_carve_outs
+        relation: requires
+        note: This indemnity is one of the four Excluded Claims; the carve-out list must name it for the indemnity to sit outside the general cap.
+      - related_rule_key: indemnification.indemnity_procedure
+        relation: read_with
+        note: The notice and defence-control terms in rung 1 must match the procedure rule rather than create a second, conflicting procedure.
+    test_cases:
+      - name: Standard indemnity with exclusions and remedy
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Vendor will defend Customer against claims that the Services
+          infringe a third party's patent, copyright or trade secret, except
+          where the claim results from a combination with non-Vendor
+          products or from Customer's modification, and Vendor may procure
+          rights, modify the Services, or terminate and refund as its sole
+          remedy option.
+      - name: Infringement Claims defined term, same scope
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Vendor shall defend and indemnify Customer against Infringement
+          Claims, being claims that the Services as delivered infringe a
+          patent, copyright, trade mark or trade secret, excluding claims
+          from modification or combination not made by Vendor.
+      - name: Extended to Documentation-specified combinations
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: yellow
+        sample_text: >
+          The indemnity above also covers a claim arising from combining the
+          Services with a third-party product that Vendor's user guide
+          identifies as a supported integration, provided Customer gives
+          prompt notice and Vendor controls the defence.
+      - name: Indemnity excludes claims from Vendor's own code changes
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Vendor will defend Customer against third-party infringement
+          claims, except any claim arising from a modification Vendor itself
+          made to the Services after the Order Form date.
+      - name: Indemnity extended to any breach of the agreement
+        expected_outcome: red_line
+        expected_red_line_key: ip-indemnity-any-breach
+        expected_zone: red
+        sample_text: >
+          Vendor shall indemnify, defend and hold harmless Customer against
+          any claim, loss or liability of any kind arising out of or related
+          to this Agreement or Vendor's performance of the Services.
+
+  - rule_key: indemnification.customer_indemnity
+    title: Customer indemnity
+    required: false
+    risk_weight: 8
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: true
+    judgment_note: >
+      Weigh whether the counterparty is a public body or large health system
+      that is barred by its own charter or state law from giving an
+      indemnity at all; pressing for this clause against such a counterparty
+      may not be worth the negotiating capital.
+    position_summary: >
+      Customer indemnifies Halcyon against third-party claims arising from
+      Customer Data, Customer's instructions, or Customer's use of the
+      Services in breach of this Agreement or of law.
+    risk_rationale: >
+      Halcyon Engage ingests content hospital staff and patients submit
+      through secure messaging and intake forms. Without a customer
+      indemnity, Halcyon alone bears the cost of defending claims caused by
+      content or instructions it did not create, against only $2M of
+      general liability cover shared across roughly 310 customers.
+    detection_guidance: >
+      Look for an indemnity given by "Customer" covering "Customer Data",
+      "Customer's use of the Services in violation of" or "content submitted
+      by Customer", usually directly after Halcyon's infringement indemnity
+      under a heading such as "Indemnification by Customer". Absence means
+      Halcyon relies on ordinary breach of contract claims only, which is a
+      missing clause, not a deviation.
+    source_ref: Halcyon Risk Policy RP-04
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Full customer indemnity
+        zone: green
+        summary: Customer indemnifies Halcyon for Customer Data, its instructions, and its unlawful or non-compliant use of the Services.
+        language: >
+          Customer shall defend and indemnify Halcyon against any
+          third-party claim arising from (a) Customer Data, (b) Customer's
+          instructions to Halcyon regarding the processing of Customer Data,
+          or (c) Customer's use of the Services in violation of this
+          Agreement or of applicable law, and shall pay the damages and
+          costs finally awarded against Halcyon on such a claim.
+      - kind: fallback
+        rung: 1
+        label: Narrow to Customer Data and breach of the Agreement
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: Require Customer to maintain its own general liability cover and provide evidence on request.
+        summary: Drop the stand-alone "violation of law" ground, keeping Customer Data and breach of the Agreement.
+        language: >
+          Customer shall defend and indemnify Halcyon against any
+          third-party claim arising from Customer Data or from Customer's
+          use of the Services in breach of this Agreement, and shall pay the
+          damages and costs finally awarded against Halcyon on such a claim.
+      - kind: fallback
+        rung: 2
+        label: Indemnity capped at the general liability cap
+        zone: yellow
+        approver_role: general_counsel
+        conditions: {counterparty_tier: [tier_1]}
+        give_get: Require a specific acknowledgement that Customer Data includes PHI submitted through intake forms and secure messaging.
+        summary: Customer's indemnity obligation is expressly subject to the same aggregate cap that applies to Halcyon.
+        language: >
+          Customer shall defend and indemnify Halcyon against any
+          third-party claim arising from Customer Data or from Customer's
+          use of the Services in breach of this Agreement, subject to the
+          general limitation of liability set out in this Agreement.
+      - kind: acceptable_variant
+        label: Indemnity drafted as a mutual indemnification section
+        zone: green
+        summary: Customer's obligation is stated as one half of a mutual indemnification clause rather than a stand-alone section.
+        language: >
+          Each party shall defend and indemnify the other against
+          third-party claims arising from the indemnifying party's own data,
+          instructions or breach of this Agreement, Customer's obligation
+          under this Section covering Customer Data and Customer's use of
+          the Services.
+    red_lines:
+      - key: cust-indemnity-removed-no-substitute
+        description: Customer's indemnity obligation is deleted with no equivalent protection for claims arising from Customer Data or Customer's own conduct.
+        condition_type: semantic
+        condition:
+          test: >
+            The agreement removes any obligation for Customer to indemnify
+            Halcyon for claims arising from Customer Data, Customer's
+            instructions, or Customer's breach of the Agreement or
+            violation of law in using the Services, and gives Halcyon no
+            equivalent protection elsewhere in the agreement.
+        action: escalate
+        approver_role: general_counsel
+        rationale: >
+          Some tier-1 public bodies and health systems are barred by charter
+          or state law from giving an indemnity; the General Counsel must
+          confirm whether that is the actual reason before Halcyon accepts
+          the gap, since otherwise Halcyon alone carries claims caused by
+          content it did not create against only $2M of general liability
+          cover.
+    objections:
+      - objection: Our charter does not permit us to indemnify a vendor under any circumstances.
+        their_rationale: Public hospital systems and some non-profits are statutorily barred from giving indemnities.
+        response: >
+          We can accept that limitation where it is a genuine legal bar, and
+          will ask for written confirmation of the specific statute or
+          charter provision so General Counsel can document the exception
+          file.
+        talking_points:
+          - Ask for the specific statute or charter clause, not a general assertion.
+          - Consider requiring Customer to carry its own liability cover as a partial substitute.
+        recommended_position: {rule_key: indemnification.customer_indemnity, rung: 1}
+        frequency: common
+        counterparty_profile: Public hospital systems and government-affiliated clinics
+      - objection: We will not indemnify you for claims about how our own staff used the product; that is your product's responsibility.
+        their_rationale: Customer draws the line at its staff's ordinary use, as distinct from its own data or deliberate misuse.
+        response: >
+          Ordinary use within the Documentation is already Halcyon's
+          responsibility under the performance warranty and is not what this
+          clause reaches; we only ask Customer to stand behind data it
+          submits and conduct that breaches this Agreement or the law.
+        talking_points:
+          - Distinguish ordinary use (Halcyon's responsibility) from unlawful or breaching use (Customer's).
+          - Offer to cap Customer's indemnity at the general liability cap.
+        recommended_position: {rule_key: indemnification.customer_indemnity, rung: 2}
+        frequency: occasional
+    dependencies:
+      - related_rule_key: limitation_of_liability.cap_amount
+        relation: read_with
+        note: Rung 2 makes Customer's indemnity obligation subject to the same cap that applies to Halcyon; the two numbers must match.
+    test_cases:
+      - name: Standard customer indemnity
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Customer will defend and indemnify Vendor against any third-party
+          claim arising from Customer Data, Customer's instructions to
+          Vendor, or Customer's use of the Services in violation of this
+          Agreement or applicable law.
+      - name: Mutual indemnification clause, same scope for Customer's half
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Each party shall indemnify the other against third-party claims
+          caused by the indemnifying party's own data or breach of this
+          Agreement; for Customer, this covers Customer Data and Customer's
+          breach.
+      - name: Narrowed to Customer Data and breach of the agreement only
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: yellow
+        sample_text: >
+          Customer will indemnify Vendor against claims arising from
+          Customer Data or from Customer's breach of this Agreement.
+      - name: Customer indemnity limited to claims where Customer was grossly negligent
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Customer shall indemnify Vendor only for claims arising from
+          Customer's grossly negligent submission of Customer Data.
+      - name: Agreement expressly states Customer has no indemnity obligation
+        expected_outcome: red_line
+        expected_red_line_key: cust-indemnity-removed-no-substitute
+        expected_zone: yellow
+        sample_text: >
+          For the avoidance of doubt, Customer shall have no obligation to
+          defend or indemnify Vendor under this Agreement in any
+          circumstance.
+      - name: Missing customer indemnity
+        expected_outcome: missing
+        expected_zone: red
+        sample_text: ""
+
+  - rule_key: indemnification.indemnity_procedure
+    title: Indemnity procedure
+    required: true
+    risk_weight: 8
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      An indemnified party must give prompt written notice within a stated
+      number of days, and the indemnifying party controls the defence and
+      settlement, with no settlement that admits fault without the
+      indemnified party's consent.
+    risk_rationale: >
+      Halcyon's insurers under the $10M cyber and technology E&O policy
+      require prompt notice and control of the defence as a condition of
+      cover. A vague or one-sided procedure can forfeit that cover entirely
+      on a claim far larger than the $165k median contract that gave rise to
+      it.
+    detection_guidance: >
+      Look for "promptly notify", "within [number] days", "sole control of
+      the defence and settlement", "reasonable assistance" and "shall not
+      settle without the prior written consent". The text is usually a
+      sub-clause headed "Procedure" or "Conditions" inside the
+      indemnification section. An indemnity with no procedure language at
+      all is a deviation, not a missing clause, since the indemnity
+      obligation itself still exists.
+    source_ref: Halcyon Risk Policy RP-04; cyber policy claims-reporting condition
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Prompt notice within 10 days; indemnifying party controls defence
+        zone: green
+        summary: 10-day notice, sole control of defence and settlement by the indemnifying party, no fault-admitting settlement without consent.
+        language: >
+          The indemnified party shall give the indemnifying party prompt
+          written notice of the claim, in any event within ten (10) days of
+          becoming aware of it, and shall give the indemnifying party sole
+          control of the defence and settlement, provided that the
+          indemnifying party shall not settle any claim in a manner that
+          admits fault by, or imposes any obligation on, the indemnified
+          party without its prior written consent, such consent not to be
+          unreasonably withheld. The indemnified party shall provide
+          reasonable cooperation at the indemnifying party's expense.
+      - kind: fallback
+        rung: 1
+        label: Notice within 30 days
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: Require that late notice only reduces the indemnity to the extent the delay actually prejudiced the defence.
+        summary: Extend the notice window to thirty days without losing control of the defence.
+        language: >
+          The indemnified party shall give the indemnifying party prompt
+          written notice of the claim, in any event within thirty (30) days
+          of becoming aware of it, and shall give the indemnifying party sole
+          control of the defence and settlement, subject to the consent
+          requirement above; a failure to give notice within this period
+          relieves the indemnifying party of its obligations only to the
+          extent the delay materially prejudiced the defence.
+      - kind: fallback
+        rung: 2
+        label: Joint participation, indemnifying party still controls settlement
+        zone: yellow
+        approver_role: general_counsel
+        conditions: {counterparty_tier: [tier_1]}
+        give_get: Require that the indemnified party's own counsel costs under this rung are not reimbursed.
+        summary: The indemnified party may participate in the defence with its own counsel at its own cost; the indemnifying party keeps control of settlement.
+        language: >
+          The indemnified party may participate in the defence of the claim
+          with counsel of its own choosing at its own expense, provided that
+          the indemnifying party retains control of the settlement of the
+          claim subject to the consent requirement above.
+      - kind: acceptable_variant
+        label: Procedure stated as conditions precedent in a single paragraph
+        zone: green
+        summary: Same notice, control and consent terms combined into one paragraph rather than separate sentences.
+        language: >
+          As a condition of the indemnities in this Section, the indemnified
+          party must give prompt written notice of any claim within ten (10)
+          days of becoming aware of it and must allow the indemnifying party
+          to control the defence and any settlement, which shall not admit
+          fault by or bind the indemnified party without its prior written
+          consent.
+    parameters:
+      - key: claim_notice_days
+        label: Days to give written notice of a claim
+        value_type: number
+        unit: days
+        direction: lower_is_better
+        preferred_value: 10
+        green_limit: 10
+        yellow_limit: 30
+        extraction_hint: >
+          The number of days the indemnified party has to give notice of a
+          claim before the indemnity is at risk. "Promptly" with no number
+          is treated as meeting the green limit.
+    red_lines:
+      - key: indemnity-proc-no-defence-control
+        description: The indemnifying party has no right to control the defence or settlement of a claim it must pay for.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause lets the indemnified party conduct or settle the
+            claim on its own, including admitting fault or agreeing to pay
+            money, while still requiring the indemnifying party to pay for
+            it, with no right for the indemnifying party to control or at
+            least participate in the defence.
+        action: escalate
+        approver_role: general_counsel
+        rationale: >
+          Losing control of the defence is itself a condition of cover under
+          Halcyon's $10M cyber and technology E&O policy; accepting it risks
+          the insurer denying the claim entirely, which the General Counsel
+          must weigh against the commercial value of the deal.
+    objections:
+      - objection: Ten days is too short; our claims have to go through several layers of internal sign-off before we can even notify you.
+        their_rationale: Large health systems route vendor notices through risk management and legal before they go out.
+        response: >
+          We can extend the notice window to thirty days, which still lets
+          us respond to most claims while they are easy to defend, provided
+          a late notice only reduces the indemnity to the extent it actually
+          hurt our ability to defend the claim.
+        talking_points:
+          - The extended window still protects Customer fully unless the delay caused real prejudice.
+          - Internal sign-off delays are exactly what the "materially prejudiced" standard is meant to tolerate.
+        recommended_position: {rule_key: indemnification.indemnity_procedure, rung: 1}
+        frequency: common
+        counterparty_profile: Large hospital systems with multi-layer legal sign-off
+      - objection: We need our own counsel involved in any claim that could affect our patients or our reputation.
+        their_rationale: Counterparty wants assurance it is not left out of a defence strategy that affects its public standing.
+        response: >
+          We can let Customer's own counsel participate in the defence at
+          Customer's expense, while Halcyon retains control of settlement so
+          the claim is resolved consistently with our other customers in the
+          same position.
+        talking_points:
+          - Participation is not the same as control; Halcyon still decides whether and how to settle.
+          - This rung is reserved for tier-1 accounts and needs General Counsel sign-off.
+        recommended_position: {rule_key: indemnification.indemnity_procedure, rung: 2}
+        frequency: occasional
+    dependencies:
+      - related_rule_key: indemnification.ip_infringement_indemnity
+        relation: requires
+        note: This procedure governs how claims under the infringement indemnity, and any customer indemnity, are notified and defended.
+    test_cases:
+      - name: Standard 10-day notice with defence control
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          The party seeking indemnification must give written notice of the
+          claim within ten days of learning of it and must let the
+          indemnifying party control the defence and settlement, which may
+          not admit fault without the indemnified party's consent.
+      - name: Conditions precedent paragraph, same terms
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          As a condition of any indemnity in this Agreement, the indemnified
+          party shall give prompt notice within ten days and shall permit
+          the indemnifying party to control the defence, subject to consent
+          before any fault-admitting settlement.
+      - name: 30-day notice with a materiality standard for late notice
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: yellow
+        sample_text: >
+          Notice of a claim must be given within thirty days of the
+          indemnified party becoming aware of it; late notice excuses the
+          indemnifying party's obligations only to the extent it was
+          actually prejudiced by the delay.
+      - name: Notice period of 60 days with no materiality standard
+        expected_outcome: deviation
+        expected_zone: red
+        sample_text: >
+          The indemnified party shall notify the indemnifying party of any
+          claim within sixty days; failure to do so within that period
+          relieves the indemnifying party of all obligations under this
+          Section.
+      - name: Indemnified party may settle without the indemnifying party's involvement
+        expected_outcome: red_line
+        expected_red_line_key: indemnity-proc-no-defence-control
+        expected_zone: yellow
+        sample_text: >
+          Customer may defend or settle any claim in its sole discretion,
+          including by admitting liability or agreeing to a payment, and
+          Vendor shall reimburse Customer for the full cost of the
+          settlement.
+
+  - rule_key: warranties.performance_warranty
+    title: Performance warranty
+    required: true
+    risk_weight: 8
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Halcyon warrants that the Services will perform materially in
+      accordance with the Documentation and will be provided with reasonable
+      skill and care, with a thirty-day cure period as the sole remedy for a
+      breach of this warranty.
+    risk_rationale: >
+      Halcyon Engage is a clinical workflow tool, not a source of medical
+      advice, so the warranty standard must stay at "materially in
+      accordance with the Documentation" rather than an error-free or
+      fitness-for-clinical-purpose standard the product was never built to
+      meet. A cure-period remedy keeps the exposure proportionate to the
+      $165k median contract instead of opening it to termination or damages
+      claims for every minor defect.
+    detection_guidance: >
+      Look for "warrants that the Services will perform materially in
+      accordance with the Documentation", "professional and workmanlike
+      manner", "free from material defects" and a stated cure period as the
+      remedy. A warranty with no cure period or remedy stated is a
+      deviation, not a missing clause; an agreement with no performance
+      warranty at all is a missing clause.
+    source_ref: Halcyon Risk Policy RP-04
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Material-conformance warranty with 30-day cure
+        zone: green
+        summary: Services perform materially as documented; sole remedy is a 30-day cure or, failing cure, termination and refund.
+        language: >
+          Halcyon warrants that, during the Subscription Term, the Services
+          will perform materially in accordance with the Documentation and
+          will be provided with reasonable skill and care. If the Services
+          fail to conform to this warranty, Customer's sole and exclusive
+          remedy, and Halcyon's entire liability, shall be for Halcyon to
+          use commercially reasonable efforts to correct the
+          non-conformance within thirty (30) days of written notice, or, if
+          Halcyon cannot do so, to terminate the affected Services and
+          refund any prepaid, unused Fees.
+      - kind: fallback
+        rung: 1
+        label: Cure period of 15 days
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: Require written notice with enough detail to reproduce the non-conformance before the cure clock starts.
+        summary: Shorten the cure period to fifteen days.
+        language: >
+          If the Services fail to conform to the warranty above, Customer's
+          sole and exclusive remedy shall be for Halcyon to use commercially
+          reasonable efforts to correct the non-conformance within fifteen
+          (15) days of written notice reasonably sufficient to reproduce the
+          issue, or, if Halcyon cannot do so, to terminate the affected
+          Services and refund any prepaid, unused Fees.
+      - kind: fallback
+        rung: 2
+        label: Add a narrow uptime cross-reference without a separate standard
+        zone: yellow
+        approver_role: vp_customer_success
+        conditions: {counterparty_tier: [tier_1]}
+        give_get: Require that this cross-reference not create a second, independent remedy beyond service credits.
+        summary: State expressly that the uptime commitment is part of "performs materially in accordance with the Documentation" without adding a new, separate warranty standard.
+        language: >
+          For clarity, a failure to meet the uptime commitment set out in
+          this Agreement is addressed exclusively through the service
+          credits described there and does not, by itself, constitute a
+          breach of the warranty in this Section.
+      - kind: acceptable_variant
+        label: Warranty stated as part of a broader "Mutual Warranties" section
+        zone: green
+        summary: Same material-conformance standard and cure remedy, drafted alongside mutual warranties of authority and compliance.
+        language: >
+          Each party represents that it has the authority to enter into
+          this Agreement, and Halcyon further warrants that the Services
+          will perform materially in accordance with the Documentation,
+          Customer's sole remedy for a breach of this warranty being a
+          thirty (30) day cure period followed by termination and refund of
+          unused, prepaid Fees if not cured.
+    parameters:
+      - key: warranty_cure_period_days
+        label: Days to cure a non-conforming warranty claim
+        value_type: number
+        unit: days
+        direction: higher_is_better
+        preferred_value: 30
+        green_limit: 30
+        yellow_limit: 15
+        extraction_hint: >
+          The number of days Halcyon has to correct a non-conformance before
+          Customer's remedy shifts to termination and refund. A longer cure
+          period is better for Halcyon.
+    red_lines:
+      - key: warranty-fitness-for-purpose
+        description: The warranty is extended to promise error-free, uninterrupted operation or fitness for Customer's particular clinical or regulatory purpose.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause warrants that the Services will be error-free,
+            uninterrupted, or fit for Customer's particular clinical,
+            diagnostic or regulatory purpose, rather than warranting only
+            material conformance with the Documentation.
+        action: block
+        rationale: >
+          Halcyon Engage is coordination and messaging software, not a
+          diagnostic or clinical-decision tool, and was never designed or
+          validated against an error-free or purpose-fitness standard; a
+          promise at that standard is outside what the performance warranty
+          disclaimer and the $10M technology E&O policy are priced to cover.
+    objections:
+      - objection: Thirty days is too long to leave a defect unfixed when our clinicians are relying on it daily.
+        their_rationale: Counterparty's clinical operations team wants defects resolved fast, not on a contractual clock.
+        response: >
+          We can commit to fifteen days for the contractual cure remedy
+          while still working urgent issues through our support process on
+          a much faster operational timeline; the thirty-day period is the
+          outer bound for the legal remedy, not how quickly we actually
+          respond.
+        talking_points:
+          - Separate the support SLA, which is fast, from the contractual cure remedy, which is a backstop.
+          - Offer the 15-day rung in exchange for clearer, written non-conformance notices.
+        recommended_position: {rule_key: warranties.performance_warranty, rung: 1}
+        frequency: common
+        counterparty_profile: Large hospital systems with clinical operations stakeholders
+      - objection: The warranty should cover uptime failures too, not just functional defects.
+        their_rationale: Counterparty wants one warranty standard to cover both features and availability.
+        response: >
+          We keep those separate because uptime already has its own
+          dedicated remedy, service credits, which is faster and does not
+          require proving a material non-conformance; folding uptime into
+          this warranty would just duplicate that remedy under a different
+          name.
+        talking_points:
+          - Service credits are available without a cure period or dispute over materiality.
+          - This rung is for tier-1 accounts and needs Customer Success sign-off.
+        recommended_position: {rule_key: warranties.performance_warranty, rung: 2}
+        frequency: occasional
+    dependencies:
+      - related_rule_key: service_levels.uptime_commitment
+        relation: conflicts_with
+        note: The performance warranty must not create a second remedy for an uptime miss that duplicates the service credit remedy.
+    test_cases:
+      - name: Standard material-conformance warranty with 30-day cure
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Vendor warrants the Services will perform materially in
+          accordance with the Documentation; Customer's sole remedy for a
+          breach is a thirty-day period for Vendor to correct the defect or,
+          failing that, termination and a refund of unused fees.
+      - name: Warranty inside a Mutual Warranties section
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Each party warrants its authority to sign this Agreement, and
+          Vendor further warrants material conformance of the Services with
+          the Documentation, remediable within thirty days as Customer's
+          sole remedy.
+      - name: 15-day cure period
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: yellow
+        sample_text: >
+          If the Services do not perform materially as documented,
+          Vendor's sole obligation is to correct the issue within fifteen
+          days of receiving a detailed written notice.
+      - name: No cure period or remedy stated
+        expected_outcome: deviation
+        expected_zone: red
+        sample_text: >
+          Vendor warrants that the Services will perform materially in
+          accordance with the Documentation.
+      - name: Trap - warranty phrased as a disclaimer of a stricter standard
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Vendor does not warrant that the Services will be error-free; the
+          only warranty given is that the Services will perform materially
+          in accordance with the Documentation, with a thirty-day cure
+          period as Customer's sole remedy.
+
+  - rule_key: warranties.disclaimer
+    title: Warranty disclaimer
+    required: true
+    risk_weight: 8
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Other than the express performance warranty, Halcyon disclaims all
+      warranties, including implied warranties of merchantability, fitness
+      for a particular purpose and non-infringement, and states that the
+      Services do not constitute medical advice.
+    risk_rationale: >
+      Without this disclaimer, implied warranties under the Uniform
+      Commercial Code and similar state law can attach by default and are
+      not bounded by the cure-period remedy in the express warranty. For a
+      clinical workflow product used by roughly 310 hospital and clinic
+      customers, the disclaimer is also how Halcyon makes clear the
+      Services are not a source of medical advice or diagnosis.
+    detection_guidance: >
+      Look for "except as expressly provided", "disclaims all warranties",
+      "merchantability", "fitness for a particular purpose",
+      "non-infringement" and "as is", often in capital letters, and for a
+      statement that the Services do not constitute medical advice. A
+      disclaimer that is present but silent on medical advice is a
+      deviation, not a missing clause.
+    source_ref: Halcyon Risk Policy RP-04
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Full disclaimer with medical-advice statement
+        zone: green
+        summary: Disclaims all implied warranties and states the Services are not medical advice.
+        language: >
+          EXCEPT AS EXPRESSLY SET OUT IN THIS AGREEMENT, HALCYON DISCLAIMS
+          ALL WARRANTIES, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING
+          THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+          PARTICULAR PURPOSE AND NON-INFRINGEMENT. THE SERVICES ARE NOT A
+          SUBSTITUTE FOR PROFESSIONAL MEDICAL JUDGMENT AND DO NOT
+          CONSTITUTE MEDICAL ADVICE, DIAGNOSIS OR TREATMENT.
+      - kind: fallback
+        rung: 1
+        label: Drop the capitalisation, keep the substance
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: Require that the medical-advice statement still appear in the body of the Agreement, not only in the Documentation.
+        summary: Same disclaimer and medical-advice statement, without requiring capital letters.
+        language: >
+          Except as expressly set out in this Agreement, Halcyon disclaims
+          all warranties, whether express, implied or statutory, including
+          the implied warranties of merchantability, fitness for a
+          particular purpose and non-infringement. The Services are not a
+          substitute for professional medical judgment and do not
+          constitute medical advice, diagnosis or treatment.
+      - kind: fallback
+        rung: 2
+        label: Carve the performance warranty itself out of the disclaimer's "AS IS" language
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: Require Customer to accept that this clarification does not expand the performance warranty's standard or remedy.
+        summary: Clarify that the disclaimer does not override the express performance warranty elsewhere in the Agreement.
+        language: >
+          Except for the express warranty set out in the Performance
+          Warranty section of this Agreement, the Services are provided "AS
+          IS" and Halcyon disclaims all other warranties, whether express,
+          implied or statutory, including the implied warranties of
+          merchantability, fitness for a particular purpose and
+          non-infringement.
+      - kind: acceptable_variant
+        label: Disclaimer combined with the warranty section as one clause
+        zone: green
+        summary: Same disclaimer substance, drafted as the closing paragraph of the warranty section rather than a stand-alone clause.
+        language: >
+          No warranty is given other than as expressly stated above;
+          Halcyon disclaims the implied warranties of merchantability,
+          fitness for a particular purpose and non-infringement, and the
+          Services are not intended to provide medical advice, diagnosis or
+          treatment.
+    red_lines:
+      - key: disclaimer-deleted
+        description: The warranty disclaimer is removed, or Halcyon is deemed to give warranties beyond the express performance warranty.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause removes the disclaimer of implied warranties
+            entirely, or states that Halcyon gives warranties of
+            merchantability, fitness for a particular purpose or
+            non-infringement in addition to the express performance
+            warranty.
+        action: block
+        rationale: >
+          Implied warranties left standing are not bounded by the
+          cure-period remedy and are not priced into Halcyon Risk Policy
+          RP-04; for a clinical product serving about 310 customers, an
+          implied fitness-for-purpose warranty could be read as a promise
+          about clinical outcomes the product was never built to make.
+    objections:
+      - objection: All-capitals disclaimers are unenforceable boilerplate in our state; please use normal text.
+        their_rationale: Counterparty's counsel has seen capitalisation requirements struck down or ignored by courts.
+        response: >
+          We are comfortable dropping the capitalisation as long as the
+          substance, including the medical-advice statement, stays in the
+          body of the Agreement where Customer's own business teams will
+          see it.
+        talking_points:
+          - The substance of the disclaimer, not its formatting, is what Halcyon's risk policy requires.
+          - Confirm the medical-advice statement remains visible, not moved to the Documentation only.
+        recommended_position: {rule_key: warranties.disclaimer, rung: 1}
+        frequency: occasional
+      - objection: This disclaimer seems to undercut the performance warranty you just gave us.
+        their_rationale: Counterparty's counsel reads "AS IS" language as potentially swallowing the express warranty.
+        response: >
+          We can add a sentence making clear the disclaimer does not
+          override the express performance warranty, which remains in full
+          effect; the disclaimer only removes the warranties Halcyon did
+          not expressly agree to give.
+        talking_points:
+          - The performance warranty section already states its own remedy and survives the disclaimer.
+          - This clarification does not expand the performance warranty's standard.
+        recommended_position: {rule_key: warranties.disclaimer, rung: 2}
+        frequency: common
+        counterparty_profile: Large hospital systems
+    dependencies:
+      - related_rule_key: warranties.performance_warranty
+        relation: read_with
+        note: The disclaimer's "AS IS" language and the express performance warranty must be read together so neither swallows the other.
+    test_cases:
+      - name: Standard full disclaimer with medical-advice statement
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Except as expressly stated in this Agreement, Vendor disclaims all
+          warranties, express, implied or statutory, including
+          merchantability, fitness for a particular purpose and
+          non-infringement, and the Services do not constitute medical
+          advice or diagnosis.
+      - name: Disclaimer folded into the close of the warranty section
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          No other warranty is given; the implied warranties of
+          merchantability, fitness for a particular purpose and
+          non-infringement are disclaimed, and the Services are not
+          intended as medical advice.
+      - name: Disclaimer in normal case, same substance
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: yellow
+        sample_text: >
+          Vendor disclaims all implied warranties, including
+          merchantability, fitness for a particular purpose and
+          non-infringement; the services are not a substitute for
+          professional medical judgment.
+      - name: Disclaimer present but silent on medical advice
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Except as expressly stated, Vendor disclaims all implied
+          warranties, including merchantability, fitness for a particular
+          purpose and non-infringement.
+      - name: Disclaimer deleted entirely
+        expected_outcome: red_line
+        expected_red_line_key: disclaimer-deleted
+        expected_zone: red
+        sample_text: >
+          Vendor warrants that the Services are fit for Customer's intended
+          purpose, merchantable, and will not infringe any third party's
+          rights, in addition to the express warranties stated elsewhere in
+          this Agreement.
+
+  - rule_key: insurance.coverage_requirements
+    title: Insurance coverage requirements
+    required: true
+    risk_weight: 9
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Halcyon maintains cyber and technology errors and omissions cover of
+      at least $10,000,000 aggregate and commercial general liability cover
+      of at least $2,000,000, and provides a certificate of insurance on
+      request.
+    risk_rationale: >
+      $10M of cyber and technology E&O cover and $2M of general liability
+      cover are the limits Halcyon actually holds today across its roughly
+      310 customers. Committing to a higher stated limit than Halcyon
+      carries creates a contractual promise the insurance does not back, and
+      an open-ended "adequate to cover all losses" promise cannot be priced
+      or verified at all.
+    detection_guidance: >
+      Look for "shall maintain", "commercial general liability", "cyber
+      liability", "technology errors and omissions", "limits of not less
+      than", "additional insured" and "certificate of insurance". Absence
+      means there is no contractual insurance obligation, which is a
+      missing clause for a SaaS agreement of this kind.
+    source_ref: Halcyon Risk Policy RP-04; current cyber and technology E&O and general liability policies
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Current limits, certificate on request
+        zone: green
+        summary: $10M cyber/technology E&O, $2M general liability, certificate of insurance provided on request.
+        language: >
+          Halcyon shall maintain, throughout the Subscription Term, (a)
+          cyber liability and technology errors and omissions insurance
+          with limits of not less than US$10,000,000 in the aggregate, and
+          (b) commercial general liability insurance with limits of not
+          less than US$2,000,000 per occurrence, in each case with insurers
+          rated A- or better by A.M. Best, and shall provide a certificate
+          of insurance evidencing this coverage within ten (10) business
+          days of Customer's written request.
+      - kind: fallback
+        rung: 1
+        label: Add additional insured status on the general liability policy
+        zone: yellow
+        approver_role: cfo
+        give_get: Require that additional insured status not extend to the cyber or technology E&O policy.
+        summary: Name Customer as an additional insured on the general liability policy only.
+        language: >
+          Halcyon shall maintain the insurance described above and shall
+          name Customer as an additional insured on its commercial general
+          liability policy, such status not extending to Halcyon's cyber
+          liability and technology errors and omissions policy.
+      - kind: fallback
+        rung: 2
+        label: Raise the cyber and technology E&O limit above US$10,000,000
+        zone: yellow
+        approver_role: cfo
+        conditions: {deal_value_band: [strategic]}
+        give_get: Require advance notice before Halcyon reduces its coverage below the stated limit during the Subscription Term.
+        summary: Increase the cyber and technology E&O limit beyond what Halcyon holds today, up to US$20,000,000.
+        language: >
+          Halcyon shall maintain cyber liability and technology errors and
+          omissions insurance with limits of not less than
+          US$[amount, not to exceed US$20,000,000] in the aggregate for the
+          duration of the Subscription Term.
+      - kind: acceptable_variant
+        label: Limits stated as a schedule rather than inline
+        zone: green
+        summary: Same limits and certificate obligation, set out in an insurance schedule referenced from the body of the Agreement.
+        language: >
+          Halcyon shall maintain the insurance coverage set out in Schedule
+          [X] (Insurance), being cyber liability and technology errors and
+          omissions cover of not less than US$10,000,000 and commercial
+          general liability cover of not less than US$2,000,000, and shall
+          provide a certificate of insurance on Customer's written request.
+    parameters:
+      - key: cyber_eo_limit_usd
+        label: Cyber and technology E&O aggregate limit
+        value_type: currency_usd
+        direction: lower_is_better
+        preferred_value: 10000000
+        green_limit: 10000000
+        yellow_limit: 20000000
+        extraction_hint: >
+          The stated aggregate limit for cyber liability and technology
+          errors and omissions cover. A limit below $10,000,000 is still
+          green; it is the floor, not a target.
+    red_lines:
+      - key: insurance-unlimited
+        description: Halcyon must maintain insurance with no stated limit, or coverage "adequate to cover all losses" under the Agreement.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause requires Halcyon to maintain insurance coverage with
+            no stated dollar limit, or coverage described as adequate or
+            sufficient to cover all losses, liabilities or damages that
+            could arise under the Agreement.
+        action: block
+        rationale: >
+          An unlimited or "adequate to cover all losses" insurance
+          requirement cannot be purchased, priced or verified against
+          Halcyon's actual $10M cyber and technology E&O and $2M general
+          liability cover, and effectively removes the liability cap
+          through an insurance-procurement obligation instead.
+    objections:
+      - objection: We need to be named as an additional insured on every policy you carry, including the cyber policy.
+        their_rationale: Counterparty's risk management team applies a single additional-insured requirement across all vendor policies.
+        response: >
+          We can add Customer as an additional insured on our general
+          liability policy, which is the standard way insurers extend that
+          status; cyber and technology E&O policies are underwritten and
+          priced differently and our carrier does not offer additional
+          insured status on them.
+        talking_points:
+          - Additional insured status on cyber policies is unusual in the market and often unavailable from carriers.
+          - Offer a certificate of insurance and notice of material changes as an alternative on the cyber side.
+        recommended_position: {rule_key: insurance.coverage_requirements, rung: 1}
+        frequency: common
+        counterparty_profile: Large hospital systems with standard vendor risk requirements
+      - objection: $10M is not enough given the scale of patient data you process across your whole customer base.
+        their_rationale: Counterparty benchmarks the limit against Halcyon's total customer count rather than this one contract.
+        response: >
+          We can increase the cyber and technology E&O limit for a strategic
+          engagement of this size, subject to CFO approval, up to twenty
+          million dollars; that increase needs to be weighed against the
+          premium cost across our full book, not just this contract.
+        talking_points:
+          - The limit is an aggregate across all claims in a policy period, not per contract.
+          - This rung is reserved for strategic deals and needs CFO sign-off.
+        recommended_position: {rule_key: insurance.coverage_requirements, rung: 2}
+        frequency: occasional
+    dependencies:
+      - related_rule_key: limitation_of_liability.cap_amount
+        relation: read_with
+        note: The liability cap on strategic deals should not be raised to a multiple of Fees that the stated insurance limits could not realistically back.
+    test_cases:
+      - name: Standard limits with certificate on request
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Vendor will maintain cyber and technology errors and omissions
+          insurance of at least ten million dollars and general liability
+          insurance of at least two million dollars, and will provide a
+          certificate of insurance within ten business days of request.
+      - name: Limits set out in a schedule
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Vendor's insurance obligations are set out in Schedule 3, which
+          states a ten-million-dollar cyber and technology E&O limit and a
+          two-million-dollar general liability limit, with a certificate
+          available on request.
+      - name: Additional insured on general liability only
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: yellow
+        sample_text: >
+          Vendor shall maintain the insurance described above and shall name
+          Customer as an additional insured on its commercial general
+          liability policy.
+      - name: Certificate obligation with no stated limits
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Vendor shall maintain insurance appropriate to its business and
+          shall provide a certificate of insurance on request.
+      - name: Trap - limits stated as a floor with explicit headroom language
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Vendor's insurance shall at no time provide less than ten million
+          dollars of cyber and technology E&O cover and two million dollars
+          of general liability cover.
+
+  - rule_key: intellectual_property.ownership
+    title: Ownership of intellectual property
+    required: true
+    risk_weight: 9
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Halcyon retains all right, title and interest in the Services, the
+      underlying software and the Documentation, including any
+      configurations or customizations built on the shared platform;
+      Customer owns only its own Customer Data and any deliverables created
+      solely for it that contain no Halcyon technology.
+    risk_rationale: >
+      Every one of Halcyon's roughly 310 customers runs on the same
+      multi-tenant code base, so any ownership right given to one customer
+      over a configuration or customization built from shared platform
+      components would leave Halcyon unable to lawfully reuse or support
+      that component for the others. This is the foundation the $72M ARR
+      business is built on and is not adjustable by deal size.
+    detection_guidance: >
+      Look for "retains all right, title and interest", "no rights are
+      granted except as expressly set out", "work made for hire", "hereby
+      assigns" and "Deliverables", and check closely for any assignment
+      wording that reaches configurations, workflows or integrations built
+      on the shared platform. Absence of an ownership clause in a SaaS
+      agreement is a missing clause.
+    source_ref: Halcyon Risk Policy RP-04
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Halcyon retains all IP; Customer owns only its own data
+        zone: green
+        summary: Halcyon owns the Services, software, Documentation and any configurations; Customer owns Customer Data.
+        language: >
+          As between the parties, Halcyon and its licensors retain all
+          right, title and interest in and to the Services, the underlying
+          software, the Documentation, and any configurations,
+          customizations, workflows or integrations created in connection
+          with this Agreement, including any suggestions or modifications
+          requested by Customer. No rights are granted to Customer except
+          as expressly set out in this Agreement. As between the parties,
+          Customer retains all right, title and interest in and to Customer
+          Data.
+      - kind: fallback
+        rung: 1
+        label: Customer-specific deliverables containing no Halcyon technology
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: Require that any such deliverable be separately scoped and priced under an Order Form, not bundled into the base subscription.
+        summary: Customer owns deliverables built solely for it under a separate statement of work, provided they contain no Halcyon pre-existing technology.
+        language: >
+          Where the parties agree in a separate Order Form or statement of
+          work that Halcyon will create a deliverable solely for Customer
+          that contains no pre-existing Halcyon technology, Halcyon assigns
+          to Customer all right, title and interest in that deliverable upon
+          full payment of the fees for it; for clarity, this does not apply
+          to the Services, the underlying software, the Documentation, or
+          any configuration built using Halcyon's platform components.
+      - kind: fallback
+        rung: 2
+        label: Perpetual, royalty-free licence to Customer-requested configurations
+        zone: yellow
+        approver_role: commercial_counsel
+        conditions: {counterparty_tier: [tier_1]}
+        give_get: Require that the licence be non-exclusive and non-transferable outside Customer's corporate group.
+        summary: Grant Customer a perpetual, non-exclusive licence to configurations built at its request, without assigning ownership.
+        language: >
+          Halcyon grants Customer a perpetual, non-exclusive,
+          non-transferable, royalty-free licence to use any configuration
+          or workflow built at Customer's specific request, solely for
+          Customer's own internal use of the Services; ownership of the
+          underlying platform components remains with Halcyon.
+      - kind: acceptable_variant
+        label: Ownership stated through a "no implied licence" clause
+        zone: green
+        summary: Same reservation of rights, drafted as a negative grant rather than an affirmative retention statement.
+        language: >
+          Nothing in this Agreement grants Customer any right, title or
+          interest in the Services, the underlying software or the
+          Documentation, other than the limited right to use the Services
+          during the Subscription Term as set out in this Agreement; all
+          other rights are reserved to Halcyon.
+    red_lines:
+      - key: ip-ownership-assignment-to-customer
+        description: Ownership of configurations, customizations or integrations built using Halcyon's pre-existing platform is assigned to Customer.
+        condition_type: semantic
+        condition:
+          test: >
+            The agreement assigns to Customer ownership of a configuration,
+            customization, workflow or integration that Halcyon built using
+            its pre-existing platform components, rather than limiting
+            Customer's ownership to its own data and to deliverables
+            created solely for it that contain no Halcyon technology.
+        action: block
+        rationale: >
+          Assigning any part of the shared, multi-tenant platform to one
+          customer would leave Halcyon unable to lawfully reuse that
+          component for the other roughly 310 customers running on the same
+          code base and would breach the ownership warranties Halcyon gives
+          in its other contracts.
+    objections:
+      - objection: We paid for the configuration work, so we should own it.
+        their_rationale: Counterparty's procurement team treats anything it paid a professional-services fee for as a work made for hire.
+        response: >
+          Where we build something solely for you that does not touch our
+          shared platform components, we are glad to assign that under a
+          separate statement of work once it is paid for. Configuration of
+          the platform itself has to stay ours, because the same components
+          run every other customer's environment.
+        talking_points:
+          - Distinguish stand-alone deliverables from configuration of the shared platform.
+          - Offer a perpetual licence to the configuration if ownership is not available.
+        recommended_position: {rule_key: intellectual_property.ownership, rung: 1}
+        frequency: common
+        counterparty_profile: Large hospital systems with in-house development teams
+      - objection: At minimum, we need a licence to keep using any custom workflow if we ever switch vendors.
+        their_rationale: Counterparty wants continuity of its own business processes independent of the relationship with Halcyon.
+        response: >
+          We can grant a perpetual, non-exclusive licence to a workflow
+          built specifically at your request, so you can keep describing
+          your process the same way even if the underlying platform changes,
+          without us losing the ability to reuse the same building blocks
+          for other customers.
+        talking_points:
+          - The licence is non-exclusive and tied to Customer's own internal use.
+          - This rung is reserved for tier-1 accounts and needs commercial counsel sign-off.
+        recommended_position: {rule_key: intellectual_property.ownership, rung: 2}
+        frequency: occasional
+    dependencies:
+      - related_rule_key: intellectual_property.feedback_license
+        relation: read_with
+        note: Feedback and configuration requests both flow into the same shared platform; the ownership and feedback clauses should use consistent language about what Customer receives back.
+    test_cases:
+      - name: Standard ownership retention
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Vendor retains all right, title and interest in the Services, the
+          underlying software and the Documentation; Customer retains all
+          right, title and interest in Customer Data.
+      - name: Ownership stated as a no-implied-licence clause
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Customer receives no right, title or interest in the Services or
+          underlying software beyond the right to use them during the
+          Subscription Term; all other rights are reserved to Vendor.
+      - name: Customer owns a stand-alone deliverable under a statement of work
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: yellow
+        sample_text: >
+          Under the attached statement of work, Vendor assigns to Customer
+          all right, title and interest in the custom report template built
+          solely for Customer, which contains no Vendor platform code, upon
+          payment in full.
+      - name: Ownership clause silent on configurations built during onboarding
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Vendor retains ownership of the Services and Documentation. This
+          Agreement does not address ownership of any configuration created
+          during implementation.
+      - name: Customer assigned ownership of a platform configuration
+        expected_outcome: red_line
+        expected_red_line_key: ip-ownership-assignment-to-customer
+        expected_zone: red
+        sample_text: >
+          Vendor hereby assigns to Customer all right, title and interest in
+          the workflow configuration built on Vendor's platform during
+          implementation of the Services.
+
+  - rule_key: intellectual_property.feedback_license
+    title: Feedback licence
+    required: false
+    risk_weight: 8
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Halcyon may use any suggestions, enhancement requests or
+      recommendations Customer provides about the Services under a
+      perpetual, irrevocable, royalty-free licence, without restriction or
+      obligation to Customer.
+    risk_rationale: >
+      Halcyon Engage improves through enhancement requests from its roughly
+      310 customers, and a product change suggested by one customer is
+      almost always built into the shared platform and used by many others.
+      Without a clear feedback licence, Halcyon risks a claim that a feature
+      built on one customer's suggestion belongs to that customer.
+    detection_guidance: >
+      Look for "Feedback", "suggestions, enhancement requests or
+      recommendations", "perpetual, irrevocable, royalty-free licence" and
+      "without restriction or obligation", usually a short sub-clause in the
+      intellectual property section. Absence leaves Halcyon's right to act
+      on customer suggestions unclear, which is a missing clause.
+    source_ref: Halcyon Risk Policy RP-04
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Perpetual, royalty-free feedback licence
+        zone: green
+        summary: Halcyon may use Feedback freely, without restriction or obligation to Customer.
+        language: >
+          If Customer provides Halcyon with any suggestion, enhancement
+          request, recommendation or other feedback relating to the
+          Services ("Feedback"), Customer grants Halcyon a perpetual,
+          irrevocable, worldwide, royalty-free licence to use, incorporate
+          and commercialise the Feedback in the Services, without
+          restriction or obligation to Customer, provided that Feedback
+          shall not include Customer's Confidential Information unless
+          Customer identifies it as such and agrees to its use.
+      - kind: fallback
+        rung: 1
+        label: Exclude Customer's Confidential Information by default
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: Require Customer to flag any Feedback it wants excluded from the licence at the time it is given.
+        summary: Feedback licence excludes anything that would otherwise be Customer's Confidential Information, with no separate identification step required.
+        language: >
+          Customer grants Halcyon a perpetual, irrevocable, worldwide,
+          royalty-free licence to use Feedback in the Services, without
+          restriction or obligation to Customer, except that Feedback does
+          not include any information that is Customer's Confidential
+          Information under this Agreement.
+      - kind: fallback
+        rung: 2
+        label: Non-attribution assurance
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: Require that this assurance not be read as limiting Halcyon's right to use the Feedback itself.
+        summary: Add assurance that Halcyon will not publicly attribute specific Feedback to Customer without consent.
+        language: >
+          Halcyon will not publicly attribute specific Feedback to Customer
+          by name without Customer's prior written consent, provided that
+          this does not limit Halcyon's licence to use, incorporate or
+          commercialise the Feedback itself.
+      - kind: acceptable_variant
+        label: Feedback licence drafted as part of a broader "Suggestions" clause
+        zone: green
+        summary: Same perpetual, royalty-free licence, drafted under a "Suggestions" heading rather than "Feedback".
+        language: >
+          Any suggestions Customer submits regarding the Services may be
+          used by Halcyon for any purpose, including incorporating them
+          into the Services, without payment or other obligation to
+          Customer, on a perpetual and irrevocable basis.
+    red_lines:
+      - key: feedback-license-revocable-or-confidential
+        description: The feedback licence is made revocable, non-perpetual, or Customer retains confidentiality rights that prevent Halcyon from using the Feedback.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause lets Customer revoke the licence to use Feedback, is
+            not stated as perpetual or irrevocable, or treats all Feedback
+            as Customer's Confidential Information by default, preventing
+            Halcyon from using or disclosing it.
+        action: escalate
+        approver_role: commercial_counsel
+        rationale: >
+          Feedback from one customer is routinely built into the shared
+          platform used by Halcyon's roughly 310 customers; a revocable or
+          confidential licence would force Halcyon to track and potentially
+          remove shared features on a single customer's demand.
+    objections:
+      - objection: We do not want our enhancement requests used to help your other hospital customers for free.
+        their_rationale: Counterparty views its operational know-how embedded in a feature request as a competitive input.
+        response: >
+          We only use the functional substance of a suggestion, never your
+          confidential business information, and we will not publicly
+          attribute the idea to you without your consent. The alternative,
+          where every customer's feedback is locked to that customer alone,
+          would slow improvements for everyone, including you.
+        talking_points:
+          - Offer the non-attribution assurance at rung 2.
+          - Clarify that Feedback excludes Customer's Confidential Information.
+        recommended_position: {rule_key: intellectual_property.feedback_license, rung: 2}
+        frequency: occasional
+      - objection: Any feedback we give should remain our confidential information unless we say otherwise.
+        their_rationale: Counterparty's default confidentiality clause would otherwise sweep in anything said to Halcyon's support team.
+        response: >
+          We agree Feedback should not include your genuinely confidential
+          information, and we are comfortable excluding it by default rather
+          than requiring you to flag it each time, as long as the licence to
+          use ordinary product suggestions is not affected.
+        talking_points:
+          - Rung 1 excludes Confidential Information by default, with no extra step required from Customer.
+          - The licence still needs to be perpetual and irrevocable for ordinary suggestions.
+        recommended_position: {rule_key: intellectual_property.feedback_license, rung: 1}
+        frequency: common
+        counterparty_profile: Large hospital systems with strict confidentiality policies
+    dependencies:
+      - related_rule_key: intellectual_property.ownership
+        relation: read_with
+        note: Feedback incorporated into the Services becomes part of the platform Halcyon owns under the ownership rule; the two clauses should not conflict on who owns the resulting feature.
+    test_cases:
+      - name: Standard perpetual feedback licence
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Any suggestions or enhancement requests Customer gives Vendor
+          about the Services may be used, incorporated and commercialised
+          by Vendor on a perpetual, irrevocable, royalty-free basis, with no
+          obligation to Customer.
+      - name: Feedback licence under a "Suggestions" heading
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Suggestions Customer submits about the Services may be used by
+          Vendor for any purpose, including incorporating them into the
+          Services, on a perpetual and irrevocable basis and without
+          payment to Customer.
+      - name: Confidential Information excluded by default
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: yellow
+        sample_text: >
+          Customer grants Vendor a perpetual, irrevocable, royalty-free
+          licence to use Feedback, except that Feedback never includes
+          information that would otherwise be Customer's Confidential
+          Information.
+      - name: Feedback licence silent on whether it is perpetual
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Customer's suggestions regarding the Services may be used by
+          Vendor in the Services without payment to Customer.
+      - name: Trap - licence described as broad but still perpetual and irrevocable
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Vendor's right to use Feedback is as broad as permitted by law,
+          on a perpetual, irrevocable, royalty-free basis, without
+          restriction or obligation to Customer.
+
+  - rule_key: intellectual_property.usage_data
+    title: Usage data
+    required: false
+    risk_weight: 9
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: true
+    judgment_note: >
+      Weigh whether the described aggregation or de-identification method
+      could plausibly re-identify a specific patient or Customer given the
+      actual volume and sensitivity of the data at issue, not only whether
+      the clause uses the words "aggregated" or "de-identified".
+    position_summary: >
+      Halcyon may collect and use Usage Data, meaning aggregated and
+      de-identified data about how the Services are used, to operate,
+      secure and improve the product, without identifying Customer or any
+      patient and without training third-party models or selling the data.
+    risk_rationale: >
+      Halcyon operates a multi-tenant platform across roughly 310 hospital
+      and clinic customers and needs aggregated usage signals to run
+      capacity planning, security monitoring and product improvement work
+      under its SOC 2 Type II, ISO 27001 and HITRUST r2 programs. Because
+      the underlying data can include PHI before it is aggregated, the
+      right must be narrow enough that Usage Data can never be used to
+      re-identify a patient or to train models made available to other
+      companies.
+    detection_guidance: >
+      Look for "Usage Data", "aggregated and anonymised", "de-identified",
+      "statistical data", "system performance data" and "to improve the
+      Services", and check for limits on re-identification and on
+      disclosure to third parties. Absence means Halcyon has no express
+      right to use data about how the Services are used, which is a missing
+      clause for a product operated at this scale. This rule governs
+      telemetry and metadata about how the Services are used, such as login
+      frequency, feature usage and system performance; it is distinct from
+      the data_protection customer_data_use rule, which governs de-identified
+      or aggregated derivatives of the content of Customer Data itself
+      (patient, scheduling or clinical record content Halcyon hosts for
+      Customer). A clause that aggregates or de-identifies the substance of
+      patient or clinical records belongs to the other rule even if it is
+      labelled "usage data" or "analytics"; a clause limited to
+      configuration or usage metrics belongs here.
+    source_ref: Halcyon Risk Policy RP-04
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Aggregated, de-identified Usage Data for operating, securing and improving the Services
+        zone: green
+        summary: Halcyon may use Usage Data that is aggregated and de-identified to a standard that cannot reasonably re-identify a patient or Customer.
+        language: >
+          Halcyon may collect and use data about the configuration and use
+          of the Services ("Usage Data"), provided that Usage Data is
+          aggregated and de-identified such that it cannot reasonably be
+          used to identify Customer or any individual, to operate, secure,
+          support and improve the Services and Halcyon's other products.
+          Halcyon will not use Usage Data to train models made available to
+          third parties and will not sell Usage Data.
+      - kind: fallback
+        rung: 1
+        label: Add a right for Customer to request the de-identification methodology on request
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: Require that this disclosure be made under confidentiality and not more than once per year absent a security incident.
+        summary: Halcyon describes its de-identification methodology to Customer on written request, under confidentiality.
+        language: >
+          On Customer's written request, not more than once per year absent
+          a security incident, Halcyon will describe in reasonable detail,
+          under the confidentiality obligations of this Agreement, the
+          method it uses to aggregate and de-identify Usage Data.
+      - kind: fallback
+        rung: 2
+        label: Permit benchmarking disclosures in a form that does not identify Customer
+        zone: yellow
+        approver_role: general_counsel
+        conditions: {counterparty_tier: [tier_1]}
+        give_get: Require that any benchmark report be reviewed by Customer before external publication if it could be inferred to relate to Customer.
+        summary: Halcyon may publish benchmark statistics derived from Usage Data across its customer base, provided no statistic is specific enough to identify Customer.
+        language: >
+          Halcyon may publish aggregate benchmark statistics derived from
+          Usage Data across its customer base, provided no such statistic
+          identifies Customer or is derived from a sample small enough that
+          Customer could reasonably be identified from it.
+      - kind: acceptable_variant
+        label: Usage Data right drafted as part of the data protection section
+        zone: green
+        summary: Same aggregation, de-identification and no-training-or-sale limits, placed in the data protection section rather than intellectual property.
+        language: >
+          As part of operating and improving the Services, Vendor may
+          process de-identified, aggregated data about Services usage that
+          does not identify Customer or any individual, and will not use
+          that data to train models offered to third parties or sell it.
+    parameters:
+      - key: usage_data_training_or_sale_prohibited
+        label: Usage Data may not be used to train third-party models or sold
+        value_type: boolean
+        direction: exact
+        preferred_value: true
+        green_limit: true
+        extraction_hint: >
+          True when the clause expressly prohibits using Usage Data to
+          train models offered to third parties and prohibits selling it.
+          False if the clause is silent or permits either use.
+    red_lines:
+      - key: usage-data-reidentification-risk
+        description: Usage Data may be disclosed or used in a form that could re-identify a specific patient or Customer.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause permits Usage Data to be disclosed to a third party,
+            or used internally, in a form that is not aggregated and
+            de-identified to a standard that prevents reasonably
+            identifying a specific patient or Customer.
+        action: block
+        rationale: >
+          Halcyon is a business associate under HIPAA and a processor under
+          GDPR; data that could re-identify a patient is PHI or Personal
+          Data regardless of the "Usage Data" label, and using or disclosing
+          it outside those regimes' instructions would put Halcyon's HITRUST
+          r2 certification and its business associate agreements at risk.
+    objections:
+      - objection: We don't want any data derived from our patients used for anything other than running our own instance.
+        their_rationale: Counterparty's privacy counsel treats all derived data as inseparable from the underlying PHI.
+        response: >
+          We limit our use to data that has been aggregated and
+          de-identified to a standard that cannot reasonably identify your
+          patients or your organisation, and we will describe that method
+          to you under confidentiality on request so your privacy counsel
+          can review it directly.
+        talking_points:
+          - Offer rung 1's methodology disclosure before conceding further.
+          - Distinguish de-identified aggregate data from PHI itself, which stays governed by the Data Protection section.
+        recommended_position: {rule_key: intellectual_property.usage_data, rung: 1}
+        frequency: common
+        counterparty_profile: Large hospital systems with privacy counsel review
+      - objection: You should not be allowed to publish any statistics derived from our usage at all.
+        their_rationale: Counterparty worries that even aggregate benchmarks could let competitors infer its performance.
+        response: >
+          We can withhold your organisation from any benchmark that could be
+          read as specific to you, and on tier-1 accounts we will show you a
+          benchmark before it is published externally if it could be
+          inferred to relate to you.
+        talking_points:
+          - Benchmarks are reviewed before publication on tier-1 accounts under rung 2.
+          - No benchmark statistic is derived from a sample small enough to identify a single customer.
+        recommended_position: {rule_key: intellectual_property.usage_data, rung: 2}
+        frequency: occasional
+    dependencies:
+      - related_rule_key: data_protection.customer_data_use
+        relation: read_with
+        note: Usage Data must be read against the data protection section's limits on Customer Data use so the two rights do not overlap or conflict.
+    test_cases:
+      - name: Standard aggregated, de-identified Usage Data right
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Vendor may collect and use Usage Data, meaning aggregated and
+          de-identified data about use of the Services that cannot
+          reasonably identify Customer or any individual, to operate,
+          secure and improve the Services; Vendor will not use Usage Data
+          to train third-party models or sell it.
+      - name: Usage Data right drafted in the data protection section
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Vendor may process de-identified, aggregated usage data that does
+          not identify Customer or any individual to operate and improve
+          the Services, and will not use it to train models offered to
+          third parties or sell it.
+      - name: Methodology disclosure on written request
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: yellow
+        sample_text: >
+          Vendor may use aggregated, de-identified Usage Data to improve the
+          Services and will describe its de-identification method to
+          Customer under confidentiality on written request, no more than
+          once per year absent a security incident.
+      - name: Usage Data right silent on training or sale
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Vendor may collect and use aggregated data about use of the
+          Services to improve its products.
+      - name: Usage Data disclosed without adequate de-identification
+        expected_outcome: red_line
+        expected_red_line_key: usage-data-reidentification-risk
+        expected_zone: red
+        sample_text: >
+          Vendor may disclose usage statistics, including record-level
+          activity logs tied to individual patient accounts, to its
+          analytics partners to improve the Services.
+
+  - rule_key: publicity.name_and_logo_use
+    title: Name and logo use
+    required: false
+    risk_weight: 8
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Halcyon may identify Customer as a customer and use Customer's name
+      and logo in a customer list, consistent with Customer's trademark
+      guidelines, and Customer may not publicise Halcyon's performance or
+      service level data without Halcyon's prior written consent.
+    risk_rationale: >
+      Reference customers are valuable to a $72M ARR business selling to
+      about 310 hospital systems and clinic groups that look to peers before
+      buying, so a basic right to list Customer by name supports sales
+      without disclosing Customer Data. Allowing Customer to publish
+      Halcyon's own uptime or service level performance without consent
+      could expose incident details before Halcyon has verified them,
+      affecting every other customer on the shared platform.
+    detection_guidance: >
+      Look for "may use Customer's name and logo", "customer list", "press
+      release", "case study", "without the prior written consent" and "in
+      accordance with trademark usage guidelines", and check for any right
+      given to Customer to publish or benchmark Halcyon's performance data.
+      Absence means neither party has a contractual right to use the
+      other's name or marks, which is a missing clause, not a deviation.
+    source_ref: Halcyon Risk Policy RP-04
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Customer list and logo use, consent required for case studies
+        zone: green
+        summary: Halcyon may list Customer by name and logo; a case study or press release needs Customer's prior written consent.
+        language: >
+          Halcyon may identify Customer as a customer of Halcyon and use
+          Customer's name and logo on Halcyon's customer list and in sales
+          materials, in accordance with Customer's trademark usage
+          guidelines if provided, provided that any press release or case
+          study naming Customer requires Customer's prior written consent.
+          Customer shall not publish, disclose or benchmark Halcyon's
+          performance, uptime or service level data without Halcyon's prior
+          written consent.
+      - kind: fallback
+        rung: 1
+        label: Consent required for the customer list as well
+        zone: yellow
+        approver_role: contracts_manager
+        give_get: Require Customer to respond to a consent request within 30 days, after which consent is deemed given for the customer list only.
+        summary: Halcyon needs Customer's prior written consent even to add Customer to the general customer list.
+        language: >
+          Halcyon may identify Customer as a customer of Halcyon, including
+          on Halcyon's customer list, only with Customer's prior written
+          consent, which Customer shall not unreasonably withhold or delay;
+          consent is deemed given for the customer list alone if Customer
+          does not respond within thirty (30) days of a request.
+      - kind: fallback
+        rung: 2
+        label: No publicity right at all
+        zone: yellow
+        approver_role: contracts_manager
+        give_get: Require that Customer's restriction on publicising Halcyon's performance data survive this concession unchanged.
+        summary: Halcyon has no right to identify Customer publicly in any form.
+        language: >
+          Neither party may identify the other as a party to this Agreement,
+          or use the other's name, logo or trademarks, in any public
+          statement, customer list, press release or case study, without
+          that party's prior written consent in each instance.
+      - kind: acceptable_variant
+        label: Publicity rights drafted as a mutual, reciprocal clause
+        zone: green
+        summary: Same consent structure, stated as a mutual right rather than one-sided in Halcyon's favour.
+        language: >
+          Each party may identify the other as a party to this Agreement and
+          use the other's name and logo on a customer or vendor list, as
+          applicable, subject to the other party's trademark usage
+          guidelines, provided that any case study, press release, or
+          publication of the other party's performance data requires that
+          party's prior written consent.
+    red_lines:
+      - key: publicity-performance-data-release
+        description: Customer may publish, disclose or benchmark Halcyon's performance, uptime or service level data without Halcyon's consent.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause allows Customer to publish, disclose to third
+            parties, or use in a public benchmark Halcyon's performance,
+            uptime, security incident or service level data, without
+            requiring Halcyon's prior written consent.
+        action: block
+        rationale: >
+          Halcyon's multi-tenant platform serves about 310 customers on
+          shared infrastructure; unverified or out-of-context performance
+          disclosures by one customer can misstate the experience of every
+          other customer and complicate incident response under Halcyon's
+          SOC 2 Type II program.
+    objections:
+      - objection: We don't want to appear on any public customer list; our procurement rules forbid it.
+        their_rationale: Public hospital systems and government-affiliated clinics often restrict vendor endorsements by policy.
+        response: >
+          We can require our own consent even for the general customer
+          list, so nothing is published about the relationship without your
+          sign-off each time, or on request we can agree not to identify you
+          publicly at all.
+        talking_points:
+          - Offer rung 1 first; move to rung 2 only if the policy is absolute.
+          - Confirm whether the restriction is a blanket policy or case-by-case.
+        recommended_position: {rule_key: publicity.name_and_logo_use, rung: 1}
+        frequency: common
+        counterparty_profile: Public hospital systems and government-affiliated clinics
+      - objection: We should be free to publish our own experience with your service, including uptime, in our own materials.
+        their_rationale: Counterparty wants to use its own operational data about Halcyon's performance for its own marketing or vendor reviews.
+        response: >
+          We are glad to work with you on an approved case study that
+          includes performance information we have verified together;
+          publishing uptime or incident figures unilaterally risks
+          describing a single customer's experience as if it applied to the
+          whole platform, which is what the consent requirement is there to
+          avoid.
+        talking_points:
+          - Offer to collaborate on a joint case study instead.
+          - Performance figures are specific to shared infrastructure and need context before publication.
+        frequency: occasional
+    dependencies:
+      - related_rule_key: service_levels.uptime_commitment
+        relation: read_with
+        note: The restriction on Customer publicising performance data refers to the same uptime and service credit figures defined in the service levels rule.
+    test_cases:
+      - name: Standard customer list right with consent for case studies
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Vendor may list Customer as a customer and use its name and logo
+          in sales materials; any press release or case study naming
+          Customer requires Customer's prior written consent, and Customer
+          may not publish Vendor's performance data without Vendor's
+          consent.
+      - name: Mutual, reciprocal publicity clause
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Each party may identify the other as a party to this Agreement and
+          use its name and logo on a customer or vendor list, subject to
+          trademark guidelines, with consent required for any case study or
+          publication of the other's performance data.
+      - name: Consent required even for the customer list
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: yellow
+        sample_text: >
+          Vendor may identify Customer as a customer, including on its
+          customer list, only with Customer's prior written consent, not to
+          be unreasonably withheld.
+      - name: Customer list right with no restriction on Customer publicising performance data
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Vendor may list Customer as a customer and use its name and logo
+          in sales materials and on its website.
+      - name: Trap - restriction phrased as a Customer obligation, not a Vendor right
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Customer shall not publish, disclose, or use in any public
+          benchmark any data regarding Vendor's performance, uptime or
+          service levels without Vendor's prior written consent, and Vendor
+          may identify Customer as a customer in its sales materials.

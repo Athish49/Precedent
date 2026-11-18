@@ -1,0 +1,7 @@
+# Failing fixture: edits applied to a copy of fixtures/valid by test_playbook_models.py.
+description: 'Cross-check: related_rule_key exists or is in the taxonomy.'
+file: playbooks/saas_msa_vendor/risk.yaml
+edits:
+- path: [rules, 0, dependencies, 0, related_rule_key]
+  set: limitation_of_liability.nonexistent
+expect: {code: dependency.unknown_rule, message: does not exist, rule_key: limitation_of_liability.cap_amount}

@@ -1,109 +1,328 @@
-"""Unit tests for app.core.storage — filesystem backend only.
+"""Unit tests for app.core.storage.
 
-S3 backend is excluded: it requires boto3 network calls and is covered
-by integration tests against a live or mock S3-compatible service.
+The S3 backend is exercised against a mocked boto3 client: no network, no
+credentials. The in-memory double used by the rest of the suite is tested
+here too. Nothing in this file touches the filesystem.
 """
 
 from __future__ import annotations
 
+from types import SimpleNamespace
+from unittest.mock import MagicMock
+
 import pytest
+from botocore.exceptions import ClientError
 
+import app.core.storage as storage_module
 from app.core.config import Settings
-from app.core.storage import FilesystemStorageBackend, StorageBackend, get_storage
+from app.core.storage import (
+    S3StorageBackend,
+    StorageBackend,
+    StorageConfigurationError,
+    get_storage,
+    validate_key,
+)
+from tests.in_memory_storage import InMemoryStorage
 
-# ── helpers ──────────────────────────────────────────────────────────────────
+_BUCKET = "test-bucket"
 
-def _base_env() -> dict[str, str]:
-    return {
-        "DATABASE_URL": (
-            "postgresql+psycopg://user:pass@ep-test.us-east-2.aws.neon.tech/testdb?sslmode=require"
-        ),
-        "ANTHROPIC_API_KEY": "sk-ant-test",
-    }
+# Keys that must never reach the bucket: absolute, or escaping the prefix.
+_BAD_KEYS = [
+    "/contracts/x/y.pdf",
+    "\\contracts\\x\\y.pdf",
+    "../other-project/secret.pdf",
+    "contracts/../../other-project/secret.pdf",
+    "contracts/x/..",
+    "contracts\\..\\..\\secret.pdf",
+    "..",
+    "",
+]
 
 
-# ── FilesystemStorageBackend ──────────────────────────────────────────────────
+@pytest.fixture()
+def s3_client(monkeypatch: pytest.MonkeyPatch) -> MagicMock:
+    """Replace ``boto3.client`` with a factory returning one mock client."""
+    client = MagicMock(name="s3_client")
+    factory = MagicMock(name="boto3.client", return_value=client)
+    monkeypatch.setattr("boto3.client", factory)
+    client.factory = factory
+    return client
 
-class TestFilesystemStorageBackend:
-    """Tests that exercise FilesystemStorageBackend in an isolated temp dir."""
 
-    @pytest.fixture()
-    def backend(self, tmp_path: pytest.TempPathFactory) -> FilesystemStorageBackend:
-        return FilesystemStorageBackend(base_dir=tmp_path)
+@pytest.fixture()
+def settings() -> Settings:
+    """Settings built from the placeholder environment in conftest."""
+    return Settings(_env_file=None)
 
-    def test_put_creates_file(self, backend: FilesystemStorageBackend, tmp_path) -> None:
-        backend.put("hello.txt", b"world")
-        assert (tmp_path / "hello.txt").read_bytes() == b"world"
 
-    def test_get_returns_bytes(self, backend: FilesystemStorageBackend) -> None:
-        backend.put("data.bin", b"\x00\x01\x02")
-        result = backend.get("data.bin")
-        assert result == b"\x00\x01\x02"
+@pytest.fixture()
+def backend(s3_client: MagicMock, settings: Settings) -> S3StorageBackend:
+    result = get_storage(settings)
+    assert isinstance(result, S3StorageBackend)
+    return result
 
-    def test_round_trip(self, backend: FilesystemStorageBackend) -> None:
-        payload = b"the quick brown fox jumps over the lazy dog"
-        backend.put("roundtrip/key", payload)
-        assert backend.get("roundtrip/key") == payload
 
-    def test_put_overwrites_existing_key(self, backend: FilesystemStorageBackend) -> None:
-        backend.put("dup.txt", b"first")
-        backend.put("dup.txt", b"second")
-        assert backend.get("dup.txt") == b"second"
+# ── S3 backend: project prefix ────────────────────────────────────────────────
 
-    def test_get_nonexistent_raises_file_not_found(
-        self, backend: FilesystemStorageBackend
+
+class TestS3Prefix:
+    def test_put_reaches_client_with_namespace_prefix(
+        self, backend: S3StorageBackend, s3_client: MagicMock
     ) -> None:
-        with pytest.raises(FileNotFoundError):
-            backend.get("does/not/exist.bin")
+        backend.put("contracts/x/y.pdf", b"%PDF")
+        s3_client.put_object.assert_called_once_with(
+            Bucket=_BUCKET, Key="precedent/contracts/x/y.pdf", Body=b"%PDF"
+        )
 
-    def test_nested_key_creates_subdirectory(
-        self, backend: FilesystemStorageBackend, tmp_path
+    def test_get_reads_prefixed_key(self, backend: S3StorageBackend, s3_client: MagicMock) -> None:
+        s3_client.get_object.return_value = {"Body": MagicMock(read=lambda: b"payload")}
+        assert backend.get("contracts/x/y.pdf") == b"payload"
+        s3_client.get_object.assert_called_once_with(
+            Bucket=_BUCKET, Key="precedent/contracts/x/y.pdf"
+        )
+
+    def test_presign_signs_prefixed_key(
+        self, backend: S3StorageBackend, s3_client: MagicMock
     ) -> None:
-        backend.put("a/b/c/file.txt", b"nested")
-        assert (tmp_path / "a" / "b" / "c" / "file.txt").exists()
+        s3_client.generate_presigned_url.return_value = "https://signed.example/url"
+        assert backend.presign("contracts/x/y.pdf", expires_in=120) == "https://signed.example/url"
+        s3_client.generate_presigned_url.assert_called_once_with(
+            "get_object",
+            Params={"Bucket": _BUCKET, "Key": "precedent/contracts/x/y.pdf"},
+            ExpiresIn=120,
+        )
 
-    def test_presign_raises_not_implemented(self, backend: FilesystemStorageBackend) -> None:
-        backend.put("x.bin", b"data")
-        with pytest.raises(NotImplementedError):
-            backend.presign("x.bin")
-
-    def test_implements_storage_backend_interface(
-        self, backend: FilesystemStorageBackend
+    def test_prefix_follows_project_namespace(
+        self, monkeypatch: pytest.MonkeyPatch, s3_client: MagicMock
     ) -> None:
+        monkeypatch.setenv("PROJECT_NAMESPACE", "other_project")
+        backend = get_storage(Settings(_env_file=None))
+        backend.put("contracts/x/y.pdf", b"data")
+        assert s3_client.put_object.call_args.kwargs["Key"] == "other_project/contracts/x/y.pdf"
+
+    def test_explicit_prefix_setting_wins(
+        self, monkeypatch: pytest.MonkeyPatch, s3_client: MagicMock
+    ) -> None:
+        monkeypatch.setenv("OBJECT_STORAGE_PREFIX", "/shared/precedent/")
+        backend = get_storage(Settings(_env_file=None))
+        backend.put("a.txt", b"data")
+        assert s3_client.put_object.call_args.kwargs["Key"] == "shared/precedent/a.txt"
+
+    def test_health_check_key_is_prefixed(
+        self, backend: S3StorageBackend, s3_client: MagicMock
+    ) -> None:
+        backend.put("__health_check__", b"ok")
+        assert s3_client.put_object.call_args.kwargs["Key"] == "precedent/__health_check__"
+
+    def test_client_built_from_settings(
+        self, backend: S3StorageBackend, s3_client: MagicMock
+    ) -> None:
+        s3_client.factory.assert_called_once_with(
+            "s3",
+            endpoint_url="https://storage.invalid",
+            aws_access_key_id="test-access-key",
+            aws_secret_access_key="test-secret-key",
+        )
+        assert backend.prefix == "precedent"
         assert isinstance(backend, StorageBackend)
 
-    def test_empty_bytes_round_trip(self, backend: FilesystemStorageBackend) -> None:
-        backend.put("empty.bin", b"")
-        assert backend.get("empty.bin") == b""
 
-    def test_large_payload_round_trip(self, backend: FilesystemStorageBackend) -> None:
-        large = b"x" * (4 * 1024 * 1024)  # 4 MiB
-        backend.put("large.bin", large)
-        assert backend.get("large.bin") == large
+class TestS3ListTopLevel:
+    def test_lists_root_names_only_and_reads_nothing(
+        self, backend: S3StorageBackend, s3_client: MagicMock
+    ) -> None:
+        paginator = s3_client.get_paginator.return_value
+        paginator.paginate.return_value = [
+            {
+                "Contents": [{"Key": "readme.txt"}],
+                "CommonPrefixes": [{"Prefix": "precedent/"}, {"Prefix": "other-project/"}],
+            },
+            {"CommonPrefixes": [{"Prefix": "precedent/"}]},
+            {},
+        ]
+
+        assert backend.list_top_level() == ["other-project/", "precedent/", "readme.txt"]
+
+        s3_client.get_paginator.assert_called_once_with("list_objects_v2")
+        paginator.paginate.assert_called_once_with(Bucket=_BUCKET, Delimiter="/")
+        s3_client.get_object.assert_not_called()
+        s3_client.put_object.assert_not_called()
 
 
-# ── get_storage factory ───────────────────────────────────────────────────────
+# ── S3 backend: key validation and errors ─────────────────────────────────────
+
+
+class TestS3KeyValidation:
+    @pytest.mark.parametrize("key", _BAD_KEYS)
+    def test_put_rejects_unsafe_key(
+        self, backend: S3StorageBackend, s3_client: MagicMock, key: str
+    ) -> None:
+        with pytest.raises(ValueError):
+            backend.put(key, b"data")
+        s3_client.put_object.assert_not_called()
+
+    @pytest.mark.parametrize("key", _BAD_KEYS)
+    def test_get_rejects_unsafe_key(
+        self, backend: S3StorageBackend, s3_client: MagicMock, key: str
+    ) -> None:
+        with pytest.raises(ValueError):
+            backend.get(key)
+        s3_client.get_object.assert_not_called()
+
+    @pytest.mark.parametrize("key", _BAD_KEYS)
+    def test_presign_rejects_unsafe_key(
+        self, backend: S3StorageBackend, s3_client: MagicMock, key: str
+    ) -> None:
+        with pytest.raises(ValueError):
+            backend.presign(key)
+        s3_client.generate_presigned_url.assert_not_called()
+
+    def test_dots_inside_a_filename_are_allowed(self) -> None:
+        key = "contracts/x/report..final.v2.pdf"
+        assert validate_key(key) == key
+
+    def test_get_missing_key_raises_key_error(
+        self, backend: S3StorageBackend, s3_client: MagicMock
+    ) -> None:
+        s3_client.get_object.side_effect = ClientError(
+            {"Error": {"Code": "NoSuchKey", "Message": "not found"}}, "GetObject"
+        )
+        with pytest.raises(KeyError):
+            backend.get("contracts/missing.pdf")
+
+    def test_get_other_client_error_propagates(
+        self, backend: S3StorageBackend, s3_client: MagicMock
+    ) -> None:
+        s3_client.get_object.side_effect = ClientError(
+            {"Error": {"Code": "AccessDenied", "Message": "denied"}}, "GetObject"
+        )
+        with pytest.raises(ClientError):
+            backend.get("contracts/x/y.pdf")
+
+
+# ── get_storage factory: no fallback ──────────────────────────────────────────
+
+
+def _complete_settings(**overrides: object) -> SimpleNamespace:
+    values: dict[str, object] = {
+        "object_storage_endpoint": "https://storage.invalid",
+        "object_storage_bucket": _BUCKET,
+        "object_storage_access_key": "test-access-key",
+        "object_storage_secret_key": "test-secret-key",
+        "object_storage_prefix": "precedent",
+    }
+    values.update(overrides)
+    return SimpleNamespace(**values)
+
 
 class TestGetStorageFactory:
-    """Tests for the get_storage() factory function."""
+    def test_returns_s3_backend(self, s3_client: MagicMock) -> None:
+        assert isinstance(get_storage(_complete_settings()), S3StorageBackend)
 
-    def test_returns_filesystem_backend_when_no_endpoint(
-        self, monkeypatch: pytest.MonkeyPatch, tmp_path
+    @pytest.mark.parametrize(
+        ("attr", "env_name"),
+        [
+            ("object_storage_endpoint", "OBJECT_STORAGE_ENDPOINT"),
+            ("object_storage_bucket", "OBJECT_STORAGE_BUCKET"),
+            ("object_storage_access_key", "OBJECT_STORAGE_ACCESS_KEY"),
+            ("object_storage_secret_key", "OBJECT_STORAGE_SECRET_KEY"),
+            ("object_storage_prefix", "OBJECT_STORAGE_PREFIX"),
+        ],
+    )
+    @pytest.mark.parametrize("blank", [None, "", "   "])
+    def test_missing_setting_raises_naming_the_variable(
+        self, s3_client: MagicMock, attr: str, env_name: str, blank: str | None
     ) -> None:
-        for k, v in _base_env().items():
-            monkeypatch.setenv(k, v)
-        settings = Settings(_env_file=None)
-        backend = get_storage(settings)
-        assert isinstance(backend, FilesystemStorageBackend)
+        with pytest.raises(StorageConfigurationError) as exc_info:
+            get_storage(_complete_settings(**{attr: blank}))
+        assert env_name in str(exc_info.value)
+        s3_client.factory.assert_not_called()
 
-    def test_filesystem_backend_from_factory_is_functional(
-        self, monkeypatch: pytest.MonkeyPatch, tmp_path
-    ) -> None:
-        for k, v in _base_env().items():
-            monkeypatch.setenv(k, v)
-        settings = Settings(_env_file=None)
-        backend = get_storage(settings)
-        # Override internal base_dir so the test stays inside tmp_path
-        backend._base_dir = tmp_path  # type: ignore[union-attr]
-        backend.put("factory-test.txt", b"ok")
-        assert backend.get("factory-test.txt") == b"ok"
+    def test_object_without_storage_attributes_raises(self, s3_client: MagicMock) -> None:
+        with pytest.raises(StorageConfigurationError) as exc_info:
+            get_storage(object())
+        message = str(exc_info.value)
+        for env_name in (
+            "OBJECT_STORAGE_ENDPOINT",
+            "OBJECT_STORAGE_BUCKET",
+            "OBJECT_STORAGE_ACCESS_KEY",
+            "OBJECT_STORAGE_SECRET_KEY",
+        ):
+            assert env_name in message
+
+    def test_no_local_backend_exists(self) -> None:
+        assert not hasattr(storage_module, "FilesystemStorageBackend")
+        assert "FilesystemStorageBackend" not in storage_module.__all__
+        backends = [
+            obj
+            for obj in vars(storage_module).values()
+            if isinstance(obj, type)
+            and issubclass(obj, StorageBackend)
+            and obj is not StorageBackend
+        ]
+        assert backends == [S3StorageBackend]
+
+
+# ── InMemoryStorage test double ───────────────────────────────────────────────
+
+
+class TestInMemoryStorage:
+    def test_implements_storage_backend_interface(self) -> None:
+        assert isinstance(InMemoryStorage(), StorageBackend)
+
+    def test_round_trip(self) -> None:
+        double = InMemoryStorage()
+        double.put("contracts/x/y.pdf", b"payload")
+        assert double.get("contracts/x/y.pdf") == b"payload"
+        assert "contracts/x/y.pdf" in double
+        assert double.keys() == ["contracts/x/y.pdf"]
+
+    def test_put_overwrites_existing_key(self) -> None:
+        double = InMemoryStorage()
+        double.put("dup.txt", b"first")
+        double.put("dup.txt", b"second")
+        assert double.get("dup.txt") == b"second"
+
+    def test_empty_bytes_round_trip(self) -> None:
+        double = InMemoryStorage()
+        double.put("empty.bin", b"")
+        assert double.get("empty.bin") == b""
+
+    def test_get_missing_key_raises_key_error(self) -> None:
+        with pytest.raises(KeyError):
+            InMemoryStorage().get("does/not/exist.bin")
+
+    def test_presign_returns_a_url_for_the_key(self) -> None:
+        url = InMemoryStorage().presign("contracts/x/y.pdf", expires_in=60)
+        assert "contracts/x/y.pdf" in url
+
+    @pytest.mark.parametrize("key", _BAD_KEYS)
+    def test_rejects_the_same_keys_as_the_real_backend(self, key: str) -> None:
+        double = InMemoryStorage()
+        with pytest.raises(ValueError):
+            double.put(key, b"data")
+        with pytest.raises(ValueError):
+            double.get(key)
+        with pytest.raises(ValueError):
+            double.presign(key)
+
+    def test_instances_are_isolated(self) -> None:
+        first, second = InMemoryStorage(), InMemoryStorage()
+        first.put("a.txt", b"data")
+        assert "a.txt" not in second
+
+
+# ── Suite-wide wiring from conftest ───────────────────────────────────────────
+
+
+class TestSuiteWiring:
+    def test_application_factory_returns_the_double(self, storage: InMemoryStorage) -> None:
+        """Application code that calls the factory gets the in-memory double."""
+        from app.core.config import get_settings
+
+        assert storage_module.get_storage(get_settings()) is storage
+
+    def test_real_boto3_client_is_blocked_by_default(self, settings: Settings) -> None:
+        """Without an explicit mock, building the S3 backend fails loudly."""
+        with pytest.raises(AssertionError):
+            get_storage(settings)

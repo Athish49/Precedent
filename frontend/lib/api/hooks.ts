@@ -9,6 +9,7 @@ import type {
   AnalysisResult,
   AnalyticsIntelligence,
   AnalyticsTabular,
+  BootstrapResponse,
   ChangeSet,
   Clause,
   ComplianceCheckResult,
@@ -16,8 +17,14 @@ import type {
   ContractFilters,
   ContractMetadata,
   ContractValue,
+  CreateDraftVersionBody,
   CreatePlaybookBody,
+  CreateRedLineBody,
   CreateRuleBody,
+  CreateRuleObjectionBody,
+  CreateRuleParameterBody,
+  CreateRulePositionBody,
+  CreateRuleTestCaseBody,
   DiffSummaryResult,
   DraftClauseBody,
   DraftDocumentBody,
@@ -34,20 +41,28 @@ import type {
   PaperOrigin,
   Playbook,
   PlaybookRule,
+  PlaybookVersion,
   PortfolioRisk,
   PrecedentClause,
   PrecedentDraftResult,
   ProcessedContract,
+  PublishVersionBody,
   QABody,
   QAResult,
   Redline,
+  RedLine,
   RedlineDecisionBody,
   RedlineHistoryItem,
   RenewalRow,
   ResearchBody,
   ResearchResult,
-  ResolvedRule,
+  ResolveParams,
+  ResolveResponse,
   ReviewRun,
+  RulePosition,
+  RuleParameter,
+  RuleObjection,
+  RuleTestCase,
   SmartSearchResult,
   StanceMode,
   SummarizeResult,
@@ -88,10 +103,27 @@ export function useContractText(id: string) {
 export function useUploadDocument() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ file, paper_origin }: { file: File; paper_origin: PaperOrigin }) => {
+    mutationFn: ({
+      file,
+      paper_origin,
+      contract_type,
+      party_role,
+      context,
+    }: {
+      file: File;
+      paper_origin: PaperOrigin;
+      contract_type?: string;
+      party_role?: string;
+      context?: Record<string, unknown>;
+    }) => {
       const form = new FormData();
       form.append('file', file);
       form.append('paper_origin', paper_origin);
+      if (contract_type) form.append('contract_type', contract_type);
+      if (party_role) form.append('party_role', party_role);
+      if (context && Object.keys(context).length > 0) {
+        form.append('context', JSON.stringify(context));
+      }
       return apiFetch<ProcessedContract>('/documents', { method: 'POST', body: form });
     },
     onSuccess: () => {
@@ -211,12 +243,27 @@ export function usePlaybookRules(id: string) {
   });
 }
 
-export function useResolvedRules(contractType: string) {
+// Resolve preview (playbook_status.md defect #3 / task 4.9 item 2): the
+// backend returns `{contract_type, party_role, paper_origin, rules: [...],
+// pinned_version_ids, applied_playbook_keys}`, not a bare rule list, and the
+// query params are contract_type / party_role / paper_origin / context (a
+// JSON-encoded string).
+export function useResolvedRules(params: ResolveParams) {
   return useQuery({
-    queryKey: keys.resolvedRules(contractType),
+    queryKey: keys.resolvedRules(params),
     queryFn: () =>
-      apiFetch<ResolvedRule[]>('/playbooks/resolve', { params: { contract_type: contractType } }),
-    enabled: !!contractType,
+      apiFetch<ResolveResponse>('/playbooks/resolve', {
+        params: {
+          contract_type: params.contract_type,
+          party_role: params.party_role,
+          paper_origin: params.paper_origin,
+          context:
+            params.context && Object.keys(params.context).length > 0
+              ? JSON.stringify(params.context)
+              : undefined,
+        },
+      }),
+    enabled: !!params.contract_type,
   });
 }
 
@@ -290,16 +337,227 @@ export function useDeleteRule() {
   });
 }
 
+// Bootstrap (playbook_status.md defect #4 / task 4.9 item 3): the backend
+// requires `{playbook_id, contract_ids | contract_type}` and returns
+// `created_rule_count`, not `{corpus}` / `created_count`.
 export function useBootstrapPlaybooks() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (corpus: string[]) =>
-      apiFetch<{ created_count: number }>('/playbooks/bootstrap', {
+    mutationFn: ({
+      playbookId,
+      contractIds,
+      contractType,
+    }: {
+      playbookId: string;
+      contractIds?: string[];
+      contractType?: string;
+    }) =>
+      apiFetch<BootstrapResponse>('/playbooks/bootstrap', {
         method: 'POST',
-        body: { corpus },
+        body: {
+          playbook_id: playbookId,
+          contract_ids: contractIds,
+          contract_type: contractType,
+        },
       }),
-    onSuccess: () => {
+    onSuccess: (_data, { playbookId }) => {
       queryClient.invalidateQueries({ queryKey: keys.playbooks() });
+      queryClient.invalidateQueries({ queryKey: keys.playbookRules(playbookId) });
+      queryClient.invalidateQueries({ queryKey: keys.playbook(playbookId) });
+    },
+  });
+}
+
+// ─── S6 Playbook versions (task 4.8 / 4.9 item 5) ────────────────────────────
+
+export function usePlaybookVersions(playbookId: string) {
+  return useQuery({
+    queryKey: keys.playbookVersions(playbookId),
+    queryFn: () => apiFetch<PlaybookVersion[]>(`/playbooks/${playbookId}/versions`),
+    enabled: !!playbookId,
+  });
+}
+
+export function useCreateDraftVersion() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ playbookId, ...body }: { playbookId: string } & CreateDraftVersionBody) =>
+      apiFetch<PlaybookVersion>(`/playbooks/${playbookId}/versions`, {
+        method: 'POST',
+        body,
+      }),
+    onSuccess: (_data, { playbookId }) => {
+      queryClient.invalidateQueries({ queryKey: keys.playbookVersions(playbookId) });
+    },
+  });
+}
+
+export function usePublishVersion() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      versionId,
+      ...body
+    }: { versionId: string; playbookId: string } & PublishVersionBody) =>
+      apiFetch<PlaybookVersion>(`/playbooks/versions/${versionId}/publish`, {
+        method: 'POST',
+        body: { change_summary: body.change_summary, approved_by: body.approved_by },
+      }),
+    onSuccess: (_data, { playbookId }) => {
+      queryClient.invalidateQueries({ queryKey: keys.playbookVersions(playbookId) });
+    },
+  });
+}
+
+// ─── S6 Rule children: positions, parameters, red lines, objections, test
+// cases (task 4.8 / 4.9 item 4 — the rule editor ladder tabs) ────────────────
+
+export function useRulePositions(ruleId: string) {
+  return useQuery({
+    queryKey: keys.rulePositions(ruleId),
+    queryFn: () => apiFetch<RulePosition[]>(`/playbooks/rules/${ruleId}/positions`),
+    enabled: !!ruleId,
+  });
+}
+
+export function useCreateRulePosition() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ruleId, ...body }: { ruleId: string } & CreateRulePositionBody) =>
+      apiFetch<RulePosition>(`/playbooks/rules/${ruleId}/positions`, { method: 'POST', body }),
+    onSuccess: (_data, { ruleId }) => {
+      queryClient.invalidateQueries({ queryKey: keys.rulePositions(ruleId) });
+    },
+  });
+}
+
+export function useDeleteRulePosition() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ positionId }: { positionId: string; ruleId: string }) =>
+      apiFetch<void>(`/playbooks/positions/${positionId}`, { method: 'DELETE' }),
+    onSuccess: (_data, { ruleId }) => {
+      queryClient.invalidateQueries({ queryKey: keys.rulePositions(ruleId) });
+    },
+  });
+}
+
+export function useRuleParameters(ruleId: string) {
+  return useQuery({
+    queryKey: keys.ruleParameters(ruleId),
+    queryFn: () => apiFetch<RuleParameter[]>(`/playbooks/rules/${ruleId}/parameters`),
+    enabled: !!ruleId,
+  });
+}
+
+export function useCreateRuleParameter() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ruleId, ...body }: { ruleId: string } & CreateRuleParameterBody) =>
+      apiFetch<RuleParameter>(`/playbooks/rules/${ruleId}/parameters`, { method: 'POST', body }),
+    onSuccess: (_data, { ruleId }) => {
+      queryClient.invalidateQueries({ queryKey: keys.ruleParameters(ruleId) });
+    },
+  });
+}
+
+export function useDeleteRuleParameter() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ parameterId }: { parameterId: string; ruleId: string }) =>
+      apiFetch<void>(`/playbooks/parameters/${parameterId}`, { method: 'DELETE' }),
+    onSuccess: (_data, { ruleId }) => {
+      queryClient.invalidateQueries({ queryKey: keys.ruleParameters(ruleId) });
+    },
+  });
+}
+
+export function useRuleRedLines(ruleId: string) {
+  return useQuery({
+    queryKey: keys.ruleRedLines(ruleId),
+    queryFn: () => apiFetch<RedLine[]>(`/playbooks/rules/${ruleId}/red-lines`),
+    enabled: !!ruleId,
+  });
+}
+
+export function useCreateRuleRedLine() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ruleId, ...body }: { ruleId: string } & CreateRedLineBody) =>
+      apiFetch<RedLine>(`/playbooks/rules/${ruleId}/red-lines`, { method: 'POST', body }),
+    onSuccess: (_data, { ruleId }) => {
+      queryClient.invalidateQueries({ queryKey: keys.ruleRedLines(ruleId) });
+    },
+  });
+}
+
+export function useDeleteRuleRedLine() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ redLineId }: { redLineId: string; ruleId: string }) =>
+      apiFetch<void>(`/playbooks/red-lines/${redLineId}`, { method: 'DELETE' }),
+    onSuccess: (_data, { ruleId }) => {
+      queryClient.invalidateQueries({ queryKey: keys.ruleRedLines(ruleId) });
+    },
+  });
+}
+
+export function useRuleObjections(ruleId: string) {
+  return useQuery({
+    queryKey: keys.ruleObjections(ruleId),
+    queryFn: () => apiFetch<RuleObjection[]>(`/playbooks/rules/${ruleId}/objections`),
+    enabled: !!ruleId,
+  });
+}
+
+export function useCreateRuleObjection() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ruleId, ...body }: { ruleId: string } & CreateRuleObjectionBody) =>
+      apiFetch<RuleObjection>(`/playbooks/rules/${ruleId}/objections`, { method: 'POST', body }),
+    onSuccess: (_data, { ruleId }) => {
+      queryClient.invalidateQueries({ queryKey: keys.ruleObjections(ruleId) });
+    },
+  });
+}
+
+export function useDeleteRuleObjection() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ objectionId }: { objectionId: string; ruleId: string }) =>
+      apiFetch<void>(`/playbooks/objections/${objectionId}`, { method: 'DELETE' }),
+    onSuccess: (_data, { ruleId }) => {
+      queryClient.invalidateQueries({ queryKey: keys.ruleObjections(ruleId) });
+    },
+  });
+}
+
+export function useRuleTestCases(ruleId: string) {
+  return useQuery({
+    queryKey: keys.ruleTestCases(ruleId),
+    queryFn: () => apiFetch<RuleTestCase[]>(`/playbooks/rules/${ruleId}/test-cases`),
+    enabled: !!ruleId,
+  });
+}
+
+export function useCreateRuleTestCase() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ruleId, ...body }: { ruleId: string } & CreateRuleTestCaseBody) =>
+      apiFetch<RuleTestCase>(`/playbooks/rules/${ruleId}/test-cases`, { method: 'POST', body }),
+    onSuccess: (_data, { ruleId }) => {
+      queryClient.invalidateQueries({ queryKey: keys.ruleTestCases(ruleId) });
+    },
+  });
+}
+
+export function useDeleteRuleTestCase() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ testCaseId }: { testCaseId: string; ruleId: string }) =>
+      apiFetch<void>(`/playbooks/test-cases/${testCaseId}`, { method: 'DELETE' }),
+    onSuccess: (_data, { ruleId }) => {
+      queryClient.invalidateQueries({ queryKey: keys.ruleTestCases(ruleId) });
     },
   });
 }

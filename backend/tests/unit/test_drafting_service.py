@@ -1,18 +1,17 @@
 from __future__ import annotations
 
 import uuid
-from unittest.mock import AsyncMock, MagicMock, patch
+from types import SimpleNamespace
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
 from app.services.drafting.service import (
-    DraftResult,
     draft_clause,
     draft_document,
     draft_memo,
     draft_precedent,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -21,6 +20,11 @@ from app.services.drafting.service import (
 
 def _mock_session() -> AsyncMock:
     return AsyncMock()
+
+
+def _empty_resolve() -> AsyncMock:
+    """A ``routing.resolve`` stand-in that resolves to no rules (playbook miss)."""
+    return AsyncMock(return_value=SimpleNamespace(rules=[]))
 
 
 # ---------------------------------------------------------------------------
@@ -58,6 +62,10 @@ async def test_draft_clause_frequency_hit() -> None:
 
     with (
         patch(
+            "app.services.drafting.service.playbook_routing.resolve",
+            new=_empty_resolve(),
+        ),
+        patch(
             "app.services.drafting.service.frequency_tracker.most_common_clause",
             new=AsyncMock(return_value=freq_result),
         ),
@@ -66,7 +74,7 @@ async def test_draft_clause_frequency_hit() -> None:
         result = await draft_clause(
             session,
             "limitation_of_liability",
-            context={"contract_type": "SaaS"},
+            context="SaaS deal, standard terms.",
         )
 
     assert result.source == "frequency"
@@ -81,6 +89,10 @@ async def test_draft_clause_llm_fallback() -> None:
 
     with (
         patch(
+            "app.services.drafting.service.playbook_routing.resolve",
+            new=_empty_resolve(),
+        ),
+        patch(
             "app.services.drafting.service.frequency_tracker.most_common_clause",
             new=AsyncMock(return_value=None),
         ),
@@ -92,7 +104,7 @@ async def test_draft_clause_llm_fallback() -> None:
         result = await draft_clause(
             session,
             "indemnification",
-            context={"contract_type": "Services"},
+            context="Services agreement.",
             instruction="Mutual indemnification only.",
         )
 
@@ -101,6 +113,317 @@ async def test_draft_clause_llm_fallback() -> None:
     llm_mock.assert_called_once()
     call_args = llm_mock.call_args
     assert call_args[0][0] == "drafting_clause"
+
+
+# ---------------------------------------------------------------------------
+# draft_clause: playbook resolution (task 4.7)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_draft_clause_playbook_resolution_hit() -> None:
+    """Known contract_type + party_role resolve (task 4.2) to a rule whose
+    requested clause type has a preferred (rung-0) position → source=
+    'playbook', with no frequency lookup and no model call at all."""
+    session = _mock_session()
+    position = SimpleNamespace(
+        kind="preferred", rung=0, language="Mutual cap at 12 months of Fees."
+    )
+    rule = SimpleNamespace(
+        rule_key="limitation_of_liability.cap_amount",
+        clause_type="limitation_of_liability",
+        positions=[position],
+    )
+    resolved = SimpleNamespace(rules=[rule])
+
+    with (
+        patch(
+            "app.services.drafting.service.playbook_routing.resolve",
+            new=AsyncMock(return_value=resolved),
+        ) as resolve_mock,
+        patch("app.services.drafting.service.frequency_tracker.most_common_clause") as freq_mock,
+        patch("app.services.drafting.service.gateway.call_text") as llm_mock,
+    ):
+        result = await draft_clause(
+            session,
+            "limitation_of_liability",
+            contract_type="saas_msa",
+            party_role="vendor",
+        )
+
+    assert result.source == "playbook"
+    assert result.text == "Mutual cap at 12 months of Fees."
+    resolve_mock.assert_called_once()
+    freq_mock.assert_not_called()
+    llm_mock.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_draft_clause_playbook_resolution_by_issue_key() -> None:
+    """The requested clause type may be the bare issue (the part of
+    rule_key after the dot) rather than the clause family; that still
+    resolves to the rung-0 language with no model call."""
+    session = _mock_session()
+    position = SimpleNamespace(kind="preferred", rung=0, language="Net 30 payment terms.")
+    rule = SimpleNamespace(
+        rule_key="payment.payment_terms",
+        clause_type="payment",
+        positions=[position],
+    )
+    resolved = SimpleNamespace(rules=[rule])
+
+    with (
+        patch(
+            "app.services.drafting.service.playbook_routing.resolve",
+            new=AsyncMock(return_value=resolved),
+        ),
+        patch("app.services.drafting.service.frequency_tracker.most_common_clause") as freq_mock,
+        patch("app.services.drafting.service.gateway.call_text") as llm_mock,
+    ):
+        result = await draft_clause(
+            session,
+            "payment_terms",
+            contract_type="saas_msa",
+            party_role="vendor",
+        )
+
+    assert result.source == "playbook"
+    assert result.text == "Net 30 payment terms."
+    freq_mock.assert_not_called()
+    llm_mock.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_draft_clause_playbook_preferred_language_override_wins() -> None:
+    """An explicit preferred_language still wins over playbook resolution,
+    and short-circuits before resolve() is even called."""
+    session = _mock_session()
+
+    with (
+        patch("app.services.drafting.service.playbook_routing.resolve") as resolve_mock,
+        patch("app.services.drafting.service.frequency_tracker.most_common_clause") as freq_mock,
+        patch("app.services.drafting.service.gateway.call_text") as llm_mock,
+    ):
+        result = await draft_clause(
+            session,
+            "limitation_of_liability",
+            contract_type="saas_msa",
+            party_role="vendor",
+            preferred_language="Caller-supplied override language.",
+        )
+
+    assert result.source == "playbook"
+    assert result.text == "Caller-supplied override language."
+    resolve_mock.assert_not_called()
+    freq_mock.assert_not_called()
+    llm_mock.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_draft_clause_playbook_miss_no_rule_falls_through_to_frequency() -> None:
+    """contract_type/party_role resolve, but no rule matches the requested
+    clause type/issue → falls through to frequency, exactly as the cascade
+    worked before this task."""
+    from app.services.drafting.frequency_tracker import FrequencyResult
+
+    session = _mock_session()
+    resolved = SimpleNamespace(rules=[])  # no rule for this clause type
+    freq_result = FrequencyResult(text="Standard liability cap clause.", frequency=5, scoped=True)
+
+    with (
+        patch(
+            "app.services.drafting.service.playbook_routing.resolve",
+            new=AsyncMock(return_value=resolved),
+        ),
+        patch(
+            "app.services.drafting.service.frequency_tracker.most_common_clause",
+            new=AsyncMock(return_value=freq_result),
+        ),
+        patch("app.services.drafting.service.gateway.call_text") as llm_mock,
+    ):
+        result = await draft_clause(
+            session,
+            "limitation_of_liability",
+            contract_type="saas_msa",
+            party_role="vendor",
+        )
+
+    assert result.source == "frequency"
+    assert result.text == "Standard liability cap clause."
+    llm_mock.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_draft_clause_missing_facts_still_resolves_baseline() -> None:
+    """No contract_type/party_role/paper_origin/deal_context supplied →
+    resolve() still runs (task 4.2: an unknown type resolves the baseline
+    playbook), with the repo-wide fallbacks ``""`` / ``"vendor"`` /
+    ``"own"`` and an empty context. A baseline rule for the clause type
+    therefore still yields playbook language."""
+    session = _mock_session()
+    position = SimpleNamespace(kind="preferred", rung=0, language="Baseline indemnity.")
+    rule = SimpleNamespace(
+        rule_key="indemnification.scope",
+        clause_type="indemnification",
+        positions=[position],
+    )
+
+    with (
+        patch(
+            "app.services.drafting.service.playbook_routing.resolve",
+            new=AsyncMock(return_value=SimpleNamespace(rules=[rule])),
+        ) as resolve_mock,
+        patch("app.services.drafting.service.frequency_tracker.most_common_clause") as freq_mock,
+        patch("app.services.drafting.service.gateway.call_text") as llm_mock,
+    ):
+        result = await draft_clause(
+            session, "indemnification", context="Mutual indemnification only."
+        )
+
+    assert result.source == "playbook"
+    assert result.text == "Baseline indemnity."
+    resolve_mock.assert_awaited_once_with(session, "", "vendor", "own", context={})
+    freq_mock.assert_not_called()
+    llm_mock.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_draft_clause_threads_deal_context_to_resolve() -> None:
+    """contract_type/party_role/paper_origin/deal_context reach resolve()
+    unchanged, so overlay playbooks and ``applies_when`` rules can apply."""
+    session = _mock_session()
+    deal_context = {"regimes": ["hipaa"], "deal_value_band": "mid"}
+    position = SimpleNamespace(kind="preferred", rung=0, language="HIPAA BAA language.")
+    rule = SimpleNamespace(
+        rule_key="data_protection.baa",
+        clause_type="data_protection",
+        positions=[position],
+    )
+
+    with (
+        patch(
+            "app.services.drafting.service.playbook_routing.resolve",
+            new=AsyncMock(return_value=SimpleNamespace(rules=[rule])),
+        ) as resolve_mock,
+        patch("app.services.drafting.service.frequency_tracker.most_common_clause") as freq_mock,
+        patch("app.services.drafting.service.gateway.call_text") as llm_mock,
+    ):
+        result = await draft_clause(
+            session,
+            "data_protection",
+            contract_type="saas_msa",
+            party_role="customer",
+            paper_origin="counterparty",
+            deal_context=deal_context,
+        )
+
+    assert result.source == "playbook"
+    assert result.text == "HIPAA BAA language."
+    resolve_mock.assert_awaited_once_with(
+        session, "saas_msa", "customer", "counterparty", context=deal_context
+    )
+    freq_mock.assert_not_called()
+    llm_mock.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_draft_clause_llm_fallback_includes_deal_facts_in_prompt() -> None:
+    """On a playbook + frequency miss the structured deal facts are not
+    dropped: they are rendered into the LLM user prompt alongside the
+    free-text context."""
+    session = _mock_session()
+
+    with (
+        patch(
+            "app.services.drafting.service.playbook_routing.resolve",
+            new=_empty_resolve(),
+        ),
+        patch(
+            "app.services.drafting.service.frequency_tracker.most_common_clause",
+            new=AsyncMock(return_value=None),
+        ),
+        patch(
+            "app.services.drafting.service.gateway.call_text",
+            return_value="LLM text.",
+        ) as llm_mock,
+    ):
+        result = await draft_clause(
+            session,
+            "data_protection",
+            context="Cover PHI handling.",
+            contract_type="saas_msa",
+            party_role="vendor",
+            deal_context={"regimes": ["hipaa"]},
+        )
+
+    assert result.source == "llm"
+    user_prompt = llm_mock.call_args[0][1][1]["content"]
+    assert "Contract type: saas_msa" in user_prompt
+    assert "Party role: vendor" in user_prompt
+    assert '"regimes": ["hipaa"]' in user_prompt
+    assert "Context: Cover PHI handling." in user_prompt
+
+
+@pytest.mark.asyncio
+async def test_draft_clause_mode_llm_skips_playbook_and_frequency() -> None:
+    """mode='llm' (the frontend's rewrite action) goes straight to the LLM,
+    even when a preferred_language override or playbook data is available."""
+    session = _mock_session()
+
+    with (
+        patch("app.services.drafting.service.playbook_routing.resolve") as resolve_mock,
+        patch("app.services.drafting.service.frequency_tracker.most_common_clause") as freq_mock,
+        patch(
+            "app.services.drafting.service.gateway.call_text",
+            return_value="Rewritten clause.",
+        ) as llm_mock,
+    ):
+        result = await draft_clause(
+            session,
+            "limitation_of_liability",
+            instruction="Make the cap mutual.",
+            contract_type="saas_msa",
+            party_role="vendor",
+            preferred_language="Override that must be ignored.",
+            mode="llm",
+        )
+
+    assert result.source == "llm"
+    assert result.text == "Rewritten clause."
+    resolve_mock.assert_not_called()
+    freq_mock.assert_not_called()
+    llm_mock.assert_called_once()
+    assert "Instruction: Make the cap mutual." in llm_mock.call_args[0][1][1]["content"]
+
+
+@pytest.mark.asyncio
+async def test_draft_clause_mode_frequency_skips_playbook() -> None:
+    """mode='frequency' starts the cascade at the frequency step."""
+    from app.services.drafting.frequency_tracker import FrequencyResult
+
+    session = _mock_session()
+    freq_result = FrequencyResult(text="Most common clause.", frequency=3, scoped=True)
+
+    with (
+        patch("app.services.drafting.service.playbook_routing.resolve") as resolve_mock,
+        patch(
+            "app.services.drafting.service.frequency_tracker.most_common_clause",
+            new=AsyncMock(return_value=freq_result),
+        ),
+        patch("app.services.drafting.service.gateway.call_text") as llm_mock,
+    ):
+        result = await draft_clause(
+            session,
+            "limitation_of_liability",
+            contract_type="saas_msa",
+            party_role="vendor",
+            mode="frequency",
+        )
+
+    assert result.source == "frequency"
+    assert result.text == "Most common clause."
+    resolve_mock.assert_not_called()
+    llm_mock.assert_not_called()
 
 
 # ---------------------------------------------------------------------------

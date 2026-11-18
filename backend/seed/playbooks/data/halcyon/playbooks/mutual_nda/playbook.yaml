@@ -1,0 +1,26 @@
+key: halcyon-mutual-nda
+name: Halcyon Mutual Non-Disclosure Agreement
+practice_area: nda
+layer: agreement
+party_role: mutual
+paper_scope: both
+jurisdiction: global
+precedence: 20
+owner_role: contracts_manager
+parent: halcyon-baseline
+applies_when: null
+review_cadence_days: 90
+description: >
+  Positions for the mutual non-disclosure agreement Halcyon signs with
+  prospective customers, vendors and partners before sharing confidential
+  information such as pricing, product roadmaps, security documentation and,
+  on the diligence path to a signed Order Form or Vendor agreement, samples
+  of de-identified clinical workflow information. Merges on top of
+  halcyon-baseline.
+version:
+  version: "1.0"
+  effective_from: 2026-01-15
+  change_summary: Initial published version.
+  created_by: Contracts Manager
+  approved_by: General Counsel
+rule_files: [rules.yaml]

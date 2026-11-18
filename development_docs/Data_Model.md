@@ -2,12 +2,17 @@
 
 Single **Neon Postgres** database (with `pgvector`). This document defines every table, its columns, relationships, indexes, and the corresponding Pydantic/ORM domain models. It is the contract between services — all persistence conforms to this.
 
+**Playbook redesign (2026-11-16).** Section 6 and the playbook-related columns elsewhere describe the structured, versioned playbook from `playbook_plan.md`. The schema is written as migrations `010`–`012` with matching ORM models. Columns marked *(set by phase 4)* exist but nothing writes them until the wiring tasks in `playbook_implementation.md` phase 4 land. The five legacy `playbook_rule` columns were dropped by migration `015` (§6.4); that content now lives only in `rule_position` and `red_line` rows.
+
 Conventions:
 - Primary keys are UUIDs (`uuid` type, generated app-side or `gen_random_uuid()`).
 - Timestamps are `timestamptz`, default `now()`.
 - Enumerated values are Postgres enums or `text` + `CHECK` (noted per column).
 - `charStart`/`charEnd` are integer character offsets into the contract's canonical text (FR-2).
-- No user/tenant columns (no multi-user — Non-Goals).
+- No user/tenant columns (no multi-user — Non-Goals). Fields such as `authored_by` and `approved_by` are text until authentication exists.
+- **Project schema.** The database account is shared with other projects, so every table, view and the `alembic_version` table lives in the Postgres schema named by the `DB_SCHEMA` setting (default: `PROJECT_NAMESPACE`, i.e. `precedent`), never in `public`. Only the shared `vector` extension stays in `public`. `Base.metadata` carries the schema, so models and unqualified foreign-key strings (`"playbook.id"`) resolve inside it; hand-written SQL names the schema explicitly from the setting.
+- All tables carry `created_at`; mutable tables also carry `updated_at`, maintained on update.
+- A **condition** (`applies_when`, `conditions`, `context_overrides[].when`) is a JSON object mapping a `context_dimension` key to the list of values it matches. All keys must match. An empty or null condition always matches.
 
 ## 1. Entity-relationship overview
 
@@ -21,10 +26,32 @@ erDiagram
     CONTRACT ||--o{ OBLIGATION : "extracted into"
     CONTRACT ||--o{ QA_CACHE : "answered"
     CONTRACT }o--|| PARTY : "counterparty"
-    CONTRACT }o--o{ PLAYBOOK : "evaluated against"
     CLAUSE ||--o{ FLAG : "flagged"
     FLAG ||--o| REDLINE : "produces"
-    PLAYBOOK ||--o{ PLAYBOOK_RULE : "contains"
+    AGREEMENT_TYPE ||--o{ PLAYBOOK : "typed by"
+    PLAYBOOK ||--o{ PLAYBOOK : "inherits from"
+    PLAYBOOK ||--o{ PLAYBOOK_VERSION : "has"
+    PLAYBOOK_VERSION ||--o{ PLAYBOOK_RULE : "contains"
+    PLAYBOOK_VERSION ||--o{ PLAYBOOK_CHANGE_LOG : "records"
+    CLAUSE_FAMILY ||--o{ CLAUSE_ISSUE : "has"
+    CLAUSE_FAMILY ||--o{ CLAUSE : "types"
+    CLAUSE_FAMILY ||--o{ PLAYBOOK_RULE : "classifies"
+    CLAUSE_ISSUE ||--o{ PLAYBOOK_RULE : "classifies"
+    PLAYBOOK_RULE ||--o{ RULE_POSITION : "ladder"
+    PLAYBOOK_RULE ||--o{ RULE_PARAMETER : "limits"
+    PLAYBOOK_RULE ||--o{ RED_LINE : "guards"
+    PLAYBOOK_RULE ||--o{ RULE_OBJECTION : "anticipates"
+    PLAYBOOK_RULE ||--o{ RULE_DEPENDENCY : "links"
+    PLAYBOOK_RULE ||--o{ RULE_TEST_CASE : "verified by"
+    APPROVER_ROLE ||--o{ RULE_POSITION : "approves"
+    APPROVER_ROLE ||--o{ ESCALATION_POLICY : "assigned"
+    PLAYBOOK ||--o{ ESCALATION_POLICY : "scoped to"
+    PLAYBOOK ||--o{ RED_LINE : "playbook-wide"
+    RULE_POSITION ||--o{ RULE_OBJECTION : "recommended move"
+    CONTRACT ||--o{ PLAYBOOK_EXCEPTION : "granted on"
+    PLAYBOOK_RULE ||--o{ PLAYBOOK_EXCEPTION : "deviates from"
+    RULE_POSITION ||--o{ DECISION_EVENT : "offered"
+    REVIEW_RUN }o--o{ PLAYBOOK_VERSION : "pinned to"
     CLAUSE ||--o{ CLAUSE_EMBEDDING : "embedded"
     REDLINE ||--o{ DECISION_EVENT : "logged"
     PARTY ||--o{ DECISION_EVENT : "keyed by"
@@ -42,11 +69,13 @@ The repository record. The bytes live in object storage; this row is the metadat
 |---|---|---|
 | `id` | uuid PK | |
 | `title` | text | derived from metadata or filename |
-| `object_key` | text | key in object storage (source of truth) |
+| `object_key` | text | logical key in object storage (source of truth), e.g. `contracts/{id}/{filename}`. Stored unprefixed; the storage backend adds the project prefix |
 | `source_format` | text | `pdf` \| `docx` |
 | `canonical_text` | text | the single reference text for all offsets |
 | `paper_origin` | text | `own` \| `counterparty` (CHECK) — set from upload context |
-| `contract_type` | text | e.g. `saas_msa`, `nda`, `dpa` (nullable; from metadata/routing) |
+| `contract_type` | text | an `agreement_type.key`, e.g. `saas_msa`, `nda`, `dpa`. Nullable. Set from the upload form, else classified in document processing; null when confidence is low *(set by phase 4)* |
+| `party_role` | text | `vendor` \| `customer` \| `mutual` — which side the organization is on. Nullable *(set by phase 4)* |
+| `context` | jsonb | deal facts keyed by `context_dimension.key`: `deal_value_band`, `counterparty_tier`, `data_sensitivity`, `region`, `regimes`. Nullable *(set by phase 4)* |
 | `counterparty_id` | uuid FK → party.id | normalized; nullable |
 | `current_version_id` | uuid FK → contract_version.id | nullable |
 | `status` | text | `processing` \| `analyzed` \| `redlined` \| `executed` (CHECK) |
@@ -62,7 +91,8 @@ One row per segmented clause. Load-bearing for S2/S5/S7/Version Comparison (FR-3
 | `id` | uuid PK | stable across versions where possible (used for diff alignment) |
 | `contract_id` | uuid FK → contract.id | |
 | `ordinal` | int | order within the contract |
-| `clause_type` | text | canonical type from S1 normalizer (e.g. `indemnification`) |
+| `clause_type` | text FK → clause_family.key | canonical type from S1 normalizer (e.g. `indemnification`); `other` is a family, so unmatched headings still resolve |
+| `issue_keys` | jsonb | list of `clause_issue.key` values for the rules matched inside the clause. Nullable *(set by phase 4)* |
 | `heading_text` | text | raw heading as found |
 | `text` | text | clause body |
 | `char_start` | int | offset into `contract.canonical_text` |
@@ -146,6 +176,11 @@ One row per detected issue on a clause.
 | `char_start` / `char_end` | int | citation offsets (nullable for structural flags) |
 | `detail` | jsonb | gap description, deviation vs preferred, etc. |
 | `matched_rule_id` | uuid FK → playbook_rule.id | nullable |
+| `rule_key` | text | `{clause_type}.{issue_key}` of the rule that produced the finding. Nullable *(set by phase 4)* |
+| `zone` | text | `green` \| `yellow` \| `red`. Assigned by the deterministic evaluator, never by the model. Nullable *(set by phase 4)* |
+| `position_id` | uuid FK → rule_position.id | the position the clause text matched, if any. Nullable |
+| `red_line_id` | uuid FK → red_line.id | the red line that fired, if any. Nullable |
+| `parameter_values` | jsonb | extracted parameter values with their verbatim quotes. Nullable |
 | `created_at` | timestamptz | |
 
 ### `risk_score`
@@ -156,9 +191,10 @@ Per-contract (and optionally per-clause) numeric risk. Severity-weighted (FR-4).
 | `id` | uuid PK | |
 | `contract_id` | uuid FK | |
 | `clause_id` | uuid FK | nullable → contract-level when null |
-| `score` | numeric | computed from weighted severity of flags |
+| `score` | numeric | normalised to 0–1 under weights `v2`: total flag points ÷ (9 × sum of `risk_weight` over resolved rules), capped at 1.0. Flag points = severity base (1, 3 or 9) × `risk_weight` (1–10); ungoverned flags use weight 1. Reporting only — the gate is driven by the zone. (The `v1` scorer still in the code returns a raw unbounded sum) |
 | `max_clause_severity` | text | fed to the gate hard-stop logic |
-| `weights_version` | text | which S6 weight config produced it |
+| `max_zone` | text | worst zone across the contract's findings; drives the gate. Nullable *(set by phase 4)* |
+| `weights_version` | text | which scoring scheme produced it: `v1` (raw sum) or `v2` (normalised) |
 | `created_at` | timestamptz | |
 
 ## 5. Redline tables (S3)
@@ -174,10 +210,12 @@ One row per generated redline for a flagged clause.
 | `flag_id` | uuid FK → flag.id | nullable |
 | `review_run_id` | uuid FK → review_run.id | nullable |
 | `stance_mode` | text | `light` \| `balanced` \| `firm` |
-| `position` | text | `preferred` \| `fallback` (toggle) |
+| `position` | text | `preferred` or `fallback_1`..`fallback_n` (CHECK: `position = 'preferred' OR position ~ '^fallback_[0-9]+$'`). The toggle steps one rung at a time |
+| `position_id` | uuid FK → rule_position.id | the ladder rung this redline offers. Nullable *(set by phase 4)* |
+| `objection_id` | uuid FK → rule_objection.id | the objection whose response seeded the counterparty comment. Nullable *(set by phase 4)* |
 | `replacement_text` | text | LLM-produced target text |
 | `tracked_changes` | jsonb | deterministic diff output (insert/delete/modify spans w/ offsets) |
-| `alternatives` | jsonb | 2–3 proposals |
+| `alternatives` | jsonb | the rule's fallback rungs allowed by their `conditions`, in rung order, each with its `position_id`. The model adapts defined terms; it does not invent positions |
 | `explanation` | text | plain-language |
 | `counterparty_comment` | text | negotiation comment |
 | `rationale` | jsonb | deterministic: playbook position + LLM output |
@@ -186,32 +224,344 @@ One row per generated redline for a flagged clause.
 
 ## 6. Playbook tables (S6)
 
-### `playbook`
+The playbook is a structured, versioned policy dataset: every rule is a record a lawyer can read and the review pipeline can execute. It is organised into thirteen buckets.
+
+| # | Bucket | What it answers | Tables |
+|---|---|---|---|
+| 1 | Taxonomy | What clause and issue is this? | `clause_family`, `clause_issue` |
+| 2 | Playbook header | Which agreement, which side, which jurisdiction, who owns it? | `agreement_type`, `playbook` |
+| 3 | Versions | Which rule set was in force, and what changed? | `playbook_version`, `playbook_change_log` |
+| 4 | Rules | What is our position on this issue, and why? | `playbook_rule` |
+| 5 | Positions | What language do we offer or accept, in what order? | `rule_position` |
+| 6 | Parameters | What are the numeric limits? | `rule_parameter` |
+| 7 | Red lines | What do we never accept? | `red_line` |
+| 8 | Objections | What will the other side say, and how do we answer? | `rule_objection` |
+| 9 | Dependencies | Which other rules move with this one? | `rule_dependency` |
+| 10 | Test cases | How do we know the rule works? | `rule_test_case` |
+| 11 | Context | Which deal facts change the answer? | `context_dimension`, `contract.context` |
+| 12 | Authority | Who can approve what, and how fast? | `approver_role`, `escalation_policy` |
+| 13 | Outcomes | What did we concede, to whom, under which rule? | `playbook_exception`, `decision_event` |
+
+Buckets 1–12 are the playbook. Bucket 13 is produced by the features that use it, and feeds back into it.
+
+### 6.1 Taxonomy
+
+#### `clause_family`
+The canonical clause type and the source of truth for the S1 normaliser's vocabulary. **Reference data**: 29 rows inserted by migration `010` (the 20 original canonical types, `other`, and `service_levels`, `security`, `subprocessors`, `breach_notification`, `data_transfers`, `publicity`, `non_solicitation`, `suspension`), with synonyms added by migration `014`. The in-code `_SYNONYMS` dictionary is gone (task 5.5); the normaliser reads a process-wide cache populated from these `synonyms` rows at app startup (`load_synonym_cache`, called from `app.main`'s lifespan).
+
+| Column | Type | Notes |
+|---|---|---|
+| `key` | text PK | e.g. `limitation_of_liability`. Matches `clause.clause_type` |
+| `name` | text | display name |
+| `category` | text | `commercial` \| `risk_allocation` \| `data_and_security` \| `term_and_exit` \| `boilerplate` |
+| `description` | text | one or two sentences |
+| `synonyms` | jsonb | heading synonyms used by the S1 normaliser; no synonym maps to two families |
+| `external_refs` | jsonb | optional mappings, e.g. `{"cuad": "Cap On Liability"}` |
+| `sort_order` | int | |
+
+#### `clause_issue`
+The negotiable point inside a family. Rules attach here, so findings are at the level lawyers negotiate, not whole clauses.
+
 | Column | Type | Notes |
 |---|---|---|
 | `id` | uuid PK | |
-| `name` | text | e.g. "SaaS MSA", "HIPAA" |
-| `practice_area` | text | `hipaa` \| `gdpr` \| `saas_msa` \| `nda` \| `dpa` (CHECK) |
-| `precedence` | int | for merge order when multiple apply |
+| `family_key` | text FK → clause_family.key | |
+| `key` | text | e.g. `cap_amount`. UNIQUE with `family_key` |
+| `name` | text | |
+| `description` | text | what the issue is and why it is negotiated |
+| `detection_hints` | text | how to recognise it; what absence means |
+
+### 6.2 Playbook header
+
+#### `agreement_type`
+Lookup replacing the old five-value CHECK on `playbook.practice_area`. **Reference data**: 7 rows inserted by migration `010`.
+
+| Column | Type | Notes |
+|---|---|---|
+| `key` | text PK | `baseline`, `nda`, `saas_msa`, `dpa`, `vendor_msa`, `hipaa`, `gdpr` |
+| `name` | text | |
+| `kind` | text | `agreement` \| `regime` \| `baseline` |
+
+#### `playbook`
+| Column | Type | Notes |
+|---|---|---|
+| `id` | uuid PK | |
+| `name` | text | |
+| `key` | text UNIQUE | stable slug, e.g. `halcyon-saas-msa-vendor` |
+| `practice_area` | text FK → agreement_type.key | |
+| `layer` | text | `base` \| `agreement` \| `overlay` |
+| `precedence` | int | merge order; convention: base 10, agreement 20, overlay 30 |
+| `party_role` | text | `vendor` \| `customer` \| `mutual` |
+| `paper_scope` | text | `own` \| `counterparty` \| `both` |
+| `jurisdiction` | text | e.g. `US`, `EU`, `global` |
+| `business_unit` | text | nullable |
+| `owner_role_id` | uuid FK → approver_role.id | who maintains it; nullable |
+| `parent_playbook_id` | uuid FK → playbook.id | explicit inheritance; nullable |
+| `applies_when` | jsonb | context condition for overlays, e.g. `{"regimes": ["hipaa"]}` |
+| `description` | text | nullable |
+| `status` | text | `draft` \| `active` \| `archived` |
+| `current_version_id` | uuid FK → playbook_version.id | the published version in force; nullable |
+| `review_cadence_days` | int | e.g. 90; overlays 180 |
+| `next_review_at` | date | nullable |
 | `created_at` / `updated_at` | timestamptz | |
 
-### `playbook_rule`
-Unified store keyed by clause type: preferred / acceptable / prohibited / fallback + weight.
+### 6.3 Versions
+
+#### `playbook_version`
+A snapshot of a playbook's rules.
 
 | Column | Type | Notes |
 |---|---|---|
 | `id` | uuid PK | |
-| `playbook_id` | uuid FK → playbook.id | |
-| `clause_type` | text | join key to `clause.clause_type` |
-| `preferred_language` | text | |
-| `acceptable_variations` | jsonb | list |
-| `prohibited_terms` | jsonb | list (seeded from templates + human, NOT mined from executed corpus) |
-| `fallback_language` | text | nullable |
-| `required` | boolean | drives missing-clause detection |
-| `risk_weight` | numeric | severity weight for scoring (FR-4) |
-| `escalation_threshold` | numeric | nullable |
+| `playbook_id` | uuid FK → playbook.id | cascade delete |
+| `version` | text | e.g. `1.0`, `1.1`. UNIQUE with `playbook_id` |
+| `status` | text | `draft` \| `published` \| `superseded` |
+| `effective_from` / `effective_to` | timestamptz | `effective_to` null while in force |
+| `change_summary` | text | |
+| `created_by` / `approved_by` | text | names or role keys |
+| `published_at` | timestamptz | nullable |
 
-Index: btree `(playbook_id, clause_type)`.
+Lifecycle: only a `draft` version is editable. Publishing freezes its rules and their children, sets `playbook.current_version_id`, and marks the previous version `superseded`. A new draft is created by copying the current version. A review pins the versions it ran against (`review_run.playbook_version_ids`), so results are reproducible.
+
+#### `playbook_change_log`
+One row per rule-level change between versions.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | uuid PK | |
+| `playbook_version_id` | uuid FK → playbook_version.id | the version that introduced the change |
+| `rule_key` | text | stable rule identity |
+| `change_type` | text | `added` \| `modified` \| `removed` |
+| `field_path` | text | e.g. `parameters.cap_multiple_months.green_limit`; nullable |
+| `old_value` / `new_value` | jsonb | |
+| `reason` | text | why, including any deviation data that prompted it |
+| `changed_by` | text | |
+
+### 6.4 Rules
+
+#### `playbook_rule`
+One row per issue per playbook version.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | uuid PK | |
+| `playbook_id` | uuid FK → playbook.id | kept for query convenience; cascade delete |
+| `playbook_version_id` | uuid FK → playbook_version.id | |
+| `clause_type` | text FK → clause_family.key | join key to `clause.clause_type` |
+| `issue_id` | uuid FK → clause_issue.id | |
+| `rule_key` | text | `{clause_type}.{issue_key}`, e.g. `limitation_of_liability.cap_amount`. UNIQUE with `playbook_version_id`. The merge key across layers |
+| `title` | text | short human title |
+| `position_summary` | text | plain-language statement of the outcome wanted |
+| `risk_rationale` | text | why the position exists; what harm it prevents |
+| `required` | boolean | drives missing-clause detection |
+| `risk_weight` | numeric | 1–10 scale; severity multiplier for scoring (FR-4) |
+| `negotiable` | boolean | false for mandatory regulatory terms |
+| `default_zone` | text | zone for a deviation that matches no position and no red line; usually `yellow` |
+| `needs_human_judgment` | boolean | surface the issue; do not auto-decide |
+| `judgment_note` | text | what the human must weigh; nullable |
+| `applies_when` | jsonb | context condition for the whole rule; nullable |
+| `detection_guidance` | text | rule-specific recognition notes for the analysis prompt |
+| `source_ref` | text | policy, regulation or insurer requirement behind it; nullable |
+| `authored_by` / `approved_by` | text | |
+| `last_reviewed_at` | date | |
+
+Indexes: btree `(playbook_id, clause_type)`; UNIQUE `(playbook_version_id, rule_key)`.
+
+**Legacy columns (removed).** `preferred_language`, `acceptable_variations`, `prohibited_terms`, `fallback_language` and `escalation_threshold` used to live on this table. Migration `011` backfilled them into child rows — `preferred_language` → a `preferred` position; each `acceptable_variations` entry → an `acceptable_variant`; `fallback_language` → a rung 1 fallback (yellow, no approver); each `prohibited_terms` entry → a rule-scoped `phrase` red line with `negation_guard: true` and action `block` — giving legacy rules `rule_key = clause_type || '.general'` and a published `1.0` version. Migration `015` re-ran that same mapping (catching up any rule written through the CRUD API after `011` with no child rows yet) and then dropped the five columns. `escalation_threshold` had no child-table equivalent and no code ever read it; its values were discarded. The negotiating-language content for every rule now lives only in `rule_position` and rule-scoped `red_line` rows (§6.5, §6.7).
+
+### 6.5 Positions
+
+#### `rule_position`
+The ladder — one preferred position and an ordered set of fallbacks — plus language accepted when the other side proposes it.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | uuid PK | |
+| `rule_id` | uuid FK → playbook_rule.id | cascade delete |
+| `kind` | text | `preferred` \| `fallback` \| `acceptable_variant` |
+| `rung` | int | 0 for preferred; 1..n for fallbacks in the order conceded; null for variants |
+| `label` | text | e.g. "Fallback 1: 18-month cap" |
+| `language` | text | complete, contract-ready clause text |
+| `summary` | text | one-sentence plain-language description |
+| `zone` | text | `green` (pre-approved) \| `yellow` (needs the approver) |
+| `approver_role_id` | uuid FK → approver_role.id | required when `zone = yellow`; nullable |
+| `conditions` | jsonb | when this rung may be used, e.g. `{"deal_value_band": ["enterprise", "strategic"]}`; nullable |
+| `give_get` | text | what to ask for in return; nullable |
+| `internal_note` | text | nullable |
+
+Invariants: exactly one `preferred` per rule; fallback rungs run 1..n with no gaps; a `yellow` position names an approver. These are checked by the seed validator, not by a database constraint.
+
+### 6.6 Parameters
+
+#### `rule_parameter`
+A structured, comparable value extracted from the clause. Thresholds are numbers, not prose.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | uuid PK | |
+| `rule_id` | uuid FK → playbook_rule.id | cascade delete |
+| `key` | text | e.g. `cap_multiple_months`. UNIQUE with `rule_id` |
+| `label` | text | |
+| `value_type` | text | `number` \| `duration_days` \| `percent` \| `currency_usd` \| `enum` \| `boolean` |
+| `unit` | text | nullable |
+| `direction` | text | `higher_is_better` \| `lower_is_better` \| `exact` \| `set_membership` |
+| `preferred_value` | jsonb | |
+| `green_limit` | jsonb | furthest value still green |
+| `yellow_limit` | jsonb | furthest value still yellow; beyond it is red |
+| `allowed_values` | jsonb | for `enum`; nullable |
+| `extraction_hint` | text | how to read the value from clause text |
+| `context_overrides` | jsonb | per-context limits, e.g. `[{"when": {"deal_value_band": ["strategic"]}, "yellow_limit": 36}]`; nullable |
+
+### 6.7 Red lines
+
+#### `red_line`
+Something never accepted without the named approval, or never at all. Replaces literal `prohibited_terms`.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | uuid PK | |
+| `scope` | text | `rule` \| `playbook` \| `global` |
+| `rule_id` | uuid FK → playbook_rule.id | set when `scope = rule`; cascade delete |
+| `playbook_id` | uuid FK → playbook.id | set when `scope = playbook` |
+| `key` | text | stable identifier, e.g. `lol-uncapped` |
+| `description` | text | plain statement of what is prohibited |
+| `condition_type` | text | `phrase` \| `regex` \| `parameter` \| `semantic` |
+| `condition` | jsonb | see below |
+| `action` | text | `block` (prohibited outright) \| `escalate` (needs the named approver) |
+| `approver_role_id` | uuid FK → approver_role.id | for `escalate`; nullable |
+| `rationale` | text | |
+
+Condition shapes:
+
+- `phrase`: `{"any": ["..."], "negation_guard": true}`. The guard suppresses a match preceded by a negation word in the same sentence. Deterministic (Layer 1).
+- `regex`: `{"pattern": "...", "flags": "i"}`. Deterministic (Layer 1).
+- `parameter`: `{"parameter_key": "cap_multiple_months", "op": "is_absent"}` or a comparison. Deterministic, over extracted values.
+- `semantic`: `{"test": "The clause makes the vendor's liability uncapped for any category other than the listed carve-outs."}`. Evaluated by the analysis model (Layer 2) and returned as a yes or no with a quote.
+
+### 6.8 Objections
+
+#### `rule_objection`
+| Column | Type | Notes |
+|---|---|---|
+| `id` | uuid PK | |
+| `rule_id` | uuid FK → playbook_rule.id | cascade delete |
+| `objection` | text | what the counterparty says |
+| `their_rationale` | text | why they say it |
+| `response` | text | our reply, in language that can be sent |
+| `talking_points` | jsonb | short list for a call |
+| `recommended_position_id` | uuid FK → rule_position.id | where to move if the objection holds; nullable |
+| `frequency` | text | `common` \| `occasional` \| `rare` |
+| `counterparty_profile` | text | e.g. "large hospital systems"; nullable |
+
+### 6.9 Dependencies
+
+#### `rule_dependency`
+| Column | Type | Notes |
+|---|---|---|
+| `id` | uuid PK | |
+| `rule_id` | uuid FK → playbook_rule.id | cascade delete |
+| `related_rule_key` | text | resolved within the merged rule set, so it may live in another layer |
+| `relation` | text | `read_with` \| `trade_against` \| `requires` \| `conflicts_with` |
+| `note` | text | e.g. "A higher cap is acceptable only if the indemnity is inside the cap" |
+
+### 6.10 Test cases
+
+#### `rule_test_case`
+Example clauses with expected outcomes, so a rule change can be regression-tested before it is published.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | uuid PK | |
+| `rule_id` | uuid FK → playbook_rule.id | cascade delete |
+| `name` | text | |
+| `sample_text` | text | a clause as it might appear in a contract; empty for a missing-clause case |
+| `context` | jsonb | deal context for the case; nullable |
+| `expected_outcome` | text | `compliant` \| `acceptable_variant` \| `fallback` \| `deviation` \| `red_line` \| `missing` |
+| `expected_zone` | text | `green` \| `yellow` \| `red` |
+| `expected_position_rung` | int | for `fallback`; nullable |
+| `expected_red_line_key` | text | for `red_line`; nullable |
+| `is_trap` | boolean | true for negated or look-alike wording that must not trigger |
+
+### 6.11 Context
+
+#### `context_dimension`
+| Column | Type | Notes |
+|---|---|---|
+| `key` | text PK | `deal_value_band`, `counterparty_tier`, `data_sensitivity`, `region`, `regimes` |
+| `name` | text | |
+| `value_type` | text | `enum` \| `multi_enum` |
+| `values` | jsonb | allowed values with definitions, e.g. band boundaries in dollars |
+| `source` | text | `upload` \| `metadata` \| `derived` |
+
+Company-specific, so rows come from seed or the API, not a migration. With no dimensions defined, the application accepts `contract.context` as given and skips validation and band derivation.
+
+### 6.12 Authority
+
+#### `approver_role`
+| Column | Type | Notes |
+|---|---|---|
+| `id` | uuid PK | |
+| `key` | text UNIQUE | e.g. `commercial_counsel` |
+| `name` | text | |
+| `function` | text | `legal` \| `security` \| `privacy` \| `finance` \| `sales` \| `delivery` |
+| `level` | int | seniority; higher approves more |
+| `default_sla_hours` | int | |
+
+#### `escalation_policy`
+The approval matrix.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | uuid PK | |
+| `playbook_id` | uuid FK → playbook.id | null means all playbooks |
+| `clause_type` | text FK → clause_family.key | null means any clause |
+| `zone` | text | `yellow` \| `red` |
+| `conditions` | jsonb | context match; nullable |
+| `approver_role_id` | uuid FK → approver_role.id | decision owner |
+| `consult_role_ids` | jsonb | functions reviewed in parallel |
+| `sla_hours` | int | |
+| `required_info` | jsonb | what the approver must be given |
+| `priority` | int | most specific match wins; ties broken by priority |
+
+A position's own `approver_role_id` takes precedence over the matrix. The matrix covers deviations that match no position, and red lines with `action = escalate`.
+
+### 6.13 Outcomes
+
+#### `playbook_exception`
+An approved departure from the playbook. Created in `requested` status when a yellow rung is accepted.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | uuid PK | |
+| `contract_id` | uuid FK → contract.id | |
+| `review_run_id` | uuid FK → review_run.id | nullable |
+| `rule_id` | uuid FK → playbook_rule.id | the exact frozen rule row |
+| `rule_key` | text | for grouping across versions |
+| `position_id` | uuid FK → rule_position.id | the rung agreed, if any; nullable |
+| `zone` | text | |
+| `agreed_text` | text | |
+| `parameter_values` | jsonb | values actually agreed |
+| `approver_role_id` | uuid FK → approver_role.id | |
+| `approved_by` | text | |
+| `rationale` | text | |
+| `give_get_obtained` | text | nullable |
+| `expires_at` | date | nullable |
+| `status` | text | `requested` \| `approved` \| `rejected` \| `expired` |
+
+Indexes: btree `contract_id`, btree `rule_key`.
+
+### 6.14 Reference data versus seed data
+
+| Data | Needed for the application to run? | Source |
+|---|---|---|
+| Agreement types (7) | Yes; playbooks and contracts reference them | Migration `010` |
+| Clause families (29) and synonyms | Yes; the document pipeline classifies clauses with them | Migration `010` |
+| Clause issues | No | Seed, or created through the API |
+| Context dimensions, approver roles, escalation policies | No; company-specific | Seed, or created through the API |
+| Playbooks, versions, rules and all rule children | No | Seed, or created through the API |
+| Synthetic contracts and negotiation history | No | Seed |
+
+Empty playbook, role and policy tables are a valid state: every feature works with no seed data loaded.
 
 ## 7. Negotiation Memory Store (NMS)
 
@@ -224,7 +574,11 @@ Append-only log. Patterns are a **read-time view**, not a maintained table.
 | `contract_id` | uuid FK | |
 | `counterparty_id` | uuid FK → party.id | grouping key |
 | `clause_type` | text | |
-| `position_offered` | text | `preferred` \| `fallback_1` \| ... |
+| `position_offered` | text | `preferred` \| `fallback_1` \| `fallback_2` \| ... |
+| `rule_id` | uuid FK → playbook_rule.id | the frozen rule row behind the redline. Nullable *(set by phase 4)* |
+| `rule_key` | text | for grouping across versions. Nullable *(set by phase 4)* |
+| `position_id` | uuid FK → rule_position.id | the rung offered. Nullable *(set by phase 4)* |
+| `playbook_version_id` | uuid FK → playbook_version.id | the version in force. Nullable *(set by phase 4)* |
 | `recommended_stance` | text | what S3 recommended |
 | `outcome` | text | `pending` \| `accepted` \| `rejected` \| `countered` (CHECK; nullable until user acts) |
 | `final_text` | text | the language that actually closed (nullable) |
@@ -239,6 +593,9 @@ SELECT counterparty_id, clause_type,
 FROM decision_event
 GROUP BY counterparty_id, clause_type;
 ```
+The view is created in the project schema and its definition names that schema explicitly.
+
+**Feedback loop.** Grouping `decision_event` and `playbook_exception` by `rule_key` and rung shows which fallbacks are actually used. A fallback accepted in most deals is a candidate to become the preferred position; a rule that is red in most deals is out of step with the market. Those findings become `playbook_change_log` reasons in the next version.
 
 ## 8. Obligation & monitoring (S8)
 
@@ -277,8 +634,9 @@ Records one end-to-end pipeline execution.
 | `id` | uuid PK | |
 | `contract_id` | uuid FK | |
 | `trigger` | text | `manual` \| `upload_event` (CHECK) |
-| `gate_decision` | text | `auto_applied` \| `escalated` (CHECK; nullable while running) |
-| `gate_reason` | jsonb | which hard-stop fired, aggregate score, max clause severity |
+| `gate_decision` | text | `auto_applied` \| `needs_approval` \| `escalated` (CHECK; nullable while running) |
+| `gate_reason` | jsonb | worst zone, which hard-stop fired, normalised score, and for yellow/red the approver role, time limit and required information (or a note that no approver is configured) |
+| `playbook_version_ids` | jsonb | the playbook versions this run was pinned to. Nullable *(set by phase 4)* |
 | `status` | text | `running` \| `completed` \| `failed` (CHECK) |
 | `started_at` / `completed_at` | timestamptz | |
 
@@ -312,6 +670,8 @@ S9 owns **no tables** — it is deterministic SQL views/materialized views over 
 
 Each table has a paired Pydantic model for API I/O and internal transfer, plus the SQLAlchemy ORM class. Key non-persisted transfer objects:
 
+- `ResolvedRule` — S6 resolution output: a merged rule with its children (positions, parameters, red lines, objections, dependencies, test cases) plus `source_playbook_id`, `source_playbook_name` and `source_version`.
+- Response models for every playbook entity (`PlaybookVersionResponse`, `RulePositionResponse`, `RedLineResponse`, `EscalationPolicyResponse`, …) in `app/schemas/playbook.py`. PATCH bodies are applied with `model_dump(exclude_unset=True)`, so a nullable field can be cleared by sending `null`.
 - `ProcessedContract` — S1 output: `{ clauses: list[ClauseDTO], metadata: MetadataDTO, paper_origin, counterparty_id, canonical_text }`.
 - `AnalysisResult` — S2 output: `{ flags: list[FlagDTO], risk: RiskDTO }`.
 - `RedlineResult` — S3 output: `{ redlines: list[RedlineDTO] }`.
@@ -319,6 +679,14 @@ Each table has a paired Pydantic model for API I/O and internal transfer, plus t
 
 ## 13. Migrations
 
-- Alembic; first migration enables `vector` extension and creates `party`, `contract`, `contract_metadata`, `clause`, `contract_version`.
-- Subsequent migrations add analysis, redline, playbook, NMS, obligation, review_run, qa_cache tables and the analytics views.
-- Every schema change is a migration; no manual DDL. Seed data (pre-built playbook templates for NDA/DPA/SaaS MSA/HIPAA/GDPR with default prohibited terms) is loaded via a seed script, not a migration.
+- Alembic. The migration environment creates the project schema if needed, keeps `alembic_version` in it (`version_table_schema`), and runs `SET LOCAL search_path TO <schema>, public` inside the migration transaction, so no migration names a schema in `op.create_table`. `public` stays on the path only so the `vector` type resolves. Runtime code does not rely on a session search path (the pooled Neon endpoint does not preserve one).
+- `001` enables the `vector` extension (in `public`, shared) and creates `party`, `contract`, `contract_metadata`, `clause`, `contract_version`. `002`–`009` add playbook, analysis, NMS, redline, review_run, qa_cache and obligation tables and the analytics views.
+- `010_playbook_lookups` — `agreement_type`, `clause_family`, `clause_issue`, `context_dimension`, `approver_role`, `escalation_policy`, plus the reference rows (7 agreement types, 29 clause families) as literals.
+- `011_playbook_structure` — extends `playbook` and `playbook_rule`; creates `playbook_version`, `playbook_change_log` and the six rule child tables; backfills legacy rows into versions and children; cascade delete from playbook to rules.
+- `012_playbook_outcomes` — new columns on `contract`, `clause`, `flag`, `risk_score`, `redline`, `decision_event`, `review_run`; widened `redline.position` and `review_run.gate_decision` checks; `clause.clause_type` FK; `playbook_exception`.
+- `013_decision_event_counterparty_nullable` — widens `decision_event.counterparty_id` to nullable, matching `contract.counterparty_id`, and removes the zero/nil-UUID placeholder the application used to write for an unknown counterparty; unrelated to the playbook rule shape.
+- `014_term_survival_synonym` — adds the `"term and survival"` heading synonym to `clause_family.synonyms` (a gap between migration `010`'s seed and the in-code `_SYNONYMS` dict, needed before `_SYNONYMS` is retired).
+- `015_drop_legacy_rule_columns` (destructive, task 5.5) — catches up any rule written through the CRUD API after `011` with no child rows yet, then drops the five legacy `playbook_rule` columns (`preferred_language`, `acceptable_variations`, `prohibited_terms`, `fallback_language`, `escalation_threshold`). Authored and dry-run tested; not yet applied to a live database.
+- Every schema change is a migration; no manual DDL. Migrations are written serially: one author at a time, `down_revision` set to the current head.
+- **Reference data comes from migrations; seed data does not.** A migration never reads a file under `backend/seed/`. Company content — clause issues, context dimensions, roles, policies, playbooks, rules, synthetic contracts and history — is loaded by the seed loaders in `backend/seed/` (Backend_Structure §6), which upsert by stable key, never modify a published version, and refuse to run outside the project schema.
+- Operational scripts: `scripts/move_to_schema.py` (one-time move of the original 17 tables and 6 views from `public` into the project schema, dry-run by default) and `scripts/check_partition.py` (read-only check that nothing of this project sits outside its namespace).

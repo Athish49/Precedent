@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +13,13 @@ import {
   useDraftMemo,
   usePrecedentSearch,
 } from '@/lib/api/hooks';
-import type { DraftSource, PrecedentClause } from '@/lib/api/types';
+import type {
+  DraftClauseBody,
+  DraftClauseMode,
+  DraftSource,
+  PaperOrigin,
+  PrecedentClause,
+} from '@/lib/api/types';
 import { cn } from '@/lib/utils';
 
 type Mode = 'clause' | 'document' | 'precedent' | 'memo';
@@ -72,10 +78,22 @@ function EmptyResult() {
 
 // ─── Mode 1: Single Clause ────────────────────────────────────────────────────
 
+// Same party-role / paper-origin vocabulary as the playbooks page's
+// "Resolve preview" and the intake slide-over.
+const PARTY_ROLES = ['vendor', 'customer', 'mutual'] as const;
+const PAPER_ORIGINS: PaperOrigin[] = ['own', 'counterparty'];
+
+const inputCls =
+  'w-full rounded border border-border bg-background px-3 py-1.5 text-sm outline-none focus:ring-1 focus:ring-primary/50';
+
 function ClauseComposer({ onPrompt }: { onPrompt?: string }) {
   const [clauseType, setClauseType] = useState('');
   const [context, setContext] = useState(onPrompt ?? '');
-  const [draftMode, setDraftMode] = useState('');
+  const [draftMode, setDraftMode] = useState<DraftClauseMode | ''>('');
+  const [contractType, setContractType] = useState('');
+  const [partyRole, setPartyRole] = useState('');
+  const [paperOrigin, setPaperOrigin] = useState<PaperOrigin | ''>('');
+  const [contextJson, setContextJson] = useState('');
   const [rewriteInstruction, setRewriteInstruction] = useState('');
   const draftClause = useDraftClause();
 
@@ -83,14 +101,54 @@ function ClauseComposer({ onPrompt }: { onPrompt?: string }) {
     if (onPrompt) setContext(onPrompt);
   }, [onPrompt]);
 
+  // Derived from contextJson on every render (same pattern as the playbooks
+  // page's resolve preview). Invalid JSON blocks submission rather than
+  // silently drafting without the deal context.
+  let dealContext: Record<string, unknown> | undefined;
+  let contextError = '';
+  if (contextJson.trim()) {
+    try {
+      const parsed: unknown = JSON.parse(contextJson);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        dealContext = parsed as Record<string, unknown>;
+      } else {
+        contextError = 'Deal context must be a JSON object.';
+      }
+    } catch {
+      contextError = 'Deal context must be valid JSON.';
+    }
+  }
+
+  // Playbook-resolution facts shared by the draft and rewrite requests.
+  function resolutionFields(): Partial<DraftClauseBody> {
+    return {
+      contract_type: contractType.trim() || undefined,
+      party_role: partyRole || undefined,
+      paper_origin: paperOrigin || undefined,
+      deal_context: dealContext,
+    };
+  }
+
   function handleSubmit() {
-    if (!clauseType || !context) return;
-    draftClause.mutate({ clause_type: clauseType, context, mode: draftMode || undefined });
+    if (!clauseType || !context || contextError) return;
+    draftClause.mutate({
+      clause_type: clauseType,
+      context,
+      mode: draftMode || undefined,
+      ...resolutionFields(),
+    });
   }
 
   function handleRewrite() {
-    if (!clauseType || !rewriteInstruction) return;
-    draftClause.mutate({ clause_type: clauseType, context: rewriteInstruction, mode: 'llm' });
+    const current = draftClause.data?.text;
+    if (!clauseType || !rewriteInstruction || !current || contextError) return;
+    draftClause.mutate({
+      clause_type: clauseType,
+      context: context || undefined,
+      instruction: `${rewriteInstruction}\n\nRewrite the following clause:\n${current}`,
+      mode: 'llm',
+      ...resolutionFields(),
+    });
   }
 
   const result = draftClause.data;
@@ -124,19 +182,68 @@ function ClauseComposer({ onPrompt }: { onPrompt?: string }) {
           />
         </div>
         <div className="space-y-1">
+          <label className="text-xs font-medium">
+            Contract type <span className="font-normal text-muted-foreground">(optional)</span>
+          </label>
+          <input
+            value={contractType}
+            onChange={(e) => setContractType(e.target.value)}
+            placeholder="e.g. nda, saas_msa, dpa"
+            className={inputCls}
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-1">
+            <label className="text-xs font-medium">Party role</label>
+            <select value={partyRole} onChange={(e) => setPartyRole(e.target.value)} className={inputCls}>
+              <option value="">Default (vendor)</option>
+              {PARTY_ROLES.map((r) => (
+                <option key={r} value={r}>{r}</option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium">Paper origin</label>
+            <select
+              value={paperOrigin}
+              onChange={(e) => setPaperOrigin(e.target.value as PaperOrigin | '')}
+              className={inputCls}
+            >
+              <option value="">Default (own)</option>
+              {PAPER_ORIGINS.map((o) => (
+                <option key={o} value={o}>{o}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs font-medium">
+            Deal context <span className="font-normal text-muted-foreground">(optional, JSON)</span>
+          </label>
+          <input
+            value={contextJson}
+            onChange={(e) => setContextJson(e.target.value)}
+            placeholder='{"deal_value_band": "mid", "regimes": ["hipaa"]}'
+            className={inputCls}
+          />
+          {contextError && <p className="text-xs text-destructive">{contextError}</p>}
+        </div>
+        <div className="space-y-1">
           <label className="text-xs font-medium">Mode (optional)</label>
           <select
             value={draftMode}
-            onChange={(e) => setDraftMode(e.target.value)}
-            className="w-full rounded border border-border bg-background px-3 py-1.5 text-sm outline-none focus:ring-1 focus:ring-primary/50"
+            onChange={(e) => setDraftMode(e.target.value as DraftClauseMode | '')}
+            className={inputCls}
           >
-            <option value="">Default</option>
-            <option value="playbook">Playbook</option>
-            <option value="frequency">Frequency</option>
-            <option value="llm">LLM (NL rewrite)</option>
+            <option value="">Default (playbook → frequency → LLM)</option>
+            <option value="frequency">Skip playbook (frequency → LLM)</option>
+            <option value="llm">LLM only</option>
           </select>
         </div>
-        <Button disabled={!clauseType || !context || draftClause.isPending} onClick={handleSubmit}>
+        <Button
+          disabled={!clauseType || !context || !!contextError || draftClause.isPending}
+          onClick={handleSubmit}
+        >
           {draftClause.isPending ? 'Drafting…' : 'Draft Clause'}
         </Button>
       </div>
@@ -164,7 +271,7 @@ function ClauseComposer({ onPrompt }: { onPrompt?: string }) {
                   <Button
                     variant="outline"
                     size="sm"
-                    disabled={!rewriteInstruction || draftClause.isPending}
+                    disabled={!rewriteInstruction || !!contextError || draftClause.isPending}
                     onClick={handleRewrite}
                   >
                     Rewrite
@@ -449,7 +556,11 @@ function MemoComposer() {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function DraftingPage() {
+// useSearchParams() opts the page into client-side rendering during static
+// generation, which Next.js requires to be wrapped in a Suspense boundary
+// (see "missing-suspense-with-csr-bailout"). The default export below
+// provides that boundary; this inner component holds the actual page body.
+function DraftingPageInner() {
   const searchParams = useSearchParams();
   const routedPrompt = searchParams.get('prompt') ?? undefined;
   const [mode, setMode] = useState<Mode>('clause');
@@ -483,5 +594,13 @@ export default function DraftingPage() {
         {mode === 'memo' && <MemoComposer />}
       </div>
     </div>
+  );
+}
+
+export default function DraftingPage() {
+  return (
+    <Suspense fallback={null}>
+      <DraftingPageInner />
+    </Suspense>
   );
 }

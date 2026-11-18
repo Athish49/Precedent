@@ -1,0 +1,7 @@
+# Failing fixture: edits applied to a copy of fixtures/valid by test_playbook_models.py.
+description: 'Cross-check: rule_key resolves to a family in taxonomy.yaml.'
+file: playbooks/saas_msa_vendor/risk.yaml
+edits:
+- path: [rules, 0, rule_key]
+  set: liability.cap_amount
+expect: {code: rule.unknown_family, message: expected_families, rule_key: liability.cap_amount}

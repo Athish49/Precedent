@@ -1,0 +1,2371 @@
+rules:
+  - rule_key: payment.payment_terms
+    title: Payment terms
+    required: true
+    risk_weight: 4
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Customer pays invoices within 30 days of the invoice date; longer terms
+      up to 60 days are negotiable with Deal Desk approval.
+    risk_rationale: >
+      Halcyon invoices annually in advance on most of its 310 customers, and
+      cash timing matters most on the larger deals that fund the $72M ARR
+      base. Net 30 keeps collections predictable against payroll and AWS
+      hosting costs; stretching past 60 days materially delays cash on the
+      largest accounts, some of which run to $2.4M a year.
+    detection_guidance: >
+      Look for "net 30", "within thirty (30) days of the invoice date", "due
+      upon receipt" or "payable in arrears" in the payment section or the
+      order form. Convert any stated period to days from the invoice date. A
+      payment clause with fees stated but no stated period is a missing
+      clause, since the parties have fees but no due date.
+    source_ref: Halcyon Finance Policy FIN-02; accounts receivable terms
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Net 30
+        zone: green
+        summary: Customer pays each invoice within 30 days of the invoice date.
+        language: >
+          Customer shall pay each undisputed invoice within thirty (30) days
+          of the invoice date. Halcyon will invoice the Fees annually in
+          advance of each Subscription Term unless the Order Form states
+          otherwise.
+      - kind: fallback
+        rung: 1
+        label: Net 45
+        zone: green
+        summary: Payment within 45 days of the invoice date.
+        language: >
+          Customer shall pay each undisputed invoice within forty-five (45)
+          days of the invoice date. Halcyon will invoice the Fees annually in
+          advance of each Subscription Term unless the Order Form states
+          otherwise.
+      - kind: fallback
+        rung: 2
+        label: Net 60
+        zone: yellow
+        approver_role: deal_desk
+        conditions: {counterparty_tier: [tier_1, tier_2]}
+        give_get: Ask for annual prepayment in full on signature, with no instalments.
+        summary: Payment within 60 days of the invoice date.
+        language: >
+          Customer shall pay each undisputed invoice within sixty (60) days
+          of the invoice date. Halcyon will invoice the Fees annually in
+          advance of each Subscription Term unless the Order Form states
+          otherwise.
+      - kind: acceptable_variant
+        label: Due-within-30-days wording
+        zone: green
+        summary: Same 30-day period in different wording.
+        language: >
+          All amounts invoiced under this Agreement are due and payable
+          within thirty (30) days following Customer's receipt of the
+          applicable invoice.
+    parameters:
+      - key: payment_terms_days
+        label: Days to pay an invoice
+        value_type: duration_days
+        unit: days
+        direction: lower_is_better
+        preferred_value: 30
+        green_limit: 45
+        yellow_limit: 60
+        extraction_hint: >
+          Convert "net 30", "net 45", "net 60" or a stated number of days
+          after the invoice date to the day count. "Due upon receipt" is 0.
+          "Annually in advance" without a due date does not by itself set
+          this parameter; look for the separate payment-period wording.
+    red_lines:
+      - key: pay-terms-contingent-on-satisfaction
+        description: >
+          Payment is made contingent on Customer's subjective satisfaction or
+          on Customer's own receipt of payment from a third party, rather
+          than on the invoice period running.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause makes Customer's obligation to pay conditional on
+            Customer's satisfaction with the Services, or on Customer first
+            being paid by a third party (a "pay-when-paid" or
+            "pay-if-paid" condition), rather than simply on the stated
+            payment period running from the invoice date.
+        action: block
+        rationale: >
+          A satisfaction or pay-when-paid condition turns a fixed revenue
+          stream into a discretionary one and is not something Halcyon's
+          finance team can forecast or collect against; this is distinct
+          from, and more severe than, simply a longer payment period.
+    objections:
+      - objection: Our accounts payable cycle is fixed at Net 60; we cannot process anything faster.
+        their_rationale: Large health systems batch vendor payments on a fixed AP run and will not create an exception.
+        response: >
+          We can agree to Net 60 with Deal Desk sign-off in exchange for
+          annual prepayment in full on signature, which removes the
+          collections risk the longer term creates for us. Let us know if
+          annual prepayment works for your budget cycle.
+        talking_points:
+          - Net 60 is available but needs Deal Desk approval and a give-get.
+          - Prepayment in full removes the cash-timing concern entirely.
+        recommended_position: {rule_key: payment.payment_terms, rung: 2}
+        frequency: common
+        counterparty_profile: Large hospital systems and public bodies
+      - objection: We only pay invoices we have reviewed and approved internally, which can take time.
+        their_rationale: Internal procurement sign-off is a real operational constraint for the counterparty.
+        response: >
+          We are glad to work with your review cycle, but the clause needs a
+          fixed outside date so Fees do not become payable at Customer's
+          discretion. We can extend to Net 45 to give your team more room
+          within the stated period.
+        talking_points:
+          - A fixed day count protects both sides from open-ended disputes.
+          - Net 45 already builds in meaningful review time.
+        frequency: occasional
+        counterparty_profile: Mid-market physician groups
+    dependencies:
+      - related_rule_key: termination.for_cause_cure_period
+        relation: trade_against
+        note: >
+          A longer payment term should be paired with a shorter, separate
+          cure period specifically for non-payment, so slow payment does not
+          also delay Halcyon's ability to act on it.
+      - related_rule_key: suspension.suspension_rights
+        relation: requires
+        note: >
+          The suspension trigger for non-payment is measured from the due
+          date this rule sets; the two must use consistent day counts.
+    test_cases:
+      - name: Standard Net 30
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Customer will pay all undisputed invoices within thirty (30) days
+          after the date of the invoice.
+      - name: Due-on-receipt variant wording
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Invoices issued under this Agreement are payable in full upon
+          Customer's receipt, provided that Customer shall in any event remit
+          payment no later than thirty (30) days after the invoice date.
+      - name: Net 60 for a tier-1 hospital system
+        context: {counterparty_tier: tier_1}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Customer shall settle each invoice no later than sixty (60) days
+          following the date it is issued.
+      - name: Net 50 payment term
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Customer shall pay invoices within fifty (50) days of the invoice
+          date.
+      - name: Pay-when-paid condition
+        expected_outcome: red_line
+        expected_red_line_key: pay-terms-contingent-on-satisfaction
+        expected_zone: red
+        sample_text: >
+          Customer's obligation to pay any invoice is conditioned on
+          Customer's receipt of the corresponding reimbursement from its own
+          payers, and payment is due within thirty (30) days after such
+          reimbursement is received.
+      - name: No stated payment period
+        expected_outcome: missing
+        expected_zone: yellow
+        sample_text: ""
+  - rule_key: payment.late_fees
+    title: Late fees on overdue amounts
+    required: true
+    risk_weight: 3
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Overdue, undisputed amounts accrue interest at 1.5% a month; Halcyon
+      may recover reasonable collection costs. No customer set-off right.
+    risk_rationale: >
+      With a median contract of $165k a year, a handful of slow-paying
+      accounts can meaningfully affect quarterly cash flow if there is no
+      cost to paying late. A modest late fee gives Customer a reason to pay
+      on time without being so aggressive that it becomes a point of
+      principle in renewal talks.
+    detection_guidance: >
+      Look for "interest at the rate of", a monthly or annual percentage,
+      "or the maximum rate permitted by applicable law", "late charge" and
+      "costs of collection, including reasonable attorneys' fees". Also check
+      for "set off" or "withhold" language in Customer's favor, which is a
+      deviation regardless of the interest rate. No late-fee wording at all
+      is a concession in Customer's favor, not a missing clause; treat it as
+      the no-late-fee fallback below, not as absence of the issue.
+    source_ref: Halcyon Finance Policy FIN-02
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: 1.5% a month
+        zone: green
+        summary: Interest of 1.5% a month on overdue, undisputed amounts.
+        language: >
+          Any undisputed amount not paid when due will accrue interest at the
+          rate of one and one-half percent (1.5%) per month, or the highest
+          rate permitted by applicable law if lower, from the due date until
+          paid, and Halcyon may recover its reasonable costs of collection,
+          including reasonable attorneys' fees.
+      - kind: fallback
+        rung: 1
+        label: 1.0% a month
+        zone: green
+        summary: Interest reduced to 1.0% a month.
+        language: >
+          Any undisputed amount not paid when due will accrue interest at the
+          rate of one percent (1.0%) per month, or the highest rate permitted
+          by applicable law if lower, from the due date until paid, and
+          Halcyon may recover its reasonable costs of collection, including
+          reasonable attorneys' fees.
+      - kind: fallback
+        rung: 2
+        label: No late fee
+        zone: yellow
+        approver_role: deal_desk
+        give_get: Ask for a shorter payment term or annual prepayment in exchange.
+        summary: No interest or late charge on overdue amounts.
+        language: >
+          This Agreement states no interest or late charge on amounts paid
+          after their due date; Halcyon's remedies for non-payment are those
+          stated in the suspension and termination provisions of this
+          Agreement.
+      - kind: acceptable_variant
+        label: Statutory-rate wording
+        zone: green
+        summary: Interest pegged to a statutory rate that is at or above 1.0% a month.
+        language: >
+          Overdue, undisputed amounts bear interest at the statutory rate
+          applicable to commercial debts under the law governing this
+          Agreement, together with Halcyon's reasonable costs of collection.
+    parameters:
+      - key: late_fee_percent_per_month
+        label: Late fee, percent a month
+        value_type: percent
+        unit: percent per month
+        direction: higher_is_better
+        preferred_value: 1.5
+        green_limit: 1.0
+        yellow_limit: 0
+        extraction_hint: >
+          Read the stated monthly rate directly. Convert an annual rate to a
+          monthly equivalent by dividing by twelve. No late-fee wording at
+          all extracts as 0, which is the no-late-fee yellow rung, not an
+          absent parameter.
+    red_lines:
+      - key: late-fee-customer-setoff
+        description: >
+          Customer is given a right to set off or withhold amounts it claims
+          are owed against the Fees payable to Halcyon.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause gives Customer a right to set off, withhold or
+            deduct any amount from the Fees payable to Halcyon, based on
+            Customer's own claim or dispute, rather than merely stating the
+            interest rate Halcyon may charge on amounts Customer owes.
+        action: block
+        rationale: >
+          A set-off right lets Customer unilaterally reduce what it pays
+          based on its own assessment of a dispute, which turns a fixed
+          subscription fee into something Customer can discount at will; this
+          is a different and more severe problem than the interest rate
+          itself.
+    objections:
+      - objection: 1.5% a month is well above what we pay our other vendors; we would like it removed.
+        their_rationale: Hospital procurement teams compare late-fee terms across vendors and push back on anything above a nominal rate.
+        response: >
+          We can bring the rate down to 1.0% a month, which is in line with
+          standard commercial terms, but removing it entirely needs Deal Desk
+          approval and usually comes with a shorter payment term in return.
+        talking_points:
+          - 1.0% a month is the market-standard fallback, offered without escalation.
+          - Removing the fee only happens alongside a shorter payment term or prepayment.
+        recommended_position: {rule_key: payment.late_fees, rung: 1}
+        frequency: common
+        counterparty_profile: Mid-market and tier-2 customers
+      - objection: If you can charge us interest for paying late, we should be able to withhold payment when Services are down.
+        their_rationale: Counterparty treats the two as symmetrical remedies for breach of the same agreement.
+        response: >
+          Service level failures already have a dedicated remedy, the
+          service credit, so the fee and the credit cover different
+          problems; a general set-off right would let either side withhold
+          payment over any dispute, which we are not able to agree to.
+        talking_points:
+          - Service credits already address availability failures.
+          - A set-off right is a global red line, not a negotiable term.
+        frequency: occasional
+        counterparty_profile: Tier-1 health systems with sophisticated procurement
+    dependencies:
+      - related_rule_key: payment.payment_terms
+        relation: trade_against
+        note: >
+          Removing the late fee entirely is a larger concession when paired
+          with a longer payment term; prefer offering only one of the two.
+    test_cases:
+      - name: Standard 1.5% monthly interest
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Amounts not paid by their due date bear interest at one and
+          one-half percent (1.5%) per month until paid in full.
+      - name: Statutory-rate variant
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Past-due, undisputed invoices accrue interest at the maximum rate
+          permitted under applicable law for commercial accounts.
+      - name: Reduced to 1.0% a month
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          Overdue amounts accrue interest at a rate of one percent (1.0%) per
+          month from the due date.
+      - name: 0.5% monthly rate
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Late payments accrue a charge of one-half of one percent (0.5%) of
+          the overdue amount for each month or part of a month it remains
+          unpaid.
+      - name: Trap - Customer may not set off
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Overdue amounts bear interest at 1.5% per month, and Customer shall
+          not set off, withhold or deduct any amount from the Fees for any
+          reason, including a dispute over the Services.
+  - rule_key: payment.price_increases
+    title: Renewal price increases
+    required: true
+    risk_weight: 5
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Fees may increase by up to 7% at each renewal on 60 days' notice; a
+      cap of 5% remains green, and a multi-year price freeze needs Deal Desk
+      approval.
+    risk_rationale: >
+      AWS hosting and staffing costs rise every year, and with a median
+      contract of $165k the difference between a 5% and a 7% increase is
+      real at scale across 310 customers. A stated cap also protects
+      Customer from an open-ended increase, which keeps renewal
+      conversations about value rather than price shock.
+    detection_guidance: >
+      Look for "increase the Fees", "upon each renewal", a percentage cap,
+      "Consumer Price Index", "then-current list price" or "Fees shall
+      remain fixed for" a number of years. No cap at all leaves renewal
+      pricing fully at Halcyon's discretion, which favors Halcyon and is a
+      concession in our favor rather than a missing clause; do not treat
+      silence on this issue as missing.
+    source_ref: Halcyon Finance Policy FIN-03; renewal pricing guidance
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Up to 7% a year
+        zone: green
+        summary: Fees may increase up to 7% at each renewal, on 60 days' notice.
+        language: >
+          Upon each renewal of the Subscription Term, Halcyon may increase
+          the Fees by notice given at least sixty (60) days before the
+          renewal date, provided that any such increase shall not exceed
+          seven percent (7%) of the Fees in effect for the immediately
+          preceding Subscription Term.
+      - kind: fallback
+        rung: 1
+        label: Capped at 5%
+        zone: green
+        summary: The renewal increase cap is reduced to 5%.
+        language: >
+          Upon each renewal of the Subscription Term, Halcyon may increase
+          the Fees by notice given at least sixty (60) days before the
+          renewal date, provided that any such increase shall not exceed
+          five percent (5%) of the Fees in effect for the immediately
+          preceding Subscription Term.
+      - kind: fallback
+        rung: 2
+        label: Fixed price for the renewal term
+        zone: yellow
+        approver_role: deal_desk
+        conditions: {deal_value_band: [enterprise, strategic]}
+        give_get: Ask for a longer renewal term, such as 24 or 36 months, in exchange.
+        summary: Fees remain fixed, with no increase, for the stated renewal term.
+        language: >
+          Upon each renewal, the Fees shall remain fixed at the amount in
+          effect for the immediately preceding Subscription Term for the
+          renewal term stated on the applicable Order Form.
+      - kind: acceptable_variant
+        label: Index-linked increase at or below 7%
+        zone: green
+        summary: An increase tied to CPI, capped so it cannot exceed 7%.
+        language: >
+          Upon each renewal, the Fees may increase by the percentage increase
+          in the Consumer Price Index for the preceding twelve (12) months,
+          provided that the increase shall in no event exceed seven percent
+          (7%).
+    parameters:
+      - key: price_increase_notice_days
+        label: Notice of a renewal price increase, in days
+        value_type: duration_days
+        unit: days
+        direction: higher_is_better
+        preferred_value: 60
+        green_limit: 45
+        yellow_limit: 30
+        extraction_hint: >
+          Read the stated number of days' advance notice required before a
+          renewal price increase takes effect.
+      - key: price_increase_cap_percent
+        label: Renewal price increase cap, percent
+        value_type: percent
+        unit: percent per renewal
+        direction: higher_is_better
+        preferred_value: 7
+        green_limit: 5
+        yellow_limit: 0
+        extraction_hint: >
+          Read the stated percentage cap on each renewal increase directly. A
+          CPI-linked increase with no stated ceiling is treated as
+          uncapped for this parameter, even though the deviation itself is
+          still assessed on its own terms.
+      - key: price_lock_years
+        label: Years Fees are fixed with no increase
+        value_type: number
+        unit: years
+        direction: lower_is_better
+        preferred_value: 0
+        green_limit: 0
+        yellow_limit: 3
+        extraction_hint: >
+          0 when any renewal increase is permitted at all, however small. Set
+          to the number of years the Fees are contractually frozen when a
+          price-lock or fixed-price clause applies.
+    red_lines:
+      - key: price-lock-over-3-years
+        description: >
+          Fees are frozen, with no permitted increase, for more than three
+          years.
+        condition_type: parameter
+        condition: {parameter_key: price_lock_years, op: gt, value: 3}
+        action: block
+        rationale: >
+          A price lock beyond a few years leaves Halcyon unable to recover
+          rising AWS and staffing costs on that account for the life of a
+          long agreement, and sets a precedent other large accounts will
+          expect at their own renewal.
+    objections:
+      - objection: A 7% increase is far above typical healthcare IT budget growth; we need a hard cap closer to CPI.
+        their_rationale: Hospital systems set multi-year budgets and cannot absorb unpredictable software cost increases.
+        response: >
+          We can bring the cap down to 5%, which is already below our
+          standard rate and does not need approval. If you need the Fees
+          fixed outright, we can discuss that in exchange for a longer
+          renewal term.
+        talking_points:
+          - 5% is available immediately, no escalation required.
+          - A fixed price is available for a longer committed renewal term.
+        recommended_position: {rule_key: payment.price_increases, rung: 1}
+        frequency: common
+        counterparty_profile: Tier-1 and tier-2 hospital systems
+      - objection: Lock the price for the full five years of our renewal, with no exceptions.
+        their_rationale: Large strategic accounts want cost certainty to match their own multi-year budget cycles.
+        response: >
+          We can fix the price for a strategic renewal term with Deal Desk
+          approval, but we are not able to agree to a lock beyond that term
+          without further sign-off, since it removes our ability to recover
+          rising hosting costs.
+        talking_points:
+          - A fixed-price renewal is available for strategic accounts with approval.
+          - A lock beyond the stated renewal term is not something we can offer.
+        recommended_position: {rule_key: payment.price_increases, rung: 2}
+        frequency: occasional
+        counterparty_profile: Strategic accounts over $1.5M a year
+    dependencies:
+      - related_rule_key: term.initial_term
+        relation: trade_against
+        note: >
+          A lower price-increase cap or a price freeze is a reasonable ask
+          from Customer in exchange for agreeing to a longer initial term.
+    test_cases:
+      - name: Standard 7% renewal cap
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          At each renewal, Halcyon may raise the then-current Fees by no more
+          than seven percent (7%), on at least sixty (60) days' notice.
+      - name: CPI-linked, capped at 7%
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Fees may be adjusted at each renewal to reflect the change in the
+          Consumer Price Index over the prior year, but any such adjustment
+          will not exceed seven percent (7%).
+      - name: 5% cap
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          Renewal Fees will not increase by more than five percent (5%) over
+          the prior term's Fees.
+      - name: 3% renewal increase cap
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Halcyon may increase the Fees at renewal by up to three percent
+          (3%) upon notice to Customer.
+      - name: Trap - no price-lock commitment beyond the term
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Nothing in this Agreement fixes the Fees beyond the then-current
+          Subscription Term; at each renewal, Halcyon may increase the Fees
+          by up to seven percent (7%) on sixty (60) days' notice.
+  - rule_key: payment.taxes
+    title: Allocation of taxes on the fees
+    required: true
+    risk_weight: 3
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Fees are exclusive of taxes other than those on Halcyon's net income;
+      Customer bears sales, use, VAT and similar taxes and provides any
+      exemption certificate; cross-border withholding gross-up needs Deal
+      Desk approval.
+    risk_rationale: >
+      Halcyon serves US hospital systems and EU private clinic groups, so
+      both US sales and use tax and EU VAT regimes apply across the $72M ARR
+      base. Several non-profit hospital customers hold tax exemptions that
+      must be honored correctly to avoid Halcyon over-collecting or
+      under-remitting tax on the same invoice stream.
+    detection_guidance: >
+      Look for "exclusive of taxes", "sales, use, value added or withholding
+      taxes", "gross up", "exemption certificate" and "taxes based on
+      Halcyon's net income". Silence on who bears tax leaves it unclear
+      whether the stated Fees include tax, which is a missing clause, not a
+      concession either way.
+    source_ref: Halcyon Finance Policy FIN-04; tax allocation guidance
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Exclusive of taxes, Customer bears them
+        zone: green
+        summary: Fees are exclusive of tax; Customer pays all taxes except those on Halcyon's net income.
+        language: >
+          All Fees are exclusive of applicable sales, use, value added,
+          goods and services and similar taxes, which Customer shall pay or
+          reimburse to Halcyon, excluding any tax imposed on Halcyon's net
+          income. Customer shall provide Halcyon with a valid exemption
+          certificate before invoicing if it claims a tax exemption.
+      - kind: fallback
+        rung: 1
+        label: Exemption certificate required before exemption applies
+        zone: green
+        summary: Same allocation, with the exemption conditioned on a certificate on file in advance.
+        language: >
+          All Fees are exclusive of applicable sales, use, value added,
+          goods and services and similar taxes, which Customer shall pay or
+          reimburse to Halcyon, excluding any tax imposed on Halcyon's net
+          income. No tax exemption applies to an invoice unless Customer has
+          delivered a valid, then-current exemption certificate to Halcyon
+          at least ten (10) business days before that invoice is issued.
+      - kind: fallback
+        rung: 2
+        label: Withholding gross-up
+        zone: yellow
+        approver_role: deal_desk
+        conditions: {region: [eu, uk, other]}
+        give_get: Ask for annual prepayment to offset the administrative cost of the gross-up.
+        summary: Halcyon agrees to a gross-up for cross-border withholding tax.
+        language: >
+          If Customer is required by law to withhold any amount from a
+          payment to Halcyon on account of tax, Customer shall increase the
+          payment so that Halcyon receives, after withholding, the full
+          amount it would have received had no withholding applied.
+      - kind: acceptable_variant
+        label: Taxes-payable-by-Customer wording
+        zone: green
+        summary: Different wording for the same allocation.
+        language: >
+          Customer is responsible for all sales, use, value added and
+          similar taxes assessed on the Fees, other than taxes based on
+          Halcyon's net income, and shall pay such taxes in addition to the
+          Fees unless it furnishes a valid exemption certificate.
+    parameters:
+      - key: withholding_tax_gross_up
+        label: Halcyon bears cross-border withholding gross-up
+        value_type: boolean
+        direction: exact
+        preferred_value: false
+        green_limit: false
+        yellow_limit: true
+        extraction_hint: >
+          True if the clause requires Halcyon (rather than Customer) to
+          absorb or gross up for withholding tax on cross-border payments;
+          false if Customer bears it or no withholding applies.
+    red_lines:
+      - key: tax-income-tax-indemnity
+        description: >
+          Halcyon is required to bear or indemnify Customer for taxes based
+          on Halcyon's own net income, or for taxes generally without the
+          net-income carve-out.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause requires Halcyon to pay, reimburse or indemnify
+            Customer for any tax measured by Halcyon's income or profits, or
+            states that Halcyon bears all taxes of any kind arising from the
+            Agreement with no carve-out for Halcyon's own income tax.
+        action: block
+        rationale: >
+          Taxes on Halcyon's own income are Halcyon's cost of doing business
+          everywhere it operates and are not a negotiable term tied to any
+          one customer's deal.
+    objections:
+      - objection: We are a non-profit hospital and are exempt from sales tax; this clause should not apply to us.
+        their_rationale: Many US non-profit health systems hold a genuine, documented state tax exemption.
+        response: >
+          We honor a valid exemption certificate on file; please send the
+          current certificate and we will apply the exemption going forward
+          and will not charge tax on your invoices.
+        talking_points:
+          - The clause already carves out a valid exemption certificate.
+          - We need the certificate on file before, not after, an invoice issues.
+        frequency: common
+        counterparty_profile: Non-profit hospital systems
+      - objection: Your invoices to our EU entity must be net of any withholding tax we are required to deduct.
+        their_rationale: Some jurisdictions legally require the payer to withhold tax at source regardless of the contract's allocation.
+        response: >
+          We can agree to a withholding gross-up for EU and UK deals with
+          Deal Desk approval, in exchange for annual prepayment to offset the
+          added administrative cost on our side.
+        talking_points:
+          - A gross-up is available for cross-border deals, not as a default.
+          - Prepayment is the standard give-get for this concession.
+        recommended_position: {rule_key: payment.taxes, rung: 2}
+        frequency: occasional
+        counterparty_profile: EU private clinic groups
+    dependencies:
+      - related_rule_key: payment.payment_terms
+        relation: read_with
+        note: >
+          The exemption certificate deadline in this rule should be checked
+          against the payment term so Customer has enough notice before the
+          first invoice under a new Order Form.
+    test_cases:
+      - name: Standard exclusive-of-tax allocation
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          The Fees stated on the Order Form do not include applicable sales,
+          use or similar taxes, which Customer will pay in addition, except
+          for taxes assessed on Halcyon's net income.
+      - name: Taxes payable by Customer, different wording
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Customer shall bear and pay all transaction taxes arising from
+          this Agreement, other than any tax based on Halcyon's income, upon
+          presentation of a valid exemption certificate where applicable.
+      - name: Exemption certificate required in advance
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          Customer is responsible for all applicable taxes other than those
+          on Halcyon's net income, and any claimed exemption requires a
+          current certificate on file with Halcyon no later than ten (10)
+          business days before the invoice date.
+      - name: Fees stated inclusive of sales and use tax
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          The Fees stated on the Order Form are inclusive of applicable
+          sales and use tax, which Halcyon will remit on Customer's behalf;
+          this does not affect Halcyon's own obligation to pay tax on its
+          net income.
+      - name: Halcyon must indemnify Customer for Halcyon's own income tax
+        expected_outcome: red_line
+        expected_red_line_key: tax-income-tax-indemnity
+        expected_zone: red
+        sample_text: >
+          Halcyon shall indemnify and hold Customer harmless from any tax
+          assessed on Halcyon's revenue or net income arising from amounts
+          paid under this Agreement.
+      - name: No allocation of taxes stated
+        expected_outcome: missing
+        expected_zone: yellow
+        sample_text: ""
+  - rule_key: term.initial_term
+    title: Initial subscription term
+    required: true
+    risk_weight: 4
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      The first committed Subscription Term is 36 months; terms of 12
+      months or more stay green; shorter committed terms, down to a
+      3-month floor, need VP Sales approval; month-to-month is a red line.
+    risk_rationale: >
+      Implementation of Halcyon Engage involves HL7 FHIR integration with a
+      hospital's record system, which takes months to complete and is not
+      worth the cost on a short commitment. A 36-month term matches the
+      revenue recognition and discounting Halcyon builds into its pricing
+      for a $165k median contract, and protects against churn shortly after
+      a costly integration.
+    detection_guidance: >
+      Look for "Initial Term", "Subscription Term", "commences on the
+      Effective Date and continues for" and a stated period in months or
+      years, in the agreement body or the Order Form. "Month-to-month"
+      wording, or language that lets either party exit on short notice with
+      no minimum period, is a deviation at best and usually the red line
+      below, not a missing clause. No stated term at all is a missing
+      clause.
+    source_ref: Halcyon Finance Policy FIN-01; subscription revenue guidance
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: 36-month Initial Term
+        zone: green
+        summary: The Initial Term is 36 months from the Effective Date.
+        language: >
+          The Subscription Term commences on the Effective Date stated on
+          the Order Form and continues for an initial period of thirty-six
+          (36) months (the "Initial Term"), unless earlier terminated as
+          permitted by this Agreement.
+      - kind: fallback
+        rung: 1
+        label: 12-month Initial Term
+        zone: green
+        summary: The Initial Term is reduced to 12 months.
+        language: >
+          The Subscription Term commences on the Effective Date stated on
+          the Order Form and continues for an initial period of twelve (12)
+          months (the "Initial Term"), unless earlier terminated as
+          permitted by this Agreement.
+      - kind: fallback
+        rung: 2
+        label: 3-month Initial Term
+        zone: yellow
+        approver_role: vp_sales
+        give_get: Ask for annual prepayment in full and a non-refundable implementation fee.
+        summary: The Initial Term is reduced to a 3-month floor.
+        language: >
+          The Subscription Term commences on the Effective Date stated on
+          the Order Form and continues for an initial period of three (3)
+          months (the "Initial Term"), unless earlier terminated as
+          permitted by this Agreement.
+        internal_note: >
+          3 months is an internally set floor for a committed term; it is
+          not stated in the company risk appetite table and should be
+          revisited at the next review.
+      - kind: acceptable_variant
+        label: Continues-for wording with an Order Form reference
+        zone: green
+        summary: Same 36-month commitment, referencing the Order Form for the period.
+        language: >
+          This Agreement and each Order Form are effective for the period
+          stated on the applicable Order Form, which shall be no less than
+          thirty-six (36) months unless the parties agree otherwise in
+          writing.
+    parameters:
+      - key: initial_term_months
+        label: Initial Term, in months
+        value_type: number
+        unit: months
+        direction: higher_is_better
+        preferred_value: 36
+        green_limit: 12
+        yellow_limit: 3
+        extraction_hint: >
+          Read the stated Initial Term or Subscription Term length directly
+          in months, converting years to months. Month-to-month or
+          evergreen wording with no minimum period does not map to a number
+          here; flag it against the red line instead.
+    red_lines:
+      - key: iterm-month-to-month
+        description: >
+          The agreement runs month-to-month, or otherwise states no minimum
+          committed Initial Term, from the outset.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause gives the agreement no fixed Initial Term and instead
+            lets it run on a month-to-month or similarly open-ended basis
+            from the start, with no minimum committed period.
+        action: block
+        rationale: >
+          With no minimum committed period, Halcyon cannot justify the
+          implementation effort or the pricing it extends against a
+          multi-year relationship, and every account becomes cancellable
+          before its HL7 FHIR integration has even stabilized.
+    objections:
+      - objection: We cannot commit to 36 months before we know the integration will work for our clinicians.
+        their_rationale: Clinical staff adoption is uncertain until the system has been used in production for a while.
+        response: >
+          We can start with a 12-month Initial Term, which still gives your
+          team a full year to evaluate fit, and most customers renew well
+          before then. A shorter commitment than that needs VP Sales sign-off
+          and usually comes with prepayment.
+        talking_points:
+          - 12 months is available without escalation.
+          - A pilot concern is better addressed through a phased rollout than a short term.
+        recommended_position: {rule_key: term.initial_term, rung: 1}
+        frequency: common
+        counterparty_profile: Tier-2 and tier-3 customers evaluating Halcyon Engage for the first time
+      - objection: Our procurement rules do not allow multi-year committed contracts without a break clause.
+        their_rationale: Some public and non-profit hospital systems have internal policies against long non-cancellable commitments.
+        response: >
+          We can go as short as three months with VP Sales approval if paired
+          with prepayment and a non-refundable implementation fee, since a
+          very short term changes how we price and resource the
+          implementation.
+        talking_points:
+          - A 3-month floor is available only with approval and a give-get.
+          - Month-to-month with no minimum period is not something we can offer.
+        recommended_position: {rule_key: term.initial_term, rung: 2}
+        frequency: occasional
+        counterparty_profile: Public-sector and tier-1 health systems with procurement constraints
+    dependencies:
+      - related_rule_key: payment.price_increases
+        relation: trade_against
+        note: >
+          A longer Initial Term is a reasonable basis to offer a lower
+          renewal price-increase cap or a fixed price for the term.
+    test_cases:
+      - name: Standard 36-month term
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Beginning on the Effective Date, the Subscription Term runs for
+          thirty-six (36) consecutive months.
+      - name: Order Form reference variant
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          The term of this Agreement is the period stated on the Order Form,
+          which will be at least thirty-six (36) months.
+      - name: 12-month term
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          This Agreement commences on the Effective Date and runs for a
+          period of twelve (12) months.
+      - name: 6-month term with no approval basis stated
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          The Initial Term of this Agreement is six (6) months from the
+          Effective Date.
+      - name: Month-to-month from inception
+        expected_outcome: red_line
+        expected_red_line_key: iterm-month-to-month
+        expected_zone: red
+        sample_text: >
+          This Agreement continues on a month-to-month basis from the
+          Effective Date until either party gives notice to terminate.
+      - name: No stated term
+        expected_outcome: missing
+        expected_zone: yellow
+        sample_text: ""
+  - rule_key: term.auto_renewal
+    title: Automatic renewal
+    required: true
+    risk_weight: 4
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      The agreement automatically renews for successive 12-month terms
+      unless either party gives at least 60 days' written notice of
+      non-renewal; removing auto-renewal entirely needs VP Sales approval.
+    risk_rationale: >
+      Automatic renewal protects the recurring revenue Halcyon relies on for
+      $72M of ARR without a sales team having to re-sign every account each
+      year. Many public-sector and hospital customers have procurement
+      rules against automatic renewal, so a clean non-renewal path matters
+      to winning and keeping those accounts even though Halcyon prefers to
+      keep the right.
+    detection_guidance: >
+      Look for "automatically renew", "successive renewal terms of", "unless
+      either party gives written notice of non-renewal at least" and a
+      stated number of days. Wording that instead requires a new signed
+      Order Form to continue the relationship means there is no
+      auto-renewal at all, which corresponds to the no-auto-renewal
+      fallback below, not to a missing clause; an agreement with no renewal
+      wording at all simply expires at the end of the Initial Term, which is
+      the same outcome as that fallback.
+    source_ref: Halcyon Finance Policy FIN-01; subscription revenue guidance
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: 12-month renewals, 60 days' notice
+        zone: green
+        summary: Auto-renews for 12 months unless either party gives 60 days' notice.
+        language: >
+          Upon expiration of the Initial Term, and upon expiration of each
+          Renewal Term, this Agreement will automatically renew for
+          successive twelve (12) month Renewal Terms, unless either party
+          gives the other written notice of non-renewal at least sixty (60)
+          days before the end of the then-current term.
+      - kind: fallback
+        rung: 1
+        label: 30 days' notice
+        zone: green
+        summary: The non-renewal notice window is shortened to 30 days.
+        language: >
+          Upon expiration of the Initial Term, and upon expiration of each
+          Renewal Term, this Agreement will automatically renew for
+          successive twelve (12) month Renewal Terms, unless either party
+          gives the other written notice of non-renewal at least thirty (30)
+          days before the end of the then-current term.
+      - kind: fallback
+        rung: 2
+        label: No automatic renewal
+        zone: yellow
+        approver_role: vp_sales
+        give_get: Ask for a longer Initial Term or a right of first refusal on renewal pricing in exchange.
+        summary: The Agreement does not renew automatically; a new Order Form is required.
+        language: >
+          This Agreement will expire at the end of the Initial Term, or any
+          Renewal Term then in effect, unless the parties execute a new or
+          amended Order Form before that date.
+      - kind: acceptable_variant
+        label: 45 days' notice, double-negative wording
+        zone: green
+        summary: Same 12-month auto-renewal, within the notice range, worded as a double negative.
+        language: >
+          Unless Customer gives Halcyon written notice of non-renewal at
+          least forty-five (45) days before the end of the then-current
+          term, this Agreement does not terminate at that time and instead
+          continues for a further Renewal Term of twelve (12) months.
+    parameters:
+      - key: renewal_notice_days
+        label: Non-renewal notice window, in days
+        value_type: duration_days
+        unit: days
+        direction: higher_is_better
+        preferred_value: 60
+        green_limit: 30
+        yellow_limit: 15
+        extraction_hint: >
+          Read the stated number of days' notice required to stop automatic
+          renewal. This parameter does not apply when there is no
+          auto-renewal at all; in that case assess the rule against the
+          no-auto-renewal fallback instead.
+        context_overrides:
+          - when: {counterparty_tier: [tier_1]}
+            yellow_limit: 10
+      - key: renewal_term_months
+        label: Length of each Renewal Term, in months
+        value_type: number
+        unit: months
+        direction: higher_is_better
+        preferred_value: 12
+        green_limit: 12
+        yellow_limit: 6
+        extraction_hint: >
+          Read the stated length of each successive Renewal Term in months.
+          Does not apply when there is no auto-renewal at all.
+    red_lines:
+      - key: renew-midterm-cancel-refund
+        description: >
+          Customer may cancel a Renewal Term after it has already begun and
+          receive a refund of prepaid Fees for that term.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause allows Customer to terminate a Renewal Term at any
+            time after that Renewal Term has started and receive a refund
+            of the Fees prepaid for it, rather than only being able to stop
+            renewal by giving advance non-renewal notice before the term
+            begins.
+        action: block
+        rationale: >
+          This converts every renewal into an option Customer can exercise
+          and then unwind after the fact, which removes the predictability
+          auto-renewal is meant to provide and effectively turns the
+          Subscription Term into month-to-month with a refund right.
+    objections:
+      - objection: Automatic renewal is against our procurement policy; we must affirmatively re-sign every term.
+        their_rationale: Public bodies and some hospital systems are required to run a fresh approval process for each contract period.
+        response: >
+          We can remove automatic renewal with VP Sales approval, typically
+          in exchange for a longer Initial Term or a right of first refusal
+          on renewal pricing, so we are not left re-negotiating from
+          scratch every year.
+        talking_points:
+          - Removing auto-renewal needs approval and a give-get.
+          - A longer Initial Term is the most common trade for this concession.
+        recommended_position: {rule_key: term.auto_renewal, rung: 2}
+        frequency: common
+        counterparty_profile: Public-sector bodies and tier-1 hospital systems
+      - objection: Sixty days is too far out; give us 30 days to decide on renewal.
+        their_rationale: Budget approval for the next fiscal year is often not finalized until closer to the renewal date.
+        response: >
+          Thirty days' notice is already within our standard range and does
+          not need approval. We would ask that any notice be in writing so
+          there is no dispute about timing.
+        talking_points:
+          - 30 days is available immediately, no escalation.
+          - Written notice protects both sides from a timing dispute.
+        recommended_position: {rule_key: term.auto_renewal, rung: 1}
+        frequency: common
+        counterparty_profile: Mid-market customers on an annual budget cycle
+    dependencies:
+      - related_rule_key: termination.for_convenience
+        relation: read_with
+        note: >
+          Once Customer has a clean non-renewal path, a separate mid-term
+          termination for convenience right is less necessary and should be
+          resisted more firmly.
+    test_cases:
+      - name: Standard 60-day non-renewal notice
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          This Agreement renews automatically for additional twelve-month
+          terms unless either party notifies the other in writing at least
+          sixty (60) days before the current term ends that it will not
+          renew.
+      - name: Double-negative 45-day variant
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Unless Customer notifies Halcyon at least forty-five (45) days
+          before the end of the then-current term that it elects not to
+          renew, this Agreement continues automatically for another
+          twelve-month term.
+      - name: 30-day notice window
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          Either party may stop this Agreement from renewing by giving the
+          other written notice at least thirty (30) days before the current
+          term's end date.
+      - name: 20-day notice window
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          This Agreement renews automatically unless a party gives notice of
+          non-renewal at least twenty (20) days before the then-current term
+          ends.
+      - name: Trap - double-negative confirming the preferred position
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          This Agreement does not simply terminate at the end of the Initial
+          Term; rather, absent sixty (60) days' advance written notice of
+          non-renewal from either party, it continues automatically for a
+          further twelve-month Renewal Term.
+  - rule_key: termination.for_convenience
+    title: Termination for convenience by Customer
+    required: true
+    risk_weight: 6
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Customer has no right to terminate for convenience during the
+      Subscription Term; a narrow, late-starting right with no refund is a
+      VP Sales concession, never a right exercisable at any time with a
+      refund.
+    risk_rationale: >
+      Removing a committed Subscription Term's cancellability is what lets
+      Halcyon recognize subscription revenue predictably and justify
+      implementation investment against a $165k median contract. A
+      termination for convenience right, once granted, is the single
+      biggest threat to that predictability on the largest accounts, up to
+      $2.4M a year, so it should only be granted late in the term and
+      without a refund.
+    detection_guidance: >
+      Look for "for any reason or no reason", "for convenience", "without
+      cause", or "upon [n] days' written notice" in the termination
+      section, and note which party holds the right and what happens to
+      prepaid Fees. The absence of any such right is Halcyon's preferred
+      position and is compliant, not a missing clause; Halcyon itself
+      holding a termination for convenience right says nothing about
+      Customer's position under this rule.
+    source_ref: Halcyon Risk Policy RP-02; revenue predictability guidance
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: No termination for convenience
+        zone: green
+        summary: Customer may not terminate this Agreement for convenience during the Subscription Term.
+        language: >
+          Except as expressly permitted elsewhere in this Agreement,
+          Customer may not terminate this Agreement or any Order Form before
+          the end of the then-current Subscription Term for convenience or
+          without cause.
+      - kind: fallback
+        rung: 1
+        label: After month 18, 120 days' notice, no refund
+        zone: yellow
+        approver_role: vp_sales
+        conditions: {deal_value_band: [mid, enterprise, strategic]}
+        give_get: Ask for a 36-month Initial Term or a non-refundable implementation fee in exchange.
+        summary: Customer may terminate for convenience only after month 18, on 120 days' notice, with no refund.
+        language: >
+          Beginning on the date that is eighteen (18) months after the
+          Effective Date, Customer may terminate this Agreement for
+          convenience by giving Halcyon at least one hundred twenty (120)
+          days' prior written notice. No Fees paid or payable before the
+          effective date of such termination will be refunded.
+      - kind: fallback
+        rung: 2
+        label: After month 12, 90 days' notice, no refund
+        zone: yellow
+        approver_role: vp_sales
+        conditions: {deal_value_band: [enterprise, strategic]}
+        give_get: Ask for a right of first refusal on any replacement vendor, or a larger non-refundable implementation fee.
+        summary: Customer may terminate for convenience only after month 12, on 90 days' notice, with no refund.
+        language: >
+          Beginning on the date that is twelve (12) months after the
+          Effective Date, Customer may terminate this Agreement for
+          convenience by giving Halcyon at least ninety (90) days' prior
+          written notice. No Fees paid or payable before the effective date
+          of such termination will be refunded.
+        internal_note: >
+          Matches the company risk appetite anchor exactly; requires Deal
+          Desk concurrence on the no-refund treatment in addition to VP
+          Sales approval before signature.
+      - kind: acceptable_variant
+        label: Non-renewal-only exit, counterparty wording
+        zone: green
+        summary: Counterparty wording that limits Customer's exit to non-renewal, which is the same outcome as no mid-term termination for convenience.
+        language: >
+          Customer's sole right to end its subscription without cause is to
+          decline to renew the then-current term in accordance with the
+          renewal provisions of this Agreement; Customer has no right to
+          terminate for convenience during a Subscription Term that has
+          already begun.
+    parameters:
+      - key: customer_tfc_permitted
+        label: Customer has any termination-for-convenience right
+        value_type: boolean
+        direction: exact
+        preferred_value: false
+        green_limit: false
+        yellow_limit: true
+        extraction_hint: >
+          True only if Customer has a right to terminate before the end of
+          the Subscription Term without alleging a breach by Halcyon. A
+          right exercisable only at renewal through non-renewal notice is
+          false here.
+      - key: tfc_notice_days
+        label: Notice required to exercise termination for convenience, in days
+        value_type: duration_days
+        unit: days
+        direction: higher_is_better
+        preferred_value: 120
+        green_limit: 120
+        yellow_limit: 90
+        extraction_hint: >
+          Applies only once customer_tfc_permitted is true. Read the stated
+          notice period Customer must give before a for-convenience
+          termination takes effect.
+    red_lines:
+      - key: tfc-anytime-refund
+        description: >
+          Customer may terminate for convenience at any time, including
+          before any minimum period has run, and receive a refund of
+          prepaid Fees.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause gives Customer an unconditional right to terminate
+            this Agreement for convenience at any time, with no minimum
+            period before the right becomes exercisable, and entitles
+            Customer to a refund of Fees already paid.
+        action: block
+        rationale: >
+          This combination removes both the timing and the financial
+          protection the Subscription Term is meant to provide and is one
+          of the clearest ways a vendor contract becomes effectively
+          cancel-anytime-for-a-refund, which is not insurable against on
+          the revenue side the way a liability claim is.
+    objections:
+      - objection: We need an exit if Halcyon Engage does not deliver the clinical workflow improvements we expect.
+        their_rationale: Customer wants an operational escape hatch independent of proving a breach.
+        response: >
+          A performance shortfall of that kind is addressed through the
+          warranty and termination-for-cause provisions, not a general
+          convenience right; if you need more flexibility than that, we can
+          discuss a late-starting convenience right with VP Sales approval.
+        talking_points:
+          - Performance concerns are a cure-period, for-cause matter, not a convenience right.
+          - A convenience right, when granted, starts no earlier than month 12 with no refund.
+        recommended_position: {rule_key: termination.for_convenience, rung: 2}
+        frequency: common
+        counterparty_profile: Tier-2 customers piloting Halcyon Engage for the first time
+      - objection: If we terminate for convenience, we should at least get back the unused portion of our prepayment.
+        their_rationale: Customer views a refund of unused fees as fair even if they are the one ending the relationship early.
+        response: >
+          We are not able to offer a refund on a convenience termination;
+          doing so removes the financial predictability the committed term
+          is meant to provide. A refund is available only where Customer
+          terminates for Halcyon's own uncured breach.
+        talking_points:
+          - No-refund is a fixed feature of any convenience-termination concession.
+          - A refund right already exists for Halcyon's uncured breach, under the effect-of-termination provision.
+        recommended_position: {rule_key: termination.effect_of_termination, rung: 0}
+        frequency: occasional
+        counterparty_profile: Strategic accounts with sophisticated procurement
+    dependencies:
+      - related_rule_key: limitation_of_liability.cap_amount
+        relation: trade_against
+        note: >
+          Only extend a termination-for-convenience right in exchange for,
+          or alongside, a liability position that is no more favorable to
+          Customer than Halcyon's standard cap; the two should not both move
+          in Customer's favor on the same deal.
+    test_cases:
+      - name: No termination for convenience clause at all
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          This Agreement sets out specific grounds on which either party may
+          terminate; it does not give Customer a right to end the Agreement
+          without cause before the Subscription Term expires.
+      - name: Non-renewal-only exit variant
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Customer's only means of ending its subscription without alleging
+          a breach is to decline to renew at the end of the then-current
+          term by following the non-renewal procedure stated above.
+      - name: Convenience right after month 12, 90 days, no refund
+        context: {deal_value_band: enterprise}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          After the first anniversary of the Effective Date, Customer may
+          end this Agreement for any reason by giving ninety (90) days'
+          advance written notice, and Fees already paid will not be
+          returned.
+      - name: Convenience right from month 6, 100 days' notice
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Starting six (6) months after the Effective Date, Customer may
+          terminate this Agreement without cause on one hundred (100) days'
+          prior written notice.
+      - name: Trap - Halcyon's own convenience right
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Halcyon may terminate this Agreement for convenience at any time
+          upon ninety (90) days' written notice to Customer; this Agreement
+          states no corresponding right for Customer.
+  - rule_key: termination.for_cause_cure_period
+    title: Termination for cause and cure period
+    required: true
+    risk_weight: 4
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Either party may terminate for the other's uncured material breach
+      after a 30-day cure period; shortening the cure period to as little
+      as 10 days needs Commercial Counsel approval, and anything shorter,
+      or no cure right at all, is a red line.
+    risk_rationale: >
+      A 30-day cure period gives Halcyon's delivery and security teams
+      realistic time to fix an integration or security issue before losing
+      a customer worth up to $165k a year on average, while still letting
+      Halcyon exit a customer that will not pay or cooperate. Too short a
+      cure period on either side increases the odds a fixable issue
+      escalates into a terminated account rather than being resolved.
+    detection_guidance: >
+      Look for "material breach", "fails to cure", "remains uncured" and a
+      stated number of days after "written notice", together with
+      insolvency wording such as "becomes the subject of a petition in
+      bankruptcy" as a separate, immediate trigger. No termination-for-cause
+      right at all is a missing clause. A right to terminate for breach
+      with no opportunity to cure at all, or a stated cure period under 10
+      days, both fall under the red line below, not under deviation.
+    source_ref: Halcyon Risk Policy RP-02
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: 30-day cure period
+        zone: green
+        summary: Either party may terminate for the other's uncured material breach after a 30-day cure period.
+        language: >
+          Either party may terminate this Agreement if the other party
+          materially breaches this Agreement and fails to cure that breach
+          within thirty (30) days after receiving written notice describing
+          it in reasonable detail, or immediately if the other party becomes
+          the subject of a petition in bankruptcy or similar insolvency
+          proceeding that is not dismissed within sixty (60) days.
+      - kind: fallback
+        rung: 1
+        label: 20-day cure period, non-payment carved out
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: Ask that non-payment breaches keep the shorter cure period stated in the suspension provision.
+        summary: Cure period reduced to 20 days, with non-payment breaches handled separately.
+        language: >
+          Either party may terminate this Agreement if the other party
+          materially breaches this Agreement and fails to cure that breach
+          within twenty (20) days after receiving written notice describing
+          it in reasonable detail, except that a breach of Customer's
+          payment obligations is governed by the suspension provision of
+          this Agreement rather than by this cure period.
+      - kind: fallback
+        rung: 2
+        label: 15-day cure period
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: Require that insolvency remain an immediate termination trigger with no cure right.
+        summary: Cure period reduced to 15 days.
+        language: >
+          Either party may terminate this Agreement if the other party
+          materially breaches this Agreement and fails to cure that breach
+          within fifteen (15) days after receiving written notice describing
+          it in reasonable detail, or immediately if the other party becomes
+          the subject of a petition in bankruptcy or similar insolvency
+          proceeding that is not dismissed within sixty (60) days.
+      - kind: acceptable_variant
+        label: Remedy-the-failure wording at 30 days
+        zone: green
+        summary: Same 30-day cure period in different wording.
+        language: >
+          If either party commits a material breach of this Agreement and
+          does not remedy the failure within thirty (30) days of written
+          notice specifying it, the non-breaching party may terminate this
+          Agreement on further written notice.
+    parameters:
+      - key: cure_period_days
+        label: Cure period, in days
+        value_type: duration_days
+        unit: days
+        direction: higher_is_better
+        preferred_value: 30
+        green_limit: 30
+        yellow_limit: 10
+        extraction_hint: >
+          Read the stated number of days to cure a material breach after
+          written notice. Treat a separate, shorter cure period stated only
+          for non-payment as part of the suspension or payment provisions,
+          not this parameter.
+    red_lines:
+      - key: cure-period-under-10-days-or-none
+        description: >
+          Halcyon's cure period for an alleged material breach is less than
+          10 days, or there is no cure period at all before Customer may
+          terminate for breach.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause lets Customer terminate for Halcyon's material breach
+            with no opportunity to cure, or with a cure period of fewer than
+            ten (10) days after notice.
+        action: block
+        rationale: >
+          A cure window that short does not give Halcyon's delivery and
+          security teams a realistic chance to fix an integration or
+          security problem, turning any disputed breach allegation into an
+          effective immediate termination right for Customer.
+    objections:
+      - objection: Thirty days is too long if the issue is a HIPAA security problem affecting our patients.
+        their_rationale: Customer treats a security incident as urgent enough to warrant a much faster exit right.
+        response: >
+          A security incident is addressed through the breach notification
+          and remediation provisions on a much faster timeline than this
+          general cure period; we can shorten the general cure period itself
+          to twenty days with Commercial Counsel approval if that is the
+          underlying concern.
+        talking_points:
+          - Security incidents are handled on their own, faster timeline elsewhere in the agreement.
+          - The general cure period can come down to 20 days without touching the insolvency trigger.
+        recommended_position: {rule_key: termination.for_cause_cure_period, rung: 1}
+        frequency: occasional
+        counterparty_profile: Tier-1 health systems with security-focused counsel
+      - objection: Non-payment should not get thirty days to cure; we want to be able to exit faster for that specific breach.
+        their_rationale: Customer is comfortable with a longer general cure period but wants a faster path when Halcyon itself is the non-payor in a reciprocal services arrangement.
+        response: >
+          We can carve non-payment out to a shorter, separate cure period
+          with Commercial Counsel approval, while keeping thirty days for
+          every other type of breach.
+        talking_points:
+          - A carve-out for non-payment is available without shortening the general cure period.
+          - Insolvency remains an immediate trigger regardless of the general cure period.
+        recommended_position: {rule_key: termination.for_cause_cure_period, rung: 1}
+        frequency: rare
+        counterparty_profile: Customers with their own services obligations to Halcyon
+    dependencies:
+      - related_rule_key: payment.payment_terms
+        relation: trade_against
+        note: >
+          A longer payment term should be paired with a shorter, separate
+          cure period specifically for non-payment, so slow payment does not
+          also delay Halcyon's ability to act on it.
+    test_cases:
+      - name: Standard 30-day cure period
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          If either party materially breaches this Agreement and does not
+          cure the breach within thirty (30) days of written notice, the
+          other party may terminate this Agreement.
+      - name: Remedy-the-failure variant
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          A party that fails to remedy a material breach within thirty (30)
+          days after receiving notice specifying the breach may have this
+          Agreement terminated by the non-breaching party.
+      - name: 15-day cure period
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Either party may end this Agreement if the other party's material
+          breach remains uncured fifteen (15) days after written notice of
+          it.
+      - name: 25-day cure period
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          If either party's material breach of this Agreement remains
+          unresolved twenty-five (25) days after written notice of it, the
+          other party may terminate this Agreement.
+      - name: 5-day cure period
+        expected_outcome: red_line
+        expected_red_line_key: cure-period-under-10-days-or-none
+        expected_zone: red
+        sample_text: >
+          Customer may terminate this Agreement if Halcyon's material breach
+          is not cured within five (5) days of written notice.
+      - name: No termination-for-cause provision
+        expected_outcome: missing
+        expected_zone: yellow
+        sample_text: ""
+  - rule_key: termination.effect_of_termination
+    title: Effect of termination or expiration
+    required: true
+    risk_weight: 5
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      On termination, accrued Fees are due, prepaid Fees are refunded
+      pro-rata only if Customer terminated for Halcyon's uncured breach,
+      Customer Data is retrievable for 30 days, and stated sections survive;
+      a longer retrieval window up to 90 days needs Commercial Counsel
+      approval.
+    risk_rationale: >
+      Without a stated effect-of-termination clause, refunds, data access
+      and survival default to general law, which is unpredictable across
+      the US and EU jurisdictions where Halcyon's 310 customers are based.
+      A bounded data retrieval window also matters operationally, since
+      Halcyon's AWS storage and support costs do not stop just because a
+      customer has left.
+    detection_guidance: >
+      Look for headings such as "Effect of Termination" and for "upon
+      termination or expiration", "all rights granted shall cease", "refund
+      any prepaid Fees" and "the following sections shall survive". Absence
+      of this clause leaves refunds, data access and survival to general
+      law and is a missing clause, distinct from a clause that states these
+      outcomes but on worse terms.
+    source_ref: Halcyon Risk Policy RP-02; data retention schedule
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Accrued Fees due, pro-rata refund only for Halcyon's uncured breach, 30-day retrieval
+        zone: green
+        summary: Standard effect-of-termination package with a 30-day data retrieval window.
+        language: >
+          Upon termination or expiration of this Agreement, Customer's right
+          to access the Services ceases, and all Fees accrued but unpaid as
+          of the effective date become immediately due. Fees already paid
+          are not refundable, except that if Customer terminates this
+          Agreement under the termination-for-cause provision for Halcyon's
+          uncured material breach, Halcyon will refund, on a pro-rata basis,
+          any prepaid Fees for the unused portion of the then-current
+          Subscription Term. For thirty (30) days after the effective date
+          of termination, Halcyon will make Customer Data available for
+          Customer to retrieve in a standard export format, after which
+          Halcyon's destruction of that data from production systems and
+          backup media is governed by the data return and deletion
+          provision of this Agreement. Sections of this Agreement that by
+          their nature should survive termination, including
+          confidentiality, payment obligations accrued before termination,
+          and limitation of liability, will survive.
+      - kind: fallback
+        rung: 1
+        label: 60-day data retrieval window
+        zone: green
+        summary: Same terms, with the data retrieval window extended to 60 days.
+        language: >
+          Upon termination or expiration of this Agreement, Customer's right
+          to access the Services ceases, and all Fees accrued but unpaid as
+          of the effective date become immediately due. Fees already paid
+          are not refundable, except that if Customer terminates this
+          Agreement under the termination-for-cause provision for Halcyon's
+          uncured material breach, Halcyon will refund, on a pro-rata basis,
+          any prepaid Fees for the unused portion of the then-current
+          Subscription Term. For sixty (60) days after the effective date of
+          termination, Halcyon will make Customer Data available for
+          Customer to retrieve in a standard export format, after which
+          Halcyon's destruction of that data from production systems and
+          backup media is governed by the data return and deletion
+          provision of this Agreement. Sections of this Agreement that by
+          their nature should survive termination, including
+          confidentiality, payment obligations accrued before termination,
+          and limitation of liability, will survive.
+      - kind: fallback
+        rung: 2
+        label: 90-day data retrieval window
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: Ask for prepayment of any extension period Customer requests beyond the stated window.
+        summary: Data retrieval window extended to 90 days.
+        language: >
+          Upon termination or expiration of this Agreement, Customer's right
+          to access the Services ceases, and all Fees accrued but unpaid as
+          of the effective date become immediately due. Fees already paid
+          are not refundable, except that if Customer terminates this
+          Agreement under the termination-for-cause provision for Halcyon's
+          uncured material breach, Halcyon will refund, on a pro-rata basis,
+          any prepaid Fees for the unused portion of the then-current
+          Subscription Term. For ninety (90) days after the effective date
+          of termination, Halcyon will make Customer Data available for
+          Customer to retrieve in a standard export format, after which
+          Halcyon's destruction of that data from production systems and
+          backup media is governed by the data return and deletion
+          provision of this Agreement. Sections of this Agreement that by
+          their nature should survive termination, including
+          confidentiality, payment obligations accrued before termination,
+          and limitation of liability, will survive.
+      - kind: acceptable_variant
+        label: Export-window wording
+        zone: green
+        summary: Same 30-day window, described as an export period rather than a retrieval period.
+        language: >
+          Following termination, Customer will have thirty (30) days to
+          export its Customer Data in a standard format, after which the
+          data return and deletion provision of this Agreement governs its
+          destruction, and any Fees accrued prior to termination remain
+          payable; prepaid Fees are non-refundable except on a pro-rata
+          basis where Customer terminated for Halcyon's uncured material
+          breach.
+    parameters:
+      - key: data_retrieval_window_days
+        label: Post-termination data retrieval window, in days
+        value_type: duration_days
+        unit: days
+        direction: lower_is_better
+        preferred_value: 30
+        green_limit: 60
+        yellow_limit: 90
+        extraction_hint: >
+          Read the number of days after termination that Customer Data
+          remains available for export or retrieval. An indefinite or
+          unlimited window does not map to a number here; assess it against
+          the red line instead.
+    red_lines:
+      - key: eot-unlimited-retention-or-fee-waiver
+        description: >
+          Halcyon must retain or provide access to Customer Data for an
+          indefinite or unlimited period after termination, or Customer's
+          Fees accrued before termination are waived rather than paid.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause requires Halcyon to keep Customer Data available, or
+            to continue hosting it, for an indefinite or unlimited time
+            after termination with no stated end date, or it excuses
+            Customer from paying Fees that accrued before the termination
+            date.
+        action: block
+        rationale: >
+          Open-ended post-termination hosting is a cost with no stop date
+          across 310 customers, and waiving already-accrued Fees on top of
+          that turns an ordinary exit into Halcyon absorbing both the
+          storage cost and the lost revenue.
+    objections:
+      - objection: Thirty days is not enough for our IT team to migrate patient data to a new system.
+        their_rationale: Migrating clinical and scheduling data out of a care-coordination platform takes real operational time.
+        response: >
+          We can extend the retrieval window to sixty days at no cost, which
+          is already available without escalation; a longer window up to
+          ninety days needs Commercial Counsel approval and is usually paired
+          with prepayment for the extension.
+        talking_points:
+          - 60 days is available immediately, no escalation.
+          - 90 days is available with approval and a modest give-get.
+        recommended_position: {rule_key: termination.effect_of_termination, rung: 1}
+        frequency: common
+        counterparty_profile: Tier-1 health systems with complex data migrations
+      - objection: We should get our unused subscription fees back no matter why the Agreement ends.
+        their_rationale: Customer views any early end to the relationship as grounds for a pro-rata refund.
+        response: >
+          A pro-rata refund already applies when Customer terminates for our
+          uncured breach; extending that to every termination, including
+          Customer's own convenience termination, is not something we can
+          agree to, since it removes the financial predictability the term
+          is meant to provide.
+        talking_points:
+          - A pro-rata refund already exists for Halcyon's uncured breach.
+          - Extending it to every exit scenario is a different, larger concession than this rule covers.
+        frequency: occasional
+        counterparty_profile: Strategic accounts negotiating broad exit protections
+    dependencies:
+      - related_rule_key: data_protection.data_return_and_deletion
+        relation: requires
+        note: >
+          This rule fixes the data retrieval window first; the data
+          protection rule's production destruction and backup purge periods
+          are a second, later stage that runs from the end of this window,
+          not from the termination date. Whichever rung of this rule is
+          agreed (30, 60 or 90 days), the deletion commitment in the other
+          rule always starts the clock after it, so Customer is never
+          promised access to data Halcyon has already committed to delete.
+      - related_rule_key: termination.for_convenience
+        relation: read_with
+        note: >
+          The pro-rata refund carve-out here is deliberately narrower than,
+          and should not be read to expand, any refund terms negotiated into
+          a termination-for-convenience fallback.
+    test_cases:
+      - name: Standard effect-of-termination package
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          When this Agreement ends, Customer must pay all Fees that accrued
+          before the end date, and Halcyon will keep Customer Data available
+          for export for thirty (30) days afterward. Prepaid Fees are not
+          returned except pro-rata if Customer ended the Agreement for
+          Halcyon's own uncured breach.
+      - name: Export-window wording variant
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          On termination, Customer has a thirty (30) day export period for
+          its data, all pre-termination Fees remain due, and prepayments are
+          non-refundable other than on a pro-rata basis for a termination
+          caused by Halcyon's uncured breach.
+      - name: 60-day retrieval window
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          Customer Data remains available for retrieval for sixty (60) days
+          following termination, and accrued Fees remain payable regardless
+          of the reason for termination.
+      - name: 75-day retrieval window with no approval basis stated
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Halcyon will retain and make available Customer Data for
+          seventy-five (75) days after termination for Customer to
+          retrieve.
+      - name: Indefinite data retention with Fees waived
+        expected_outcome: red_line
+        expected_red_line_key: eot-unlimited-retention-or-fee-waiver
+        expected_zone: red
+        sample_text: >
+          Halcyon will continue to host and make available Customer Data
+          indefinitely after termination, and any Fees accrued but unpaid as
+          of the termination date are waived.
+      - name: No effect-of-termination provision
+        expected_outcome: missing
+        expected_zone: yellow
+        sample_text: ""
+  - rule_key: suspension.suspension_rights
+    title: Halcyon's right to suspend the Services
+    required: true
+    risk_weight: 5
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Halcyon may suspend the Services for fees overdue more than 30 days,
+      a security threat, or unlawful use, on 10 days' notice where
+      practicable; widening the overdue threshold to 60 days and the notice
+      to 15 days needs Commercial Counsel approval.
+    risk_rationale: >
+      Suspension is Halcyon's main lever against non-payment short of
+      terminating a $165k-median relationship outright, and Halcyon Engage
+      is used in active patient care, so the trigger and notice period need
+      to be narrow enough to be fair to hospital customers while still
+      giving Halcyon a real remedy before a non-paying account runs for
+      months. A security or unlawful-use trigger protects Halcyon's SOC 2
+      Type II and HITRUST r2 posture across the whole multi-tenant
+      environment, not just the one account.
+    detection_guidance: >
+      Look for "may suspend", "access to the Services", "overdue by more
+      than thirty (30) days", "threat to the security or integrity" and
+      "prior written notice where practicable". No suspension right at all
+      leaves non-payment or misuse to be addressed only through
+      termination, which is a missing clause on Halcyon's own paper.
+    source_ref: Halcyon Risk Policy RP-05; security incident response plan
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: 30-day overdue threshold, 10 days' notice
+        zone: green
+        summary: Halcyon may suspend for fees 30 days overdue, a security threat, or unlawful use, on 10 days' notice.
+        language: >
+          Halcyon may suspend Customer's and any user's access to the
+          Services, with prior written notice of at least ten (10) days
+          where practicable, if (a) any undisputed Fees remain overdue by
+          more than thirty (30) days, (b) Halcyon reasonably determines that
+          suspension is necessary to address a threat to the security or
+          integrity of the Services or any other customer's data, or (c)
+          Customer's or a user's use of the Services violates applicable law
+          or this Agreement's acceptable use terms. Halcyon will restore
+          access promptly once the condition giving rise to the suspension
+          has been resolved.
+      - kind: fallback
+        rung: 1
+        label: 45-day overdue threshold
+        zone: green
+        summary: The non-payment overdue threshold is extended to 45 days.
+        language: >
+          Halcyon may suspend Customer's and any user's access to the
+          Services, with prior written notice of at least ten (10) days
+          where practicable, if (a) any undisputed Fees remain overdue by
+          more than forty-five (45) days, (b) Halcyon reasonably determines
+          that suspension is necessary to address a threat to the security
+          or integrity of the Services or any other customer's data, or (c)
+          Customer's or a user's use of the Services violates applicable law
+          or this Agreement's acceptable use terms. Halcyon will restore
+          access promptly once the condition giving rise to the suspension
+          has been resolved.
+      - kind: fallback
+        rung: 2
+        label: 60-day overdue threshold, 15 days' notice
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: Ask for a shortened cure period specifically for repeated non-payment in exchange.
+        summary: Non-payment threshold extended to 60 days, with 15 days' advance notice.
+        language: >
+          Halcyon may suspend Customer's and any user's access to the
+          Services, with prior written notice of at least fifteen (15) days
+          where practicable, if (a) any undisputed Fees remain overdue by
+          more than sixty (60) days, (b) Halcyon reasonably determines that
+          suspension is necessary to address a threat to the security or
+          integrity of the Services or any other customer's data, or (c)
+          Customer's or a user's use of the Services violates applicable law
+          or this Agreement's acceptable use terms. Halcyon will restore
+          access promptly once the condition giving rise to the suspension
+          has been resolved.
+        internal_note: >
+          Consult security_lead and vp_customer_success before agreeing to
+          this rung, consistent with the suspension-yellow escalation
+          policy in authority.yaml.
+      - kind: acceptable_variant
+        label: May-suspend-or-terminate wording
+        zone: green
+        summary: Same suspension right, drafted as one of several remedies Halcyon may choose among.
+        language: >
+          If any undisputed Fees remain unpaid more than thirty (30) days
+          after their due date, or Halcyon reasonably believes continued
+          access poses a security risk or involves unlawful use, Halcyon
+          may, at its option and with ten (10) days' notice where
+          practicable, suspend access to the Services or terminate this
+          Agreement.
+    parameters:
+      - key: suspension_overdue_threshold_days
+        label: Fees overdue before Halcyon may suspend for non-payment, in days
+        value_type: duration_days
+        unit: days
+        direction: lower_is_better
+        preferred_value: 30
+        green_limit: 45
+        yellow_limit: 60
+        extraction_hint: >
+          Read the number of days an invoice must be overdue before
+          suspension for non-payment is permitted. Does not apply to
+          suspension for a security threat or unlawful use, which are not
+          tied to a day count.
+      - key: suspension_notice_days
+        label: Advance notice of suspension, in days
+        value_type: duration_days
+        unit: days
+        direction: lower_is_better
+        preferred_value: 10
+        green_limit: 10
+        yellow_limit: 15
+        extraction_hint: >
+          Read the stated advance notice period before suspension takes
+          effect. A right to suspend a security threat immediately, without
+          notice, is standard and does not reduce this parameter; read it
+          from the non-payment and unlawful-use triggers.
+    red_lines:
+      - key: susp-right-removed-with-liability
+        description: >
+          Halcyon has no right to suspend the Services for non-payment,
+          security threat or unlawful use, while remaining liable for any
+          resulting unavailability.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause removes or prohibits Halcyon's right to suspend the
+            Services for non-payment, a security threat, or unlawful use,
+            while still holding Halcyon responsible for service levels or
+            liability as if the Services remained continuously available.
+        action: block
+        rationale: >
+          Without a suspension right, Halcyon's only lever against a
+          non-paying or misusing customer is full termination, which is a
+          disproportionate response to a single overdue invoice and takes
+          far longer, while the clause would still hold Halcyon to uptime
+          and liability commitments it has no way to protect.
+    objections:
+      - objection: Suspending access to a patient-care system on 10 days' notice for a billing dispute is dangerous.
+        their_rationale: Customer is concerned about continuity of care if access is cut off over a payment disagreement.
+        response: >
+          The suspension right only applies to undisputed amounts overdue by
+          more than thirty days, not to a genuine billing dispute, and we
+          always restore access promptly once the issue is resolved. If your
+          team needs more runway, we can extend the overdue threshold to 45
+          days at no cost.
+        talking_points:
+          - Suspension applies only to undisputed, significantly overdue amounts.
+          - 45 days is available immediately as a no-cost concession.
+        recommended_position: {rule_key: suspension.suspension_rights, rung: 1}
+        frequency: common
+        counterparty_profile: Tier-1 hospital systems concerned about care continuity
+      - objection: Give us 15 days' notice before any suspension, and extend the overdue threshold to 60 days.
+        their_rationale: Larger organizations want more internal runway to resolve an invoice dispute before access is affected.
+        response: >
+          We can extend both numbers together with Commercial Counsel
+          approval, in exchange for a shorter cure period specifically for
+          repeated non-payment, so a pattern of late payment does not also
+          slow our ability to act on it.
+        talking_points:
+          - The 60-day, 15-day combination is available only with approval.
+          - A shorter repeated-non-payment cure period is the standard trade.
+        recommended_position: {rule_key: suspension.suspension_rights, rung: 2}
+        frequency: occasional
+        counterparty_profile: Tier-1 and enterprise accounts
+    dependencies:
+      - related_rule_key: payment.payment_terms
+        relation: requires
+        note: >
+          The suspension overdue threshold is measured from the due date
+          set by the payment terms rule; keep the two day counts consistent
+          when either is negotiated.
+    test_cases:
+      - name: Standard 30-day suspension right
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          If any undisputed invoice remains unpaid more than thirty (30)
+          days after its due date, Halcyon may suspend Customer's access to
+          the Services on ten (10) days' prior notice where practicable,
+          restoring access promptly once payment is received.
+      - name: Suspend-or-terminate option variant
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Where Fees remain undisputed and unpaid for more than thirty (30)
+          days, Halcyon may choose to suspend access or terminate this
+          Agreement, giving ten (10) days' notice where practicable before
+          suspension.
+      - name: 45-day overdue threshold
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          Halcyon may suspend the Services if an undisputed invoice is not
+          paid within forty-five (45) days of its due date.
+      - name: 50-day threshold, 12 days' notice
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Halcyon may suspend access to the Services if an undisputed
+          invoice remains unpaid fifty (50) days after its due date, on
+          twelve (12) days' prior notice where practicable.
+      - name: No suspension right, liability for unavailability retained
+        expected_outcome: red_line
+        expected_red_line_key: susp-right-removed-with-liability
+        expected_zone: red
+        sample_text: >
+          Halcyon has no right to suspend Customer's access to the Services
+          for any reason, and remains fully liable for the uptime
+          commitment regardless of Customer's payment status.
+      - name: No suspension provision
+        expected_outcome: missing
+        expected_zone: yellow
+        sample_text: ""
+  - rule_key: service_levels.uptime_commitment
+    title: Uptime commitment
+    required: true
+    risk_weight: 6
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Halcyon commits to 99.9% Monthly Uptime Percentage, excluding
+      scheduled maintenance and events outside its control; raising the
+      commitment to 99.95% needs VP Customer Success approval, and 99.99%
+      or higher, or a commitment with no exclusions, is a red line.
+    risk_rationale: >
+      Each additional "nine" of committed uptime sharply reduces Halcyon's
+      permitted downtime and raises engineering cost across every tenant on
+      shared AWS infrastructure in us-east-1, us-west-2 and eu-west-1, not
+      just the one customer asking for it. 99.9% monthly is realistic given
+      Halcyon's current architecture and SOC 2 Type II change-management
+      controls, while 99.95% is achievable only with added redundancy that
+      is not cost-justified for a $165k median contract.
+    detection_guidance: >
+      Look for "available", "Uptime", "Monthly Uptime Percentage", a stated
+      percentage, "excluding Scheduled Maintenance" and "measured monthly",
+      in the main agreement or a service level exhibit. No availability
+      commitment at all is a missing clause on a hosted service like
+      Halcyon Engage.
+    source_ref: Halcyon Service Level Policy SL-01
+    authored_by: Senior Commercial Counsel
+    approved_by: VP Customer Success
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: 99.9% monthly
+        zone: green
+        summary: 99.9% Monthly Uptime Percentage, excluding scheduled maintenance and events outside Halcyon's control.
+        language: >
+          Halcyon will use commercially reasonable efforts to maintain a
+          Monthly Uptime Percentage of at least 99.9% for the Services,
+          excluding Scheduled Maintenance, Emergency Maintenance, and any
+          unavailability caused by Customer's equipment, a third-party
+          service, or a Force Majeure Event. "Scheduled Maintenance" means
+          maintenance for which Halcyon gives Customer at least twenty-four
+          (24) hours' prior notice.
+      - kind: fallback
+        rung: 1
+        label: 99.95% measured quarterly
+        zone: yellow
+        approver_role: vp_customer_success
+        conditions: {counterparty_tier: [tier_1]}
+        give_get: Ask for a 24-month or longer Initial Term in exchange.
+        summary: Headline commitment raised to 99.95%, measured over a calendar quarter rather than each month.
+        language: >
+          Halcyon will use commercially reasonable efforts to maintain a
+          Quarterly Uptime Percentage of at least 99.95% for the Services,
+          calculated over each calendar quarter rather than each month, and
+          excluding Scheduled Maintenance, Emergency Maintenance, and any
+          unavailability caused by Customer's equipment, a third-party
+          service, or a Force Majeure Event.
+      - kind: fallback
+        rung: 2
+        label: 99.95% measured monthly
+        zone: yellow
+        approver_role: vp_customer_success
+        conditions: {counterparty_tier: [tier_1], deal_value_band: [enterprise, strategic]}
+        give_get: Require that the service credit cap and sole-remedy language stay at the preferred position.
+        summary: 99.95% Monthly Uptime Percentage, measured each calendar month.
+        language: >
+          Halcyon will use commercially reasonable efforts to maintain a
+          Monthly Uptime Percentage of at least 99.95% for the Services,
+          excluding Scheduled Maintenance, Emergency Maintenance, and any
+          unavailability caused by Customer's equipment, a third-party
+          service, or a Force Majeure Event.
+      - kind: acceptable_variant
+        label: Wider maintenance exclusion, same 99.9% headline
+        zone: green
+        summary: Same 99.9% commitment, with a broader, explicitly bounded maintenance exclusion.
+        language: >
+          The Services will be available at least 99.9% of the time in each
+          calendar month, excluding up to eight (8) hours of Scheduled
+          Maintenance per month performed on at least twenty-four (24)
+          hours' notice, Emergency Maintenance, and outages caused by
+          Customer's equipment, a third-party service, or events beyond
+          Halcyon's reasonable control.
+    parameters:
+      - key: uptime_percent
+        label: Committed Monthly (or equivalent) Uptime Percentage
+        value_type: percent
+        unit: percent
+        direction: lower_is_better
+        preferred_value: 99.9
+        green_limit: 99.9
+        yellow_limit: 99.98
+        extraction_hint: >
+          Read the stated committed availability percentage directly. Treat
+          a quarterly-measured commitment at the same stated percentage as
+          this value; the measurement period is a separate consideration
+          from the percentage itself.
+      - key: maintenance_notice_hours
+        label: Advance notice of Scheduled Maintenance, in hours
+        value_type: number
+        unit: hours
+        direction: lower_is_better
+        preferred_value: 24
+        green_limit: 24
+        yellow_limit: 48
+        extraction_hint: >
+          Read the stated advance notice period, in hours, Halcyon must give
+          before Scheduled Maintenance that is excluded from the uptime
+          calculation.
+    red_lines:
+      - key: uptime-100-percent-no-exclusions
+        description: >
+          Halcyon commits to 100% uptime, or to an uptime commitment with no
+          exclusion for scheduled maintenance, emergency maintenance or
+          force majeure events.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause commits Halcyon to 100% availability, or states an
+            uptime commitment with no exclusion at all for scheduled
+            maintenance, emergency maintenance, or events outside Halcyon's
+            reasonable control.
+        action: block
+        rationale: >
+          No multi-tenant SaaS platform can honestly promise 100%
+          availability or maintenance with zero exclusions, and agreeing to
+          it creates a commitment Halcyon's own infrastructure cannot
+          actually meet, regardless of the service credit remedy attached
+          to it.
+    objections:
+      - objection: 99.9% is not enough for a system our clinicians rely on throughout the day; we need 99.95%.
+        their_rationale: A large health system views patient-facing scheduling and messaging tools as near-critical infrastructure.
+        response: >
+          We can commit to 99.95% measured over a calendar quarter with VP
+          Customer Success approval, which smooths out any single bad month;
+          a monthly 99.95% commitment is available too, but it is a deeper
+          concession and typically needs a longer committed term in
+          exchange.
+        talking_points:
+          - Quarterly-measured 99.95% is the lighter of the two 99.95% options.
+          - A longer Initial Term is the standard trade for either option.
+        recommended_position: {rule_key: service_levels.uptime_commitment, rung: 1}
+        frequency: common
+        counterparty_profile: Tier-1 hospital systems
+      - objection: Your maintenance exclusion is too broad; eight hours a month is a lot of downtime you are carving out.
+        their_rationale: Customer reads a wide maintenance window as a way to understate real unavailability.
+        response: >
+          The eight-hour figure is a ceiling, not a target, and it comes
+          with twenty-four hours' advance notice so your team can plan
+          around it; we are not able to commit to an uptime figure with no
+          maintenance exclusion at all.
+        talking_points:
+          - The maintenance allowance is a stated ceiling with advance notice.
+          - An exclusion-free commitment is a red line, not a negotiable point.
+        frequency: occasional
+        counterparty_profile: Tier-2 customers with technical procurement review
+    dependencies:
+      - related_rule_key: service_levels.service_credits
+        relation: read_with
+        note: >
+          The uptime percentage and measurement period here must match the
+          availability bands used to calculate service credits, or the
+          remedy will not line up with the commitment it is meant to cover.
+    test_cases:
+      - name: Standard 99.9% monthly commitment
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Halcyon will keep the Services available at least 99.9% of the
+          time each month, not counting Scheduled Maintenance or events
+          outside its reasonable control.
+      - name: Broader maintenance exclusion variant
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          The Services will meet a 99.9% monthly availability target,
+          excluding up to eight hours of notified maintenance per month and
+          any outage caused by factors outside Halcyon's reasonable control.
+      - name: 99.95% quarterly commitment for a tier-1 account
+        context: {counterparty_tier: tier_1}
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: yellow
+        sample_text: >
+          Measured over each calendar quarter, Halcyon commits to at least
+          99.95% availability of the Services, excluding Scheduled
+          Maintenance and Force Majeure Events.
+      - name: 99.92% monthly commitment with no stated basis
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          The Services will be available at least 99.92% of the time each
+          month.
+      - name: 100% uptime promise
+        expected_outcome: red_line
+        expected_red_line_key: uptime-100-percent-no-exclusions
+        expected_zone: red
+        sample_text: >
+          Halcyon guarantees the Services will be available one hundred
+          percent (100%) of the time, with no exceptions.
+      - name: No availability commitment
+        expected_outcome: missing
+        expected_zone: yellow
+        sample_text: ""
+  - rule_key: service_levels.service_credits
+    title: Service credits for missed service levels
+    required: true
+    risk_weight: 5
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Service credits are capped at 10% of the affected month's Fees and
+      are Customer's sole remedy for a missed uptime commitment; raising the
+      cap to as much as 25% needs VP Customer Success approval, and removing
+      the sole-remedy status is a red line.
+    risk_rationale: >
+      Service credits need to be meaningful enough to matter to Customer
+      without becoming a second, uncapped damages regime layered on top of
+      the general liability cap. Capping credits at a percentage of a single
+      month's Fees, against a $165k median annual contract, keeps the
+      maximum exposure per incident proportionate and predictable across
+      Halcyon's 310 customers.
+    detection_guidance: >
+      Look for "Service Credit", a table of availability bands against a
+      percentage of monthly Fees, "shall not exceed", "sole and exclusive
+      remedy", "must be requested within" and "chronic failure". An uptime
+      commitment stated with no remedy at all for missing it is a missing
+      issue, since it leaves Customer to claim damages instead.
+    source_ref: Halcyon Service Level Policy SL-01
+    authored_by: Senior Commercial Counsel
+    approved_by: VP Customer Success
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Capped at 10%, sole remedy
+        zone: green
+        summary: Service credits on a sliding scale, capped at 10% of the affected month's Fees, as Customer's sole remedy.
+        language: >
+          If Halcyon fails to meet the Monthly Uptime Percentage commitment
+          in a calendar month, Customer may request a service credit
+          calculated on the sliding scale stated in the applicable service
+          level exhibit, provided that the total service credits for any
+          month will not exceed ten percent (10%) of the Fees payable for
+          that month. Service credits are Customer's sole and exclusive
+          remedy for Halcyon's failure to meet the uptime commitment, and
+          Customer must request a credit in writing within thirty (30) days
+          after the month to which it relates.
+      - kind: fallback
+        rung: 1
+        label: Capped at 15%, sole remedy
+        zone: green
+        summary: The monthly service credit cap is raised to 15% of the affected month's Fees.
+        language: >
+          If Halcyon fails to meet the Monthly Uptime Percentage commitment
+          in a calendar month, Customer may request a service credit
+          calculated on the sliding scale stated in the applicable service
+          level exhibit, provided that the total service credits for any
+          month will not exceed fifteen percent (15%) of the Fees payable
+          for that month. Service credits are Customer's sole and exclusive
+          remedy for Halcyon's failure to meet the uptime commitment, and
+          Customer must request a credit in writing within thirty (30) days
+          after the month to which it relates.
+      - kind: fallback
+        rung: 2
+        label: Capped at 25%, sole remedy
+        zone: yellow
+        approver_role: vp_customer_success
+        conditions: {counterparty_tier: [tier_1], deal_value_band: [enterprise, strategic]}
+        give_get: Ask for a 24-month or longer Initial Term, or a chronic-failure termination right in place of an uncapped remedy.
+        summary: The monthly service credit cap is raised to 25% of the affected month's Fees.
+        language: >
+          If Halcyon fails to meet the Monthly Uptime Percentage commitment
+          in a calendar month, Customer may request a service credit
+          calculated on the sliding scale stated in the applicable service
+          level exhibit, provided that the total service credits for any
+          month will not exceed twenty-five percent (25%) of the Fees
+          payable for that month. Service credits are Customer's sole and
+          exclusive remedy for Halcyon's failure to meet the uptime
+          commitment, and Customer must request a credit in writing within
+          thirty (30) days after the month to which it relates.
+      - kind: acceptable_variant
+        label: Sliding-scale table wording
+        zone: green
+        summary: Same 10% cap and sole-remedy status, expressed as an availability-band table rather than prose.
+        language: >
+          Service credits for a missed Monthly Uptime Percentage are
+          calculated according to the table in the applicable service level
+          exhibit, subject to a cap of ten percent (10%) of the affected
+          month's Fees, and are Customer's only remedy for an uptime
+          shortfall.
+    parameters:
+      - key: service_credit_cap_percent
+        label: Monthly service credit cap, percent of that month's Fees
+        value_type: percent
+        unit: percent of monthly Fees
+        direction: lower_is_better
+        preferred_value: 10
+        green_limit: 15
+        yellow_limit: 25
+        extraction_hint: >
+          Read the stated cap on total service credits for a single month,
+          as a percentage of that month's Fees. Convert a stated dollar cap
+          to a percentage using the Fees for the affected month when known.
+      - key: credit_request_window_days
+        label: Days Customer has to request a service credit
+        value_type: duration_days
+        unit: days
+        direction: lower_is_better
+        preferred_value: 30
+        green_limit: 30
+        yellow_limit: 60
+        extraction_hint: >
+          Read the stated number of days after the affected month, or after
+          the uptime shortfall, within which Customer must request a
+          service credit.
+      - key: service_credits_sole_remedy
+        label: Service credits are Customer's sole remedy for a missed uptime commitment
+        value_type: boolean
+        direction: exact
+        preferred_value: true
+        green_limit: true
+        yellow_limit: true
+        extraction_hint: >
+          True if the clause states that service credits are Customer's
+          sole, exclusive or only remedy for an uptime shortfall; false if
+          Customer may also claim damages or other remedies for the same
+          shortfall.
+    red_lines:
+      - key: credit-not-sole-remedy
+        description: >
+          Service credits are not stated as Customer's sole remedy for a
+          missed uptime commitment, leaving Customer free to also claim
+          damages for the same shortfall.
+        condition_type: parameter
+        condition: {parameter_key: service_credits_sole_remedy, op: eq, value: false}
+        action: block
+        rationale: >
+          Without sole-remedy status, a single availability incident could
+          expose Halcyon to both a service credit and a separate damages
+          claim for the same event, layering an uncapped remedy on top of
+          the capped one the credit scale is meant to provide.
+    objections:
+      - objection: A capped service credit with no other remedy does not reflect how much an outage actually costs us.
+        their_rationale: Customer argues the credit understates real operational harm from downtime affecting patient care.
+        response: >
+          We can raise the monthly cap to fifteen percent at no cost, and up
+          to twenty-five percent with VP Customer Success approval, but we
+          are not able to remove the sole-remedy status, since that would
+          layer an open-ended damages claim on top of the credit.
+        talking_points:
+          - 15% is available immediately; 25% is available with approval.
+          - Sole-remedy status is not part of the negotiable range.
+        recommended_position: {rule_key: service_levels.service_credits, rung: 1}
+        frequency: common
+        counterparty_profile: Tier-1 hospital systems
+      - objection: If Halcyon has repeated outages month after month, a credit alone is not enough; we want a right to terminate.
+        their_rationale: Customer wants an exit option for chronic, rather than one-off, service level failures.
+        response: >
+          We can add a chronic-failure termination right, for example after
+          three consecutive months of missed commitments, as part of the
+          give-get for a higher credit cap, rather than removing the
+          sole-remedy status itself.
+        talking_points:
+          - A chronic-failure termination right is a workable alternative to an uncapped remedy.
+          - It is offered alongside, not instead of, the capped credit.
+        recommended_position: {rule_key: service_levels.service_credits, rung: 2}
+        frequency: occasional
+        counterparty_profile: Strategic accounts with high operational reliance on Halcyon Engage
+    dependencies:
+      - related_rule_key: service_levels.uptime_commitment
+        relation: read_with
+        note: >
+          The availability bands behind this credit scale must be
+          calculated against the same Monthly (or Quarterly) Uptime
+          Percentage commitment and measurement period negotiated in the
+          uptime rule.
+      - related_rule_key: limitation_of_liability.cap_amount
+        relation: requires
+        note: >
+          If sole-remedy status is ever removed for a given deal, any
+          resulting damages claim for an availability shortfall must still
+          sit inside the general liability cap, not alongside it.
+    test_cases:
+      - name: Standard 10% cap, sole remedy
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Customer's only remedy for Halcyon missing the uptime commitment
+          in a month is a service credit, capped at ten percent (10%) of
+          that month's Fees, requested in writing within thirty days.
+      - name: Sliding-scale table variant
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          The service level exhibit's availability-band table determines
+          the credit owed for a shortfall, up to a ceiling of ten percent
+          (10%) of the month's Fees, and no other remedy is available for
+          that shortfall.
+      - name: 15% cap, sole remedy
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          For any month Halcyon does not meet the uptime commitment,
+          Customer may claim a credit of up to fifteen percent (15%) of that
+          month's Fees as its only remedy.
+      - name: 20% cap, sole remedy kept
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Service credits for a missed uptime commitment, capped at twenty
+          percent (20%) of the affected month's Fees, are Customer's only
+          remedy for that shortfall.
+      - name: Credits available in addition to damages
+        expected_outcome: red_line
+        expected_red_line_key: credit-not-sole-remedy
+        expected_zone: red
+        sample_text: >
+          Customer may claim a service credit for a missed uptime
+          commitment and may separately pursue any other remedy available
+          at law for the same failure.
+      - name: No remedy stated for a missed uptime commitment
+        expected_outcome: missing
+        expected_zone: yellow
+        sample_text: ""

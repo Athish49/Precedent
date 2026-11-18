@@ -1,0 +1,7 @@
+# Failing fixture: edits applied to a copy of fixtures/valid by test_playbook_models.py.
+description: 'Cross-check: every issue''s family is in expected_families.'
+file: taxonomy.yaml
+edits:
+- path: [issues, 3, family]
+  set: payments
+expect: {code: taxonomy.unknown_family, message: payments, rule_key: payments.payment_terms}

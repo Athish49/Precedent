@@ -34,16 +34,38 @@ class DecisionEvent(Base):
         ForeignKey("contract.id", name="fk_decision_event_contract"),
         nullable=False,
     )
-    counterparty_id: Mapped[uuid.UUID] = mapped_column(
+    # Nullable (task 4.6): a redline can be generated before a counterparty
+    # is known (e.g. drafting from a template). Writing a zero/nil UUID
+    # placeholder here was the bug task 1.3's agent flagged; the column is
+    # widened to actually allow NULL (migration 013) instead.
+    counterparty_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("party.id", name="fk_decision_event_party"),
-        nullable=False,
+        nullable=True,
     )
     clause_type: Mapped[str] = mapped_column(Text, nullable=False)
     position_offered: Mapped[str] = mapped_column(Text, nullable=False)
     recommended_stance: Mapped[str] = mapped_column(Text, nullable=False)
     outcome: Mapped[str | None] = mapped_column(Text, nullable=True)
     final_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # New columns (task 1.3; plan section 4). Nullable; nothing populates
+    # them yet — the redline/negotiation features (task 4.6 and later) do.
+    rule_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("playbook_rule.id", name="fk_decision_event_rule"),
+        nullable=True,
+    )
+    rule_key: Mapped[str | None] = mapped_column(Text, nullable=True)
+    position_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("rule_position.id", name="fk_decision_event_position"),
+        nullable=True,
+    )
+    playbook_version_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("playbook_version.id", name="fk_decision_event_playbook_version"),
+        nullable=True,
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

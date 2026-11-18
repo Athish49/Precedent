@@ -1,0 +1,21 @@
+key: halcyon-saas-msa-vendor
+name: Halcyon SaaS Master Subscription Agreement (Vendor)
+practice_area: saas_msa
+layer: agreement
+party_role: vendor
+paper_scope: both
+jurisdiction: US
+precedence: 20
+owner_role: commercial_counsel
+parent: halcyon-baseline
+applies_when: null
+review_cadence_days: 90
+description: >
+  Positions for agreements under which Halcyon sells Halcyon Engage.
+version:
+  version: "1.0"
+  effective_from: 2026-01-15
+  change_summary: Initial published version.
+  created_by: Senior Commercial Counsel
+  approved_by: General Counsel
+rule_files: [risk.yaml]

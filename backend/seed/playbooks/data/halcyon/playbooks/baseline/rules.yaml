@@ -1,0 +1,2182 @@
+rules:
+  - rule_key: governing_law.choice_of_law
+    title: Governing law
+    required: true
+    risk_weight: 6
+    negotiable: true
+    position_summary: >
+      The Agreement is governed by Delaware law, with New York, Massachusetts
+      or California acceptable, and any other US state possible with
+      Commercial Counsel's approval.
+    risk_rationale: >
+      Halcyon Care, Inc. is a Delaware corporation and its legal team of six
+      works most efficiently under law it already knows. Litigating a dispute
+      under an unfamiliar state's contract law raises the cost and
+      unpredictability of every claim, which matters when the median contract
+      is worth only $165k a year.
+    detection_guidance: >
+      Look for "governed by", "construed in accordance with" or "the laws of"
+      followed by a named jurisdiction, usually near the end of the Agreement
+      under a heading such as "Governing Law" or "General". Treat an Agreement
+      with no such clause as a missing clause rather than a deviation.
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-01
+    positions:
+      - kind: preferred
+        label: Delaware law
+        zone: green
+        summary: The law of the State of Delaware governs the Agreement.
+        language: >
+          This Agreement, and any dispute arising out of or relating to it,
+          shall be governed by and construed in accordance with the laws of
+          the State of Delaware, without regard to its conflict of laws
+          rules.
+      - kind: fallback
+        rung: 1
+        label: New York, Massachusetts or California law
+        zone: green
+        summary: The law of one of three other approved states governs.
+        language: >
+          This Agreement shall be governed by and construed in accordance
+          with the laws of the State of New York, without regard to its
+          conflict of laws rules.
+      - kind: fallback
+        rung: 2
+        label: Another US state
+        zone: yellow
+        approver_role: commercial_counsel
+        conditions: {region: [us]}
+        give_get: Ask for exclusive venue in Delaware or for a neutral arbitration seat in exchange.
+        summary: The law of the US state where the counterparty is based governs.
+        language: >
+          This Agreement shall be governed by and construed in accordance
+          with the laws of the State of [state], without regard to its
+          conflict of laws rules.
+      - kind: acceptable_variant
+        label: Delaware internal-laws wording
+        zone: green
+        summary: Delaware law expressed as the state's internal laws, a common counterparty phrasing for the same outcome.
+        language: >
+          The validity, interpretation and performance of this Agreement
+          shall be governed by the internal laws of the State of Delaware,
+          without giving effect to any choice of law principle that would
+          require the application of the laws of another jurisdiction.
+    parameters:
+      - key: governing_law_jurisdiction
+        label: Jurisdiction whose law governs
+        value_type: enum
+        direction: set_membership
+        preferred_value: delaware
+        green_limit: [delaware, new_york, massachusetts, california]
+        yellow_limit: [other_us_state]
+        allowed_values:
+          - delaware
+          - new_york
+          - massachusetts
+          - california
+          - ireland
+          - england_and_wales
+          - other_us_state
+          - other
+        extraction_hint: >
+          Map the named state or country to one of the allowed values. Any US
+          state not separately listed is other_us_state. Anything outside the
+          United States, Ireland and England and Wales is other.
+        context_overrides:
+          - when: {region: [eu, uk]}
+            green_limit: [delaware, new_york, massachusetts, california, ireland, england_and_wales]
+    red_lines:
+      - key: col-floating-choice
+        description: The governing law may be chosen or changed later, by the counterparty or by whichever law it designates.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause lets a party choose, designate or change the
+            governing law of this Agreement at some point after signing,
+            rather than fixing a single named jurisdiction's law at signing.
+            Answer no if a single named state or country's law is fixed at
+            signing and cannot later be changed by either party acting
+            alone.
+        action: block
+        rationale: >
+          A law chosen or changed later by one party, rather than fixed at
+          signing, makes the Agreement's meaning and Halcyon's liability
+          exposure unpredictable for the life of a multi-year contract.
+    objections:
+      - objection: We are a public body and our procurement rules require our own state's law.
+        their_rationale: State procurement statutes often mandate home-state law for any contract the body signs.
+        response: >
+          We understand the requirement comes from statute rather than
+          preference. We can accept the law of your state for this Agreement.
+          In exchange, we would ask for a neutral venue or an exclusive forum
+          in Delaware for any dispute.
+        talking_points:
+          - Ask for the citation to the procurement statute.
+          - Offer home-state law in exchange for venue or forum concessions.
+        recommended_position: {rule_key: governing_law.choice_of_law, rung: 2}
+        frequency: common
+        counterparty_profile: Public hospital systems and county health departments
+      - objection: Delaware has no connection to this deal; our headquarters and your services are elsewhere.
+        their_rationale: Neither party is located in Delaware, so its courts and law feel arbitrary to the counterparty.
+        response: >
+          Delaware is where Halcyon is incorporated, and its contract law is
+          well developed and predictable for both sides' counsel. If that is
+          not acceptable, New York law offers the same predictability and is
+          our next preference.
+        talking_points:
+          - Delaware and New York law are the most common choices for US software agreements.
+          - Predictability lowers the legal cost of every dispute, which benefits both parties.
+        recommended_position: {rule_key: governing_law.choice_of_law, rung: 1}
+        frequency: occasional
+        counterparty_profile: Regional physician groups unfamiliar with Delaware
+    dependencies:
+      - related_rule_key: governing_law.venue
+        relation: read_with
+        note: Governing law and venue are drafted together; a change to one often prompts a matching change to the other.
+    test_cases:
+      - name: Delaware law, standard wording
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          The laws of the State of Delaware govern this Agreement, excluding
+          its conflict of laws principles.
+      - name: Delaware law, internal-laws wording
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          This Agreement is to be construed under the internal laws of
+          Delaware, without resort to the choice of law rules of any other
+          jurisdiction.
+      - name: Texas law for a Texas-based counterparty
+        context: {region: us, counterparty_tier: tier_2}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: This Agreement shall be interpreted under the laws of the State of Texas.
+      - name: Law of a foreign country outside the approved list
+        context: {region: other}
+        expected_outcome: red_line
+        expected_red_line_key: global-governing-law-outside-lists
+        expected_zone: red
+        sample_text: This Agreement shall be governed by the laws of the Province of Ontario, Canada.
+      - name: Floating choice of law at the counterparty's later election
+        expected_outcome: red_line
+        expected_red_line_key: col-floating-choice
+        expected_zone: red
+        sample_text: >
+          The governing law of this Agreement shall be such law as [Party B]
+          may designate by written notice at any time during the term.
+      - name: Two governing laws for different purposes
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          This Agreement is governed as to its formation by the laws of
+          Delaware and as to its performance by the laws of the state in
+          which the receiving party maintains its principal place of business.
+      - name: Trap - clause only forbids a later change by either party
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          This Agreement is governed by the laws of the State of Delaware.
+          Neither party may later designate a different governing law except
+          by a signed written amendment.
+
+  - rule_key: governing_law.venue
+    title: Venue and jurisdiction
+    required: true
+    risk_weight: 6
+    negotiable: true
+    position_summary: >
+      Disputes are heard exclusively in the state and federal courts located
+      in Delaware, with the same three other states acceptable as a
+      fallback.
+    risk_rationale: >
+      An exclusive venue avoids parallel proceedings in several courts and
+      limits the number of law firms Halcyon's six-person legal team must
+      engage across its roughly 310 customer relationships. A non-exclusive
+      or floating venue multiplies the legal spend on any single dispute well
+      beyond the $165k median annual contract it concerns.
+    detection_guidance: >
+      Look for "exclusive jurisdiction", "submits to the jurisdiction of the
+      courts located in", "waives any objection to venue" and "state and
+      federal courts". Note whether the clause is exclusive or non-exclusive.
+      A governing law clause with no named court leaves venue missing.
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-01
+    positions:
+      - kind: preferred
+        label: Exclusive venue in Delaware
+        zone: green
+        summary: The Delaware state and federal courts have exclusive jurisdiction.
+        language: >
+          Each party irrevocably submits to the exclusive jurisdiction of the
+          state and federal courts located in the State of Delaware for any
+          dispute arising out of or relating to this Agreement, and waives any
+          objection to venue or to the convenience of that forum.
+      - kind: fallback
+        rung: 1
+        label: Exclusive venue in New York, Massachusetts or California
+        zone: green
+        summary: The courts of one of three other approved states have exclusive jurisdiction.
+        language: >
+          Each party irrevocably submits to the exclusive jurisdiction of the
+          state and federal courts located in the State of New York for any
+          dispute arising out of or relating to this Agreement.
+      - kind: fallback
+        rung: 2
+        label: Non-exclusive venue in the governing law state
+        zone: yellow
+        approver_role: commercial_counsel
+        conditions: {region: [us]}
+        give_get: Ask that the counterparty waive any objection based on inconvenient forum.
+        summary: The courts of the state whose law governs the Agreement have non-exclusive jurisdiction.
+        language: >
+          Each party submits to the non-exclusive jurisdiction of the state
+          and federal courts located in the state whose law governs this
+          Agreement under the Governing Law section, and waives any objection
+          that such courts are an inconvenient forum.
+      - kind: acceptable_variant
+        label: Venue phrased as consent to jurisdiction
+        zone: green
+        summary: The same exclusive Delaware venue, expressed as consent rather than submission.
+        language: >
+          Each party consents to the personal jurisdiction of, and agrees
+          that any action arising under this Agreement shall be brought
+          exclusively in, the state or federal courts sitting in Wilmington,
+          Delaware.
+    parameters:
+      - key: venue_exclusive_jurisdiction
+        label: Venue is exclusive
+        value_type: boolean
+        direction: exact
+        preferred_value: true
+        green_limit: true
+        yellow_limit: false
+        extraction_hint: >
+          True if the clause states the named court or courts have exclusive
+          jurisdiction, or that the parties may bring an action only there.
+          False if jurisdiction is stated as non-exclusive or concurrent, or
+          if either party may choose among courts.
+    red_lines:
+      - key: ven-floating-forum
+        description: The venue may be selected later by whichever party commences suit, rather than fixed at signing.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause lets the party that commences a proceeding choose or
+            designate the venue or forum for that proceeding, rather than
+            fixing one or more named courts at signing that apply regardless
+            of which party sues first. Answer no if a named court or courts
+            are fixed at signing, even if more than one court is named.
+        action: block
+        rationale: >
+          A forum chosen by whichever party sues first invites forum shopping
+          and removes any ability to budget litigation cost in advance across
+          Halcyon's book of about 310 customer contracts.
+    objections:
+      - objection: Litigating in Delaware is inconvenient and expensive for a small practice like ours.
+        their_rationale: Smaller counterparties lack in-house counsel and would need to engage unfamiliar Delaware litigation counsel for any dispute.
+        response: >
+          We recognize that travel and local counsel add cost. We can offer
+          non-exclusive jurisdiction in the state whose law governs the
+          Agreement instead of exclusive Delaware venue, while keeping
+          Delaware law itself.
+        talking_points:
+          - Disputes are rare; the clause matters only if one arises.
+          - Non-exclusive jurisdiction in the governing-law state is our standard fallback.
+        recommended_position: {rule_key: governing_law.venue, rung: 2}
+        frequency: common
+        counterparty_profile: Small practices and startups (tier_3)
+      - objection: We need the option to sue in our own state if you breach the Agreement.
+        their_rationale: The counterparty wants the flexibility of its home courts rather than being bound to Halcyon's choice of forum.
+        response: >
+          Exclusive venue protects both sides from being sued in a forum the
+          other has no notice of. We are willing to move to non-exclusive
+          jurisdiction in the governing-law state, which still gives you
+          access to local courts when that state is your own.
+        talking_points:
+          - A single, predictable forum keeps litigation cost proportionate to a $165k median contract.
+          - Non-exclusive jurisdiction is a real concession, not a token one.
+        recommended_position: {rule_key: governing_law.venue, rung: 2}
+        frequency: occasional
+    dependencies:
+      - related_rule_key: dispute_resolution.forum
+        relation: read_with
+        note: Venue determines which court has jurisdiction only if the dispute is not instead sent to arbitration under the forum clause.
+    test_cases:
+      - name: Exclusive Delaware venue, standard wording
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          The parties consent to the exclusive jurisdiction of the state and
+          federal courts sitting in the State of Delaware and waive any claim
+          that such courts are an inconvenient forum.
+      - name: Venue phrased as consent to Delaware jurisdiction
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Each party agrees that any suit arising from this Agreement will be
+          brought only in a state or federal court located in Wilmington,
+          Delaware, and consents to that court's personal jurisdiction.
+      - name: Non-exclusive jurisdiction in the governing law state
+        context: {region: us}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          The courts located in the state whose law governs this Agreement
+          shall have non-exclusive jurisdiction over any dispute.
+      - name: Venue set in a country outside the approved list
+        context: {region: other}
+        expected_outcome: red_line
+        expected_red_line_key: global-governing-law-outside-lists
+        expected_zone: red
+        sample_text: Any dispute shall be submitted to the exclusive jurisdiction of the courts of Ontario, Canada.
+      - name: Floating venue chosen by whoever sues first
+        expected_outcome: red_line
+        expected_red_line_key: ven-floating-forum
+        expected_zone: red
+        sample_text: >
+          The party bringing a claim under this Agreement may select any
+          court of competent jurisdiction as the venue for that claim.
+      - name: Two venues named for different claim types
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Claims for non-payment shall be brought in the courts of Delaware,
+          while all other claims shall be brought in the courts of the
+          receiving party's principal place of business.
+      - name: Trap - inconvenient-forum objection is waived, not a floating clause
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Each party submits to the exclusive jurisdiction of the Delaware
+          courts and may not later claim that such courts are an
+          inconvenient or improper forum.
+
+  - rule_key: dispute_resolution.escalation_process
+    title: Escalation process
+    required: true
+    risk_weight: 2
+    negotiable: true
+    position_summary: >
+      Before either party starts formal proceedings, senior representatives
+      meet within ten business days of written notice of a dispute, and the
+      dispute is resolved or escalated within thirty days, except for claims
+      for injunctive relief or collection of undisputed Fees.
+    risk_rationale: >
+      A short, carved-out escalation step resolves routine disagreements
+      without legal spend on a $165k median contract, while the carve-outs
+      preserve Halcyon's ability to stop an active security or IP problem and
+      to collect undisputed amounts without delay. Removing the carve-outs
+      would let a dispute over an unrelated issue stall urgent relief or
+      routine collections.
+    detection_guidance: >
+      Look for "good faith negotiations", "senior executives", "within ten
+      (10) business days of written notice", "thirty (30) days" and
+      "mediation". Absence means a party may sue without warning, which is a
+      low-severity missing clause rather than a deviation.
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-01
+    positions:
+      - kind: preferred
+        label: Thirty-day escalation with carve-outs
+        zone: green
+        summary: A thirty-day executive escalation step, with injunctive relief and Fee collection carved out.
+        language: >
+          Before commencing any formal proceeding relating to a dispute under
+          this Agreement, the parties shall cause senior representatives with
+          authority to resolve the matter to meet, in person or by
+          videoconference, within ten (10) business days of either party's
+          written notice of the dispute, and shall negotiate in good faith
+          for up to thirty (30) days following that notice before either
+          party may commence formal proceedings. This section does not apply
+          to a request for injunctive or other equitable relief or to an
+          action to collect undisputed amounts owed.
+      - kind: fallback
+        rung: 1
+        label: Forty-five-day escalation with carve-outs
+        zone: green
+        summary: The same escalation step extended to forty-five days, carve-outs unchanged.
+        language: >
+          Before commencing any formal proceeding relating to a dispute under
+          this Agreement, the parties shall cause senior representatives with
+          authority to resolve the matter to meet within ten (10) business
+          days of either party's written notice of the dispute, and shall
+          negotiate in good faith for up to forty-five (45) days following
+          that notice before either party may commence formal proceedings.
+          This section does not apply to a request for injunctive or other
+          equitable relief or to an action to collect undisputed amounts
+          owed.
+      - kind: fallback
+        rung: 2
+        label: Sixty-day escalation, Fee collection no longer carved out
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: Ask for a shorter ten-business-day executive meeting trigger in exchange.
+        summary: The escalation period extends to sixty days and no longer exempts claims to collect unpaid Fees.
+        language: >
+          Before commencing any formal proceeding relating to a dispute under
+          this Agreement, the parties shall cause senior representatives with
+          authority to resolve the matter to meet within ten (10) business
+          days of either party's written notice of the dispute, and shall
+          negotiate in good faith for up to sixty (60) days following that
+          notice, including with respect to any amount claimed to be owed,
+          before either party may commence formal proceedings. This section
+          does not apply to a request for injunctive or other equitable
+          relief.
+      - kind: acceptable_variant
+        label: Good-faith discussion period, counterparty phrasing
+        zone: green
+        summary: The same thirty-day outcome phrased as a duty to discuss rather than a formal escalation step.
+        language: >
+          The parties shall engage in good faith discussions to resolve any
+          dispute arising under this Agreement for a period of thirty (30)
+          days following written notice before either party initiates formal
+          proceedings, provided that either party may seek injunctive relief
+          or pursue collection of undisputed amounts at any time.
+    parameters:
+      - key: escalation_period_days
+        label: Days of required escalation before formal proceedings
+        value_type: duration_days
+        unit: days
+        direction: lower_is_better
+        preferred_value: 30
+        green_limit: 45
+        yellow_limit: 60
+        extraction_hint: >
+          Read the total number of days the clause requires before either
+          party may commence formal proceedings, counting from written notice
+          of the dispute. Convert a stated number of business days to
+          calendar days using a 1.4x multiplier if no calendar figure is
+          given.
+    red_lines:
+      - key: esc-no-urgent-carveout
+        description: The escalation requirement applies to every claim with no exception for injunctive relief or for collecting undisputed Fees.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause requires the full escalation or negotiation period to
+            run before either party may take any action at all, including a
+            request for injunctive or emergency relief and an action to
+            collect amounts that are not in dispute, with no exception of any
+            kind.
+        action: escalate
+        approver_role: commercial_counsel
+        rationale: >
+          Without any carve-out, an unrelated dispute could delay emergency
+          relief during an active security incident or delay collection of
+          routine unpaid Fees, so Commercial Counsel must weigh the specific
+          deal before accepting it.
+    objections:
+      - objection: Thirty days is too long; we want the right to sue immediately if you breach.
+        their_rationale: The counterparty does not want a cooling-off period to stand between a breach and legal recourse.
+        response: >
+          The escalation step rarely delays a real claim by more than a few
+          weeks, and it already does not apply to injunctive relief or to
+          collecting money owed. We are open to shortening the initial
+          executive meeting trigger if the overall period is a concern.
+        talking_points:
+          - The carve-outs already cover the claims most likely to be urgent.
+          - A short negotiation step resolves most disputes without legal cost on either side.
+        frequency: occasional
+      - objection: We want our procurement or compliance team included in the escalation meeting, not just executives.
+        their_rationale: Some counterparties route disputes through a compliance function rather than business leadership.
+        response: >
+          We can agree that each party's representatives include whichever
+          function is appropriate to the dispute, so long as each side sends
+          someone with authority to resolve the matter.
+        talking_points:
+          - The requirement is authority to resolve, not a specific title.
+        frequency: rare
+    dependencies:
+      - related_rule_key: dispute_resolution.forum
+        relation: requires
+        note: The escalation ladder must be exhausted, subject to its carve-outs, before either party may invoke the forum clause's formal proceedings.
+    test_cases:
+      - name: Thirty-day escalation with both carve-outs
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Senior representatives of both parties will meet within ten
+          business days of written notice of a dispute and attempt in good
+          faith to resolve it within thirty days, except that either party
+          may seek injunctive relief or collect undisputed Fees at any time.
+      - name: Good-faith discussion phrasing without the word escalation
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Before filing suit, the parties agree to discuss any dispute in
+          good faith for thirty days after written notice, other than a claim
+          for an injunction or for amounts not in dispute.
+      - name: Sixty-day period, Fee collection no longer carved out
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          The parties shall negotiate for sixty days following notice of a
+          dispute, including any dispute over amounts owed, before either may
+          commence proceedings, other than a claim for injunctive relief.
+      - name: No escalation step before formal proceedings
+        expected_outcome: missing
+        expected_zone: yellow
+        sample_text: ""
+      - name: Escalation applies to every claim, no exceptions at all
+        expected_outcome: red_line
+        expected_red_line_key: esc-no-urgent-carveout
+        expected_zone: red
+        sample_text: >
+          Neither party may commence any proceeding, claim or request for
+          relief of any kind arising under this Agreement until the parties
+          have completed sixty days of negotiation following written notice.
+      - name: Escalation period doubles after a prior dispute in the same year
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          The escalation period under this section shall be fifty days for
+          any dispute arising within twelve months of a prior dispute between
+          the parties.
+
+  - rule_key: dispute_resolution.forum
+    title: Dispute forum
+    required: true
+    risk_weight: 4
+    negotiable: true
+    position_summary: >
+      Disputes are decided by the courts named in the venue clause rather
+      than by mandatory arbitration, with either party free to seek
+      injunctive relief in court at any time.
+    risk_rationale: >
+      Court litigation preserves normal discovery and appeal rights and lets
+      Halcyon rely on published case law when the same clause is interpreted
+      across many of its roughly 310 contracts. Arbitration is acceptable as
+      a concession, but only if it preserves the right to seek an emergency
+      injunction, since Halcyon must be able to act quickly to stop misuse of
+      PHI or its intellectual property.
+    detection_guidance: >
+      Look for "binding arbitration", "administered by", "seat of
+      arbitration", "a single arbitrator", "waives the right to a jury
+      trial" and "class action waiver". Read it together with the venue
+      clause, since the two can conflict. Absence of arbitration wording
+      means the courts named in the venue clause decide disputes.
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-01
+    positions:
+      - kind: preferred
+        label: Courts decide, no mandatory arbitration
+        zone: green
+        summary: Disputes go to the courts named in the venue clause; no arbitration requirement.
+        language: >
+          Disputes arising out of or relating to this Agreement shall be
+          resolved by the courts identified in the Venue section of this
+          Agreement, and nothing in this Agreement requires either party to
+          arbitrate any claim.
+      - kind: fallback
+        rung: 1
+        label: Arbitration with an injunctive-relief carve-out
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: Ask for a single arbitrator and a seat in Delaware in exchange.
+        summary: Binding arbitration administered by a named body, with court access preserved for injunctive relief.
+        language: >
+          Any dispute arising out of or relating to this Agreement, other
+          than a claim for injunctive or other equitable relief, shall be
+          resolved by binding arbitration administered by the American
+          Arbitration Association under its Commercial Arbitration Rules,
+          before a single arbitrator seated in the State of Delaware. Either
+          party may seek injunctive or equitable relief in a court of
+          competent jurisdiction at any time, including before or during the
+          arbitration.
+      - kind: fallback
+        rung: 2
+        label: Arbitration seated outside Delaware, carve-out preserved
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: Ask that each party bear its own arbitration costs regardless of outcome.
+        summary: The same arbitration process, but seated in the counterparty's home state instead of Delaware.
+        language: >
+          Any dispute arising out of or relating to this Agreement, other
+          than a claim for injunctive or other equitable relief, shall be
+          resolved by binding arbitration administered by the American
+          Arbitration Association under its Commercial Arbitration Rules,
+          before a single arbitrator seated in [the counterparty's home
+          state]. Either party may seek injunctive or equitable relief in a
+          court of competent jurisdiction at any time.
+      - kind: acceptable_variant
+        label: No obligation to arbitrate, counterparty phrasing
+        zone: green
+        summary: The same courts-decide outcome, phrased as an express statement that nothing in the Agreement requires arbitration.
+        language: >
+          Nothing in this Agreement shall be construed to require either
+          party to arbitrate any dispute. Any dispute arising out of or
+          relating to this Agreement shall be subject to the jurisdiction of
+          the courts identified in the Venue section of this Agreement.
+    parameters:
+      - key: dispute_forum_type
+        label: Forum for resolving disputes
+        value_type: enum
+        direction: set_membership
+        preferred_value: courts
+        green_limit: [courts]
+        yellow_limit: [arbitration]
+        allowed_values: [courts, arbitration]
+        extraction_hint: >
+          courts if the clause relies on the venue clause's named courts with
+          no arbitration requirement; arbitration if the clause requires
+          binding arbitration for any category of claim.
+    red_lines:
+      - key: dfm-arbitration-forecloses-injunctive
+        description: Arbitration is mandatory for every claim, including a request for injunctive or emergency relief, with no right to seek a court injunction pending arbitration.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause requires all disputes, including a request for
+            provisional, injunctive or emergency relief, to be resolved
+            exclusively through arbitration, with no right for either party
+            to seek an injunction or other provisional remedy from a court at
+            any time, including while arbitration is pending.
+        action: block
+        rationale: >
+          Halcyon must be able to go to court immediately to stop an active
+          misuse of PHI, Customer Data or its intellectual property; an
+          arbitration-only clause with no court access for emergency relief
+          leaves that harm unaddressed for as long as arbitration takes to
+          convene.
+    objections:
+      - objection: Arbitration is confidential and faster; we want all disputes arbitrated, including any request for an injunction.
+        their_rationale: The counterparty values confidentiality and speed over the formality of court proceedings for every claim.
+        response: >
+          We are comfortable with arbitration for most disputes and can agree
+          to it for everything except a request for injunctive relief, which
+          needs to be available in court so either side can act quickly in an
+          emergency.
+        talking_points:
+          - The carve-out is narrow and rarely used outside a genuine emergency.
+          - Confidentiality of the arbitration itself is unaffected by the carve-out.
+        recommended_position: {rule_key: dispute_resolution.forum, rung: 1}
+        frequency: common
+        counterparty_profile: Counterparties with in-house arbitration preference, often larger health systems
+      - objection: We will not arbitrate in Delaware; it is inconvenient and far from our operations.
+        their_rationale: Travel and unfamiliar local counsel raise the counterparty's cost of participating in arbitration.
+        response: >
+          We can move the arbitration seat to your home state while keeping
+          the same injunctive-relief carve-out and a single arbitrator, which
+          keeps the process efficient for both sides.
+        talking_points:
+          - The seat of arbitration, not the governing law, controls procedural convenience.
+        recommended_position: {rule_key: dispute_resolution.forum, rung: 2}
+        frequency: occasional
+    test_cases:
+      - name: Courts decide, no arbitration requirement
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Any dispute arising under this Agreement shall be resolved in the
+          courts identified in the Venue section; neither party is required
+          to arbitrate any claim.
+      - name: Express statement that arbitration is not required
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Nothing in this Agreement requires either party to arbitrate a
+          dispute; any claim arising under this Agreement is subject to the
+          jurisdiction of the courts named in the Venue section.
+      - name: AAA arbitration with the injunctive-relief carve-out
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: yellow
+        sample_text: >
+          Except for claims seeking injunctive or equitable relief, any
+          dispute shall be settled by binding arbitration administered by the
+          American Arbitration Association, with a single arbitrator seated
+          in Delaware.
+      - name: AAA arbitration seated in the counterparty's home state
+        context: {region: us}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Except for claims seeking injunctive relief, disputes shall be
+          settled by binding arbitration administered by the American
+          Arbitration Association, with a single arbitrator seated in the
+          state of the counterparty's principal office.
+      - name: Mandatory arbitration with no injunctive-relief carve-out
+        expected_outcome: red_line
+        expected_red_line_key: dfm-arbitration-forecloses-injunctive
+        expected_zone: red
+        sample_text: >
+          All disputes, claims and requests for relief of any kind arising
+          under this Agreement, without exception, shall be resolved
+          exclusively by binding arbitration, and neither party may seek
+          relief from any court at any time.
+      - name: Arbitration required only above a dollar threshold
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Disputes involving a claim of $50,000 or more shall be arbitrated;
+          smaller claims may be brought in any court either party chooses.
+
+  - rule_key: notices.method
+    title: Notice method
+    required: true
+    risk_weight: 2
+    negotiable: true
+    position_summary: >
+      Formal notices are given in writing by hand, nationally recognized
+      overnight courier or certified mail to each party's legal contact, and
+      are deemed received on a stated day after dispatch; email alone does
+      not suffice for a notice of breach or termination unless confirmed.
+    risk_rationale: >
+      Halcyon's legal team of six tracks cure periods and termination
+      deadlines across roughly 310 customer contracts, so a notice method
+      that cannot be proven to have reached the right person risks a missed
+      deadline or a dispute over whether notice was ever given. Requiring
+      confirmation for email keeps the low cost of electronic notice while
+      preserving proof of delivery.
+    detection_guidance: >
+      Look for "notices shall be in writing", "delivered by hand",
+      "nationally recognized overnight courier", "certified mail", "by email
+      to", "deemed received" and "Attention: Legal Department". Absence means
+      there is no agreed way to give effective notice, which is a missing
+      clause.
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-02
+    positions:
+      - kind: preferred
+        label: Hand delivery, courier or certified mail only
+        zone: green
+        summary: Formal notices require hand delivery, overnight courier or certified mail to the legal contact; email alone is not sufficient for breach or termination notices.
+        language: >
+          All notices under this Agreement shall be in writing and delivered
+          by hand, by nationally recognized overnight courier, or by
+          certified mail, return receipt requested, to the address and
+          attention of the Legal Department set out on the signature page or
+          as later updated by notice given under this section. A notice is
+          deemed received one (1) business day after dispatch by courier or
+          three (3) business days after dispatch by certified mail. A notice
+          of breach or termination given only by email is not effective.
+      - kind: fallback
+        rung: 1
+        label: Email permitted with confirmation of receipt
+        zone: green
+        summary: Email is also acceptable for any notice, including breach or termination, if a confirmation of delivery is obtained.
+        language: >
+          All notices under this Agreement shall be in writing and delivered
+          by hand, by nationally recognized overnight courier, by certified
+          mail, return receipt requested, or by email to the address and
+          attention of the Legal Department, provided that a notice sent by
+          email is effective only upon the sending party's receipt of a
+          written or electronic confirmation of delivery from the recipient.
+      - kind: fallback
+        rung: 2
+        label: Email alone sufficient, no confirmation required
+        zone: yellow
+        approver_role: contracts_manager
+        give_get: Ask that the designated email address be limited to the Legal Department rather than a general support inbox.
+        summary: Email alone is sufficient for every notice, including breach or termination, without any confirmation of delivery.
+        language: >
+          All notices under this Agreement may be given in writing by hand,
+          by nationally recognized overnight courier, by certified mail, or
+          by email to the address and attention of the Legal Department, and
+          are deemed received upon transmission, without any requirement of
+          confirmation.
+      - kind: acceptable_variant
+        label: Notice deemed given on actual receipt, any written method
+        zone: green
+        summary: Notice is effective on actual receipt by any method that produces a written or electronic record, a common counterparty phrasing for the same outcome.
+        language: >
+          Any notice required under this Agreement shall be deemed duly given
+          on the date actually received by the party to whom it is addressed,
+          provided it is delivered by a method that produces a written or
+          electronic record of delivery, addressed to the recipient's legal
+          or contracts department.
+    parameters:
+      - key: email_sufficient_for_formal_notices
+        label: Email alone is sufficient for a notice of breach or termination
+        value_type: boolean
+        direction: exact
+        preferred_value: false
+        green_limit: false
+        yellow_limit: true
+        extraction_hint: >
+          False if the clause requires hand delivery, courier or certified
+          mail for a breach or termination notice, or requires confirmation
+          of an emailed notice. True if an unconfirmed email alone is
+          sufficient for every type of notice, including breach or
+          termination.
+    red_lines:
+      - key: ntc-informal-only
+        description: Notice may be given by an informal, unverifiable channel such as a verbal statement, a posting or a text message.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause treats an informal or unverifiable channel, such as a
+            verbal statement, a phone call, a text message, or posting to a
+            website or application, as sufficient by itself to give a notice
+            of breach or termination, with no requirement of a written or
+            confirmed delivery. Answer no if every notice of breach or
+            termination must be given in writing by a method such as hand
+            delivery, courier, certified mail, or a confirmed email.
+        action: escalate
+        approver_role: contracts_manager
+        rationale: >
+          An informal or unverifiable channel cannot reliably establish when
+          a cure period or a termination right began to run, which the
+          contracts managers rely on to administer the roughly 310 customer
+          contracts in force.
+    objections:
+      - objection: Requiring courier or certified mail for every notice is slow and old-fashioned; we want to use email for everything.
+        their_rationale: The counterparty's own operations run on email and finds physical mail delivery burdensome to track.
+        response: >
+          We can accept email for formal notices, including breach or
+          termination, as long as the sender obtains a confirmation of
+          delivery, which protects both sides if a dispute later arises over
+          whether notice was given.
+        talking_points:
+          - Confirmation of delivery is a low-cost step that avoids disputes over whether notice occurred.
+          - We are not asking for mail generally, only for breach and termination notices.
+        recommended_position: {rule_key: notices.method, rung: 1}
+        frequency: common
+      - objection: Your Legal Department address is generic; we want notices sent to our named account manager too.
+        their_rationale: The counterparty wants assurance that the people actually running the relationship see a notice, not only a legal inbox.
+        response: >
+          We can add the account team as a required copy on any notice,
+          while keeping the Legal Department as the address that starts the
+          clock on cure periods and deadlines.
+        talking_points:
+          - A required copy to the account team does not change when a deadline starts running.
+        frequency: occasional
+    test_cases:
+      - name: Courier notice to the Legal Department
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Notices must be delivered by hand or by a nationally recognized
+          overnight courier to the Legal Department at the address on the
+          signature page, and are deemed received one business day after
+          dispatch.
+      - name: Notice effective on actual receipt, any written record
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          A notice is effective when actually received by the recipient's
+          legal department, provided it is sent by a method that creates a
+          written record of delivery.
+      - name: Email alone sufficient, no confirmation required
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Any notice, including a notice of breach or termination, may be
+          given by email to the Legal Department and is deemed received when
+          sent.
+      - name: No notice clause in the agreement
+        expected_outcome: missing
+        expected_zone: yellow
+        sample_text: ""
+      - name: Notice may be given verbally in a phone call
+        expected_outcome: red_line
+        expected_red_line_key: ntc-informal-only
+        expected_zone: red
+        sample_text: >
+          Verbal notice given during a scheduled account review call shall be
+          sufficient notice of any breach or termination under this
+          Agreement.
+      - name: Notice deemed received before it is even sent
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          A notice is deemed received two business days before the date it
+          is dispatched, for purposes of calculating any cure period.
+
+  - rule_key: assignment.consent_requirement
+    title: Consent to assignment
+    required: true
+    risk_weight: 3
+    negotiable: true
+    position_summary: >
+      Neither party may assign this Agreement without the other's prior
+      written consent, not to be unreasonably withheld, except for an
+      assignment to an Affiliate or in connection with a merger or sale of
+      substantially all of a party's business.
+    risk_rationale: >
+      Halcyon's SOC 2 Type II, ISO 27001 and HITRUST r2 obligations depend on
+      knowing who holds its contracts and data commitments. An assignment
+      standard that is not unreasonably withheld preserves a check on who
+      steps into a counterparty's role while still allowing routine
+      corporate transactions, including Halcyon's own, to proceed without
+      friction.
+    detection_guidance: >
+      Look for "may not assign", "without the prior written consent", "not to
+      be unreasonably withheld, conditioned or delayed", "to an Affiliate"
+      and "successor to all or substantially all of its business or assets".
+      Absence means assignment is governed by the default rules of the
+      governing law and is a missing clause.
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-02
+    positions:
+      - kind: preferred
+        label: Consent not unreasonably withheld, Affiliate and M&A carve-outs
+        zone: green
+        summary: Assignment needs consent not to be unreasonably withheld, except to an Affiliate or successor in a merger, acquisition or sale of substantially all assets.
+        language: >
+          Neither party may assign or transfer this Agreement, in whole or in
+          part, without the prior written consent of the other party, which
+          consent shall not be unreasonably withheld, conditioned or delayed,
+          except that either party may assign this Agreement without consent
+          to an Affiliate or to a successor of all or substantially all of
+          its business or assets related to this Agreement, whether by
+          merger, acquisition, reorganization or operation of law, upon
+          written notice to the other party.
+      - kind: fallback
+        rung: 1
+        label: Asset-sale carve-out broadened
+        zone: green
+        summary: The same consent standard, with the successor carve-out extended to a sale of the business unit performing this Agreement, not only substantially all of the party's business.
+        language: >
+          Neither party may assign or transfer this Agreement without the
+          prior written consent of the other party, which consent shall not
+          be unreasonably withheld, conditioned or delayed, except that
+          either party may assign this Agreement without consent to an
+          Affiliate or to a successor of the business unit that performs this
+          Agreement, whether by merger, acquisition, reorganization, or sale
+          of assets, upon written notice to the other party.
+      - kind: fallback
+        rung: 2
+        label: No consent required except for assignment to a direct competitor
+        zone: yellow
+        approver_role: contracts_manager
+        give_get: Ask for ten business days' advance notice of any assignment in exchange.
+        summary: Either party may assign on notice alone, without consent, except an assignment to a direct competitor of the other party still requires consent.
+        language: >
+          Either party may assign this Agreement upon written notice to the
+          other party and without the other party's consent, except that an
+          assignment to a direct competitor of the other party requires the
+          other party's prior written consent, not to be unreasonably
+          withheld.
+      - kind: acceptable_variant
+        label: Binds successors and assigns, counterparty phrasing
+        zone: green
+        summary: The same consent-not-unreasonably-withheld outcome, phrased as a binding-effect clause with a voidness remedy.
+        language: >
+          This Agreement shall be binding upon and inure to the benefit of
+          the parties and their respective permitted successors and assigns.
+          Neither party shall assign this Agreement without the prior written
+          consent of the other, not to be unreasonably withheld, and any
+          assignment in violation of this section shall be void.
+    parameters:
+      - key: assignment_consent_standard
+        label: Standard applied to assignment consent
+        value_type: enum
+        direction: set_membership
+        preferred_value: not_unreasonably_withheld
+        green_limit: [not_unreasonably_withheld]
+        yellow_limit: [no_consent_except_competitor, sole_discretion]
+        allowed_values:
+          - not_unreasonably_withheld
+          - no_consent_except_competitor
+          - sole_discretion
+          - no_consent_required
+        extraction_hint: >
+          not_unreasonably_withheld if consent cannot be unreasonably
+          withheld for any assignment outside the Affiliate or M&A carve-out.
+          no_consent_except_competitor if notice alone suffices except for an
+          assignment to a direct competitor. sole_discretion if consent may
+          be refused for any reason. no_consent_required if no consent or
+          notice is needed for any assignment.
+    red_lines:
+      - key: asn-con-unrestricted
+        description: Assignment is permitted to any third party, including a direct competitor, without any consent, notice or restriction.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause permits a party to assign this Agreement, including
+            to a direct competitor of the other party or to any other third
+            party, without any consent, notice, or restriction of any kind.
+        action: block
+        rationale: >
+          Halcyon's confidentiality duties and its SOC 2, ISO 27001 and
+          HITRUST r2 commitments depend on knowing who the counterparty is;
+          an unrestricted assignment could hand those obligations, and access
+          to Customer Data, to an unvetted or competing entity with no
+          review.
+    objections:
+      - objection: Requiring your consent to any assignment could block or slow down our own financing or sale process.
+        their_rationale: Investors and acquirers often want assignment rights to move quickly without waiting on a counterparty's approval.
+        response: >
+          The Affiliate and merger-or-sale carve-out already lets a financing
+          or sale transaction proceed without our consent, as long as the
+          successor assumes the Agreement. Consent is needed only for an
+          assignment outside that path, and it cannot be unreasonably
+          withheld.
+        talking_points:
+          - The carve-out covers the overwhelming majority of real-world assignment scenarios.
+          - The not-unreasonably-withheld standard limits our ability to block a legitimate transaction.
+        recommended_position: {rule_key: assignment.consent_requirement, rung: 1}
+        frequency: common
+      - objection: We want to be able to assign this Agreement to any subsidiary or contractor we use to deliver services, without asking first.
+        their_rationale: Counterparties with complex corporate structures want flexibility to move obligations among related entities operationally.
+        response: >
+          We can agree that notice, rather than consent, is enough for an
+          assignment to any of your Affiliates, while keeping consent for an
+          assignment to an unrelated third party or a direct competitor of
+          ours.
+        talking_points:
+          - Affiliate assignments are already covered without consent in our preferred language.
+          - A competitor carve-out protects both sides' confidential information.
+        recommended_position: {rule_key: assignment.consent_requirement, rung: 2}
+        frequency: occasional
+    dependencies:
+      - related_rule_key: assignment.change_of_control
+        relation: read_with
+        note: A change of control is defined and carved out from the assignment consent requirement in the change-of-control rule.
+    test_cases:
+      - name: Consent not unreasonably withheld, standard carve-outs
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Neither party may assign this Agreement without the other's prior
+          written consent, which shall not be unreasonably withheld, except
+          for an assignment to an Affiliate or to a successor in a merger or
+          sale of substantially all of its assets.
+      - name: Binding on successors and assigns, voidness remedy
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          This Agreement binds the parties' permitted successors and
+          assigns. Any assignment made without the other party's consent,
+          not to be unreasonably withheld, is void.
+      - name: No consent needed except for assignment to a competitor
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Either party may assign this Agreement on written notice without
+          the other's consent, unless the assignee is a direct competitor of
+          the other party, in which case consent is required.
+      - name: No assignment clause present
+        expected_outcome: missing
+        expected_zone: yellow
+        sample_text: ""
+      - name: Assignment permitted to anyone, including a competitor, with no restriction
+        expected_outcome: red_line
+        expected_red_line_key: asn-con-unrestricted
+        expected_zone: red
+        sample_text: >
+          Either party may freely assign this Agreement to any third party,
+          including a competitor of the other party, without notice or
+          consent of any kind.
+      - name: Consent required only for assignments above a revenue threshold
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Consent is required for an assignment to an entity with annual
+          revenue below $1,000,000, but no consent is required for an
+          assignment to a larger entity.
+
+  - rule_key: assignment.change_of_control
+    title: Change of control
+    required: true
+    risk_weight: 4
+    negotiable: true
+    position_summary: >
+      A change of control of either party is not itself an assignment and
+      needs no consent, provided the surviving entity assumes the Agreement,
+      but either party may terminate on notice if the other's change of
+      control results in control by a direct competitor.
+    risk_rationale: >
+      Halcyon's own growth may include a financing round, acquisition or
+      sale, so the baseline keeps change of control outside the consent
+      requirement for both sides. The competitor-termination right protects
+      either party if the other ends up controlled by a direct rival, without
+      giving a counterparty a routine exit whenever Halcyon is acquired,
+      which would unsettle the predictable renewal revenue behind the $165k
+      median and $2.4M largest contracts.
+    detection_guidance: >
+      Look for "change of control", "merger, acquisition or sale of all or
+      substantially all", "by operation of law", "deemed an assignment" and
+      "acquired by a competitor". It may sit in the assignment clause or the
+      termination clause. Absence means a change in ownership has no
+      contractual consequence.
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-02
+    positions:
+      - kind: preferred
+        label: Not an assignment; terminable only if the acquirer is a competitor
+        zone: green
+        summary: Change of control needs no consent and is not an assignment; either party may terminate on ninety days' notice if the other is acquired by a direct competitor.
+        language: >
+          A change of control of a party shall not be deemed an assignment
+          of this Agreement and shall not require the other party's consent,
+          provided that the surviving or acquiring entity assumes this
+          Agreement in writing. If a party undergoes a change of control
+          that results in its control by a direct competitor of the other
+          party, the other party may terminate this Agreement upon ninety
+          (90) days' prior written notice given within ninety (90) days after
+          it learns of the change of control.
+      - kind: fallback
+        rung: 1
+        label: Competitor-only termination right, notice shortened to sixty days
+        zone: green
+        summary: The same competitor-triggered termination right, with the notice period shortened from ninety to sixty days.
+        language: >
+          A change of control of a party shall not be deemed an assignment
+          of this Agreement and shall not require the other party's consent,
+          provided that the surviving or acquiring entity assumes this
+          Agreement in writing. If a party undergoes a change of control
+          that results in its control by a direct competitor of the other
+          party, the other party may terminate this Agreement upon sixty
+          (60) days' prior written notice given within sixty (60) days
+          after it learns of the change of control.
+      - kind: fallback
+        rung: 2
+        label: Unconditional termination right on thirty days' notice
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: Ask that the notice period for exercising this right be no more than sixty days after the change of control is announced.
+        summary: Either party may terminate on thirty days' notice following the other's change of control, regardless of who the acquirer is.
+        language: >
+          A change of control of a party shall not be deemed an assignment
+          of this Agreement, provided the surviving entity assumes this
+          Agreement in writing. Following any change of control of a party,
+          the other party may terminate this Agreement upon thirty (30)
+          days' prior written notice, without regard to the identity of the
+          acquiring entity.
+      - kind: acceptable_variant
+        label: Change of control defined by voting control percentage
+        zone: green
+        summary: The same consent-free, competitor-terminable outcome, with change of control defined by a specific ownership threshold rather than described generally.
+        language: >
+          For purposes of this section, a "change of control" means any
+          transaction or series of transactions resulting in a person or
+          group acquiring, directly or indirectly, more than fifty percent
+          (50%) of the voting securities or assets of a party. A change of
+          control is not an assignment requiring consent, but the other party
+          may terminate this Agreement upon ninety (90) days' notice if the
+          acquiring person or group is a direct competitor of that party.
+    parameters:
+      - key: coc_termination_notice_days
+        label: Notice period for the competitor-change-of-control termination right
+        value_type: duration_days
+        unit: days
+        direction: higher_is_better
+        preferred_value: 90
+        green_limit: 60
+        yellow_limit: 30
+        extraction_hint: >
+          The number of days' prior written notice required before the
+          termination right triggered by a change of control, as acquired by
+          a competitor or otherwise, becomes effective.
+    red_lines:
+      - key: asn-coc-auto-terminate
+        description: A change of control automatically terminates the Agreement, or is treated as a breach, with no notice period and no chance for the successor to assume the Agreement.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause automatically terminates the Agreement, or treats it
+            as a breach of the Agreement, immediately upon a change of
+            control of either party, with no notice period and no
+            opportunity for the surviving or acquiring entity to assume the
+            Agreement.
+        action: escalate
+        approver_role: commercial_counsel
+        rationale: >
+          Halcyon's own path to growth may include an acquisition or
+          financing event; an automatic termination with no notice would
+          put every renewal, including the $2.4M largest contract, at risk
+          the moment such a transaction closes, so Commercial Counsel must
+          weigh the specific deal rather than accept it outright.
+    objections:
+      - objection: We want the right to walk away if you are ever acquired, not just if the acquirer is a competitor.
+        their_rationale: The counterparty wants control over who it continues to do business with, regardless of whether the acquirer competes with it.
+        response: >
+          We can offer an unconditional termination right on notice following
+          any change of control, though we would ask for a longer notice
+          window so both sides have time to plan a transition.
+        talking_points:
+          - An unconditional exit right is a real concession and is offered only as a fallback.
+          - A longer notice period protects continuity of service during a transition.
+        recommended_position: {rule_key: assignment.change_of_control, rung: 2}
+        frequency: occasional
+      - objection: Ninety days is too long to wait before we can terminate over a competitor acquisition.
+        their_rationale: The counterparty wants to exit quickly if a rival gains control of its vendor, before sensitive data continues flowing.
+        response: >
+          We can shorten the notice period down to sixty days while keeping
+          the same competitor-triggered termination right, which still gives
+          both sides time to plan a transition.
+        talking_points:
+          - A shorter window is available without expanding the trigger beyond a competitor acquisition.
+        recommended_position: {rule_key: assignment.change_of_control, rung: 1}
+        frequency: rare
+    test_cases:
+      - name: Change of control not an assignment, competitor termination right
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          A change of control of either party shall not be treated as an
+          assignment of this Agreement and requires no consent, but the
+          other party may terminate on ninety days' notice if the acquiring
+          entity is a direct competitor.
+      - name: Change of control defined by a fifty percent ownership threshold
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          A change of control means the acquisition by any person of more
+          than fifty percent of a party's voting securities. Such an event
+          is not an assignment, but the non-changing party may terminate on
+          ninety days' notice if the acquirer is a direct competitor.
+      - name: Unconditional thirty-day termination right after any change of control
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Following a change of control of either party, the other party may
+          terminate this Agreement upon thirty days' written notice,
+          regardless of the identity of the new controlling party.
+      - name: No change of control provision in the agreement
+        expected_outcome: missing
+        expected_zone: yellow
+        sample_text: ""
+      - name: Change of control automatically terminates the agreement with no notice
+        expected_outcome: red_line
+        expected_red_line_key: asn-coc-auto-terminate
+        expected_zone: red
+        sample_text: >
+          This Agreement terminates automatically and immediately upon a
+          change of control of either party, with no notice period and no
+          right for the successor entity to assume it.
+      - name: Termination right triggered only by a change of control of the smaller party
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Only Party B's change of control gives Party A a termination
+          right; a change of control of Party A has no effect under this
+          section.
+
+  - rule_key: amendment.written_amendment
+    title: Written amendment
+    required: true
+    risk_weight: 5
+    negotiable: true
+    position_summary: >
+      This Agreement may be amended only by a signed written instrument, and
+      no delay or failure to enforce a right is a waiver of that or any
+      other right.
+    risk_rationale: >
+      Across roughly 310 customer contracts, a written-amendment requirement
+      prevents an email exchange, a sales conversation or a support ticket
+      from being read as changing fixed commercial terms such as the Fees or
+      liability cap. The no-waiver language stops routine leniency on one
+      occasion from being read as giving up the right to enforce a term
+      later.
+    detection_guidance: >
+      Look for "may be amended only by a written instrument signed by
+      authorized representatives of both parties", "no waiver shall be
+      effective unless in writing" and, as a deviation, "may modify these
+      terms from time to time by posting". Absence is a missing clause.
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-02
+    positions:
+      - kind: preferred
+        label: Signed written instrument only, explicit no-waiver
+        zone: green
+        summary: Amendment requires a signed written instrument; no waiver without a signed writing, and delay does not waive a right.
+        language: >
+          This Agreement may be amended, modified or supplemented only by a
+          written instrument signed by authorized representatives of both
+          parties. No waiver of any provision of this Agreement is effective
+          unless set out in a writing signed by the party against whom the
+          waiver is asserted, and no failure or delay by either party in
+          exercising any right under this Agreement operates as a waiver of
+          that or any other right.
+      - kind: fallback
+        rung: 1
+        label: Amendment by signed writing or confirmed email exchange
+        zone: green
+        summary: The same no-waiver protection, with amendment also permitted by an email exchange between designated representatives that expressly states an intent to amend.
+        language: >
+          This Agreement may be amended, modified or supplemented only by a
+          written instrument signed by authorized representatives of both
+          parties, or by an exchange of emails between the parties'
+          designated contract representatives that expressly states the
+          parties' intent to amend this Agreement and identifies the
+          provision being amended. No failure or delay by either party in
+          exercising any right under this Agreement operates as a waiver of
+          that or any other right.
+      - kind: fallback
+        rung: 2
+        label: Each party may update its own contact details by notice; every other amendment still requires signature
+        zone: yellow
+        approver_role: contracts_manager
+        give_get: Ask for thirty days' advance notice before any contact-detail update takes effect.
+        summary: Either party may update its own notice address, designated contact or support channel by notice; every other change to this Agreement still requires a signed written instrument.
+        language: >
+          Either party may update its own notice address, its own
+          designated contact for notices, or its own support contact
+          channel under this Agreement by written notice to the other
+          party. No other amendment, modification or supplement to this
+          Agreement is effective unless made by a written instrument signed
+          by authorized representatives of both parties.
+      - kind: acceptable_variant
+        label: No modification or amendment unless in writing and executed, counterparty phrasing
+        zone: green
+        summary: The same signed-writing requirement, phrased from the counterparty's side.
+        language: >
+          No modification, amendment or supplement to this Agreement shall
+          be binding on either party unless made in writing and executed by
+          both parties. No delay or omission by either party in exercising a
+          right under this Agreement shall be construed as a waiver of that
+          right.
+    red_lines:
+      - key: amd-conduct-waiver
+        description: A party's conduct, course of dealing or delay in enforcing a right is treated as a waiver of that or future rights.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause states that a party's conduct, course of dealing, or
+            delay or failure to enforce a right under this Agreement
+            operates as a waiver of that right, or of future rights,
+            without a separate signed writing. Answer no if the clause
+            states that a waiver is effective only when set out in a
+            writing signed by the waiving party, and that delay or conduct
+            alone is not a waiver.
+        action: escalate
+        approver_role: commercial_counsel
+        rationale: >
+          Without explicit no-waiver protection, temporary leniency, such as
+          tolerating a late payment during a renewal negotiation, could be
+          read as forfeiting the right to enforce that term later across any
+          of Halcyon's roughly 310 customer contracts.
+    objections:
+      - objection: Requiring a signed document for every change is too slow; we want to be able to agree to minor changes by email.
+        their_rationale: Counterparties with lean legal teams find it faster to confirm small changes informally rather than routing a signature.
+        response: >
+          We can accept an email exchange between named contract
+          representatives as an amendment, as long as it expressly states
+          the intent to amend and identifies the term being changed, which
+          keeps a clear record without a full signature process.
+        talking_points:
+          - The email must be explicit about amending the Agreement, not a routine conversation.
+          - This still protects against an informal comment being read as a binding change.
+        recommended_position: {rule_key: amendment.written_amendment, rung: 1}
+        frequency: common
+      - objection: We want the right to update our standard terms, posted online, without your signature each time.
+        their_rationale: Counterparties with their own standard terms sometimes expect those terms to govern and to be updatable unilaterally.
+        response: >
+          We cannot agree to unilateral changes to this Agreement by posting
+          updated terms online. We can, however, let either party update
+          purely administrative details, such as a support contact, by
+          notice, while any change to Fees, liability or data terms still
+          needs a signed amendment.
+        talking_points:
+          - A unilaterally updatable agreement cannot be priced or insured with any confidence.
+          - The administrative carve-out addresses the convenience concern without the risk.
+        recommended_position: {rule_key: amendment.written_amendment, rung: 2}
+        frequency: occasional
+    dependencies: []
+    test_cases:
+      - name: Signed written instrument required, explicit no-waiver
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          This Agreement may be amended only by a written instrument signed
+          by both parties, and no delay in enforcing a right is a waiver of
+          that right.
+      - name: No modification unless in writing and executed, counterparty phrasing
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          No amendment to this Agreement is binding unless it is in writing
+          and signed by both parties. No omission in exercising a right is a
+          waiver of that right.
+      - name: Administrative details updatable by notice, substantive terms still signed
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Either party may change its designated support contact by written
+          notice; any change to the Fees or the liability cap requires a
+          signed amendment executed by both parties.
+      - name: No amendment clause present
+        expected_outcome: missing
+        expected_zone: yellow
+        sample_text: ""
+      - name: Delay in enforcing a right is deemed a permanent waiver
+        expected_outcome: red_line
+        expected_red_line_key: amd-conduct-waiver
+        expected_zone: red
+        sample_text: >
+          Any delay by a party in enforcing a right under this Agreement
+          shall be deemed a waiver of that right for the remainder of the
+          term.
+      - name: Counterparty may amend by posting updated terms online
+        expected_outcome: red_line
+        expected_red_line_key: global-unilateral-amendment
+        expected_zone: red
+        sample_text: >
+          [Party B] may modify the terms of this Agreement from time to time
+          by posting an updated version on its website, effective upon
+          posting.
+      - name: Amendment permitted by a purchase order referencing a new term
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          A term of this Agreement may be amended by either party issuing a
+          purchase order or invoice that states the revised term, without a
+          separate signed amendment.
+      - name: Trap - no-waiver clause stated as the conduct rule, not a waiver by conduct
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          No course of dealing between the parties shall be construed as a
+          waiver of any provision of this Agreement; any waiver must be in a
+          signed writing.
+
+  - rule_key: entire_agreement.integration
+    title: Integration
+    required: true
+    risk_weight: 4
+    negotiable: true
+    position_summary: >
+      This Agreement, together with its Order Forms and exhibits,
+      constitutes the entire agreement between the parties and supersedes
+      all prior proposals, negotiations and representations, written or
+      oral.
+    risk_rationale: >
+      Halcyon Engage is a single multi-tenant product sold on standard
+      Documentation to about 310 customers, so a clean integration clause
+      keeps a sales proposal, an RFP response or a pre-contract email from
+      being read as an additional binding promise. Without it, one
+      customer's pre-signing materials could create obligations engineering
+      has never committed to building.
+    detection_guidance: >
+      Look for "entire agreement", "supersedes all prior and
+      contemporaneous", "proposals, negotiations and representations" and
+      "terms on any purchase order shall have no effect". Wording that
+      incorporates "Vendor's response to the RFP" is a deviation. Absence of
+      an integration clause is a missing clause.
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-03
+    positions:
+      - kind: preferred
+        label: Entire agreement, prior materials superseded, purchase orders ineffective
+        zone: green
+        summary: This Agreement and its Order Forms and exhibits are the entire agreement; prior materials and purchase-order terms have no effect.
+        language: >
+          This Agreement, together with all Order Forms, exhibits and
+          addenda signed by both parties, constitutes the entire agreement
+          between the parties regarding its subject matter and supersedes
+          all prior and contemporaneous proposals, negotiations,
+          understandings and representations, whether written or oral.
+          Terms on any purchase order, invoice or similar document issued by
+          either party have no effect under this Agreement, even if
+          referenced or attached.
+      - kind: fallback
+        rung: 1
+        label: Signed Statement of Work may add non-conflicting project terms
+        zone: green
+        summary: The same entire-agreement outcome, with a signed Statement of Work permitted to add project-specific terms that do not conflict with this Agreement.
+        language: >
+          This Agreement, together with all Order Forms, exhibits and
+          addenda signed by both parties, constitutes the entire agreement
+          between the parties regarding its subject matter and supersedes
+          all prior and contemporaneous proposals, negotiations,
+          understandings and representations. A signed Statement of Work may
+          add project-specific terms that do not conflict with this
+          Agreement. Terms on any purchase order or invoice have no effect
+          under this Agreement.
+      - kind: fallback
+        rung: 2
+        label: Sales proposal referenced as non-binding interpretive context only
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: Ask for an express statement that the referenced material creates no additional obligation.
+        summary: The counterparty's sales proposal or RFP response may be referenced as non-binding context for interpreting this Agreement, but creates no additional obligation.
+        language: >
+          This Agreement, together with all Order Forms and exhibits signed
+          by both parties, constitutes the entire agreement between the
+          parties. [Counterparty]'s request for proposal and Halcyon's
+          response to it may be referred to solely as non-binding context
+          for interpreting an ambiguous term of this Agreement, and create no
+          additional obligation on either party.
+      - kind: acceptable_variant
+        label: Final and complete expression, counterparty phrasing
+        zone: green
+        summary: The same superseding outcome, phrased as the agreement being the final and complete expression of the parties' bargain.
+        language: >
+          The parties agree that this Agreement, including its Order Forms
+          and exhibits, represents the final and complete expression of
+          their agreement regarding its subject matter and supersedes any
+          prior written or oral agreements, proposals or understandings
+          between them.
+    red_lines:
+      - key: ent-int-rfp-incorporation
+        description: A request for proposal, sales presentation or other pre-contract document is incorporated as a binding part of the Agreement.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause incorporates the counterparty's request for proposal,
+            sales presentation, marketing material or other pre-contract
+            document as a binding part of the Agreement, so that a
+            representation made before signing creates an additional
+            obligation beyond the Agreement and the Documentation.
+        action: escalate
+        approver_role: commercial_counsel
+        rationale: >
+          Halcyon Engage runs on one shared code base for about 310
+          customers; letting a single customer's pre-contract materials
+          become binding commitments would import obligations outside the
+          Documentation that engineering has not committed to building.
+    objections:
+      - objection: We relied on your sales team's presentation and want those commitments to be part of the Agreement.
+        their_rationale: The counterparty's decision to buy was based on statements made during the sales process and it wants those statements to be enforceable.
+        response: >
+          Any commitment we intend to be binding belongs in the Documentation
+          or the Order Form, where it applies consistently to every
+          customer. We can reference the proposal as non-binding
+          interpretive context if a term later needs clarifying, without
+          making it an independent source of obligations.
+        talking_points:
+          - A shared, multi-tenant product cannot have different binding promises for each customer.
+          - Anything you need delivered should be written into the Order Form or Documentation directly.
+        recommended_position: {rule_key: entire_agreement.integration, rung: 2}
+        frequency: common
+      - objection: Our internal process requires that our Statement of Work control over your standard terms.
+        their_rationale: Procurement-heavy counterparties often have internal policies requiring their own project documents to take precedence.
+        response: >
+          We can let a signed Statement of Work add project-specific detail
+          that does not conflict with this Agreement, but the Agreement's
+          commercial and risk terms, such as liability and payment, continue
+          to control.
+        talking_points:
+          - The order-of-precedence rule sets out exactly which document controls a conflict.
+        recommended_position: {rule_key: entire_agreement.integration, rung: 1}
+        frequency: occasional
+    dependencies:
+      - related_rule_key: entire_agreement.order_of_precedence
+        relation: requires
+        note: The integration clause's superseding effect only works once the order-of-precedence rule has resolved which surviving document controls a conflict.
+    test_cases:
+      - name: Entire agreement, purchase order terms ineffective
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          This Agreement and its Order Forms constitute the entire agreement
+          between the parties and supersede all prior proposals and
+          representations; terms on any purchase order have no effect.
+      - name: Final and complete expression, counterparty phrasing
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          This Agreement represents the final and complete expression of the
+          parties' agreement and supersedes any prior written or oral
+          understanding between them.
+      - name: Sales proposal referenced as non-binding interpretive context
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          This Agreement is the entire agreement between the parties, except
+          that the parties may refer to the counterparty's request for
+          proposal solely as non-binding context for interpreting an
+          ambiguous term, without creating any additional obligation.
+      - name: No integration or entire agreement clause present
+        expected_outcome: missing
+        expected_zone: yellow
+        sample_text: ""
+      - name: Vendor's RFP response incorporated as binding
+        expected_outcome: red_line
+        expected_red_line_key: ent-int-rfp-incorporation
+        expected_zone: red
+        sample_text: >
+          This Agreement incorporates by reference, as binding obligations of
+          Halcyon, all representations made in Halcyon's response to the
+          counterparty's request for proposal dated March 2026.
+      - name: Entire agreement clause excludes the exhibits from superseding prior drafts
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          This Agreement supersedes all prior proposals, except that any
+          draft exhibit exchanged during negotiation remains part of the
+          parties' understanding and may be enforced independently.
+
+  - rule_key: entire_agreement.order_of_precedence
+    title: Order of precedence
+    required: true
+    risk_weight: 5
+    negotiable: true
+    position_summary: >
+      Where documents conflict, a signed amendment prevails, then the Order
+      Form, then the body of this Agreement, then any exhibit, then the
+      Documentation; a purchase order or similar document never prevails.
+    risk_rationale: >
+      Halcyon negotiates its liability cap, payment terms and data
+      protection commitments in the body of the Agreement and the Order
+      Form, so a clear ranking stops an exhibit or a later-issued purchase
+      order from silently overriding terms Commercial Counsel approved. This
+      matters most on larger deals, where an Order Form worth up to the
+      $2.4M largest contract may be revised more than once before signing.
+    detection_guidance: >
+      Look for "in the event of a conflict", "order of precedence", "shall
+      prevail", "shall control" and a ranked list of documents. Check every
+      attached addendum for its own competing precedence statement. Absence
+      leaves conflicts between documents unresolved and is a missing issue.
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-03
+    positions:
+      - kind: preferred
+        label: Amendment, then Order Form, then body, then exhibit, then Documentation
+        zone: green
+        summary: A five-level ranking with a signed amendment first and the Documentation last; purchase orders excluded entirely.
+        language: >
+          In the event of a conflict among the documents forming this
+          Agreement, the following order of precedence applies, from highest
+          to lowest: (1) a signed amendment to this Agreement; (2) the
+          applicable Order Form; (3) the body of this Agreement; (4) any
+          exhibit or addendum; and (5) the Documentation. Terms stated on a
+          purchase order, invoice or similar document issued by either party
+          have no effect, regardless of the order in which the documents
+          were issued.
+      - kind: fallback
+        rung: 1
+        label: Signed Statement of Work ranks above the Order Form for scope and deliverables
+        zone: green
+        summary: The same five-level ranking, with a signed Statement of Work ranking above the Order Form solely as to project scope and deliverables.
+        language: >
+          In the event of a conflict among the documents forming this
+          Agreement, the following order of precedence applies, from highest
+          to lowest: (1) a signed amendment to this Agreement; (2) a signed
+          Statement of Work, solely as to project scope and deliverables; (3)
+          the applicable Order Form; (4) the body of this Agreement; (5) any
+          exhibit or addendum; and (6) the Documentation. Terms stated on a
+          purchase order or invoice have no effect.
+      - kind: fallback
+        rung: 2
+        label: Counterparty's procurement terms govern administrative procedures only, ranked below the body
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: Ask that any referenced procurement terms be attached as a static exhibit rather than a live URL.
+        summary: A procurement portal's terms or a referenced policy may govern solely as to administrative or security procedures, ranked below the body of this Agreement, provided it does not conflict with liability, payment or data protection terms.
+        language: >
+          Where the counterparty's procurement portal terms or a policy
+          referenced by URL address administrative or security procedures
+          not otherwise addressed in this Agreement, those terms apply to
+          that extent only, ranked below the body of this Agreement, and
+          only to the extent they do not conflict with the limitation of
+          liability, payment terms or data protection terms of this
+          Agreement.
+      - kind: acceptable_variant
+        label: Main body controls unless an exhibit expressly states otherwise
+        zone: green
+        summary: The same outcome phrased as a default rule favoring the main body, which an exhibit may expressly override for its own subject matter, including a self-declared business associate agreement or data processing addendum.
+        language: >
+          Wherever a conflict arises between the terms of the body of this
+          Agreement and any exhibit or addendum, the terms of the body shall
+          control unless the exhibit expressly states that it overrides a
+          named section, or a stated subject matter, of the body for that
+          subject matter alone. This includes a business associate agreement
+          or data processing addendum that expressly states it controls as to
+          the use and disclosure of protected health information or personal
+          data, which prevails on that subject matter without displacing the
+          body's limitation of liability, payment or governing law terms. A
+          purchase order has no effect on this Agreement in any circumstance.
+    parameters:
+      - key: order_of_precedence_po_treatment
+        label: Effect given to purchase order or procurement terms
+        value_type: enum
+        direction: set_membership
+        preferred_value: no_effect
+        green_limit: [no_effect]
+        yellow_limit: [limited_scope_only]
+        allowed_values: [no_effect, limited_scope_only, full_effect]
+        extraction_hint: >
+          no_effect if purchase order, invoice or procurement portal terms
+          are stated to have no effect regardless of ranking, or if the
+          clause does not address purchase orders or procurement terms at
+          all. limited_scope_only if such terms govern only a narrow
+          administrative or procedural area and cannot touch liability,
+          payment or data terms. full_effect only if such terms are
+          expressly ranked above, or equal to, the body of the Agreement, or
+          are expressly stated to override it.
+    red_lines:
+      - key: ent-ord-po-prevails
+        description: A purchase order, invoice or similar document issued by the counterparty is ranked above the Agreement or the Order Form.
+        condition_type: semantic
+        condition:
+          test: >
+            The order-of-precedence ranking gives priority to a purchase
+            order, invoice, procurement portal terms, or similar document
+            issued by the counterparty over the body of this Agreement or
+            the Order Form.
+        action: block
+        rationale: >
+          A purchase order generated by the counterparty's procurement
+          system could silently override the liability cap, payment terms or
+          data protection terms that Commercial Counsel negotiated into the
+          Order Form and the body of the Agreement.
+    objections:
+      - objection: Our internal systems automatically attach our purchase order terms, and our procurement policy says those terms control.
+        their_rationale: Large counterparties often have procurement systems that issue purchase orders with standard terms as a matter of policy, regardless of the signed agreement.
+        response: >
+          We cannot agree to let an automatically generated purchase order
+          override the negotiated terms of this Agreement. We can note in
+          the Agreement that any purchase order is used only for internal
+          tracking and invoicing and has no legal effect on these terms.
+        talking_points:
+          - A purchase order is typically generated without legal review on either side.
+          - Invoicing and purchasing mechanics can proceed without giving the purchase order legal effect.
+        frequency: common
+      - objection: We want our security or data processing addendum to override the liability cap if there's a conflict.
+        their_rationale: Counterparties sometimes want privacy or security terms to take priority over commercial terms like the liability cap, especially for sensitive data deals.
+        response: >
+          We keep the liability cap and other risk allocation terms in the
+          body of the Agreement, ranked above any addendum, so that the cap
+          applies consistently. We are glad to make sure the addendum itself
+          is clear and complete on security and data terms.
+        talking_points:
+          - A liability cap that can be overridden by any addendum is not a cap at all.
+          - The addendum can still control on its own subject matter, such as PHI or personal data, without touching the cap.
+        frequency: occasional
+    test_cases:
+      - name: Five-level ranking, purchase orders excluded
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          If the documents comprising this Agreement conflict, they are
+          ranked as follows: a signed amendment, then the Order Form, then
+          the body of the Agreement, then any exhibit, then the
+          Documentation. A purchase order has no effect under this
+          Agreement.
+      - name: Main body controls unless an exhibit expressly overrides it
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          If the main body of this Agreement and an exhibit conflict, the
+          main body controls unless the exhibit expressly states that it
+          overrides a specific section. No purchase order has any effect on
+          this Agreement.
+      - name: Business associate agreement self-declared to control as to PHI
+        context: {regimes: [hipaa], data_sensitivity: phi}
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          In the event of a conflict between the body of this Agreement and
+          the Business Associate Agreement attached as an exhibit, the body
+          controls except that, with respect to the use and disclosure of
+          protected health information, the Business Associate Agreement
+          controls. Nothing in the Business Associate Agreement displaces the
+          limitation of liability or payment terms of the body.
+      - name: Procurement portal terms govern administrative procedures only
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          The counterparty's procurement portal terms, available at its
+          standard URL, govern administrative ordering procedures not
+          otherwise addressed in this Agreement, and do not affect the
+          liability cap, payment terms or data protection terms, which are
+          controlled by the body of this Agreement.
+      - name: No order-of-precedence clause present
+        expected_outcome: missing
+        expected_zone: yellow
+        sample_text: ""
+      - name: Purchase order terms prevail over the Order Form
+        expected_outcome: red_line
+        expected_red_line_key: ent-ord-po-prevails
+        expected_zone: red
+        sample_text: >
+          In the event of a conflict, the terms stated on the counterparty's
+          purchase order shall prevail over the Order Form and the body of
+          this Agreement.
+      - name: Exhibits rank above the body of the Agreement generally
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Any exhibit or addendum to this Agreement shall control over the
+          body of this Agreement in the event of any conflict, for all
+          purposes.
+
+  - rule_key: force_majeure.scope
+    title: Force majeure scope
+    required: true
+    risk_weight: 3
+    negotiable: true
+    position_summary: >
+      Neither party is liable for delay caused by events beyond its
+      reasonable control, but force majeure never excuses a party's payment,
+      confidentiality, data protection or security obligations.
+    risk_rationale: >
+      Halcyon is a HIPAA business associate and a GDPR processor operating
+      under SOC 2 Type II, ISO 27001 and HITRUST r2 controls, so its breach
+      notification and safeguard duties cannot be suspended by a storm or an
+      outage at a hosting provider. Carving out payment, confidentiality,
+      data protection and security keeps the clause focused on genuine
+      performance delay rather than becoming an excuse for a compliance
+      failure.
+    detection_guidance: >
+      Look for "beyond its reasonable control", "acts of God", "natural
+      disaster", "failure of third-party hosting or telecommunications",
+      "pandemic", "governmental action" and "other than payment
+      obligations". Absence means non-performance is judged under general
+      law doctrines such as impossibility, and is a missing clause.
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-03
+    positions:
+      - kind: preferred
+        label: Standard scope, payment and confidentiality and data and security carved out
+        zone: green
+        summary: Force majeure excuses delay from events beyond reasonable control, but never excuses payment, confidentiality, data protection or security obligations.
+        language: >
+          Neither party is liable for any delay or failure to perform caused
+          by an event beyond its reasonable control, including an act of
+          God, natural disaster, war, civil unrest, governmental action, or
+          failure of third-party hosting, internet or telecommunications
+          infrastructure, and including a widespread cyberattack not caused
+          by the affected party's failure to maintain the security
+          safeguards required of it under this Agreement. This section does
+          not excuse either party's payment obligations or its
+          confidentiality, data protection or security obligations under
+          this Agreement.
+      - kind: fallback
+        rung: 1
+        label: Service level obligations also excused during the event
+        zone: green
+        summary: The same scope and carve-outs, with agreed service levels also excused for the duration of the event, but payment, confidentiality, data protection and security remain carved out.
+        language: >
+          Neither party is liable for any delay or failure to perform caused
+          by an event beyond its reasonable control, including an act of
+          God, natural disaster, war, civil unrest, governmental action, or
+          failure of third-party hosting, internet or telecommunications
+          infrastructure. A party's obligations under any agreed service
+          level are also excused for the duration of such an event. This
+          section does not excuse either party's payment obligations or its
+          confidentiality, data protection or security obligations under
+          this Agreement.
+      - kind: fallback
+        rung: 2
+        label: Data protection and security obligations excused if performance is impossible
+        zone: yellow
+        approver_role: security_lead
+        give_get: Ask for prompt notice of the event and continued use of commercially reasonable efforts to mitigate it.
+        summary: A party's data protection and security obligations are also excused for the duration of the event, but only where compliance is rendered impossible, not merely more difficult, and the party continues to use commercially reasonable mitigation efforts.
+        language: >
+          Neither party is liable for any delay or failure to perform caused
+          by an event beyond its reasonable control. A party's data
+          protection and security obligations under this Agreement are
+          excused for the duration of such an event only to the extent that
+          compliance is rendered impossible, rather than merely more
+          difficult or costly, and only if the affected party continues to
+          use commercially reasonable efforts to mitigate the event's
+          effect. This section never excuses either party's payment
+          obligations.
+      - kind: acceptable_variant
+        label: Listed force majeure events, counterparty phrasing
+        zone: green
+        summary: The same scope and carve-outs, phrased as a list of named events rather than a general standard.
+        language: >
+          Neither party shall be liable for any failure or delay in
+          performance under this Agreement caused by fire, flood,
+          earthquake, war, riot, civil disorder, terrorism, governmental
+          action, or any other similar cause beyond its reasonable control,
+          excluding in every case each party's payment, confidentiality, data
+          protection and security obligations under this Agreement.
+    red_lines:
+      - key: fm-scp-security-excused
+        description: Force majeure excuses a party's confidentiality, data protection or security obligations, including breach notification, without the impossibility and mitigation limits.
+        condition_type: semantic
+        condition:
+          test: >
+            The force majeure clause excuses a party's confidentiality, data
+            protection or security obligations, including breach
+            notification, as a consequence of a force majeure event, without
+            limiting that excuse to circumstances where compliance is
+            rendered truly impossible and the party continues reasonable
+            mitigation efforts.
+        action: block
+        rationale: >
+          Halcyon's breach notification and safeguard duties under 45
+          C.F.R. Parts 160 and 164 and the GDPR cannot be waived by
+          contract, even during a disruption, and an open-ended excuse would
+          conflict with the SOC 2, ISO 27001 and HITRUST r2 controls Halcyon
+          actually operates.
+    objections:
+      - objection: If a hurricane takes down our systems, we shouldn't be in breach for a delayed breach notification either.
+        their_rationale: The counterparty believes any obligation, including compliance deadlines, should be excused during a severe, uncontrollable event.
+        response: >
+          We can excuse data protection and security obligations where
+          compliance is truly impossible during the event, as long as
+          reasonable mitigation continues and notice is given promptly once
+          it is possible to do so. We cannot agree to an open-ended excuse
+          that covers obligations we could still meet with reasonable
+          effort.
+        talking_points:
+          - The impossibility standard still protects a party facing a genuine inability to comply.
+          - Breach notification duties are regulatory, not merely contractual, and cannot be waived outright.
+        recommended_position: {rule_key: force_majeure.scope, rung: 2}
+        frequency: occasional
+      - objection: A ransomware attack on our systems should count as force majeure even if our security wasn't perfect.
+        their_rationale: Counterparties want cyberattacks treated as force majeure regardless of whether their own security controls were adequate.
+        response: >
+          A cyberattack can be a force majeure event, but only if it was not
+          caused by a failure to maintain the security safeguards this
+          Agreement requires. That keeps the clause from excusing an
+          incident that reasonable security would have prevented.
+        talking_points:
+          - The safeguards requirement is the same standard used elsewhere in the Agreement.
+          - This protects both parties from the other claiming force majeure for its own security lapse.
+        frequency: common
+    dependencies:
+      - related_rule_key: force_majeure.termination_right
+        relation: requires
+        note: An event must first qualify within the scope clause before the termination-right rule's trigger period begins running.
+    test_cases:
+      - name: Standard scope with payment, confidentiality, data and security carved out
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Neither party is liable for delay caused by an event beyond its
+          reasonable control, such as a natural disaster or a failure of
+          third-party hosting, but this section does not excuse a party's
+          payment, confidentiality, data protection or security obligations.
+      - name: Listed events, counterparty phrasing, same carve-outs
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Neither party is liable for a delay caused by fire, flood, war or
+          governmental action beyond its reasonable control, excluding in
+          every case its payment, confidentiality, data protection and
+          security obligations.
+      - name: Data protection obligations excused only if truly impossible, with mitigation
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          A party's data protection obligations are excused during a force
+          majeure event only to the extent compliance is rendered
+          impossible, not merely difficult, and only while the party
+          continues reasonable efforts to mitigate the event.
+      - name: No force majeure clause present
+        expected_outcome: missing
+        expected_zone: yellow
+        sample_text: ""
+      - name: Force majeure excuses breach notification outright
+        expected_outcome: red_line
+        expected_red_line_key: fm-scp-security-excused
+        expected_zone: red
+        sample_text: >
+          A party's obligation to provide breach notification under this
+          Agreement is suspended for the duration of any force majeure
+          event affecting that party's systems.
+      - name: Force majeure excuses obligations for ninety days regardless of actual impact
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Upon the occurrence of any force majeure event, all of a party's
+          obligations under this Agreement, including service levels and
+          reporting, are suspended for ninety days regardless of whether
+          performance remains possible.
+      - name: Trap - mitigation duty stated as a continuing obligation, not an excuse
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          A party affected by a force majeure event remains obligated to use
+          commercially reasonable efforts to mitigate its effects and to
+          resume performance as soon as reasonably possible; nothing in this
+          section excuses that party's data protection or security
+          obligations.
+
+  - rule_key: force_majeure.termination_right
+    title: Force majeure termination right
+    required: true
+    risk_weight: 4
+    negotiable: true
+    position_summary: >
+      Either party may terminate if a force majeure event prevents a
+      material obligation from being performed for more than thirty
+      consecutive days, with a refund limited to prepaid Fees for the
+      unused portion of the then-current term.
+    risk_rationale: >
+      Fees are invoiced annually in advance, so a termination right tied to
+      a meaningful continuous disruption, rather than a brief one, protects
+      that revenue while still giving the affected party and its counterpart
+      a real exit if the disruption drags on. Limiting the refund to the
+      unused portion of the current term keeps the financial exposure of an
+      uncontrollable event bounded and consistent across all of Halcyon's
+      customer contracts.
+    detection_guidance: >
+      Look inside the force majeure clause for "continues for more than", a
+      number of days, "either party may terminate" and "refund of prepaid
+      Fees". A force majeure clause with no end point means the affected
+      party can be excused indefinitely, which is a missing issue.
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-03
+    positions:
+      - kind: preferred
+        label: Thirty-day trigger, refund of unused current-term Fees
+        zone: green
+        summary: Either party may terminate after thirty consecutive days of force majeure; refund is limited to prepaid Fees for the unused portion of the current term.
+        language: >
+          If a force majeure event under this Agreement prevents a party
+          from performing a material obligation for more than thirty (30)
+          consecutive days, either party may terminate this Agreement upon
+          written notice to the other. Upon such termination, any party that
+          has prepaid Fees for the then-current term shall receive a refund
+          of the prepaid Fees for the unused portion of that term, and
+          neither party has further liability to the other arising from the
+          force majeure event itself.
+      - kind: fallback
+        rung: 1
+        label: Thirty-day trigger, refund extended to any prepaid multi-year amount
+        zone: green
+        summary: The same thirty-day trigger, with the refund broadened to cover any prepaid Fees for a future term under a multi-year prepayment, not only the then-current term.
+        language: >
+          If a force majeure event under this Agreement prevents a party
+          from performing a material obligation for more than thirty (30)
+          consecutive days, either party may terminate this Agreement upon
+          written notice. Upon such termination, any party that has prepaid
+          Fees shall receive a refund of the prepaid Fees for the unused
+          portion of the then-current term and for any future term already
+          prepaid under a multi-year prepayment, and neither party has
+          further liability arising from the event itself.
+      - kind: fallback
+        rung: 2
+        label: Fifteen-day trigger, same broadened refund
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: Ask that the terminating party give the other party at least ten business days to cure or work around the disruption before the trigger period starts.
+        summary: The trigger period shortens to fifteen consecutive days, with the same refund of unused current-term and prepaid future-term Fees.
+        language: >
+          If a force majeure event under this Agreement prevents a party
+          from performing a material obligation for more than fifteen (15)
+          consecutive days, either party may terminate this Agreement upon
+          written notice. Upon such termination, any party that has prepaid
+          Fees shall receive a refund of the prepaid Fees for the unused
+          portion of the then-current term and for any future term already
+          prepaid under a multi-year prepayment.
+      - kind: acceptable_variant
+        label: Termination right and refund, counterparty phrasing
+        zone: green
+        summary: The same thirty-day trigger and current-term refund, phrased from the counterparty's perspective.
+        language: >
+          If either party is unable to perform a material obligation under
+          this Agreement because of a force majeure event continuing for
+          more than thirty (30) days, the other party may terminate this
+          Agreement by written notice, and any prepaid, unused Fees for the
+          terminated portion of the then-current term shall be refunded.
+    parameters:
+      - key: force_majeure_termination_trigger_days
+        label: Consecutive days of force majeure before either party may terminate
+        value_type: duration_days
+        unit: days
+        direction: higher_is_better
+        preferred_value: 30
+        green_limit: 30
+        yellow_limit: 15
+        extraction_hint: >
+          The number of consecutive days a force majeure event must prevent
+          performance of a material obligation before either party gains a
+          termination right under this section.
+    red_lines:
+      - key: fm-term-uncapped-refund
+        description: Termination for force majeure entitles a party to a refund beyond the unused portion of prepaid Fees, such as a refund of fees already earned or a liquidated payment.
+        condition_type: semantic
+        condition:
+          test: >
+            Termination for force majeure entitles a party to a refund or
+            payment that exceeds the prepaid Fees for the unused portion of
+            the term, such as a refund of Fees already earned for service
+            already delivered, or a separate liquidated payment tied to the
+            force majeure event.
+        action: escalate
+        approver_role: deal_desk
+        rationale: >
+          Fees are invoiced annually in advance; a refund obligation that
+          reaches into Fees already earned or adds a separate payment
+          converts an uncontrollable event into an open-ended financial
+          liability that Deal Desk must size against the specific contract
+          before it is accepted.
+    objections:
+      - objection: Thirty days is too long to wait during a major outage; we want the right to exit sooner.
+        their_rationale: A counterparty relying on Halcyon Engage for patient-facing operations wants a faster exit if a disruption is severe.
+        response: >
+          We can shorten the trigger to fifteen consecutive days, and in
+          exchange we would ask for a short period to work around or begin
+          curing the disruption before that clock starts running.
+        talking_points:
+          - A shorter trigger is available as a real fallback, not just a token offer.
+          - Most disruptions resolve well within thirty days, so the shorter trigger matters mainly for severe events.
+        recommended_position: {rule_key: force_majeure.termination_right, rung: 2}
+        frequency: occasional
+      - objection: If we terminate because of your outage, we should get back everything we've paid, not just the unused term.
+        their_rationale: The counterparty views an outage severe enough to justify termination as serious enough to warrant a full refund.
+        response: >
+          We can extend the refund to cover any Fees prepaid for a future
+          term under a multi-year prepayment, in addition to the unused
+          current term. We cannot agree to refund Fees already earned for
+          service already delivered.
+        talking_points:
+          - The broadened refund already reaches beyond the current term for multi-year deals.
+          - Refunding delivered service would turn an uncontrollable event into an open-ended liability.
+        recommended_position: {rule_key: force_majeure.termination_right, rung: 1}
+        frequency: rare
+    test_cases:
+      - name: Thirty-day trigger, refund of unused current-term Fees
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          If a force majeure event prevents a party from performing a
+          material obligation for more than thirty consecutive days, either
+          party may terminate this Agreement, and any prepaid, unused Fees
+          for the then-current term are refunded.
+      - name: Termination and refund, counterparty phrasing
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Where a force majeure event continues for more than thirty days
+          and prevents performance of a material obligation, the other party
+          may terminate by written notice and shall receive a refund of
+          unused, prepaid Fees for the terminated term.
+      - name: Fifteen-day trigger, broadened refund
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          If a force majeure event prevents performance of a material
+          obligation for more than fifteen consecutive days, either party
+          may terminate, and prepaid Fees for the unused current term and
+          any prepaid future term are refunded.
+      - name: No termination trigger for a continuing force majeure event
+        expected_outcome: missing
+        expected_zone: yellow
+        sample_text: ""
+      - name: Force majeure termination entitles a refund of fees already earned
+        expected_outcome: red_line
+        expected_red_line_key: fm-term-uncapped-refund
+        expected_zone: red
+        sample_text: >
+          Upon termination for force majeure, the paying party shall receive
+          a full refund of all Fees paid under this Agreement, including
+          Fees for service already delivered.
+      - name: Trigger period shortens for a second force majeure event in the same term
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          If a second force majeure event occurs within the same term, the
+          termination trigger period under this section shall be twenty
+          consecutive days instead of thirty.

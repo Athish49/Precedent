@@ -1,0 +1,10 @@
+# Failing fixture: the file is replaced with `raw` in a copy of fixtures/valid.
+description: A mapping key written twice is rejected instead of silently dropped.
+file: playbooks/baseline/playbook.yaml
+raw: |
+  key: halcyon-baseline
+  name: Halcyon Baseline Positions
+  name: Halcyon Baseline Positions (again)
+expect:
+  code: file.unreadable
+  message: duplicate key

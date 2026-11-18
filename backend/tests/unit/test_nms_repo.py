@@ -227,6 +227,19 @@ async def test_get_counterparty_pattern_null_accept_rate_when_no_closed() -> Non
 
 
 @pytest.mark.asyncio
+async def test_get_counterparty_pattern_none_counterparty_returns_none_without_query() -> None:
+    """Task 4.6 item 6: an unknown counterparty is None (not a zero/nil UUID
+    placeholder) — no history can exist for it, and no query is needed."""
+    session = AsyncMock()
+    session.execute = AsyncMock()
+
+    result = await get_counterparty_pattern(session, None, "indemnification")
+
+    assert result is None
+    session.execute.assert_not_awaited()
+
+
+@pytest.mark.asyncio
 async def test_get_counterparty_pattern_queries_view_with_correct_params() -> None:
     """Verify the view is queried with both counterparty_id and clause_type."""
     counterparty_id = uuid.uuid4()

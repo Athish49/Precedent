@@ -1,0 +1,24 @@
+key: halcyon-baseline
+name: Halcyon Baseline Positions
+practice_area: baseline
+layer: base
+party_role: mutual
+paper_scope: both
+jurisdiction: global
+precedence: 10
+owner_role: general_counsel
+parent: null
+applies_when: null
+review_cadence_days: 90
+description: >
+  Boilerplate positions that apply to every Halcyon agreement regardless of
+  which party's paper is used, unless a more specific playbook overrides
+  them. Covers governing law, dispute mechanics, notices, assignment,
+  amendment, entire agreement and force majeure.
+version:
+  version: "1.0"
+  effective_from: 2026-01-15
+  change_summary: Initial published version.
+  created_by: Senior Commercial Counsel
+  approved_by: General Counsel
+rule_files: [rules.yaml]

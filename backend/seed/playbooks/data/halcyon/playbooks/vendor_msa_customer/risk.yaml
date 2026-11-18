@@ -1,0 +1,3157 @@
+# Halcyon Care, Inc. - Vendor MSA (Halcyon as customer) - risk rules (task 3.12).
+#
+# Halcyon is the BUYER in this playbook. Positions are the mirror image of the
+# SaaS MSA risk file: high Vendor caps, data breach outside the cap, 48-hour
+# breach notice and flow-down of Halcyon's HIPAA duties to Vendors that handle
+# PHI as subcontractors. Defined terms: "Halcyon", "Vendor", "Services",
+# "Halcyon Data", "Fees".
+#
+# Liability carve-outs that are unlimited for Halcyon are kept to fraud, wilful
+# misconduct, payment of Fees and third-party IP infringement indemnity, so
+# that Halcyon's own preferred language never trips global-uncapped-liability.
+rules:
+  # ------------------------------------------------------------------------
+  - rule_key: limitation_of_liability.cap_amount
+    title: Vendor aggregate liability cap
+    required: true
+    risk_weight: 10
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Vendor's total liability is capped at the Fees for 24 months, and
+      liability for a data breach affecting Halcyon Data sits outside that cap.
+    risk_rationale: >
+      Halcyon's vendors are mainly cloud, messaging and analytics suppliers
+      whose annual Fees are small compared with the harm they can cause: a
+      vendor paid less than the $165k median that Halcyon earns on a customer
+      contract can hold PHI belonging to many of Halcyon's 310 customers. If a
+      Vendor's cap is 12 months of a low fee, Halcyon is left to absorb the
+      loss against its own $10M cyber and technology errors and omissions
+      aggregate, while still owing its customers up to two or three times
+      their annual fees under the data breach super-cap it gives on the sell
+      side. The Vendor cap therefore has to be high enough, and the data
+      breach exposure separate enough, for Halcyon to pass the loss back to
+      the party that caused it.
+    detection_guidance: >
+      Look for "aggregate liability", "total liability", "shall not exceed" or
+      "limited to", followed by a look-back period of fees, a multiple or a
+      fixed sum. Record the general cap in months of Fees and, where data
+      breach or data protection claims have their own higher limit, record
+      that limit as a multiple of annual Fees. Vendor paper often caps only
+      Vendor's liability and leaves Halcyon's unlimited; check which party
+      each limit protects. A liability clause with no monetary limit on Vendor
+      is better than the preferred position, not a deviation; an agreement
+      with no liability clause at all is a missing clause.
+    source_ref: Halcyon Vendor Risk Policy VR-02 (liability and insurance); risk appetite table, buy-side rows
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: 24-month cap, data breach uncapped
+        zone: green
+        summary: Mutual cap at 24 months of Fees; Vendor's data breach liability is an Excluded Claim.
+        language: >
+          Except for the Excluded Claims, each party's total aggregate
+          liability arising out of or related to this Agreement, whether in
+          contract, tort (including negligence) or otherwise, shall not exceed
+          the Fees paid and payable by Halcyon under this Agreement in the
+          twenty-four (24) months preceding the first event giving rise to
+          liability. The Excluded Claims are not subject to this limit and do
+          not count towards it. Vendor's liability for a Security Incident
+          affecting Halcyon Data, and for any breach of its data protection or
+          security obligations under this Agreement, is an Excluded Claim.
+      - kind: fallback
+        rung: 1
+        label: 24-month cap with 5x data breach super-cap
+        zone: green
+        summary: General cap stays at 24 months; Vendor's data breach liability is capped separately at five times annual Fees.
+        give_get: Ask for the data breach indemnity at its preferred position and evidence of cyber insurance at the playbook limit.
+        language: >
+          Except for the Excluded Claims and the Data Protection Claims, each
+          party's total aggregate liability arising out of or related to this
+          Agreement shall not exceed the Fees paid and payable by Halcyon
+          under this Agreement in the twenty-four (24) months preceding the
+          first event giving rise to liability. Vendor's total aggregate
+          liability for Data Protection Claims shall not exceed five (5) times
+          the Fees paid and payable by Halcyon under this Agreement in the
+          twelve (12) months preceding the first event giving rise to
+          liability. The limit for Data Protection Claims is separate from,
+          and in addition to, the general limit, and amounts paid under one
+          limit do not reduce the other. "Data Protection Claims" means claims
+          arising from a Security Incident affecting Halcyon Data or from
+          Vendor's breach of its data protection or security obligations.
+      - kind: fallback
+        rung: 2
+        label: 12-month cap with 3x data breach super-cap
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: >
+          Require that the intellectual property indemnity stays unlimited,
+          that Vendor's cyber insurance is evidenced at the playbook limit and
+          that Halcyon may terminate for convenience without charge.
+        internal_note: >
+          This is the floor in the risk appetite table. Do not offer it where
+          the Vendor holds PHI for more than a handful of Halcyon customers
+          without asking the Security Lead how many records are exposed.
+        summary: General cap at 12 months of Fees; Vendor's data breach liability is capped separately at three times annual Fees.
+        language: >
+          Except for the Excluded Claims and the Data Protection Claims, each
+          party's total aggregate liability arising out of or related to this
+          Agreement shall not exceed the Fees paid and payable by Halcyon
+          under this Agreement in the twelve (12) months preceding the first
+          event giving rise to liability. Vendor's total aggregate liability
+          for Data Protection Claims shall not exceed three (3) times the Fees
+          paid and payable by Halcyon under this Agreement in the twelve (12)
+          months preceding the first event giving rise to liability. The limit
+          for Data Protection Claims is separate from, and in addition to, the
+          general limit. "Data Protection Claims" means claims arising from a
+          Security Incident affecting Halcyon Data or from Vendor's breach of
+          its data protection or security obligations.
+      - kind: acceptable_variant
+        label: Greater of 24 months of Fees and a fixed sum
+        zone: green
+        summary: A cap with a dollar floor that can only raise the limit above 24 months of Fees.
+        language: >
+          Subject to the Excluded Claims, neither party's cumulative liability
+          under or in connection with this Agreement shall exceed the greater
+          of (a) the total Fees paid or payable by Halcyon during the
+          twenty-four (24) months immediately before the claim arose and (b)
+          US$[amount]. Claims arising from unauthorised access to or loss of
+          Halcyon Data, or from Vendor's failure to meet its data protection
+          and security commitments, are Excluded Claims.
+    parameters:
+      - key: vendor_cap_months
+        label: Vendor general cap as months of Fees
+        value_type: number
+        unit: months
+        direction: higher_is_better
+        preferred_value: 24
+        green_limit: 24
+        yellow_limit: 12
+        extraction_hint: >
+          Convert "1x annual fees" to 12 and "2x" to 24. Convert a fixed sum
+          using the contract's annual Fees when known. Where the cap is the
+          greater of two measures, use the higher; where it is the lesser, use
+          the lower. Record the limit that applies to Vendor, not to Halcyon.
+      - key: data_breach_super_cap_multiple
+        label: Vendor data breach super-cap as a multiple of annual Fees
+        value_type: number
+        unit: multiple of annual Fees
+        direction: higher_is_better
+        preferred_value: 5
+        green_limit: 5
+        yellow_limit: 3
+        extraction_hint: >
+          Extract only where data breach or data protection claims have their
+          own monetary limit. Express it as a multiple of 12 months of Fees,
+          converting a fixed sum with the annual Fees when known. If Vendor's
+          data breach liability is unlimited, leave this parameter absent; an
+          unlimited position is better than the preferred value. If data
+          breach claims fall under the general cap, also leave it absent; the
+          cap carve-outs rule records that case.
+    red_lines:
+      - key: lol-vendor-cap-under-12-months
+        description: Vendor's general liability cap is lower than 12 months of Fees.
+        condition_type: parameter
+        condition: {parameter_key: vendor_cap_months, op: lt, value: 12}
+        action: escalate
+        approver_role: general_counsel
+        rationale: >
+          Below 12 months of Fees the cap no longer bears any relation to the
+          loss a Vendor can cause, and Halcyon would carry the difference on
+          its own $10M policy. Only the General Counsel may accept it, and
+          only for a Vendor that holds no Halcyon Data.
+      - key: lol-vendor-super-cap-under-3x
+        description: Vendor's separate data breach limit is lower than three times annual Fees.
+        condition_type: parameter
+        condition: {parameter_key: data_breach_super_cap_multiple, op: lt, value: 3}
+        action: escalate
+        approver_role: general_counsel
+        rationale: >
+          Halcyon gives its own customers a data breach super-cap of two to
+          three times annual Fees on contracts with a median value of $165k. A
+          Vendor super-cap below three times a much smaller fee leaves Halcyon
+          paying its customers out of its own pocket for the Vendor's failure.
+    objections:
+      - objection: Our cap is twelve months of fees for every customer. We cannot make an exception for one account.
+        their_rationale: A uniform cap keeps the vendor's exposure predictable across its customer base and is what its insurers have underwritten.
+        response: >
+          We understand the wish for one position across your customers, but
+          the Services put you in possession of patient data that belongs to
+          our hospital customers, and twelve months of our Fees would not
+          cover the cost of notifying those patients. We can leave ordinary
+          contract claims at twenty-four months provided data incidents are
+          dealt with separately, either outside the cap or under a dedicated
+          limit of five times annual Fees. That keeps your general exposure
+          bounded while matching the limit to the risk that actually matters
+          to us.
+        talking_points:
+          - Halcyon is a HIPAA business associate and must pass breach losses back to the subcontractor that caused them.
+          - Offer the separate data breach limit before moving the general cap below 24 months.
+          - Ask what limit their cyber policy carries; the super-cap should sit inside it.
+        recommended_position: {rule_key: limitation_of_liability.cap_amount, rung: 1}
+        frequency: common
+        counterparty_profile: Large cloud and messaging providers on their own paper
+      - objection: Unlimited liability for data breaches is uninsurable. No vendor of our size can sign that.
+        their_rationale: The vendor's cyber policy has an aggregate limit and its board will not approve an exposure above it.
+        response: >
+          We accept that an unlimited exposure is difficult for you to insure.
+          We can replace it with a separate limit for data protection claims
+          set at five times the annual Fees, in addition to the general cap.
+          If that is still beyond your cover, please send us your policy
+          limits so that we can look at a figure both sides can support.
+        talking_points:
+          - Moving from unlimited to a 5x super-cap is still green and needs no approval.
+          - A 3x super-cap with a 12-month general cap needs Commercial Counsel.
+          - Keep the limit separate from, and in addition to, the general cap.
+        recommended_position: {rule_key: limitation_of_liability.cap_amount, rung: 1}
+        frequency: common
+        counterparty_profile: Mid-sized analytics and software vendors
+      - objection: The fees on this order are small. A cap of two years of fees plus a multiple for data claims is out of proportion to what you pay us.
+        their_rationale: The vendor prices the service on the assumption that liability scales with revenue from the account.
+        response: >
+          The limit has to reflect the data you hold, not only the price. We
+          can agree to a general cap of twelve months of Fees if claims
+          relating to Halcyon Data have their own limit of three times annual
+          Fees and your indemnity for intellectual property claims stays
+          outside both limits. We would also need a certificate showing your
+          cyber cover.
+        talking_points:
+          - This is the floor; anything lower goes to the General Counsel.
+          - Tie the concession to insurance evidence and a free right to terminate for convenience.
+        recommended_position: {rule_key: limitation_of_liability.cap_amount, rung: 2}
+        frequency: occasional
+        counterparty_profile: Low-fee tools that still process Halcyon Data
+    dependencies:
+      - related_rule_key: limitation_of_liability.cap_carve_outs
+        relation: read_with
+        note: The carve-outs rule decides whether data breach liability is unlimited, under the super-cap or inside the general cap; the numbers live here.
+      - related_rule_key: insurance.coverage_requirements
+        relation: trade_against
+        note: A lower Vendor cap is only acceptable with evidence of cyber cover at least equal to the data breach super-cap.
+    test_cases:
+      - name: Two years of fees, data claims unlimited
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Other than for Excluded Claims, the maximum liability of either
+          party in connection with this Agreement is the amount of the fees
+          paid or due from Halcyon in the two years before the event that gave
+          rise to the claim. Claims resulting from a security incident
+          involving Halcyon Data or from Vendor's failure to comply with its
+          data security obligations are Excluded Claims and are not limited.
+      - name: Greater of two years of fees and a dollar floor
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Each party's liability is limited in aggregate to the higher of
+          US$2,000,000 and the fees paid or payable in the 24 months before
+          the claim. This limit does not apply to Excluded Claims, which
+          include any loss of or unauthorised access to Halcyon Data caused by
+          Vendor's breach of the Security Schedule.
+      - name: 24 months with five-times data limit
+        context: {data_sensitivity: phi, regimes: [hipaa]}
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          Neither party shall be liable for more than two times the annual
+          fees. Separately, and in addition, Vendor's liability for claims
+          arising out of a data security incident or breach of the Data
+          Protection Addendum shall be limited to five times the annual fees.
+      - name: 12 months with three-times data limit
+        context: {deal_value_band: standard, data_sensitivity: personal_data}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          The aggregate liability of each party is capped at the fees paid in
+          the 12 months prior to the claim. For breaches of Vendor's data
+          protection and security obligations a separate, additional cap
+          equal to 3x those fees applies.
+      - name: 18 months with four-times data limit
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Each party's total liability is limited to the fees paid in the
+          eighteen months before the claim, save that Vendor's liability for
+          data security incidents is subject to a further cap of four times
+          the fees paid in the previous year.
+      - name: Six-month cap
+        expected_outcome: red_line
+        expected_red_line_key: lol-vendor-cap-under-12-months
+        expected_zone: red
+        sample_text: >
+          Vendor's entire liability under this Agreement, however arising,
+          will not exceed the fees received by Vendor from Halcyon during the
+          six months immediately preceding the claim.
+      - name: Cap protects Vendor only and Halcyon is unlimited
+        expected_outcome: red_line
+        expected_red_line_key: global-uncapped-liability
+        expected_zone: red
+        sample_text: >
+          Vendor's liability is limited to the fees paid in the prior 24
+          months. Nothing in this Agreement limits Customer's liability to
+          Vendor, which shall be unlimited for any breach of this Agreement or
+          of the Acceptable Use Policy.
+      - name: Trap - not limited to twelve months
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          The parties agree that liability shall not be limited to the fees
+          for the preceding twelve months as stated in Vendor's standard
+          terms; instead each party's liability is limited to the fees paid
+          and payable in the preceding twenty-four months, and that limit
+          does not apply to Vendor's liability for security incidents
+          affecting Halcyon Data.
+
+  # ------------------------------------------------------------------------
+  - rule_key: limitation_of_liability.cap_carve_outs
+    title: Carve-outs from the Vendor liability cap
+    required: true
+    risk_weight: 9
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Vendor's liability is unlimited for fraud, gross negligence, wilful
+      misconduct, its indemnities, breach of confidentiality and any data
+      breach affecting Halcyon Data; Halcyon's own unlimited heads are kept to
+      fraud, wilful misconduct, payment of Fees and its intellectual property
+      indemnity.
+    risk_rationale: >
+      The losses Halcyon fears most from a Vendor are a breach of PHI held for
+      its hospital customers and an infringement claim that takes a component
+      of Halcyon Engage offline, and neither scales with the Vendor's Fees. If
+      those heads sit inside a cap measured in months of a small fee, Halcyon
+      pays the balance from its $10M cyber and errors and omissions aggregate
+      and may still owe its own customers a super-cap of two to three times
+      their annual fees. The carve-outs must be drafted so that the unlimited
+      heads fall on Vendor only: Halcyon cannot accept unlimited liability for
+      itself beyond fraud, wilful misconduct, payment and its intellectual
+      property indemnity.
+    detection_guidance: >
+      Look for "the limitations in this section shall not apply to", "except
+      for", "Excluded Claims" or "nothing in this Agreement limits liability
+      for", followed by a list. Read each item separately and note which party
+      it binds. Check three things: whether data breach or data protection
+      claims against Vendor are unlimited, under a separate higher limit or
+      inside the general cap; whether Vendor's intellectual property indemnity
+      is outside the cap; and whether any carve-out makes Halcyon's own
+      liability unlimited. Vendor paper commonly lists only the customer's
+      payment obligations and the customer's indemnity.
+    source_ref: Halcyon Vendor Risk Policy VR-02 (liability and insurance); risk appetite table, buy-side rows
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Data breach and Vendor indemnities unlimited
+        zone: green
+        summary: Vendor is unlimited for fraud, gross negligence, wilful misconduct, indemnities, confidentiality and data breach; Halcyon only for fraud, wilful misconduct, Fees and its intellectual property indemnity.
+        language: >
+          The limitations and exclusions of liability in this Agreement do not
+          apply to the following (the "Excluded Claims"): (a) either party's
+          fraud or wilful misconduct; (b) either party's obligation to
+          indemnify the other against third-party intellectual property
+          infringement claims; (c) Halcyon's obligation to pay undisputed
+          Fees; (d) Vendor's gross negligence; (e) Vendor's breach of its
+          confidentiality obligations; (f) Vendor's breach of its data
+          protection or security obligations and any Security Incident
+          affecting Halcyon Data that is in the possession or control of
+          Vendor or its subcontractors; (g) Vendor's other indemnification
+          obligations under this Agreement; and (h) any liability that cannot
+          be limited or excluded by law. No exclusion of indirect or
+          consequential loss applies to an Excluded Claim.
+      - kind: fallback
+        rung: 1
+        label: Data breach moved to the 5x super-cap
+        zone: green
+        summary: Vendor's data breach liability and data breach indemnity leave the unlimited list and fall under the separate super-cap; the other carve-outs stay.
+        give_get: Ask Vendor to confirm in writing that its cyber policy limit is at least the super-cap.
+        language: >
+          The limitations and exclusions of liability in this Agreement do not
+          apply to the following (the "Excluded Claims"): (a) either party's
+          fraud or wilful misconduct; (b) either party's obligation to
+          indemnify the other against third-party intellectual property
+          infringement claims; (c) Halcyon's obligation to pay undisputed
+          Fees; (d) Vendor's gross negligence; (e) Vendor's breach of its
+          confidentiality obligations in respect of information other than
+          Halcyon Data; and (f) any liability that cannot be limited or
+          excluded by law. Data Protection Claims, including Vendor's
+          indemnity for a Security Incident, are not Excluded Claims and are
+          subject only to the separate limit for Data Protection Claims, which
+          applies in addition to the general limit. The costs listed in the
+          data breach indemnity are recoverable as direct loss under that
+          separate limit.
+      - kind: fallback
+        rung: 2
+        label: Narrow carve-outs with the 3x super-cap
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: >
+          Hold the intellectual property indemnity outside every limit and
+          require that breach response costs are stated to be direct loss.
+        internal_note: >
+          Offer only together with rung 2 of the cap amount rule. Gross
+          negligence and non-data confidentiality breaches drop inside the
+          general cap at this rung.
+        summary: Unlimited heads reduced to fraud, wilful misconduct, intellectual property indemnity and Fees; data breach under the lower super-cap; everything else inside the general cap.
+        language: >
+          The limitations of liability in this Agreement do not apply to the
+          following (the "Excluded Claims"): (a) either party's fraud or
+          wilful misconduct; (b) either party's obligation to indemnify the
+          other against third-party intellectual property infringement claims;
+          (c) Halcyon's obligation to pay undisputed Fees; and (d) any
+          liability that cannot be limited or excluded by law. Data Protection
+          Claims, including Vendor's indemnity for a Security Incident, are
+          subject to the separate limit for Data Protection Claims and not to
+          the general limit. All other claims, including claims for breach of
+          confidentiality in respect of information other than Halcyon Data,
+          are subject to the general limit. Notification, credit monitoring,
+          forensic investigation and regulatory costs arising from a Security
+          Incident are direct loss and are not excluded as indirect or
+          consequential loss.
+      - kind: acceptable_variant
+        label: Nothing-limits wording
+        zone: green
+        summary: The same Vendor-side unlimited heads expressed as a "nothing in this Agreement limits" clause.
+        language: >
+          Nothing in this Agreement limits or excludes (i) a party's liability
+          for fraud, fraudulent misrepresentation or deliberate default; (ii)
+          a party's liability under its indemnity for infringement of
+          third-party intellectual property rights; (iii) Halcyon's liability
+          to pay Fees properly due; or (iv) Vendor's liability for gross
+          negligence, for unauthorised use or disclosure of Halcyon's
+          confidential information, for loss of, damage to or unauthorised
+          access to Halcyon Data, for breach of the data protection and
+          security provisions of this Agreement, or under any other indemnity
+          given by Vendor.
+    parameters:
+      - key: data_breach_cap_treatment
+        label: How Vendor's data breach liability is treated under the cap
+        value_type: enum
+        direction: set_membership
+        preferred_value: unlimited
+        green_limit: [unlimited, separate_super_cap]
+        allowed_values:
+          - unlimited
+          - separate_super_cap
+          - inside_general_cap
+          - excluded_altogether
+        extraction_hint: >
+          Use unlimited where data breach, Security Incident or data
+          protection claims against Vendor are listed as an exception to the
+          cap. Use separate_super_cap where they have their own higher limit
+          in addition to the general cap; the size of that limit is judged by
+          the cap amount rule. Use inside_general_cap where they are not
+          mentioned or are expressly subject to the general cap. Use
+          excluded_altogether where Vendor disclaims liability for loss of or
+          unauthorised access to data.
+      - key: ip_indemnity_inside_cap
+        label: Vendor's intellectual property indemnity is subject to a cap
+        value_type: boolean
+        direction: exact
+        preferred_value: false
+        extraction_hint: >
+          True if Vendor's indemnity for third-party intellectual property
+          infringement claims is subject to the general cap or to any other
+          monetary limit; false if it is listed as an exception to the cap.
+          If the agreement is silent, the indemnity is inside the cap; record
+          true.
+    red_lines:
+      - key: carve-data-breach-inside-general-cap
+        description: Vendor's liability for a data breach affecting Halcyon Data falls inside the general cap.
+        condition_type: parameter
+        condition: {parameter_key: data_breach_cap_treatment, op: eq, value: inside_general_cap}
+        action: escalate
+        approver_role: general_counsel
+        rationale: >
+          Red in the risk appetite table. A general cap of 12 to 24 months of
+          a Vendor's Fees will not cover notification and credit monitoring
+          for the patients of even one hospital customer, and Halcyon would
+          carry the rest against its $10M aggregate. Only the General Counsel
+          may accept it, and only where the Vendor holds no PHI.
+      - key: carve-vendor-disclaims-data-liability
+        description: Vendor excludes all liability for loss of, damage to or unauthorised access to Halcyon Data.
+        condition_type: semantic
+        condition:
+          test: >
+            The agreement states that Vendor has no liability, or disclaims
+            all responsibility, for loss, corruption, deletion or unauthorised
+            access to or disclosure of Halcyon's data, including where the
+            loss is caused by Vendor's own breach of the agreement. Answer no
+            if the exclusion covers only data loss caused by Halcyon or
+            Halcyon's failure to keep back-ups.
+        action: block
+        rationale: >
+          Halcyon is a HIPAA business associate and remains answerable to its
+          Covered Entity customers for PHI in a subcontractor's hands. A
+          Vendor that accepts no liability at all for the data cannot be given
+          Halcyon Data.
+      - key: carve-ip-indemnity-capped
+        description: Vendor's intellectual property infringement indemnity is subject to the liability cap.
+        condition_type: parameter
+        condition: {parameter_key: ip_indemnity_inside_cap, op: eq, value: true}
+        action: escalate
+        approver_role: general_counsel
+        rationale: >
+          An infringement claim against a component embedded in Halcyon Engage
+          threatens the service behind $72M of annual recurring revenue, and
+          the damages are set by the claimant, not by the Vendor's Fees. The
+          indemnity is only worth having if it is outside the cap.
+    objections:
+      - objection: We can carve out fraud and wilful misconduct, but data breaches must stay under the cap like every other claim.
+        their_rationale: The vendor treats security incidents as an ordinary operational risk and wants one limit for all contract claims.
+        response: >
+          Data incidents are the one risk in this agreement that does not
+          scale with the Fees, because the cost is driven by the number of
+          patients affected. We are willing to move those claims off the
+          unlimited list if they have their own limit of five times annual
+          Fees in addition to the general cap. Leaving them inside the general
+          cap is not something our risk policy allows.
+        talking_points:
+          - Inside the general cap is red and goes to the General Counsel.
+          - The 5x super-cap is green; the 3x super-cap needs Commercial Counsel.
+          - Ask for the vendor's cyber policy limit to anchor the number.
+        recommended_position: {rule_key: limitation_of_liability.cap_carve_outs, rung: 1}
+        frequency: common
+        counterparty_profile: Cloud and messaging providers
+      - objection: Gross negligence is not a defined concept and invites litigation. Please delete it.
+        their_rationale: The vendor's counsel sees the term as a route around the cap for any serious operational failure.
+        response: >
+          We take the point that the term is applied differently from state to
+          state. We can remove gross negligence from the list provided that
+          wilful misconduct, the intellectual property indemnity and the
+          separate limit for data protection claims all remain. Please note
+          that this change moves the clause into a position that needs
+          internal sign-off on our side.
+        talking_points:
+          - Dropping gross negligence is part of rung 2 and needs Commercial Counsel.
+          - Do not also give up the statement that breach response costs are direct loss.
+        recommended_position: {rule_key: limitation_of_liability.cap_carve_outs, rung: 2}
+        frequency: occasional
+        counterparty_profile: Vendors advised by outside counsel
+      - objection: The carve-outs should be mutual. If our confidentiality breaches are unlimited, yours should be too.
+        their_rationale: Symmetry is the vendor's default negotiating principle for risk allocation.
+        response: >
+          The carve-outs for fraud, wilful misconduct and intellectual
+          property indemnity are mutual. The confidentiality and data heads
+          are not, because the information flows one way: you hold our
+          customers' patient data and we hold your price list and
+          documentation. We are happy to discuss a mutual carve-out limited
+          to wilful disclosure of confidential information.
+        talking_points:
+          - Halcyon cannot accept unlimited liability beyond fraud, wilful misconduct, Fees and its IP indemnity; that is a global red line.
+          - Wilful disclosure is already covered by the wilful misconduct limb.
+        frequency: common
+        counterparty_profile: Any vendor negotiating on Halcyon paper
+    dependencies:
+      - related_rule_key: limitation_of_liability.cap_amount
+        relation: read_with
+        note: The super-cap multiple and the general cap are set in the cap amount rule; move both rules down the ladder together.
+      - related_rule_key: indemnification.data_breach_indemnity
+        relation: requires
+        note: A data breach carve-out is of little use unless the indemnity lists the recoverable breach response costs.
+    test_cases:
+      - name: Full Vendor-side carve-out list
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          The cap in Section 11.1 shall not apply to: fraud or intentional
+          misconduct by either party; the indemnities each party gives for
+          intellectual property infringement; fees owed by Halcyon; and, in
+          the case of Vendor, its gross negligence, its breach of Section 8
+          (Confidentiality), its other indemnities, and any security breach
+          or failure to comply with Schedule 3 (Data Security) that affects
+          Halcyon Data.
+      - name: Nothing-limits drafting
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Nothing in this clause restricts liability for fraud or deliberate
+          default, for either party's IP infringement indemnity, or for sums
+          due from Halcyon. Nor does it restrict Vendor's liability for gross
+          negligence, misuse of Halcyon's confidential information, loss of
+          or unauthorised access to Halcyon Data, or any indemnity Vendor
+          gives in this Agreement.
+      - name: Data claims under a separate five-times limit
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          Excluded from the general cap are fraud, wilful misconduct, the
+          parties' IP indemnities, Halcyon's payment obligations, Vendor's
+          gross negligence and Vendor's breach of confidence concerning
+          information that is not Halcyon Data. Claims arising from a data
+          security incident, including under the data breach indemnity, are
+          instead subject to the separate Data Protection Cap of five times
+          annual fees, which is additional to the general cap.
+      - name: Narrow list with three-times data limit
+        context: {deal_value_band: standard}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          The only claims outside the limitation of liability are fraud,
+          wilful misconduct, each party's IP infringement indemnity and
+          Halcyon's obligation to pay fees. Data protection claims are subject
+          to the Data Protection Cap of three times annual fees rather than
+          the general cap, and breach notification and credit monitoring costs
+          are deemed direct damages. All other claims are within the general
+          cap.
+      - name: Confidentiality breach involving Halcyon Data inside the general cap
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          The limitation of liability does not apply to fraud, wilful
+          misconduct or the IP indemnities. Breaches of confidentiality,
+          including in relation to Halcyon Data, are subject to the general
+          cap, although security incidents caused by Vendor's breach of the
+          Security Schedule are subject to a separate cap of five times the
+          annual fees.
+      - name: All data claims expressly within the cap
+        context: {data_sensitivity: phi, regimes: [hipaa]}
+        expected_outcome: red_line
+        expected_red_line_key: carve-data-breach-inside-general-cap
+        expected_zone: red
+        sample_text: >
+          The limitation in Section 10.2 applies to all claims of every kind,
+          including claims arising from loss of, or unauthorised access to,
+          Customer's data and claims under the Business Associate Agreement.
+          The sole exceptions are Customer's payment obligations and
+          Customer's indemnity under Section 9.
+      - name: Trap - cap applies to service level claims but not to data security
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          For clarity, the liability cap applies to claims for breach of the
+          service levels and is not disapplied merely because a claim is
+          framed as negligence. The cap does not, however, apply to fraud or
+          wilful misconduct, to either party's IP infringement indemnity, to
+          fees due from Halcyon, or to Vendor's gross negligence, breach of
+          confidentiality, other indemnities or any breach of its data
+          security obligations affecting Halcyon Data.
+
+  # ------------------------------------------------------------------------
+  - rule_key: indemnification.ip_infringement_indemnity
+    title: Vendor intellectual property infringement indemnity
+    required: true
+    risk_weight: 8
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Vendor defends and indemnifies Halcyon, its affiliates and its customers
+      against third-party claims that the Services infringe any intellectual
+      property right anywhere in the world, with a procure, modify or refund
+      remedy that is not exclusive.
+    risk_rationale: >
+      Vendor components for messaging, analytics and hosting are built into
+      Halcyon Engage, which is delivered to about 310 customers from AWS
+      regions in the United States and the EU and earns $72M of annual
+      recurring revenue. An infringement claim against a Vendor component can
+      reach Halcyon and its customers, and Halcyon gives those customers its
+      own infringement indemnity on the sell side. Without a matching
+      indemnity from the Vendor, covering the same territories and the same
+      people, Halcyon funds the defence of a claim about technology it did not
+      write.
+    detection_guidance: >
+      Look for "defend, indemnify and hold harmless" paired with "infringes"
+      or "misappropriates" and "intellectual property rights of a third
+      party". Record which rights and territories are covered, who is
+      indemnified, and the exclusions. Check whether the "procure, modify or
+      refund" remedy is stated to be the sole and exclusive remedy and whether
+      Vendor has a duty to defend as well as to pay. If the agreement has an
+      indemnity section with no infringement limb, treat it as a missing
+      issue.
+    source_ref: Halcyon Vendor Risk Policy VR-03 (third-party technology)
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-12
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Worldwide indemnity covering Halcyon's customers
+        zone: green
+        summary: Vendor defends and indemnifies Halcyon, its affiliates and customers for infringement of any intellectual property right worldwide; remedies are cumulative.
+        language: >
+          Vendor shall defend Halcyon, its affiliates and their respective
+          officers, directors, employees and customers (the "Halcyon
+          Indemnitees") against any claim, demand or proceeding brought by a
+          third party alleging that the Services, the Documentation or any
+          deliverable, or their use as permitted by this Agreement, infringe
+          or misappropriate any patent, copyright, trade mark, trade secret or
+          other intellectual property right anywhere in the world, and shall
+          indemnify the Halcyon Indemnitees against all damages, settlements,
+          costs and reasonable legal fees arising from the claim. If use of
+          the Services is, or in Vendor's reasonable opinion is likely to be,
+          restrained, Vendor shall at its own expense either procure the right
+          for Halcyon to continue using the Services or modify or replace them
+          so that they no longer infringe without material loss of
+          functionality. If neither is commercially practicable, either party
+          may terminate the affected Services and Vendor shall refund all
+          prepaid Fees for the period after termination and pay Halcyon's
+          reasonable costs of moving to a replacement service. Vendor has no
+          obligation under this Section to the extent the claim arises from
+          Halcyon Data or from a modification made by Halcyon that Vendor did
+          not authorise. The remedies in this Section are in addition to
+          Halcyon's other rights and remedies.
+      - kind: fallback
+        rung: 1
+        label: Territories of use, wider exclusions
+        zone: green
+        summary: Indemnity covers every country where the Services are provided or used and protects Halcyon and its affiliates; combination claims not specified by Vendor are excluded.
+        language: >
+          Vendor shall defend Halcyon and its affiliates against any claim
+          brought by a third party alleging that the Services or the
+          Documentation, or their use as permitted by this Agreement, infringe
+          or misappropriate any patent, copyright, trade mark, trade secret or
+          other intellectual property right in any country in which the
+          Services are provided or in which Halcyon is permitted to use them,
+          and shall indemnify them against all damages, settlements, costs and
+          reasonable legal fees arising from the claim. If use of the Services
+          is or is likely to be restrained, Vendor shall at its own expense
+          procure the right for Halcyon to continue using them or modify or
+          replace them without material loss of functionality, failing which
+          either party may terminate the affected Services and Vendor shall
+          refund all prepaid Fees for the period after termination. Vendor has
+          no obligation to the extent the claim arises from Halcyon Data, from
+          a modification Vendor did not authorise, or from the combination of
+          the Services with products that Vendor did not supply or specify and
+          that the Documentation does not contemplate. The remedies in this
+          Section are in addition to Halcyon's other rights and remedies.
+      - kind: fallback
+        rung: 2
+        label: United States rights only
+        zone: yellow
+        approver_role: commercial_counsel
+        conditions: {region: [us]}
+        give_get: >
+          Require that the indemnity is outside the liability cap and that
+          Vendor pays transition costs if the Services are withdrawn.
+        internal_note: >
+          Not suitable for a Vendor whose component is used to serve EU
+          customers from eu-west-1; check with the product team where the
+          component runs before offering this.
+        summary: Indemnity limited to intellectual property rights arising under United States law.
+        language: >
+          Vendor shall defend Halcyon and its affiliates against any claim
+          brought by a third party alleging that the Services or the
+          Documentation, or their use as permitted by this Agreement, infringe
+          or misappropriate any United States patent, copyright, trade mark or
+          trade secret, and shall indemnify them against all damages,
+          settlements, costs and reasonable legal fees arising from the claim.
+          If use of the Services is or is likely to be restrained, Vendor
+          shall at its own expense procure the right for Halcyon to continue
+          using them or modify or replace them without material loss of
+          functionality, failing which either party may terminate the affected
+          Services and Vendor shall refund all prepaid Fees for the period
+          after termination and pay Halcyon's reasonable costs of moving to a
+          replacement service. Vendor has no obligation to the extent the
+          claim arises from Halcyon Data, from a modification Vendor did not
+          authorise, or from a combination with products that Vendor did not
+          supply or specify.
+      - kind: acceptable_variant
+        label: Defend and pay amounts awarded or settled
+        zone: green
+        summary: Vendor-style wording under which Vendor defends at its own cost and pays amounts finally awarded or agreed in settlement, worldwide.
+        language: >
+          Vendor will, at its own expense, defend any action brought against
+          Halcyon, its affiliates or its customers to the extent it is based
+          on an allegation that the Services infringe or misappropriate the
+          intellectual property rights of a third party in any jurisdiction,
+          and will pay all costs of the defence together with any damages
+          finally awarded against them and any amounts agreed in a settlement
+          that Vendor has approved. Should the Services become, or be likely
+          to become, the subject of such an action, Vendor will obtain a
+          licence for their continued use, substitute a functionally
+          equivalent non-infringing service or, where neither can reasonably
+          be done, accept termination and return all unearned Fees. This
+          clause does not restrict any other remedy available to Halcyon.
+    parameters:
+      - key: ip_indemnity_scope
+        label: Rights and territories covered by Vendor's infringement indemnity
+        value_type: enum
+        direction: set_membership
+        preferred_value: all_rights_worldwide
+        green_limit: [all_rights_worldwide, all_rights_territories_of_use]
+        yellow_limit: [us_rights_only]
+        allowed_values:
+          - all_rights_worldwide
+          - all_rights_territories_of_use
+          - us_rights_only
+          - copyright_and_trade_secret_only
+          - none
+        extraction_hint: >
+          Use all_rights_worldwide where patents, copyright, trade marks and
+          trade secrets are covered with no territorial limit. Use
+          all_rights_territories_of_use where the indemnity is limited to
+          countries in which the Services are provided or used. Use
+          us_rights_only where it covers only rights under United States law.
+          Use copyright_and_trade_secret_only where patents are left out. Use
+          none where there is no infringement indemnity.
+    red_lines:
+      - key: ip-ind-refund-sole-remedy
+        description: Vendor has no duty to defend or pay; Halcyon's only remedy for infringement is termination or a refund.
+        condition_type: semantic
+        condition:
+          test: >
+            The agreement gives Halcyon no right to be defended against, or
+            indemnified for, third-party intellectual property infringement
+            claims about the Services, or states that replacement,
+            modification, termination or a refund of fees is Halcyon's sole
+            and exclusive remedy for infringement in place of any indemnity.
+            Answer no if Vendor must defend and pay and the sole-remedy
+            wording only describes Vendor's entire liability for infringement
+            including that indemnity.
+        action: block
+        rationale: >
+          A refund of a Vendor's Fees does nothing for a claim brought against
+          Halcyon or its hospital customers over a component of Halcyon
+          Engage. Halcyon gives its own customers an infringement indemnity
+          and cannot stand behind it without one from the Vendor.
+      - key: ip-ind-patents-excluded
+        description: The indemnity leaves out patent claims.
+        condition_type: parameter
+        condition: {parameter_key: ip_indemnity_scope, op: eq, value: copyright_and_trade_secret_only}
+        action: escalate
+        approver_role: general_counsel
+        rationale: >
+          Patent claims are the most expensive infringement claims to defend
+          and the ones most often brought against healthcare software. An
+          indemnity without them leaves the main risk with Halcyon, so only
+          the General Counsel may accept it.
+    objections:
+      - objection: We do not indemnify our customers' customers. The indemnity runs to the contracting party only.
+        their_rationale: Extending the indemnity to unknown third parties multiplies the number of potential claimants the vendor must defend.
+        response: >
+          Your service is delivered to our customers as part of our product,
+          so a claimant is as likely to sue a hospital as to sue us. We can
+          limit the indemnified parties to Halcyon and its affiliates on the
+          basis that any claim against one of our customers that we are
+          obliged to defend counts as a claim against Halcyon. Please confirm
+          that reading in the clause.
+        talking_points:
+          - Rung 1 drops customers as named indemnitees but is still green.
+          - Halcyon's own sell-side indemnity to customers creates a loss that is recoverable as a claim against Halcyon.
+        recommended_position: {rule_key: indemnification.ip_infringement_indemnity, rung: 1}
+        frequency: common
+        counterparty_profile: Infrastructure and platform vendors
+      - objection: We only cover United States intellectual property. We cannot clear rights in every country in the world.
+        their_rationale: The vendor has done freedom-to-operate work only in its home market.
+        response: >
+          We serve customers in the EU from our Irish entity, so a
+          United States-only indemnity leaves part of our use uncovered. We
+          can accept an indemnity limited to the countries in which the
+          Services are actually provided or used under this Agreement, which
+          you already know. If your service will only ever be used for our
+          United States customers we can look at a United States-only
+          position.
+        talking_points:
+          - Territories of use is green; United States only needs Commercial Counsel and is limited to US-region deals.
+          - Confirm with the product team whether the component runs in eu-west-1.
+        recommended_position: {rule_key: indemnification.ip_infringement_indemnity, rung: 1}
+        frequency: occasional
+        counterparty_profile: US-based startups and tier 3 vendors
+    dependencies:
+      - related_rule_key: limitation_of_liability.cap_carve_outs
+        relation: requires
+        note: The indemnity must be listed as an Excluded Claim; an indemnity inside the cap is a red line in the carve-outs rule.
+    test_cases:
+      - name: Worldwide defence and indemnity for Halcyon and its customers
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Supplier will defend and hold harmless Halcyon, its group companies
+          and its end customers from any third-party suit claiming that the
+          Services violate a patent, copyright, trademark or trade secret in
+          any country, and will pay the resulting damages, settlement sums and
+          attorneys' fees. Supplier will also secure continued use or provide
+          a non-infringing replacement, or failing that refund prepaid fees
+          and reimburse reasonable migration costs. These rights are without
+          prejudice to Halcyon's other remedies.
+      - name: Defend and pay finally awarded amounts
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Vendor shall defend at its cost any claim against Halcyon, its
+          affiliates or its customers that the Services infringe third-party
+          intellectual property rights in any jurisdiction and shall pay
+          damages finally awarded and settlements it has agreed. Halcyon's
+          other remedies are unaffected.
+      - name: Countries of use with combination exclusion
+        context: {region: eu}
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          Vendor indemnifies and will defend Halcyon and its affiliates
+          against third-party claims that the Services infringe any
+          intellectual property right subsisting in a country where the
+          Services are supplied or may be used under this Agreement. The
+          indemnity does not cover claims caused by Halcyon Data, by changes
+          Vendor did not approve, or by use with third-party products neither
+          supplied nor specified by Vendor.
+      - name: United States rights only
+        context: {region: us, counterparty_tier: tier_3}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Vendor will defend and indemnify Halcyon and its affiliates against
+          claims that the Services infringe a U.S. patent, U.S. copyright,
+          U.S. trademark or a trade secret protected under U.S. law. Claims
+          under the laws of other countries are not covered.
+      - name: Open-source components excluded from the indemnity
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Vendor shall defend and indemnify Halcyon against third-party claims
+          that the Services infringe intellectual property rights worldwide,
+          except that Vendor has no obligation for any claim relating to open
+          source or other third-party software included in the Services by
+          Vendor.
+      - name: Refund as the only remedy
+        expected_outcome: red_line
+        expected_red_line_key: ip-ind-refund-sole-remedy
+        expected_zone: red
+        sample_text: >
+          If the Services are alleged to infringe any third-party right,
+          Vendor may at its option modify the Services or terminate the
+          Agreement and refund fees paid for the unused portion of the term.
+          This states Customer's sole and exclusive remedy, and Vendor has no
+          obligation to defend or indemnify Customer in respect of any such
+          allegation.
+      - name: Trap - refund offered but not the sole remedy
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Vendor shall defend Halcyon, its affiliates and its customers
+          against, and indemnify them for, any third-party claim that the
+          Services infringe intellectual property rights anywhere in the
+          world. Where Vendor cannot procure continued use or supply a
+          non-infringing replacement it shall refund prepaid fees and pay
+          reasonable migration costs, but that refund is not Halcyon's sole or
+          exclusive remedy and does not replace the foregoing indemnity.
+
+  # ------------------------------------------------------------------------
+  - rule_key: indemnification.data_breach_indemnity
+    title: Vendor data breach indemnity
+    required: true
+    risk_weight: 9
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Vendor indemnifies Halcyon for the full cost of a Security Incident
+      affecting Halcyon Data, including notification, credit monitoring,
+      forensic investigation, regulatory defence and third-party claims, and
+      the indemnity is not reduced to a refund of Vendor's Fees.
+    risk_rationale: >
+      Halcyon is a HIPAA business associate for roughly 310 hospital and
+      physician-group customers and remains answerable to them, and to HHS,
+      for PHI that a Vendor holds as a subcontractor. If a Vendor's Fees are a
+      small fraction of the $165k median Halcyon earns on a customer contract,
+      a refund of those Fees covers almost none of the cost of notifying
+      patients, offering credit monitoring and running a forensic
+      investigation. The indemnity has to name those costs so that Halcyon can
+      pass the loss to the Vendor that caused it instead of carrying it
+      against its own $10M cyber and technology errors and omissions
+      aggregate.
+    detection_guidance: >
+      Look for an indemnity triggered by "Security Incident", "data breach" or
+      "unauthorised access to or disclosure of" Halcyon Data, followed by a
+      list of recoverable costs such as "notification", "credit monitoring",
+      "call centre", "forensic investigation" and "regulatory fines to the
+      extent insurable". Check whether the indemnity is listed as an Excluded
+      Claim or subject to a separate super-cap, and whether it is Halcyon's
+      only remedy or sits alongside ordinary damages. An indemnity section
+      with no breach limb, on an agreement under which Vendor holds Halcyon
+      Data, is a missing clause.
+    source_ref: Halcyon Vendor Risk Policy VR-02 (liability and insurance); risk appetite table, buy-side rows
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Full breach cost indemnity, outside the general cap
+        zone: green
+        summary: Vendor indemnifies Halcyon for all listed breach response costs and third-party claims; the indemnity is an Excluded Claim.
+        language: >
+          Vendor shall indemnify Halcyon against all reasonable costs and
+          losses arising from a Security Incident affecting Halcyon Data that
+          is in the possession or control of Vendor or its subcontractors,
+          including: (a) the cost of notifying affected individuals,
+          regulators and Halcyon's customers; (b) credit monitoring and
+          identity protection services for affected individuals for a period
+          reasonably necessary to address the risk; (c) the cost of a forensic
+          investigation; (d) call centre and public relations costs
+          reasonably incurred in response to the incident; (e) fines and
+          penalties imposed by a regulator, to the extent insurable by law;
+          and (f) amounts payable to third parties, including Halcyon's
+          customers, arising from the incident. This indemnity is in addition
+          to, and not in substitution for, Vendor's other obligations under
+          this Agreement and is an Excluded Claim under the limitation of
+          liability.
+      - kind: fallback
+        rung: 1
+        label: Same costs, subject to the data breach super-cap
+        zone: green
+        summary: The same list of recoverable costs, subject to the separate data breach super-cap rather than being wholly unlimited.
+        give_get: Ask for written confirmation of Vendor's cyber insurance limit before agreeing this rung.
+        language: >
+          Vendor shall indemnify Halcyon against all reasonable costs and
+          losses arising from a Security Incident affecting Halcyon Data that
+          is in the possession or control of Vendor or its subcontractors,
+          including the cost of notifying affected individuals, regulators and
+          Halcyon's customers, credit monitoring, forensic investigation,
+          call centre and public relations costs, insurable regulatory fines,
+          and amounts payable to third parties, including Halcyon's
+          customers. This indemnity is subject to the separate limit for Data
+          Protection Claims set out in the limitation of liability, which is
+          in addition to the general cap.
+      - kind: fallback
+        rung: 2
+        label: Notification and forensics only, subject to the lower super-cap
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: >
+          Require that third-party claims from Halcyon's customers are added
+          back in before this rung is accepted on any agreement involving PHI.
+        internal_note: >
+          Do not offer this rung where the Vendor processes PHI for more than
+          a small number of Halcyon's customers; escalate instead.
+        summary: Indemnity limited to notification, credit monitoring and forensic costs, subject to the three-times super-cap.
+        language: >
+          Vendor shall indemnify Halcyon against the reasonable cost of
+          notifying affected individuals and regulators, credit monitoring for
+          affected individuals, and forensic investigation arising from a
+          Security Incident affecting Halcyon Data that is in the possession
+          or control of Vendor or its subcontractors. This indemnity is
+          subject to the separate limit for Data Protection Claims set out in
+          the limitation of liability.
+      - kind: acceptable_variant
+        label: Reimbursement wording
+        zone: green
+        summary: Vendor-style wording using "reimburse" rather than "indemnify" for the same list of costs.
+        language: >
+          Where a Security Incident affecting Halcyon Data occurs in Vendor's
+          or its subcontractors' systems, Vendor will reimburse Halcyon's
+          reasonable costs of notifying affected individuals, regulators and
+          customers, of providing credit monitoring, of conducting a forensic
+          investigation, and of responding to resulting regulatory
+          proceedings and third-party claims, without applying the general
+          cap on liability to those amounts.
+    parameters:
+      - key: breach_indemnity_scope
+        label: Breach costs covered by Vendor's indemnity
+        value_type: enum
+        direction: set_membership
+        preferred_value: full_costs
+        green_limit: [full_costs]
+        yellow_limit: [notification_and_forensics_only]
+        allowed_values:
+          - full_costs
+          - notification_and_forensics_only
+          - third_party_claims_only
+          - none
+        extraction_hint: >
+          Use full_costs where notification, credit monitoring, forensics,
+          regulatory defence and third-party claims are all recoverable. Use
+          notification_and_forensics_only where credit monitoring, regulatory
+          fines or third-party claims are left out. Use third_party_claims_only
+          where only amounts owed to third parties are covered and Halcyon's
+          own response costs are not. Use none where there is no breach
+          indemnity at all.
+    red_lines:
+      - key: databreach-ind-no-notification-costs
+        description: The agreement does not make Vendor responsible for the cost of notifying affected individuals or regulators after a Security Incident affecting Halcyon Data.
+        condition_type: semantic
+        condition:
+          test: >
+            The agreement's indemnity for a security incident, or the absence
+            of any such indemnity, leaves Halcyon with no contractual right to
+            recover the cost of notifying affected individuals or regulators
+            following a Security Incident caused by Vendor or its
+            subcontractors. Answer no if notification costs are a recoverable
+            item under an indemnity or an uncapped claim for damages.
+        action: block
+        rationale: >
+          Halcyon owes its own notification duties to the Covered Entities it
+          serves and, under HIPAA, to HHS and affected individuals, on a
+          timeline it does not control once a Vendor's incident starts the
+          clock. A Vendor that accepts no responsibility for those costs
+          shifts a regulatory burden onto Halcyon with no means of recovery.
+      - key: databreach-ind-refund-only
+        description: Vendor's only obligation after a breach is a refund of its Fees or termination, with no indemnity for breach response costs.
+        condition_type: semantic
+        condition:
+          test: >
+            The agreement states that Vendor's entire responsibility for a
+            Security Incident affecting Halcyon Data is to refund fees paid by
+            Halcyon or to allow Halcyon to terminate the Agreement, with no
+            indemnity for notification, credit monitoring, forensic or
+            third-party claim costs. Answer no if an indemnity for those costs
+            exists in addition to any refund or termination right.
+        action: block
+        rationale: >
+          A refund of a low-value Vendor contract does nothing to offset the
+          cost of notifying the patients of a hospital customer or defending
+          a regulatory inquiry, both of which scale with the number of
+          records exposed rather than with the Vendor's Fees.
+    objections:
+      - objection: We cannot indemnify for regulatory fines. Our insurer excludes them and in some jurisdictions indemnifying a fine is unlawful.
+        their_rationale: Several regulators treat an agreement to indemnify a penalty as against public policy, and the vendor's insurer will not cover it either way.
+        response: >
+          We only ask that fines be covered to the extent insurance or law
+          permits, which is already how the clause is written. We cannot
+          remove regulatory costs altogether, because the fines and the
+          defence costs they carry are a real part of our exposure when a
+          subcontractor causes a breach of PHI. If your insurer's position
+          differs by jurisdiction, send us the policy wording and we will
+          adjust the carve-out to match it exactly.
+        talking_points:
+          - The clause already limits fines to what is insurable by law; point to that wording before conceding more.
+          - Ask for the policy exclusion in writing rather than accepting the objection on its face.
+        recommended_position: {rule_key: indemnification.data_breach_indemnity, rung: 0}
+        frequency: occasional
+        counterparty_profile: Vendors advised by outside counsel on regulatory exposure
+      - objection: Credit monitoring and call centre costs are open-ended. We need a cap or a defined scope before we can agree to cover them.
+        their_rationale: The vendor's finance team cannot price an indemnity with no ceiling on response-service spend.
+        response: >
+          That is exactly what the separate data protection limit in the
+          liability clause is for: it caps your exposure for these costs at a
+          multiple of your annual fees rather than leaving it open-ended. We
+          can move from an uncapped indemnity to one capped at five times
+          annual fees, which still comfortably covers a typical incident of
+          this kind.
+        talking_points:
+          - Point to the super-cap in the cap amount rule rather than deleting cost categories.
+          - Keep notification and forensic costs even if credit monitoring is capped.
+        recommended_position: {rule_key: indemnification.data_breach_indemnity, rung: 1}
+        frequency: common
+        counterparty_profile: Mid-sized SaaS and analytics vendors
+    dependencies:
+      - related_rule_key: limitation_of_liability.cap_amount
+        relation: trade_against
+        note: The breach indemnity's exposure is bounded by the data breach super-cap set in the cap amount rule rather than by a separate negotiated limit.
+      - related_rule_key: breach_notification.notification_timeline
+        relation: read_with
+        note: The indemnity pays for the notice Vendor must give under the breach notification rule; read the cost list together with the notice trigger.
+    test_cases:
+      - name: Full cost indemnity outside the cap
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          If a security incident affects Halcyon Data in Vendor's systems,
+          Vendor will indemnify Halcyon for the cost of notifying affected
+          persons, regulators and Halcyon's customers, for credit monitoring,
+          for forensic investigators, for call centre and public relations
+          expenses, for fines to the extent insurable, and for amounts owed to
+          third parties because of the incident. This indemnity is not subject
+          to the general limitation of liability.
+      - name: Reimbursement wording
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Vendor will reimburse Halcyon's reasonable notification, credit
+          monitoring, forensic, regulatory and third-party claim costs
+          arising from a security incident involving Halcyon Data in Vendor's
+          environment, and the general cap on liability does not apply to
+          these amounts.
+      - name: Full costs under the five-times super-cap
+        context: {data_sensitivity: phi, regimes: [hipaa]}
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          Vendor indemnifies Halcyon for notification, credit monitoring,
+          forensic, regulatory and third-party costs arising from a security
+          incident affecting Halcyon Data, subject to the Data Protection Cap
+          of five times annual fees set out elsewhere in this Agreement.
+      - name: Notification and forensics only under the lower super-cap
+        context: {deal_value_band: standard}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Vendor will cover the cost of notifying affected individuals and
+          regulators and the cost of a forensic investigation following a
+          security incident involving Halcyon Data, subject to the Data
+          Protection Cap of three times annual fees. Credit monitoring and
+          third-party claims are not covered by this indemnity.
+      - name: Indemnity covers only amounts paid to third parties
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Vendor will indemnify Halcyon against amounts Halcyon becomes
+          legally obligated to pay to a third party as a result of a security
+          incident affecting Halcyon Data. Halcyon's own costs of
+          notification, credit monitoring and investigation are not
+          recoverable under this indemnity.
+      - name: Refund of fees is the only remedy for a breach
+        expected_outcome: red_line
+        expected_red_line_key: databreach-ind-refund-only
+        expected_zone: red
+        sample_text: >
+          In the event of a security incident affecting Customer Data,
+          Vendor's sole obligation is to refund the fees paid by Customer for
+          the then-current term or, at Vendor's election, to allow Customer
+          to terminate the Agreement. Vendor has no further liability of any
+          kind arising from the incident.
+      - name: No breach costs mentioned anywhere in the agreement
+        expected_outcome: red_line
+        expected_red_line_key: databreach-ind-no-notification-costs
+        expected_zone: red
+        sample_text: >
+          Section 9 (Indemnification) covers only claims that the Services
+          infringe third-party intellectual property rights and claims
+          arising from Customer's breach of the Agreement. The Agreement
+          contains no other indemnity and does not otherwise address the cost
+          of responding to a security incident.
+      - name: Trap - notification costs covered despite a cap on damages generally
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          General damages under this Agreement are subject to the limitation
+          of liability in Section 10. Notwithstanding that limitation, Vendor
+          shall indemnify Halcyon in full for the cost of notifying affected
+          individuals and regulators, credit monitoring, forensic
+          investigation and third-party claims arising from a security
+          incident affecting Halcyon Data.
+
+  # ------------------------------------------------------------------------
+  - rule_key: warranties.performance_warranty
+    title: Vendor performance warranty
+    required: true
+    risk_weight: 6
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Vendor warrants that the Services will perform materially in accordance
+      with the Documentation, will be provided with reasonable skill and
+      care, and will not contain malicious code, for the full Subscription
+      Term, with re-performance or a service credit as the remedy.
+    risk_rationale: >
+      Halcyon Engage is integrated with hospital record systems over HL7 FHIR
+      and depends on vendor components for messaging, analytics and hosting;
+      a Vendor that warrants only the first weeks after delivery leaves
+      Halcyon with no contractual recourse for a defect that appears once the
+      component is embedded in a service relied on by about 310 customers.
+      Reasonable skill and care and freedom from malicious code are baseline
+      expectations consistent with Halcyon's own SOC 2 Type II, ISO 27001 and
+      HITRUST r2 commitments to its customers, which it cannot keep if a
+      vendor's software is not held to the same standard.
+    detection_guidance: >
+      Look for "warrants that", "will perform materially in accordance with",
+      "professional and workmanlike manner", "free from material defects" and
+      "malicious code" or "viruses". Record the warranty period: for the full
+      term, for a fixed number of days after delivery, or none at all. Check
+      the remedy: re-performance, a credit, or "AS IS" disclaimer. Absence of
+      any performance warranty in an agreement for software or services is a
+      missing clause.
+    source_ref: Halcyon Vendor Risk Policy VR-04 (service quality)
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-18
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Full-term warranty with re-performance or credit
+        zone: green
+        summary: Vendor warrants performance for the entire Subscription Term and must re-perform or credit Fees for a breach.
+        language: >
+          Vendor warrants that, throughout the Subscription Term, the Services
+          will perform materially in accordance with the Documentation, will
+          be provided with reasonable skill and care, and will not knowingly
+          introduce any virus, worm, trojan horse or other malicious code into
+          Halcyon's systems. If the Services do not conform to this warranty,
+          Vendor shall, at its own expense, re-perform the non-conforming
+          Services or correct the defect within a reasonable time. If Vendor
+          is unable to do so, Halcyon may recover as a service credit the
+          Fees paid for the period during which the Services did not conform,
+          without prejudice to Halcyon's other remedies for a material
+          breach.
+      - kind: fallback
+        rung: 1
+        label: Warranty for 12 months from delivery
+        zone: green
+        summary: The same warranty standard, running for 12 months from delivery of each deliverable rather than the full term.
+        give_get: Ask for a right to extend the warranty period on renewal for a reduced fee.
+        language: >
+          Vendor warrants that, for twelve (12) months following delivery of
+          the applicable Services, the Services will perform materially in
+          accordance with the Documentation, will be provided with reasonable
+          skill and care, and will not knowingly introduce malicious code. If
+          the Services do not conform, Vendor shall re-perform or correct the
+          non-conformity at its own expense or, if unable to do so, credit the
+          Fees paid for the affected Services.
+      - kind: fallback
+        rung: 2
+        label: Warranty for 90 days, credit only
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: Require written notice of any known defects at the time of delivery.
+        summary: Warranty period reduced to 90 days and the remedy limited to a service credit, with no re-performance obligation.
+        language: >
+          Vendor warrants that, for ninety (90) days following delivery of the
+          applicable Services, the Services will perform materially in
+          accordance with the Documentation and will not knowingly contain
+          malicious code. Halcyon's sole remedy for a breach of this warranty
+          is a credit of the Fees paid for the non-conforming Services.
+      - kind: acceptable_variant
+        label: Materially-conforms wording with a defect-correction remedy
+        zone: green
+        summary: Counterparty-style wording that reaches the same outcome using "conforms in all material respects".
+        language: >
+          Vendor represents and warrants that the Services, when used in
+          accordance with the Documentation, will conform in all material
+          respects to the Documentation throughout the Subscription Term and
+          will be free of any code intentionally designed to disrupt, disable
+          or harm Halcyon's systems. Vendor's sole obligation for a breach of
+          this warranty is to use commercially reasonable efforts to correct
+          the non-conformity, failing which Halcyon may recover the Fees paid
+          for the affected period as a credit.
+    parameters:
+      - key: warranty_period_days
+        label: Performance warranty period
+        value_type: duration_days
+        unit: days
+        direction: higher_is_better
+        preferred_value: 365
+        green_limit: 365
+        yellow_limit: 90
+        extraction_hint: >
+          Use 365 for a warranty that runs the full Subscription Term on a
+          standard annual contract, converting a stated term in months or
+          years to days. Record 0 if there is no performance warranty at all.
+        context_overrides:
+          - when: {deal_value_band: [strategic]}
+            yellow_limit: 180
+    red_lines:
+      - key: warranty-as-is-disclaimer
+        description: Vendor disclaims all warranties and provides the Services "as is".
+        condition_type: phrase
+        condition:
+          any:
+            - provided "as is"
+            - as is and as available
+            - disclaims all warranties
+          negation_guard: true
+        action: escalate
+        approver_role: general_counsel
+        rationale: >
+          Halcyon warrants to its own customers that Halcyon Engage performs
+          materially in accordance with its Documentation; a Vendor component
+          delivered with no warranty at all leaves Halcyon unable to stand
+          behind that promise or to recover from the Vendor if the component
+          fails.
+    objections:
+      - objection: We warrant for ninety days after delivery, consistent with our standard terms for every customer.
+        their_rationale: The vendor's engineering team is confident in the product only immediately after release and does not want an open-ended warranty.
+        response: >
+          A service we rely on for the life of the Subscription Term needs a
+          warranty that lasts as long as we are paying for it, not only the
+          first few months. We can move to a twelve-month warranty measured
+          from delivery of each release, renewed with each annual order,
+          rather than insisting on full-term coverage from day one.
+        talking_points:
+          - Twelve months from delivery is still green; only ninety days needs Commercial Counsel.
+          - Ask whether the vendor offers an extended warranty for a fee instead of shortening the base term.
+        recommended_position: {rule_key: warranties.performance_warranty, rung: 1}
+        frequency: common
+        counterparty_profile: Smaller software vendors
+      - objection: We cannot promise the Services will match the documentation exactly; we promise only commercially reasonable efforts to fix problems.
+        their_rationale: The vendor's documentation changes between releases and it does not want warranty claims based on an outdated version.
+        response: >
+          We are not asking for perfection, only that the Services perform
+          materially in accordance with the Documentation current at the time
+          of use, which is the standard we offer our own customers. If your
+          documentation changes frequently, we can agree that the warranty
+          runs against the version in force when the non-conformity arose.
+        talking_points:
+          - Materially in accordance with already allows for immaterial variance.
+          - Offer to tie the warranty to the current Documentation rather than a frozen version.
+        recommended_position: {rule_key: warranties.performance_warranty, rung: 0}
+        frequency: occasional
+        counterparty_profile: Vendors with frequent release cycles
+    dependencies:
+      - related_rule_key: service_levels.uptime_commitment
+        relation: read_with
+        note: The performance warranty covers functional conformity; uptime failures are addressed separately under the service levels in the commercial file.
+    test_cases:
+      - name: Full-term warranty with re-performance
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Throughout the Subscription Term, Vendor warrants that the Services
+          will perform materially in accordance with the Documentation and
+          will be supplied with reasonable skill and care, and will contain no
+          malicious code knowingly introduced by Vendor. Vendor will
+          re-perform or fix any non-conforming Services at no charge, or, if
+          it cannot, credit the Fees for the affected period.
+      - name: Materially-conforms variant
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Vendor represents that the Services will conform in all material
+          respects to the Documentation during the term and will not contain
+          code designed to damage Halcyon's systems. Vendor will use
+          commercially reasonable efforts to fix any non-conformity or credit
+          the affected fees.
+      - name: Twelve-month warranty from delivery
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          For twelve months after delivery of each release, Vendor warrants
+          that the Services will perform materially in accordance with the
+          Documentation and contain no malicious code. Vendor will
+          re-perform or correct any failure at its own cost.
+      - name: Ninety-day warranty, credit only
+        context: {deal_value_band: standard}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Vendor warrants for ninety days from delivery that the Services
+          will perform materially in accordance with the Documentation.
+          Customer's sole remedy for non-conformity is a credit of the fees
+          paid for the affected period.
+      - name: Thirty-day warranty with no stated remedy
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Vendor warrants for thirty days following delivery that the
+          Services will substantially conform to the Documentation. This
+          Section states Customer's exclusive remedy for any non-conformity.
+      - name: Services provided as is
+        expected_outcome: red_line
+        expected_red_line_key: warranty-as-is-disclaimer
+        expected_zone: red
+        sample_text: >
+          THE SERVICES ARE PROVIDED "AS IS" AND VENDOR DISCLAIMS ALL
+          WARRANTIES, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING ANY
+          WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+      - name: Trap - as-is language carved out of a real warranty
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Except as expressly warranted in this Section, the Services are not
+          provided "as is". Vendor warrants that, throughout the Subscription
+          Term, the Services will perform materially in accordance with the
+          Documentation and will be free of malicious code, with
+          re-performance or a service credit as Halcyon's remedy.
+
+  # ------------------------------------------------------------------------
+  - rule_key: insurance.coverage_requirements
+    title: Vendor insurance coverage
+    required: true
+    risk_weight: 6
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Vendor maintains cyber and technology errors and omissions cover of at
+      least $5M and commercial general liability of at least $2M throughout
+      the term, names Halcyon as an additional insured on general liability,
+      and provides a certificate on request.
+    risk_rationale: >
+      Vendors that handle Halcyon Data, including PHI as subcontractors under
+      Halcyon's HIPAA business associate agreements, must carry enough
+      insurance to fund a claim that Halcyon would otherwise have to pursue
+      against an undercapitalised vendor directly. Halcyon itself carries
+      $10M of cyber and technology errors and omissions cover and $2M of
+      general liability; requiring at least $5M of cyber cover from a vendor
+      that touches Halcyon Data keeps a meaningful part of the exposure
+      funded by insurance rather than by Halcyon's own policy limits.
+    detection_guidance: >
+      Look for "shall maintain", "commercial general liability", "cyber
+      liability" or "technology errors and omissions", "limits of not less
+      than", "additional insured" and "certificate of insurance". Record the
+      cyber/tech E&O limit and the general liability limit separately; a
+      combined limit is recorded under whichever figure is lower. Absence of
+      any insurance clause on an agreement under which Vendor holds Halcyon
+      Data is a missing clause.
+    source_ref: Halcyon Vendor Risk Policy VR-02 (liability and insurance)
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-05
+    positions:
+      - kind: preferred
+        rung: 0
+        label: $5M cyber, $2M general liability, additional insured
+        zone: green
+        summary: Vendor carries at least $5M of cyber/tech E&O cover and $2M of general liability, naming Halcyon as an additional insured on general liability, with a certificate on request.
+        language: >
+          During the Term and for twelve (12) months afterwards, Vendor shall
+          maintain, at its own expense: (a) cyber liability and technology
+          errors and omissions insurance with limits of not less than
+          US$5,000,000 per claim and in the aggregate, covering Vendor's
+          liability for a Security Incident, data breach, and wrongful acts in
+          providing the Services; and (b) commercial general liability
+          insurance with limits of not less than US$2,000,000 per occurrence
+          and in the aggregate. Vendor shall name Halcyon as an additional
+          insured on the commercial general liability policy and shall
+          provide a certificate of insurance evidencing this cover within ten
+          (10) business days of Halcyon's written request.
+      - kind: fallback
+        rung: 1
+        label: $3M cyber, $1M general liability
+        zone: green
+        summary: Reduced limits for a lower-risk Vendor, still with a certificate on request.
+        give_get: Ask for the Vendor's actual policy limit in writing even where it exceeds this floor.
+        language: >
+          During the Term, Vendor shall maintain cyber liability and
+          technology errors and omissions insurance with limits of not less
+          than US$3,000,000 per claim and in the aggregate, and commercial
+          general liability insurance with limits of not less than
+          US$1,000,000 per occurrence. Vendor shall provide a certificate of
+          insurance evidencing this cover within ten (10) business days of
+          Halcyon's written request.
+      - kind: fallback
+        rung: 2
+        label: $1M cyber cover, certificate on request only
+        zone: yellow
+        approver_role: cfo
+        conditions: {deal_value_band: [standard]}
+        give_get: Limit this rung to vendors that do not handle PHI or regulated personal data.
+        summary: Minimum cyber cover of $1M, with no stated general liability floor beyond what the Vendor already carries.
+        language: >
+          During the Term, Vendor shall maintain cyber liability insurance
+          with limits of not less than US$1,000,000 per claim and shall
+          provide a certificate of insurance evidencing its general liability
+          and cyber cover to Halcyon on written request.
+      - kind: acceptable_variant
+        label: Combined single limit at or above $5M
+        zone: green
+        summary: A single combined limit across cyber and general liability, provided it is at least $5M.
+        language: >
+          Vendor shall maintain insurance, which may be in the form of a
+          combined single limit across cyber liability, technology errors and
+          omissions and commercial general liability coverage, of not less
+          than US$5,000,000 per occurrence and in the aggregate, and shall
+          name Halcyon as an additional insured and provide a certificate of
+          insurance on request.
+    parameters:
+      - key: cyber_coverage_limit_usd
+        label: Vendor cyber / technology E&O coverage limit
+        value_type: currency_usd
+        unit: USD
+        direction: higher_is_better
+        preferred_value: 5000000
+        green_limit: 5000000
+        yellow_limit: 1000000
+        extraction_hint: >
+          Record the stated per-claim or aggregate cyber liability or
+          technology errors and omissions limit, whichever is lower if both
+          are stated. Where only a combined single limit is given, use that
+          figure for this parameter.
+      - key: general_liability_limit_usd
+        label: Vendor commercial general liability coverage limit
+        value_type: currency_usd
+        unit: USD
+        direction: higher_is_better
+        preferred_value: 2000000
+        green_limit: 2000000
+        yellow_limit: 0
+        extraction_hint: >
+          Record the stated per-occurrence commercial general liability
+          limit. Record 0 if the agreement states no general liability
+          requirement.
+    red_lines:
+      - key: insurance-none-required
+        description: The agreement imposes no insurance requirement on Vendor at all, on a deal involving Halcyon Data.
+        condition_type: parameter
+        condition: {parameter_key: cyber_coverage_limit_usd, op: eq, value: 0}
+        action: escalate
+        approver_role: cfo
+        rationale: >
+          A Vendor with no insurance obligation that still holds Halcyon Data,
+          including PHI, leaves Halcyon as the only funded party if a claim
+          exceeds the Vendor's own resources. The CFO decides whether the
+          Vendor's financial standing is an adequate substitute.
+    objections:
+      - objection: We carry $1M of cyber cover across our whole book of business. $5M is more than our policy provides.
+        their_rationale: The vendor is a smaller company whose insurance program has not scaled with its customer base.
+        response: >
+          We can work with your actual coverage, but we need it in writing and
+          we need at least $1,000,000 of cyber cover given the kind of data
+          involved. For a standard deal of this size that is an acceptable
+          floor; if the relationship grows we will revisit the limit at
+          renewal.
+        talking_points:
+          - $1M cyber cover with no PHI exposure needs CFO sign-off, not General Counsel.
+          - Ask for the certificate before signing, not after.
+        recommended_position: {rule_key: insurance.coverage_requirements, rung: 2}
+        frequency: common
+        counterparty_profile: Small or early-stage vendors
+      - objection: We will not name you as an additional insured; that is not something our broker offers on this policy.
+        their_rationale: Additional insured status is priced separately and the vendor's broker has not quoted it.
+        response: >
+          Additional insured status matters most for the general liability
+          policy, since that is what responds to third-party bodily injury or
+          property damage claims naming us. We can drop the requirement for
+          the cyber policy if it keeps the limits intact and you can still
+          provide the additional insured endorsement on general liability.
+        talking_points:
+          - Keep the coverage limits even if the additional insured request is dropped.
+          - Ask the broker for a cost to add the endorsement before giving it up.
+        recommended_position: {rule_key: insurance.coverage_requirements, rung: 1}
+        frequency: occasional
+        counterparty_profile: Vendors with a single shared insurance program
+    dependencies:
+      - related_rule_key: limitation_of_liability.cap_amount
+        relation: trade_against
+        note: A lower insurance limit supports a lower liability cap and super-cap; move them together.
+    test_cases:
+      - name: $5M cyber, $2M general liability, additional insured
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Vendor shall carry, throughout the term and for one year after,
+          cyber and technology errors and omissions insurance of not less
+          than five million dollars per claim and in the aggregate, and
+          commercial general liability insurance of not less than two million
+          dollars per occurrence, naming Halcyon as an additional insured on
+          the latter and providing a certificate within ten business days of
+          request.
+      - name: Combined single limit variant
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Vendor will maintain a combined policy covering cyber liability and
+          commercial general liability with a limit of six million dollars
+          per occurrence, will add Halcyon as an additional insured, and will
+          furnish a certificate on written request.
+      - name: $3M cyber, $1M general liability
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          Vendor shall maintain cyber and technology errors and omissions
+          cover of three million dollars and general liability cover of one
+          million dollars, and will provide a certificate within ten business
+          days of a written request.
+      - name: $1M cyber cover, certificate only
+        context: {deal_value_band: standard}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Vendor carries cyber liability insurance of one million dollars and
+          will provide Halcyon with a certificate of its general liability and
+          cyber coverage upon written request.
+      - name: $500k cyber cover only
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Vendor maintains cyber liability insurance with a limit of five
+          hundred thousand dollars and will provide evidence of coverage on
+          request.
+      - name: No insurance obligation stated
+        expected_outcome: red_line
+        expected_red_line_key: insurance-none-required
+        expected_zone: red
+        sample_text: >
+          This Agreement contains no requirement for Vendor to maintain
+          insurance of any kind, and Vendor makes no representation as to its
+          insurance coverage.
+      - name: Trap - "no less than our standard policy" meeting the floor
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Vendor's standard insurance policy, which it confirms is no less
+          protective than five million dollars of cyber and technology errors
+          and omissions cover and two million dollars of commercial general
+          liability cover, will remain in force throughout the term, and
+          Halcyon will be added as an additional insured on the general
+          liability policy.
+
+  # ------------------------------------------------------------------------
+  - rule_key: intellectual_property.ownership
+    title: Ownership of intellectual property and Halcyon Data
+    required: true
+    risk_weight: 7
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Vendor retains its pre-existing intellectual property and the Services;
+      Halcyon and its customers retain all right, title and interest in
+      Halcyon Data, and Vendor has no licence to it beyond what is needed to
+      provide the Services.
+    risk_rationale: >
+      Halcyon Data can include PHI and other personal data belonging to about
+      310 hospital, physician-group and clinic customers, and Halcyon remains
+      the business associate or controller responsible for it regardless of
+      which vendor processes it. An ownership clause that is silent on
+      Halcyon Data, or that gives Vendor a broad licence to use it for
+      Vendor's own purposes, puts Halcyon in breach of the business associate
+      and data processing commitments it has made to those customers, which
+      its HITRUST r2 and SOC 2 Type II certifications depend on it keeping.
+    detection_guidance: >
+      Look for "retains all right, title and interest", "no rights are
+      granted except as expressly set out", "Customer Data" or "Halcyon Data"
+      defined and addressed separately from the Services, and any licence
+      grant running from Halcyon to Vendor. Check whether that licence is
+      limited to providing the Services or extends to Vendor's own product
+      improvement, analytics or marketing. Absence of an ownership clause in
+      an agreement under which Vendor processes Halcyon Data is a missing
+      clause.
+    source_ref: Halcyon Vendor Risk Policy VR-05 (data and intellectual property)
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-02
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Halcyon Data reserved; licence limited to providing the Services
+        zone: green
+        summary: Vendor keeps its own IP and the Services; Halcyon Data is reserved to Halcyon and Vendor's licence to it is limited to performing the Services.
+        language: >
+          As between the parties, Vendor and its licensors own all right,
+          title and interest in and to the Services, the Documentation and
+          any pre-existing or generally applicable technology, and no rights
+          are granted to Halcyon except as expressly set out in this
+          Agreement. As between the parties, Halcyon and its customers own
+          all right, title and interest in and to Halcyon Data. Vendor is
+          granted a limited, non-exclusive licence to access, process and
+          host Halcyon Data solely to provide the Services to Halcyon in
+          accordance with this Agreement, and Vendor shall not use Halcyon
+          Data for any other purpose, including to develop, train or improve
+          any product or service offered to a party other than Halcyon.
+      - kind: fallback
+        rung: 1
+        label: Same reservation, licence also covers aggregated usage data
+        zone: green
+        summary: The same reservation of Halcyon Data, with an added licence for Vendor to use de-identified, aggregated usage data to operate and improve the Services generally.
+        give_get: Require that any aggregated data is de-identified to a standard Halcyon's privacy counsel can accept.
+        language: >
+          As between the parties, Vendor and its licensors own all right,
+          title and interest in and to the Services and the Documentation,
+          and Halcyon and its customers own all right, title and interest in
+          and to Halcyon Data. Vendor's licence to Halcyon Data is limited to
+          providing the Services, except that Vendor may use Halcyon Data in
+          de-identified and aggregated form, from which no individual or
+          Halcyon customer can reasonably be identified, to operate, support
+          and improve the Services generally.
+      - kind: fallback
+        rung: 2
+        label: Deliverables assigned, background IP and Halcyon Data reserved
+        zone: yellow
+        approver_role: commercial_counsel
+        conditions: {counterparty_tier: [tier_3]}
+        give_get: Pay a development fee for the assignment and confirm it does not include any of Vendor's pre-existing background technology.
+        summary: Custom deliverables created specifically for Halcyon under a statement of work are assigned to Halcyon; Vendor's background technology and Halcyon Data remain reserved as before.
+        language: >
+          Vendor assigns to Halcyon all right, title and interest in any
+          deliverable created specifically for Halcyon under an agreed
+          statement of work, excluding any of Vendor's pre-existing
+          technology, tools or templates incorporated into it, which Vendor
+          licenses to Halcyon on a non-exclusive, perpetual basis for use with
+          the deliverable. Halcyon Data remains reserved to Halcyon as set out
+          above.
+      - kind: acceptable_variant
+        label: No-rights-granted wording
+        zone: green
+        summary: Counterparty-style wording stating that no rights pass to Halcyon except an access licence, with Halcyon Data separately reserved.
+        language: >
+          Except for the limited right to access and use the Services as
+          described in this Agreement, no intellectual property rights are
+          transferred or licensed to Halcyon under this Agreement. For the
+          avoidance of doubt, this Section does not affect ownership of
+          Halcyon Data, which remains vested in Halcyon and its customers at
+          all times, and Vendor's access to Halcyon Data is solely to perform
+          the Services.
+    parameters:
+      - key: halcyon_data_use_restriction
+        label: Scope of Vendor's permitted use of Halcyon Data
+        value_type: enum
+        direction: set_membership
+        preferred_value: providing_services_only
+        green_limit: [providing_services_only, plus_deidentified_aggregate]
+        allowed_values:
+          - providing_services_only
+          - plus_deidentified_aggregate
+          - broad_product_improvement
+          - unrestricted
+        extraction_hint: >
+          Use providing_services_only where Vendor's licence to Halcyon Data
+          is limited to performing the Services for Halcyon. Use
+          plus_deidentified_aggregate where Vendor may also use de-identified,
+          aggregated data to operate or improve the Services generally. Use
+          broad_product_improvement where Vendor may use identifiable Halcyon
+          Data to improve its own product or for other customers. Use
+          unrestricted where no limit is stated at all.
+    red_lines:
+      - key: ip-own-vendor-claims-halcyon-data
+        description: Vendor claims ownership of, or an unrestricted licence to, Halcyon Data.
+        condition_type: parameter
+        condition: {parameter_key: halcyon_data_use_restriction, op: eq, value: unrestricted}
+        action: block
+        rationale: >
+          Halcyon is a HIPAA business associate and GDPR processor for the
+          data its customers put into Halcyon Engage, and it remains
+          accountable to those customers regardless of which vendor Halcyon
+          uses underneath. A vendor that owns, or is unrestricted in its use
+          of, that data cannot be reconciled with Halcyon's own obligations to
+          the customers whose data it is.
+    objections:
+      - objection: We need to use data flowing through our platform, including yours, to improve our models for all our customers.
+        their_rationale: The vendor's product roadmap depends on training and tuning its models on data from across its customer base.
+        response: >
+          We can agree that you may use de-identified, aggregated data from
+          which no individual or Halcyon customer can be identified to
+          improve the Services generally. We cannot agree to any use of
+          identifiable Halcyon Data, including PHI, to train models made
+          available to your other customers; that would put us in breach of
+          our obligations to the hospital systems whose data this is.
+        talking_points:
+          - De-identified, aggregated use is still green; identifiable use for other customers is a global red line on data training or sale.
+          - Ask what de-identification standard the vendor applies and whether Halcyon's privacy counsel can review it.
+        recommended_position: {rule_key: intellectual_property.ownership, rung: 1}
+        frequency: common
+        counterparty_profile: Analytics and AI-enabled vendors
+      - objection: Anything we build for you under a statement of work is ours; we license it to you, we do not assign it.
+        their_rationale: The vendor reuses components it builds for one customer across its other engagements.
+        response: >
+          For custom work we commission and pay for specifically, we need to
+          own the result, excluding anything from your pre-existing toolkit
+          that you license back to us for use with it. If a deliverable is
+          mostly built from your existing technology, tell us before the
+          statement of work is signed so we can price the assignment or agree
+          a licence instead.
+        talking_points:
+          - Assignment of custom deliverables only applies to work paid for under a statement of work, and needs Commercial Counsel.
+          - Keep Vendor's background technology licensed, not assigned.
+        recommended_position: {rule_key: intellectual_property.ownership, rung: 2}
+        frequency: occasional
+        counterparty_profile: Development and integration vendors
+    dependencies:
+      - related_rule_key: limitation_of_liability.cap_carve_outs
+        relation: read_with
+        note: Vendor's intellectual property indemnity in the carve-outs rule is only consistent if Vendor is confirmed to own the Services it indemnifies.
+    test_cases:
+      - name: Halcyon Data reserved, licence limited to the Services
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Vendor and its licensors retain all title to the Services and
+          Documentation. Halcyon and its customers retain all title to
+          Halcyon Data. Vendor's right to access or process Halcyon Data is
+          limited to providing the Services under this Agreement, and Vendor
+          will not use Halcyon Data for any other purpose, including to
+          develop products for other customers.
+      - name: No-rights-granted variant
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          No intellectual property rights pass to Halcyon other than the
+          right to use the Services as described in this Agreement. Halcyon
+          Data is unaffected by this Section and remains owned by Halcyon at
+          all times; Vendor may access it only to perform the Services.
+      - name: Licence extended to de-identified aggregate data
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          Vendor owns the Services and Documentation; Halcyon owns Halcyon
+          Data. Vendor may additionally use Halcyon Data in de-identified,
+          aggregated form, from which no customer or individual can be
+          identified, to improve the Services for its customers generally.
+      - name: Custom deliverables assigned, background IP reserved
+        context: {counterparty_tier: tier_3}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Deliverables created specifically for Halcyon under an agreed
+          statement of work are assigned to Halcyon, excluding Vendor's
+          pre-existing tools and templates, which are licensed to Halcyon for
+          use with the deliverable. Halcyon Data remains owned by Halcyon.
+      - name: Licence permits use for Vendor's other customers without de-identification
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Vendor owns the Services. Vendor may use data processed through the
+          Services, including Halcyon Data, to improve its products and
+          services for the benefit of its customer base generally.
+      - name: Vendor claims ownership of Halcyon Data without restriction
+        expected_outcome: red_line
+        expected_red_line_key: ip-own-vendor-claims-halcyon-data
+        expected_zone: red
+        sample_text: >
+          All data submitted to or generated through use of the platform,
+          including Customer Data, becomes the property of Vendor upon
+          submission, and Vendor may use, disclose, license or sell it in its
+          sole discretion.
+      - name: Trap - Halcyon Data not "owned" by Vendor despite broad platform IP clause
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Vendor owns all intellectual property in the platform, including
+          improvements, analytics and derived works created by Vendor. For
+          the avoidance of doubt, Halcyon Data is not platform intellectual
+          property, is not owned by Vendor, and may be accessed by Vendor only
+          to provide the Services to Halcyon.
+
+  # ------------------------------------------------------------------------
+  - rule_key: confidentiality.standard_of_care
+    title: Vendor's standard of care for Halcyon's confidential information
+    required: true
+    risk_weight: 6
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Vendor protects Halcyon's confidential information, including Halcyon
+      Data, with at least a reasonable standard of care, discloses it only to
+      personnel and subcontractors who need it and are bound by matching
+      confidentiality terms, and uses it only to provide the Services.
+    risk_rationale: >
+      Vendor's confidentiality obligations are the general-purpose backstop
+      for information that is not already covered by the data protection and
+      security rules, including Halcyon's pricing, roadmap and the
+      non-PHI details of its 310 customers. A standard that is weaker than
+      "reasonable care", or that lets Vendor disclose information to
+      subcontractors with no matching duty, exposes commercially sensitive
+      information at a company whose median contract is $165k and whose
+      largest is $2.4M, where a leaked price list or roadmap item affects
+      every negotiation that follows.
+    detection_guidance: >
+      Look for "the same degree of care that it uses to protect its own
+      confidential information, but no less than reasonable care", "solely
+      for the purpose of providing the Services", "shall not disclose to any
+      third party" and "personnel who need to know". Check whether
+      subcontractors who receive the information are bound by obligations at
+      least as protective as this clause. Absence of any stated standard in a
+      confidentiality clause is a deviation; absence of a confidentiality
+      clause altogether is a missing clause.
+    source_ref: Halcyon Vendor Risk Policy VR-06 (confidentiality)
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-20
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Reasonable care, need-to-know, matching subcontractor terms
+        zone: green
+        summary: Vendor uses at least reasonable care, limits access to personnel and subcontractors who need it, and binds them to equivalent terms.
+        language: >
+          Vendor shall protect Halcyon's confidential information, including
+          Halcyon Data, using the same degree of care it uses to protect its
+          own confidential information of a similar nature, but in no event
+          less than a reasonable degree of care. Vendor shall disclose
+          Halcyon's confidential information only to its employees,
+          contractors and subcontractors who need to know it to perform the
+          Services and who are bound by confidentiality obligations at least
+          as protective as this Section, and shall use it solely to provide
+          the Services to Halcyon.
+      - kind: fallback
+        rung: 1
+        label: Reasonable care without the "own information" comparison
+        zone: green
+        summary: A flat reasonable-care standard, without measuring it against Vendor's own practice.
+        give_get: Ask for written confirmation of Vendor's internal confidentiality policy.
+        language: >
+          Vendor shall protect Halcyon's confidential information, including
+          Halcyon Data, using a reasonable degree of care, and shall disclose
+          it only to employees, contractors and subcontractors who need to
+          know it to perform the Services and who are bound by written
+          confidentiality obligations. Vendor shall use Halcyon's
+          confidential information solely to provide the Services.
+      - kind: fallback
+        rung: 2
+        label: Vendor's own standard practice, no stated floor
+        zone: yellow
+        approver_role: commercial_counsel
+        conditions: {data_sensitivity: [none, personal_data]}
+        give_get: Limit this rung to Vendors handling no PHI, and require the data protection and security rules to apply in full regardless.
+        summary: Vendor protects Halcyon's confidential information to the standard it applies to its own, with no independent reasonable-care floor stated.
+        language: >
+          Vendor shall protect Halcyon's confidential information using the
+          same degree of care it applies to its own confidential information
+          of a similar nature, and shall disclose it only to personnel and
+          subcontractors who need to know it and are subject to
+          confidentiality obligations.
+      - kind: acceptable_variant
+        label: Strict-confidence wording
+        zone: green
+        summary: Counterparty-style wording using "strict confidence" to the same effect as reasonable care.
+        language: >
+          Vendor shall hold Halcyon's confidential information, including
+          Halcyon Data, in strict confidence, using measures no less
+          protective than those it applies to its own confidential
+          information and in any event reasonable under the circumstances,
+          and shall limit access to personnel and subcontractors who need it
+          for the Services and who are bound by confidentiality terms at
+          least as strict as this Agreement.
+    parameters:
+      - key: confidentiality_care_standard
+        label: Vendor's standard of care for Halcyon's confidential information
+        value_type: enum
+        direction: set_membership
+        preferred_value: reasonable_care_with_own_practice_floor
+        green_limit: [reasonable_care_with_own_practice_floor, reasonable_care_only]
+        yellow_limit: [own_practice_only]
+        allowed_values:
+          - reasonable_care_with_own_practice_floor
+          - reasonable_care_only
+          - own_practice_only
+          - none_stated
+        extraction_hint: >
+          Use reasonable_care_with_own_practice_floor where the clause
+          measures care against Vendor's own practice but sets a reasonable
+          care floor. Use reasonable_care_only where a flat reasonable care
+          standard applies with no comparison to Vendor's own practice. Use
+          own_practice_only where the clause refers only to Vendor's own
+          standard with no independent floor. Use none_stated where no
+          standard is given at all.
+    red_lines:
+      - key: confidentiality-no-standard-of-care
+        description: The confidentiality clause states no standard of care for protecting Halcyon's information.
+        condition_type: parameter
+        condition: {parameter_key: confidentiality_care_standard, op: eq, value: none_stated}
+        action: escalate
+        approver_role: commercial_counsel
+        rationale: >
+          Without a stated standard, Halcyon has no basis to show that
+          Vendor's handling of its confidential information, including
+          pricing and roadmap detail that affects negotiations across its
+          customer base, fell short of what was promised.
+    objections:
+      - objection: We will protect your information to our own internal standard; we will not commit to an external "reasonable care" benchmark.
+        their_rationale: The vendor does not want a court comparing its internal practices against an externally defined reasonable-care standard.
+        response: >
+          We can accept your own-practice standard as the baseline provided it
+          is supported by a written confidentiality policy you can show us,
+          and provided the data protection and security rules in this
+          Agreement continue to apply in full to Halcyon Data specifically.
+          For information outside those rules we would still prefer a
+          reasonable-care floor, since that is the standard we hold ourselves
+          to.
+        talking_points:
+          - Own-practice-only needs Commercial Counsel and only where no PHI is involved.
+          - Ask for the internal confidentiality policy in writing before accepting this rung.
+        recommended_position: {rule_key: confidentiality.standard_of_care, rung: 2}
+        frequency: occasional
+        counterparty_profile: Vendors with a single global confidentiality policy
+      - objection: We cannot bind every subcontractor to terms identical to this Agreement; we use our own standard subcontract.
+        their_rationale: The vendor's subcontractors are on their own standard paper that Vendor cannot amend contract by contract.
+        response: >
+          We do not need identical wording, only confidentiality obligations
+          that are at least as protective as what we have agreed here. If your
+          standard subcontract already requires that, please point us to the
+          relevant clause so we can confirm it meets the standard.
+        talking_points:
+          - At least as protective is a lower bar than identical wording and is already part of the preferred position.
+          - This point interacts with subprocessor flow-down; read it together with that rule.
+        recommended_position: {rule_key: confidentiality.standard_of_care, rung: 0}
+        frequency: common
+        counterparty_profile: Vendors that subcontract parts of the Services
+    dependencies:
+      - related_rule_key: subprocessors.subprocessor_changes
+        relation: read_with
+        note: The requirement that subcontractors are bound by matching confidentiality terms overlaps with the flow-down duty in the subprocessor rule.
+    test_cases:
+      - name: Reasonable care measured against Vendor's own practice
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Vendor will protect Halcyon's confidential information, including
+          Halcyon Data, with the same care it uses for its own confidential
+          information of a similar kind, but never less than reasonable care,
+          and will share it only with staff and subcontractors who need it
+          and who are bound by equivalent confidentiality duties.
+      - name: Strict confidence variant
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Vendor shall keep Halcyon's confidential information in strict
+          confidence, applying measures no less protective than for its own
+          confidential information and reasonable in any case, limiting
+          access to personnel and subcontractors bound by equally strict
+          terms.
+      - name: Flat reasonable-care standard
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          Vendor shall use reasonable care to protect Halcyon's confidential
+          information and shall disclose it only to staff and subcontractors
+          who need it and who have agreed in writing to keep it confidential.
+      - name: Vendor's own standard with no PHI involved
+        context: {data_sensitivity: personal_data}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Vendor will handle Halcyon's confidential information according to
+          its internal data handling standards, disclosing it only to
+          personnel who need it for the Services.
+      - name: Standard of care applies only to written information
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Vendor will take reasonable steps to protect any confidential
+          information of Halcyon that is marked "Confidential" in writing at
+          the time of disclosure. Information disclosed orally or not marked
+          is not subject to this Section.
+      - name: No standard of care stated
+        expected_outcome: red_line
+        expected_red_line_key: confidentiality-no-standard-of-care
+        expected_zone: red
+        sample_text: >
+          Vendor will keep Halcyon's confidential information confidential
+          and will not disclose it to unaffiliated third parties except as
+          required by law.
+      - name: No confidentiality clause at all
+        expected_outcome: missing
+        expected_zone: yellow
+        sample_text: ""
+      - name: Trap - "no less than reasonable" despite informal phrasing
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Vendor isn't required to go beyond what it does for its own
+          sensitive information when protecting Halcyon's confidential
+          information, but it must never do less than what a reasonably
+          careful company in its industry would do, and only staff and
+          subcontractors who need the information and are bound by matching
+          confidentiality duties may see it.
+
+  # ------------------------------------------------------------------------
+  - rule_key: security.security_program
+    title: Vendor security programme
+    required: true
+    risk_weight: 8
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Vendor maintains a written information security programme with
+      administrative, technical and physical safeguards appropriate to the
+      sensitivity of Halcyon Data, aligned with a recognised standard, and
+      will not materially decrease its protections during the term.
+    risk_rationale: >
+      Vendors in scope for this playbook are mainly cloud, messaging and
+      analytics suppliers, some of which process PHI as subcontractors under
+      Halcyon's HIPAA business associate agreements with its roughly 310
+      hospital and physician-group customers. Halcyon holds SOC 2 Type II,
+      ISO 27001 and HITRUST r2 certifications and cannot pass those audits if
+      a vendor underneath it has no equivalent programme; a vague promise to
+      use "commercially reasonable" security with no named standard gives
+      Halcyon nothing to point to when a customer or an auditor asks how a
+      subcontractor's safeguards compare to Halcyon's own.
+    detection_guidance: >
+      Look for "written information security program", "administrative,
+      technical and physical safeguards", "industry standard", "ISO 27001",
+      "SOC 2", "NIST" and "shall not materially decrease the overall
+      security". Record whether the programme is aligned with a named,
+      recognised standard or framework, or is described only in general
+      terms with no named standard. Absence of any security commitment in an
+      agreement under which Vendor hosts or processes Halcyon Data is a
+      missing clause.
+    source_ref: Halcyon Vendor Risk Policy VR-07 (vendor security)
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-06
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Written programme aligned with a recognised standard, no material decrease
+        zone: green
+        summary: Vendor maintains a written security programme aligned with ISO 27001, SOC 2 or an equivalent recognised standard and will not materially decrease its safeguards.
+        language: >
+          Vendor shall maintain, throughout the Term, a written information
+          security programme comprising administrative, technical and
+          physical safeguards appropriate to the sensitivity of Halcyon Data,
+          aligned with ISO/IEC 27001, SOC 2 or another recognised industry
+          security standard, including access controls, encryption of
+          Halcyon Data at rest and in transit, personnel background checks
+          and security training, vulnerability management, and incident
+          response procedures. Vendor shall not materially decrease the
+          overall security of the programme during the Term.
+      - kind: fallback
+        rung: 1
+        label: Programme described without naming a standard
+        zone: green
+        summary: The same categories of safeguard, described in Vendor's own terms without naming an external standard, plus the no-material-decrease commitment.
+        give_get: Ask Vendor to provide its most recent security assessment, audit report or questionnaire response.
+        language: >
+          Vendor shall maintain, throughout the Term, administrative,
+          technical and physical safeguards appropriate to the sensitivity of
+          Halcyon Data, including access controls, encryption of Halcyon Data
+          at rest and in transit, personnel training and incident response
+          procedures consistent with generally accepted industry practice for
+          providers of similar services. Vendor shall not materially decrease
+          the overall security of these safeguards during the Term.
+      - kind: fallback
+        rung: 2
+        label: General commercially reasonable security commitment
+        zone: yellow
+        approver_role: security_lead
+        conditions: {data_sensitivity: [none, personal_data]}
+        give_get: Limit this rung to Vendors handling no PHI and require a completed security questionnaire before signature.
+        summary: A general commitment to commercially reasonable security measures with no itemised list of safeguards.
+        language: >
+          Vendor shall implement and maintain commercially reasonable
+          administrative, technical and physical security measures designed
+          to protect Halcyon Data from unauthorised access, use or
+          disclosure.
+      - kind: acceptable_variant
+        label: Security exhibit incorporated by reference
+        zone: green
+        summary: The safeguard commitments are set out in a separate security exhibit or schedule incorporated into the Agreement, rather than in the body of the clause.
+        language: >
+          Vendor shall comply with the security requirements set out in
+          Schedule [X] (Security Requirements), which forms part of this
+          Agreement and sets out the administrative, technical and physical
+          safeguards Vendor maintains to protect Halcyon Data, including
+          encryption, access control, personnel and incident response
+          requirements aligned with a recognised industry standard. Vendor
+          shall not materially decrease the safeguards described in that
+          Schedule during the Term.
+    parameters:
+      - key: security_program_standard
+        label: Standard the Vendor's security programme is aligned with
+        value_type: enum
+        direction: set_membership
+        preferred_value: named_recognised_standard
+        green_limit: [named_recognised_standard, described_without_named_standard]
+        yellow_limit: [general_commercially_reasonable]
+        allowed_values:
+          - named_recognised_standard
+          - described_without_named_standard
+          - general_commercially_reasonable
+          - none
+        extraction_hint: >
+          Use named_recognised_standard where the clause names ISO 27001,
+          SOC 2, NIST or an equivalent framework. Use
+          described_without_named_standard where specific safeguards such as
+          encryption and access control are listed but no external standard
+          is named. Use general_commercially_reasonable where the commitment
+          is a general phrase with no itemised safeguards. Use none where
+          there is no security commitment at all.
+    red_lines:
+      - key: security-no-commitment
+        description: Vendor makes no security commitment of any kind over Halcyon Data.
+        condition_type: parameter
+        condition: {parameter_key: security_program_standard, op: eq, value: none}
+        action: escalate
+        approver_role: security_lead
+        rationale: >
+          A Vendor with no security commitment that still hosts or processes
+          Halcyon Data cannot be reconciled with Halcyon's SOC 2 Type II, ISO
+          27001 and HITRUST r2 certifications, all of which require Halcyon
+          to assess the security of the vendors it uses.
+    objections:
+      - objection: We will not commit to a named certification; our programme evolves and we do not want to be locked into one framework.
+        their_rationale: The vendor's security team updates its controls continuously and does not want a contractual promise tied to a specific certification cycle.
+        response: >
+          We do not need you to be certified, only to describe the safeguards
+          you maintain so we can assess them, and to tell us if you materially
+          weaken them. We can accept a description of your controls without
+          naming a specific standard, provided you can also share your most
+          recent audit report or a completed security questionnaire so we can
+          see how they compare.
+        talking_points:
+          - Described-without-named-standard is still green; only the general commercially-reasonable wording needs the Security Lead.
+          - Ask for the audit report or questionnaire as the give-get for this concession.
+        recommended_position: {rule_key: security.security_program, rung: 1}
+        frequency: common
+        counterparty_profile: Fast-growing vendors without formal certification
+      - objection: Our standard terms only promise commercially reasonable security with no itemised list. Itemising controls in the contract exposes details we would rather not disclose.
+        their_rationale: The vendor is concerned that a detailed list of controls in a contract becomes discoverable and a roadmap for attackers if the contract is ever disclosed.
+        response: >
+          We understand the concern about disclosure, but a general promise
+          gives us nothing to measure if something goes wrong. We can accept a
+          general commercially reasonable standard only where you handle no
+          regulated personal data or PHI for us, and only with sign-off from
+          our security team; for anything involving PHI we need the itemised
+          categories of safeguard, even without naming your certification.
+        talking_points:
+          - The general commercially-reasonable rung is the floor and needs Security Lead approval.
+          - Confirm the data sensitivity for this deal before offering this rung.
+        recommended_position: {rule_key: security.security_program, rung: 2}
+        frequency: occasional
+        counterparty_profile: Security-conscious vendors concerned about disclosure
+    dependencies:
+      - related_rule_key: breach_notification.notification_timeline
+        relation: read_with
+        note: The security programme sets the baseline safeguards; a failure of those safeguards is what triggers the breach notification duty.
+      - related_rule_key: subprocessors.subprocessor_changes
+        relation: trade_against
+        note: A Vendor with a weaker security programme should face tighter subcontractor notice and flow-down requirements, not looser ones.
+    test_cases:
+      - name: Written programme aligned with ISO 27001 or SOC 2
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Vendor maintains a written information security program with
+          administrative, technical and physical safeguards appropriate to
+          the data involved, aligned with ISO/IEC 27001 and SOC 2, covering
+          access control, encryption at rest and in transit, personnel
+          security and incident response, and will not materially decrease
+          the program's overall security during the term.
+      - name: Security exhibit incorporated by reference
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Vendor's security obligations are set out in Exhibit B, which lists
+          the administrative, technical and physical safeguards Vendor
+          maintains, aligned with a recognized industry framework, and which
+          Vendor may not weaken in any material respect during the term.
+      - name: Itemised safeguards without a named standard
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          Vendor will maintain administrative, technical and physical
+          safeguards appropriate to the sensitivity of the data, including
+          access controls, encryption and incident response procedures
+          consistent with standard industry practice, and will not materially
+          weaken these safeguards during the term.
+      - name: General commercially reasonable security only
+        context: {data_sensitivity: personal_data}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Vendor will use commercially reasonable security measures designed
+          to protect Customer Data from unauthorized access or disclosure.
+      - name: Safeguards promised only "where practicable"
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Vendor will implement reasonable security measures where
+          practicable, having regard to the cost of implementation and the
+          nature of the data involved, and may adjust its security program at
+          its discretion.
+      - name: No security commitment at all
+        expected_outcome: red_line
+        expected_red_line_key: security-no-commitment
+        expected_zone: red
+        sample_text: >
+          This Agreement does not require Vendor to maintain any particular
+          level of security, and Vendor makes no representation regarding the
+          security of its systems or the data processed through them.
+      - name: Trap - no named certification but a detailed, itemised programme
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Although Vendor does not hold a particular third-party
+          certification, it maintains a written security program covering
+          access control, encryption of data at rest and in transit,
+          background-checked personnel, vulnerability scanning and a tested
+          incident response plan appropriate to the sensitivity of Halcyon
+          Data, and will not materially decrease these safeguards.
+
+  # ------------------------------------------------------------------------
+  - rule_key: breach_notification.notification_timeline
+    title: Vendor breach notification timeline
+    required: true
+    risk_weight: 9
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Vendor notifies Halcyon within 48 hours of discovering a suspected or
+      confirmed Security Incident affecting Halcyon Data, so that Halcyon can
+      meet its own, shorter-fused duties to its customers and regulators.
+    risk_rationale: >
+      Halcyon is a HIPAA business associate for about 310 hospital and
+      physician-group customers and must notify those Covered Entities
+      without unreasonable delay, and in HIPAA's own breach notification rule
+      the clock for the Covered Entity's duty to individuals and to HHS runs
+      from the business associate's discovery, not from the point Halcyon
+      itself learns of it. A Vendor that waits 5 or 10 days to tell Halcyon
+      about an incident eats directly into the window Halcyon has to meet
+      those downstream duties, so the Vendor's notice period has to be
+      shorter than what Halcyon promises its own customers, not the same.
+    detection_guidance: >
+      Look for "notify", "inform" or "report" paired with a stated number of
+      hours or days and a trigger of "discovery", "becoming aware",
+      "suspected or actual" or "confirmed". Record both the period, in hours,
+      and whether the trigger is suspicion/discovery or confirmation after
+      investigation; a trigger on confirmation alone, with no separate
+      obligation on suspicion, should be treated as a weaker commitment than
+      the stated hours suggest. Absence of any notification timeline in an
+      agreement under which Vendor processes Halcyon Data, especially PHI, is
+      a missing mandatory term.
+    source_ref: 45 C.F.R. SS164.410 (business associate's duty to notify the covered entity); Halcyon Vendor Risk Policy VR-02
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-09
+    positions:
+      - kind: preferred
+        rung: 0
+        label: 48 hours from discovery of a suspected or confirmed incident
+        zone: green
+        summary: Vendor notifies Halcyon within 48 hours of becoming aware of a suspected or confirmed Security Incident.
+        language: >
+          Vendor shall notify Halcyon without undue delay, and in any event
+          within forty-eight (48) hours after becoming aware of a suspected or
+          confirmed Security Incident affecting Halcyon Data, by email to the
+          address designated by Halcyon and by telephone to Halcyon's security
+          contact. The notice shall describe the nature of the incident, the
+          categories and approximate number of individuals and records
+          affected, and the steps Vendor has taken or will take in response,
+          to the extent then known, and Vendor shall supplement the notice
+          as further information becomes available.
+      - kind: fallback
+        rung: 1
+        label: 72 hours from discovery
+        zone: green
+        summary: The same trigger on discovery of a suspected or confirmed incident, with the period extended to 72 hours.
+        give_get: Ask for an interim notice within 24 hours even if the full notice follows at 72 hours.
+        language: >
+          Vendor shall notify Halcyon without undue delay, and in any event
+          within seventy-two (72) hours after becoming aware of a suspected or
+          confirmed Security Incident affecting Halcyon Data, describing the
+          nature of the incident and the steps taken or planned in response,
+          to the extent then known.
+      - kind: fallback
+        rung: 2
+        label: Over 72 hours, or notice on confirmation only
+        zone: yellow
+        approver_role: security_lead
+        conditions: {data_sensitivity: [none, personal_data]}
+        give_get: >
+          Require a shorter period, or notice on suspicion rather than
+          confirmation, for any Vendor that will process PHI in the future,
+          and require interim verbal notice as soon as the incident is
+          suspected.
+        internal_note: >
+          Do not offer this rung for a Vendor in scope for PHI; escalate to
+          privacy_counsel instead, since the 60-day HIPAA clock to Covered
+          Entities leaves little room for a slow subcontractor.
+        summary: Notice within a longer period, such as 5 business days, or a trigger limited to confirmation after investigation rather than suspicion.
+        language: >
+          Vendor shall notify Halcyon within five (5) business days after
+          confirming that a Security Incident has affected Halcyon Data,
+          describing the nature of the incident and the remedial steps taken.
+      - kind: acceptable_variant
+        label: As-soon-as-practicable wording with a 48-hour outer limit
+        zone: green
+        summary: Counterparty-style wording promising notice as soon as reasonably practicable, with a stated outer limit of 48 hours that preserves the same practical result.
+        language: >
+          Vendor shall notify Halcyon as soon as reasonably practicable, and
+          in any event no later than forty-eight (48) hours, after it first
+          suspects or confirms that a Security Incident has affected Halcyon
+          Data, and shall provide such information about the incident as is
+          then available, supplementing it promptly as more becomes known.
+    parameters:
+      - key: breach_notice_hours
+        label: Hours to notify Halcyon of a suspected or confirmed Security Incident
+        value_type: number
+        unit: hours
+        direction: lower_is_better
+        preferred_value: 48
+        green_limit: 72
+        yellow_limit: 120
+        extraction_hint: >
+          Convert a stated number of days to hours. Where the trigger is
+          suspicion or discovery, use the stated period directly. Where the
+          trigger is confirmation only, after an internal investigation, add
+          the clause's own investigation period if stated, or otherwise treat
+          the period as the yellow limit regardless of the number stated,
+          since confirmation-only notice is materially slower than the number
+          suggests.
+      - key: breach_notice_trigger
+        label: Event that starts the notice clock
+        value_type: enum
+        direction: set_membership
+        preferred_value: suspected_or_discovered
+        green_limit: [suspected_or_discovered]
+        yellow_limit: [confirmed_only]
+        allowed_values:
+          - suspected_or_discovered
+          - confirmed_only
+          - no_trigger_stated
+        extraction_hint: >
+          Use suspected_or_discovered where the clock starts on becoming
+          aware of a suspected incident. Use confirmed_only where notice is
+          due only once Vendor has confirmed the incident through its own
+          investigation. Use no_trigger_stated where there is no notification
+          clause at all.
+    red_lines:
+      - key: breach-notice-no-commitment
+        description: Vendor gives no stated time limit for notifying Halcyon of a Security Incident.
+        condition_type: parameter
+        condition: {parameter_key: breach_notice_trigger, op: eq, value: no_trigger_stated}
+        action: block
+        rationale: >
+          Halcyon's HIPAA breach notification duty to Covered Entities and to
+          HHS runs on a 60-day clock from a business associate's discovery of
+          a breach. A Vendor with no notice commitment can consume that
+          entire window before Halcyon even learns an incident occurred,
+          leaving Halcyon unable to meet its own regulatory deadline.
+      - key: breach-notice-over-120-hours
+        description: Vendor's notice period is longer than 120 hours (5 days) from discovery, or is conditioned on completing a lengthy internal investigation first.
+        condition_type: parameter
+        condition: {parameter_key: breach_notice_hours, op: gt, value: 120}
+        action: escalate
+        approver_role: privacy_counsel
+        rationale: >
+          Beyond five days, the time remaining for Halcyon to investigate,
+          assess and notify its own customers within their contractual and
+          HIPAA deadlines becomes too short to manage reliably, so the
+          Privacy Counsel must weigh the specific Vendor's role and data
+          volume before accepting it.
+    objections:
+      - objection: Our standard terms give 30 days to notify, consistent with most of our other customers.
+        their_rationale: The vendor's incident response process includes a full internal investigation before any external notice goes out, which it says takes about a month.
+        response: >
+          Thirty days is far outside what we can work with. As a HIPAA
+          business associate we are on a 60-day clock to notify our own
+          customers and, through them, their patients and the Department of
+          Health and Human Services, and that clock starts when you discover
+          the incident, not when you tell us about it. We need notice of a
+          suspected incident within 48 hours, or at most 72, with
+          supplementary updates as your investigation continues; the
+          investigation does not need to be finished before you tell us.
+        talking_points:
+          - 72 hours on suspicion is still green; 30 days is a global red line.
+          - Point out that notice need not wait for the investigation to finish; it can be supplemented later.
+        recommended_position: {rule_key: breach_notification.notification_timeline, rung: 1}
+        frequency: common
+        counterparty_profile: Large platform vendors with a formal incident response process
+      - objection: We will notify once we have confirmed an incident actually occurred; we will not send notices based on mere suspicion that later turns out to be nothing.
+        their_rationale: The vendor wants to avoid alarming customers, or triggering their own downstream notice obligations, over false positives.
+        response: >
+          We understand the concern about false alarms, but confirmation-only
+          notice can silently use up days or weeks of the window we have to
+          meet our own HIPAA deadline. We can agree that an initial notice on
+          suspicion may be preliminary and need not be public or formal, as
+          long as it starts the clock and is followed by updates as you learn
+          more.
+        talking_points:
+          - A trigger on confirmation only is treated as yellow even if the stated number of hours looks short.
+          - Offer a lightweight, informal first notice as the compromise rather than giving up the suspicion trigger.
+        recommended_position: {rule_key: breach_notification.notification_timeline, rung: 0}
+        frequency: common
+        counterparty_profile: Vendors wary of over-notifying
+    dependencies:
+      - related_rule_key: indemnification.data_breach_indemnity
+        relation: read_with
+        note: The breach indemnity pays for the response that this notice triggers; the two rules should be read and negotiated together.
+      - related_rule_key: subprocessors.subprocessor_changes
+        relation: read_with
+        note: A sub-subcontractor's incident must flow up to Vendor and then to Halcyon on the same timeline as a Vendor's own incident.
+    test_cases:
+      - name: 48 hours from discovery of a suspected incident
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Vendor will tell Halcyon about any suspected or actual security
+          incident affecting Halcyon Data within 48 hours of becoming aware of
+          it, describing what is known so far and updating Halcyon as the
+          investigation continues.
+      - name: As soon as reasonably practicable, no later than 48 hours
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Vendor will notify Halcyon as soon as reasonably practicable after
+          first suspecting or confirming a security incident affecting
+          Halcyon Data, and in no case later than 48 hours, providing the
+          information then available and supplementing it as more is learned.
+      - name: 72 hours from discovery
+        context: {data_sensitivity: phi, regimes: [hipaa]}
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          Vendor shall give notice of a suspected or confirmed security
+          incident involving Halcyon Data within 72 hours of becoming aware of
+          it, together with such details as are then known.
+      - name: Five business days after confirmation, no PHI involved
+        context: {data_sensitivity: personal_data}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Vendor will notify Halcyon within five business days after it has
+          confirmed, following its internal investigation, that a security
+          incident affecting Customer Data has occurred.
+      - name: 96 hours, triggered on confirmation after investigation
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Vendor will complete its internal investigation and, once it has
+          confirmed an incident has occurred, will notify Halcyon within 96
+          hours of that confirmation.
+      - name: 30-day notice period
+        expected_outcome: red_line
+        expected_red_line_key: breach-notice-over-120-hours
+        expected_zone: red
+        sample_text: >
+          Vendor will notify Halcyon of a confirmed security incident
+          affecting Halcyon Data within thirty (30) days of confirming the
+          incident.
+      - name: No breach notification clause at all
+        expected_outcome: red_line
+        expected_red_line_key: breach-notice-no-commitment
+        expected_zone: red
+        sample_text: >
+          This Agreement does not include any requirement for Vendor to
+          notify Halcyon in the event of a security incident, data breach or
+          unauthorized access to Halcyon Data.
+      - name: Trap - "without undue delay" paired with a firm 48-hour cap
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Vendor shall notify Halcyon without undue delay after becoming
+          aware of a suspected or confirmed security incident affecting
+          Halcyon Data, and in any event no later than 48 hours after
+          becoming so aware, regardless of whether its internal investigation
+          has concluded.
+
+  # ------------------------------------------------------------------------
+  - rule_key: subprocessors.subprocessor_changes
+    title: Vendor subcontractor changes and HIPAA flow-down
+    required: true
+    risk_weight: 8
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Vendor gives Halcyon advance notice and a right to object before
+      engaging or replacing any subcontractor that will process Halcyon
+      Data, and where the subcontractor will handle PHI, Vendor's agreement
+      with that subcontractor imposes privacy and security obligations
+      equivalent to those Halcyon owes under its own business associate
+      agreements.
+    risk_rationale: >
+      Halcyon is a business associate under HIPAA for about 310 hospital and
+      physician-group customers, and when a Vendor subcontracts part of the
+      Services to a sub-subcontractor that touches PHI, that party becomes a
+      subcontractor within the meaning of 45 C.F.R. SS160.103 one further
+      step removed from Halcyon. Halcyon's own business associate agreements
+      require it to ensure that every subcontractor handling PHI agrees to
+      restrictions and conditions at least as protective as those in the
+      agreement above it; a Vendor that can swap subcontractors silently, or
+      that imposes no equivalent obligations on them, breaks that chain and
+      puts Halcyon in breach of commitments to customers worth up to the
+      $2.4M of its largest contract.
+    detection_guidance: >
+      Look for "notify Halcyon at least [number] days before", "updating the
+      list of subcontractors", "object on reasonable grounds", "flow down"
+      or "impose obligations no less protective than" and "subcontractor" or
+      "subprocessor". Record the length of the notice period and whether
+      Vendor commits to flow down privacy and security obligations to
+      subcontractors that handle PHI. Absence of any subcontractor notice or
+      flow-down commitment in an agreement under which Vendor may
+      subcontract processing of Halcyon Data is a missing clause.
+    source_ref: 45 C.F.R. SS164.308(b) and SS164.502(e) (business associate subcontracts); Halcyon Vendor Risk Policy VR-08
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-07
+    positions:
+      - kind: preferred
+        rung: 0
+        label: 30 days' notice, right to object, full HIPAA flow-down
+        zone: green
+        summary: Vendor gives 30 days' notice and a right to object before using a new subcontractor, and flows down HIPAA-equivalent terms to any subcontractor that will handle PHI.
+        language: >
+          Vendor shall not engage a new subcontractor to process Halcyon Data,
+          or replace an existing one, without giving Halcyon at least thirty
+          (30) days' prior written notice. Halcyon may object on reasonable
+          grounds relating to data protection or security within that period,
+          in which case the parties shall work in good faith to resolve the
+          objection, failing which Halcyon may terminate the affected
+          Services without penalty. Before any subcontractor creates,
+          receives, maintains or transmits protected health information on
+          Vendor's behalf, Vendor shall enter into a written agreement with
+          that subcontractor imposing privacy, security and breach
+          notification obligations no less protective of the protected
+          health information than those imposed on Vendor under this
+          Agreement, consistent with 45 C.F.R. SS164.308(b) and SS164.502(e).
+      - kind: fallback
+        rung: 1
+        label: 15 days' notice, right to object, PHI flow-down unchanged
+        zone: green
+        summary: Notice period shortened to 15 days; the objection right and the PHI flow-down obligation are unchanged.
+        give_get: Ask Vendor to maintain a current list of subcontractors that Halcyon may request at any time.
+        language: >
+          Vendor shall give Halcyon at least fifteen (15) days' prior written
+          notice before engaging or replacing a subcontractor that will
+          process Halcyon Data, and Halcyon may object on reasonable grounds
+          relating to data protection or security within that period. Before
+          any subcontractor processes protected health information on
+          Vendor's behalf, Vendor shall impose on that subcontractor privacy,
+          security and breach notification obligations no less protective
+          than those imposed on Vendor under this Agreement.
+      - kind: fallback
+        rung: 2
+        label: Notice without a right to object, PHI flow-down unchanged
+        zone: yellow
+        approver_role: privacy_counsel
+        conditions: {data_sensitivity: [personal_data]}
+        give_get: >
+          Require that the PHI flow-down obligation survives even where the
+          general objection right is dropped, and limit this rung to deals
+          with no PHI exposure today.
+        internal_note: >
+          Never drop the PHI flow-down commitment itself, even at this rung;
+          only the general objection right is negotiable down.
+        summary: Vendor notifies Halcyon of a new subcontractor without giving a right to object, while the PHI flow-down commitment is preserved.
+        language: >
+          Vendor shall notify Halcyon when it engages or replaces a
+          subcontractor that will process Halcyon Data, but Halcyon's rights
+          are limited to raising concerns rather than objecting formally.
+          Before any subcontractor processes protected health information on
+          Vendor's behalf, Vendor shall impose on that subcontractor privacy,
+          security and breach notification obligations no less protective
+          than those imposed on Vendor under this Agreement.
+      - kind: acceptable_variant
+        label: General authorisation with a published subcontractor list
+        zone: green
+        summary: Vendor publishes and updates a list of authorised subcontractors and gives notice of additions through that list, with the same objection right and PHI flow-down.
+        language: >
+          Vendor shall maintain and make available to Halcyon a current list
+          of its subcontractors that process Halcyon Data. Vendor shall
+          update the list and notify Halcyon at least thirty (30) days before
+          a new subcontractor is added, and Halcyon may object on reasonable
+          grounds relating to data protection or security. Any subcontractor
+          that will handle protected health information shall be bound by
+          privacy, security and breach notification obligations no less
+          protective than those Vendor owes to Halcyon under this Agreement.
+    parameters:
+      - key: subcontractor_notice_days
+        label: Days of advance notice before a new subcontractor processes Halcyon Data
+        value_type: number
+        unit: days
+        direction: higher_is_better
+        preferred_value: 30
+        green_limit: 15
+        yellow_limit: 0
+        extraction_hint: >
+          Record the stated notice period in days. Where notice is given only
+          through a published list with no minimum lead time stated, record
+          0. Where there is no subcontractor notice provision at all, also
+          record 0 and rely on the flow-down parameter to distinguish the two
+          cases.
+      - key: phi_subcontractor_flow_down
+        label: PHI-equivalent obligations flow down to subcontractors
+        value_type: boolean
+        direction: exact
+        preferred_value: true
+        extraction_hint: >
+          True where the agreement requires Vendor to impose privacy,
+          security and breach notification obligations on any subcontractor
+          that handles protected health information, at a level no less
+          protective than Vendor's own obligations. False where no such
+          flow-down commitment is stated, even if general subcontractor
+          notice is given.
+    red_lines:
+      - key: subcontractor-no-phi-flow-down
+        description: Vendor has no obligation to flow down HIPAA-equivalent privacy and security terms to a subcontractor that will handle PHI.
+        condition_type: parameter
+        condition: {parameter_key: phi_subcontractor_flow_down, op: eq, value: false}
+        action: block
+        rationale: >
+          Halcyon's business associate agreements with its Covered Entity
+          customers require it to ensure that every subcontractor handling
+          PHI, however many layers removed, is bound by terms at least as
+          protective as Halcyon's own. A Vendor that will not make the same
+          commitment to its own subcontractors breaks that chain and exposes
+          Halcyon to a finding of noncompliance under 45 C.F.R. SS164.308(b).
+      - key: subcontractor-no-notice
+        description: Vendor may engage or replace a subcontractor that processes Halcyon Data with no notice to Halcyon at all.
+        condition_type: semantic
+        condition:
+          test: >
+            The agreement allows Vendor to add, remove or replace a
+            subcontractor that processes Halcyon Data without telling Halcyon
+            before or after the change, and Halcyon has no right to see who
+            is processing its data. Answer no if Vendor must give notice of
+            some kind, even without a right to object, or must publish and
+            update a subcontractor list Halcyon can inspect.
+        action: escalate
+        approver_role: privacy_counsel
+        rationale: >
+          Halcyon cannot assess or report on where its data, including PHI,
+          is processed if it does not know who is processing it. Some notice
+          mechanism is the minimum needed to keep Halcyon's own accountability
+          obligations workable.
+    objections:
+      - objection: We cannot give 30 days' notice of every subcontractor change; our infrastructure vendors change on short notice and we have hundreds of customers to notify.
+        their_rationale: The vendor runs a shared platform and treats subcontractor changes as an operational matter rather than a contract event requiring individual notice.
+        response: >
+          We can move to 15 days' notice, or to a published and regularly
+          updated subcontractor list in place of individual notices, provided
+          we keep the right to object on data protection grounds and, where
+          protected health information is involved, you still commit to flow
+          down equivalent privacy and security terms to that subcontractor.
+          The flow-down commitment is not something we can trade away.
+        talking_points:
+          - 15 days or a published list is still green; the PHI flow-down commitment stays at every rung.
+          - Offer the published-list variant before shortening the notice period further.
+        recommended_position: {rule_key: subprocessors.subprocessor_changes, rung: 1}
+        frequency: common
+        counterparty_profile: Large infrastructure and platform vendors
+      - objection: We do not re-paper every subcontract when a new customer's data might flow through it; our subcontracts already meet our own security standard.
+        their_rationale: The vendor applies one internal security standard to all subcontractors and does not negotiate bespoke flow-down language per customer.
+        response: >
+          We are not asking you to rewrite every subcontract for us
+          specifically, only to confirm that where protected health
+          information is involved, the obligations you impose on that
+          subcontractor are no less protective than what you have promised
+          us. If your standard subcontract already does that, point us to the
+          relevant clause and we can rely on your existing paper.
+        talking_points:
+          - The flow-down standard is "no less protective," not identical wording.
+          - Ask for the relevant clause of the vendor's standard subcontract as evidence rather than insisting on new drafting.
+        recommended_position: {rule_key: subprocessors.subprocessor_changes, rung: 0}
+        frequency: occasional
+        counterparty_profile: Vendors with an established subcontractor base
+    dependencies:
+      - related_rule_key: confidentiality.standard_of_care
+        relation: read_with
+        note: The requirement that subcontractors are bound by matching confidentiality terms overlaps with this rule's general notice and objection mechanics.
+      - related_rule_key: breach_notification.notification_timeline
+        relation: read_with
+        note: An incident at a sub-subcontractor must flow up to Vendor and then to Halcyon on the same timeline as a Vendor incident.
+    test_cases:
+      - name: 30 days' notice, objection right, full PHI flow-down
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Vendor will give Halcyon 30 days' written notice before using a new
+          subcontractor to process Halcyon Data, and Halcyon may object on
+          reasonable data protection grounds within that period. Where a
+          subcontractor will handle protected health information, Vendor will
+          bind it to privacy, security and breach notification terms no less
+          protective than Vendor's own obligations under this Agreement.
+      - name: Published subcontractor list variant
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Vendor maintains and updates a public list of its subcontractors
+          that process Halcyon Data, giving Halcyon at least 30 days' notice
+          before adding a new one, with a right to object on data protection
+          grounds. Any subcontractor handling PHI is bound by terms no less
+          protective than those in this Agreement.
+      - name: 15 days' notice with PHI flow-down preserved
+        context: {data_sensitivity: phi, regimes: [hipaa]}
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          Vendor will give 15 days' notice before engaging a new
+          subcontractor to process Halcyon Data and Halcyon may object on
+          data protection or security grounds. Subcontractors that will
+          process protected health information must be bound by privacy and
+          security terms equivalent to Vendor's own obligations here.
+      - name: Notice only, no objection right, PHI flow-down preserved
+        context: {data_sensitivity: personal_data}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Vendor will tell Halcyon when a new subcontractor will process
+          Halcyon Data, though Halcyon's role is limited to raising
+          questions rather than formally objecting. Where protected health
+          information is involved, the subcontractor is bound by privacy and
+          security terms equivalent to those in this Agreement.
+      - name: Notice given but PHI flow-down obligation absent
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Vendor will give Halcyon 30 days' notice and a right to object
+          before using a new subcontractor to process Halcyon Data. Vendor's
+          agreements with its subcontractors are governed by Vendor's
+          standard subcontracting terms.
+      - name: No flow-down of HIPAA-equivalent terms to a PHI subcontractor
+        context: {data_sensitivity: phi, regimes: [hipaa]}
+        expected_outcome: red_line
+        expected_red_line_key: subcontractor-no-phi-flow-down
+        expected_zone: red
+        sample_text: >
+          Vendor may engage subcontractors to assist in providing the
+          Services, including subcontractors that will process protected
+          health information, on whatever terms Vendor considers
+          appropriate, and Vendor is not required to impose any particular
+          privacy or security obligation on them.
+      - name: Vendor may change subcontractors with no notice to Halcyon
+        expected_outcome: red_line
+        expected_red_line_key: subcontractor-no-notice
+        expected_zone: red
+        sample_text: >
+          Vendor may engage, replace or remove subcontractors that process
+          Halcyon Data at its sole discretion and is not required to notify
+          Halcyon of any such change.
+      - name: Trap - no fixed notice period but a working list Halcyon can always inspect
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Vendor does not commit to a fixed number of days' notice before
+          adding a subcontractor, but maintains a continuously updated list
+          of its subcontractors that Halcyon may inspect at any time, and
+          Halcyon may object on data protection grounds to any subcontractor
+          on that list. Subcontractors handling protected health information
+          are bound by privacy and security terms equivalent to this
+          Agreement.
+
+  # ------------------------------------------------------------------------
+  - rule_key: audit.customer_audit_rights
+    title: Halcyon's right to audit Vendor
+    required: true
+    risk_weight: 7
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Halcyon may obtain Vendor's current SOC 2 report or equivalent and,
+      failing that, audit Vendor's compliance with its security and data
+      protection obligations once a year on 30 days' notice.
+    risk_rationale: >
+      Halcyon answers to its own 310 customers, to their auditors and, for
+      PHI, to HHS, for the data a Vendor processes on its behalf, and its
+      SOC 2 Type II, ISO 27001 and HITRUST r2 certifications depend on
+      Halcyon being able to show it has verified its vendors' compliance.
+      Without an audit right, or a right to at least see the Vendor's own
+      compliance reports, Halcyon is relying entirely on the Vendor's word
+      when it tells a hospital customer that a subcontractor's safeguards
+      have been checked.
+    detection_guidance: >
+      Look for "audit", "inspect", "upon reasonable prior written notice",
+      "no more than once in any twelve-month period", "SOC 2 Type II report"
+      and "during normal business hours", from the perspective of the party
+      receiving the right rather than giving it. Check whether a third-party
+      report such as SOC 2 satisfies the right before an on-site audit is
+      required, and the frequency and notice period for any on-site audit.
+      Absence of any audit or reporting right in an agreement under which
+      Vendor processes Halcyon Data means Halcyon has no contractual way to
+      verify the Vendor's compliance.
+    source_ref: Halcyon Vendor Risk Policy VR-08 (vendor oversight); 45 C.F.R. SS164.308(b)
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-07
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Annual audit on 30 days' notice, SOC 2 report first
+        zone: green
+        summary: Vendor provides its current SOC 2 Type II report or equivalent on request and, if that does not resolve Halcyon's concerns, permits an audit once a year on 30 days' notice.
+        language: >
+          Vendor shall, upon written request and no more than once in any
+          twelve (12) month period, provide Halcyon with its then-current
+          SOC 2 Type II report or an equivalent independent audit report
+          covering the security of the Services. If that report does not
+          reasonably address Halcyon's concerns, or following a Security
+          Incident affecting Halcyon Data, Halcyon or its auditor may, on at
+          least thirty (30) days' prior written notice and no more than once
+          in any twelve (12) month period, audit Vendor's compliance with its
+          security and data protection obligations under this Agreement
+          during Vendor's normal business hours, subject to Vendor's
+          reasonable confidentiality and safety requirements.
+      - kind: fallback
+        rung: 1
+        label: Report-based assurance, on-site audit only after an incident
+        zone: green
+        summary: Halcyon receives the SOC 2 report or equivalent annually as a matter of course; an on-site audit right applies only following a confirmed Security Incident.
+        give_get: Ask for a completed security questionnaire in years when no SOC 2 report is available.
+        language: >
+          Vendor shall provide Halcyon with its then-current SOC 2 Type II
+          report or an equivalent independent audit report once a year upon
+          written request. Following a confirmed Security Incident affecting
+          Halcyon Data, Halcyon may, on at least thirty (30) days' prior
+          written notice, audit Vendor's compliance with its security
+          obligations under this Agreement.
+      - kind: fallback
+        rung: 2
+        label: Report or questionnaire only, no on-site audit right
+        zone: yellow
+        approver_role: security_lead
+        conditions: {data_sensitivity: [none, personal_data]}
+        give_get: Limit this rung to Vendors handling no PHI and require the questionnaire to be refreshed annually.
+        summary: Halcyon's verification right is limited to receiving a report or a completed security questionnaire, with no right to conduct its own audit.
+        language: >
+          Vendor shall, upon written request not more than once a year,
+          provide Halcyon with its then-current SOC 2 Type II report, an
+          equivalent independent audit report, or a completed security
+          questionnaire addressing Halcyon's reasonable data protection and
+          security questions.
+      - kind: acceptable_variant
+        label: Right to audit through a recognised industry assessment framework
+        zone: green
+        summary: Vendor satisfies the right through participation in a recognised shared-assessment or industry audit framework rather than a bespoke audit by Halcyon.
+        language: >
+          Vendor shall maintain participation in [a recognised shared
+          assessment or industry security framework] and shall make its
+          current assessment results available to Halcyon upon written
+          request, not more than once in any twelve (12) month period. If
+          those results do not reasonably address a specific concern raised
+          by Halcyon, Vendor shall permit Halcyon to audit the specific area
+          of concern on reasonable prior written notice.
+    parameters:
+      - key: audit_notice_days
+        label: Days of advance notice before an on-site or direct audit
+        value_type: number
+        unit: days
+        direction: lower_is_better
+        preferred_value: 30
+        green_limit: 30
+        yellow_limit: 60
+        extraction_hint: >
+          Record the notice period for an audit that Halcyon itself may
+          conduct, not the notice period for subcontractor changes. Where
+          only a third-party report is available and no audit right exists
+          at all, record this parameter as absent and rely on the audit
+          availability parameter instead.
+      - key: audit_right_availability
+        label: What Halcyon may use to verify Vendor's compliance
+        value_type: enum
+        direction: set_membership
+        preferred_value: report_plus_audit_right
+        green_limit: [report_plus_audit_right, report_annually_audit_after_incident]
+        yellow_limit: [report_or_questionnaire_only]
+        allowed_values:
+          - report_plus_audit_right
+          - report_annually_audit_after_incident
+          - report_or_questionnaire_only
+          - none
+        extraction_hint: >
+          Use report_plus_audit_right where Halcyon can both obtain a report
+          and conduct or commission its own audit on notice. Use
+          report_annually_audit_after_incident where the audit right is
+          limited to triggering after a confirmed incident. Use
+          report_or_questionnaire_only where Halcyon's only right is to
+          receive a report or questionnaire with no audit right at all. Use
+          none where Vendor gives no compliance verification right of any
+          kind.
+    red_lines:
+      - key: audit-vendor-refuses-all-verification
+        description: Vendor gives Halcyon no way at all to verify its compliance, including no report, no questionnaire and no audit right.
+        condition_type: parameter
+        condition: {parameter_key: audit_right_availability, op: eq, value: none}
+        action: block
+        rationale: >
+          Halcyon's HITRUST r2, SOC 2 Type II and ISO 27001 certifications,
+          and its business associate agreements with its customers, require
+          it to be able to show some basis for trusting a Vendor's
+          safeguards. A Vendor that will not share so much as a compliance
+          report cannot be given Halcyon Data, particularly PHI.
+    objections:
+      - objection: We cannot give every customer a bespoke on-site audit right; our SOC 2 report is the same assurance we give all our customers.
+        their_rationale: The vendor's multi-tenant environment cannot support individual physical audits without disrupting other customers, similar to Halcyon's own position when it sells to hospital systems.
+        response: >
+          We recognise that position, since we take the same approach with
+          our own customers. We can rely on your SOC 2 Type II report as the
+          primary form of assurance and limit our on-site audit right to
+          situations where the report does not address a specific concern, or
+          following a confirmed security incident involving our data.
+        talking_points:
+          - Report-based assurance with an incident trigger is still green.
+          - This mirrors the audit position Halcyon itself gives its own customers; cite it for consistency.
+        recommended_position: {rule_key: audit.customer_audit_rights, rung: 1}
+        frequency: common
+        counterparty_profile: Multi-tenant SaaS and platform vendors
+      - objection: We do not hold a SOC 2 report and cannot commit to obtaining one; we are too early-stage.
+        their_rationale: The vendor is a small or new company that has not yet invested in formal independent assurance.
+        response: >
+          Without an independent report, we need a completed security
+          questionnaire covering the areas our own certifications require us
+          to check, refreshed at least once a year, and we may need to revisit
+          this position if the relationship grows to involve protected
+          health information.
+        talking_points:
+          - Questionnaire-only needs Security Lead sign-off and should be limited to non-PHI deals.
+          - Set an expectation that a SOC 2 report becomes a condition of any future PHI work.
+        recommended_position: {rule_key: audit.customer_audit_rights, rung: 2}
+        frequency: occasional
+        counterparty_profile: Early-stage vendors
+    dependencies:
+      - related_rule_key: security.security_program
+        relation: read_with
+        note: The audit right is how Halcyon verifies the safeguards promised in the security programme rule; read the two together when assessing a Vendor.
+    test_cases:
+      - name: SOC 2 report plus an annual audit right on 30 days' notice
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Vendor will give Halcyon its current SOC 2 Type II report on
+          request. If that report does not resolve Halcyon's concerns, or
+          after a security incident affecting Halcyon Data, Halcyon may audit
+          Vendor's security and data protection compliance on 30 days'
+          written notice, no more than once a year, during normal business
+          hours.
+      - name: Shared assessment framework variant
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Vendor maintains current results under a recognized third-party
+          security assessment framework and will share them with Halcyon on
+          request once a year. Where those results do not address a specific
+          concern Halcyon raises, Vendor will allow Halcyon to audit that
+          specific area on reasonable notice.
+      - name: Annual report, on-site audit only after a confirmed incident
+        context: {data_sensitivity: phi}
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          Vendor will provide its SOC 2 Type II report annually on request.
+          Halcyon may audit Vendor's security practices on 30 days' notice
+          only after a confirmed security incident affecting Halcyon Data.
+      - name: Report or questionnaire only, no PHI involved
+        context: {data_sensitivity: personal_data}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Vendor will provide its SOC 2 report or, if unavailable, a
+          completed security questionnaire once a year upon written request.
+          No further audit right is given.
+      - name: Compliance report available only at Vendor's discretion
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Vendor may, at its sole discretion, share compliance information
+          with Halcyon from time to time. Halcyon has no contractual right to
+          request a report or to audit Vendor's practices.
+      - name: Vendor gives no report, questionnaire or audit right of any kind
+        expected_outcome: red_line
+        expected_red_line_key: audit-vendor-refuses-all-verification
+        expected_zone: red
+        sample_text: >
+          This Agreement does not require Vendor to provide any compliance
+          report, questionnaire response or audit right to Halcyon, and
+          Vendor's compliance with its security obligations is not subject to
+          verification by Halcyon.
+      - name: No audit clause at all
+        expected_outcome: missing
+        expected_zone: yellow
+        sample_text: ""
+      - name: Trap - no on-site audit right offered, but a current SOC 2 report is provided as of right
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Although this Agreement does not give Halcyon a right to conduct
+          its own on-site audit, Vendor will deliver its current SOC 2 Type
+          II report to Halcyon automatically each year without need for a
+          request, and will promptly answer any follow-up questions Halcyon
+          raises about it, and will permit an audit of the specific area of
+          concern on reasonable notice if the report does not resolve it.

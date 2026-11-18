@@ -2,7 +2,7 @@ import uuid
 
 from pgvector.sqlalchemy import Vector
 from sqlalchemy import ForeignKey, Index, Integer, Text
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
@@ -19,11 +19,22 @@ class Clause(Base):
         UUID(as_uuid=True), ForeignKey("contract.id", name="fk_clause_contract"), nullable=False
     )
     ordinal: Mapped[int] = mapped_column(Integer, nullable=False)
-    clause_type: Mapped[str] = mapped_column(Text, nullable=False, index=True)
+    # FK to `clause_family.key` added by migration 012 (task 1.3; plan
+    # section 4). `other` is a family, from migration 010, so any clause
+    # whose heading did not match a canonical type still resolves.
+    clause_type: Mapped[str] = mapped_column(
+        Text,
+        ForeignKey("clause_family.key", name="fk_clause_clause_family"),
+        nullable=False,
+        index=True,
+    )
     heading_text: Mapped[str | None] = mapped_column(Text, nullable=True)
     text: Mapped[str] = mapped_column(Text, nullable=False)
     char_start: Mapped[int] = mapped_column(Integer, nullable=False)
     char_end: Mapped[int] = mapped_column(Integer, nullable=False)
+    # New column (task 1.3; plan section 4): issues detected inside the
+    # clause, keyed by `clause_issue.key`. Nullable; nothing populates it yet.
+    issue_keys: Mapped[list | None] = mapped_column(JSONB, nullable=True)
 
 
 class ClauseEmbedding(Base):

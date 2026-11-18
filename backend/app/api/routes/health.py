@@ -12,6 +12,10 @@ class HealthResponse(BaseModel):
     db: bool
     embedding_model: bool
     storage: bool
+    # Project partitioning: the Postgres schema this project owns on the
+    # shared database, and whether it exists there.
+    db_schema: str
+    db_schema_exists: bool
 
 
 @router.get("/health", response_model=HealthResponse)
@@ -19,12 +23,23 @@ async def health() -> HealthResponse:
     db_ok = False
     embedding_ok = False
     storage_ok = False
+    db_schema = ""
+    schema_ok = False
+
+    try:
+        from app.core.config import get_settings
+        db_schema = get_settings().db_schema
+    except Exception:
+        pass
 
     try:
         from app.db.base import get_session_factory
         async with get_session_factory()() as session:
             await session.execute(text("SELECT 1"))
             db_ok = True
+            if db_schema:
+                from app.core.namespace import schema_exists
+                schema_ok = await schema_exists(session, db_schema)
     except Exception:
         pass
 
@@ -50,4 +65,6 @@ async def health() -> HealthResponse:
         db=db_ok,
         embedding_model=embedding_ok,
         storage=storage_ok,
+        db_schema=db_schema,
+        db_schema_exists=schema_ok,
     )

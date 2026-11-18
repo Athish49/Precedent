@@ -1,0 +1,7 @@
+# Failing fixture: edits applied to a copy of fixtures/valid by test_playbook_models.py.
+description: 'Cross-check: every role key exists in authority.yaml.'
+file: playbooks/saas_msa_vendor/risk.yaml
+edits:
+- path: [rules, 0, positions, 1, approver_role]
+  set: head_of_legal
+expect: {code: role.unknown, message: head_of_legal, rule_key: limitation_of_liability.cap_amount}

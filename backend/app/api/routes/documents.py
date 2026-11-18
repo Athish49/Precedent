@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import uuid
 from collections.abc import AsyncIterator
 from datetime import date, datetime
@@ -16,6 +17,11 @@ from app.api.errors import AppError
 from app.db.base import get_session_factory
 from app.db.models.clause import Clause
 from app.db.models.contract import Contract, ContractMetadata
+from app.services.document_processing.context_capture import (
+    validate_contract_type,
+    validate_context,
+    validate_party_role,
+)
 from app.services.document_processing.service import ProcessedContract, process
 
 router = APIRouter(tags=["documents"])
@@ -85,9 +91,21 @@ class CanonicalTextResponse(BaseModel):
 async def upload_document(
     file: UploadFile,
     paper_origin: str = Form(...),
+    contract_type: str | None = Form(default=None),
+    party_role: str | None = Form(default=None),
+    context: str | None = Form(default=None),
     session: AsyncSession = Depends(_get_session),
 ) -> ProcessedContract:
-    """Upload and process a contract document."""
+    """Upload and process a contract document.
+
+    ``contract_type``, ``party_role`` and ``context`` are optional (task
+    4.1, item 1). ``context`` is a JSON object as a string, e.g.
+    ``'{"region": "us", "deal_value": 250000}'``. When supplied,
+    ``contract_type`` is validated against ``agreement_type`` and each
+    recognised key in ``context`` is validated against ``context_dimension``
+    — both checks are skipped gracefully where the relevant lookup table has
+    no rows (``playbook_implementation.md`` section 4.1, item 6).
+    """
     if paper_origin not in _VALID_PAPER_ORIGINS:
         raise AppError(
             400,
@@ -95,9 +113,35 @@ async def upload_document(
             f"paper_origin must be one of {sorted(_VALID_PAPER_ORIGINS)!r}, got {paper_origin!r}",
         )
 
+    if party_role is not None:
+        validate_party_role(party_role)
+
+    context_dict: dict | None = None
+    if context is not None:
+        try:
+            context_dict = json.loads(context)
+        except json.JSONDecodeError as exc:
+            raise AppError(400, "invalid_context", f"context is not valid JSON: {exc}") from exc
+        if not isinstance(context_dict, dict):
+            raise AppError(400, "invalid_context", "context must be a JSON object")
+
+    if contract_type is not None:
+        await validate_contract_type(session, contract_type)
+
+    if context_dict:
+        await validate_context(session, context_dict)
+
     file_bytes = await file.read()
     try:
-        result = await process(file_bytes, file.filename or "upload", paper_origin, session)
+        result = await process(
+            file_bytes,
+            file.filename or "upload",
+            paper_origin,
+            session,
+            contract_type=contract_type,
+            party_role=party_role,
+            context=context_dict,
+        )
     except ValueError as exc:
         raise AppError(400, "unsupported_format", str(exc)) from exc
 

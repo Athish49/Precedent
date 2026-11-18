@@ -93,6 +93,20 @@ async def list_contracts(
     return items, total
 
 
+async def update_contract(session: AsyncSession, contract_id: uuid.UUID, **kwargs: object) -> Contract | None:
+    """Partially update a Contract row (task 4.1, item 5: PATCH
+    /api/repository/contracts/{id}). Returns None if the contract does not
+    exist; does not commit (caller's responsibility).
+    """
+    contract = await get_contract(session, contract_id)
+    if contract is None:
+        return None
+    for field, value in kwargs.items():
+        setattr(contract, field, value)
+    await session.flush()
+    return contract
+
+
 async def upsert_party(
     session: AsyncSession, normalized_name: str, display_name: str
 ) -> Party:

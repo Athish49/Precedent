@@ -1,0 +1,701 @@
+summary:
+  total_findings: 102
+  red: 16
+  yellow: 22
+  green: 64
+  contracts: 12
+contracts:
+- id: 1
+  file: 01_saas_msa_own_clean
+  contract_type: saas_msa
+  counterparty: Meridian Physician Partners, LLC
+  profile: SaaS MSA, Halcyon's own paper, clean; expected to pass green throughout.
+  context:
+    party_role: vendor
+    paper_origin: own
+    region: us
+    regimes: []
+    deal_value_band: mid
+    counterparty_tier: tier_2
+    data_sensitivity: personal_data
+  findings:
+  - rule_key: limitation_of_liability.cap_amount
+    playbook: saas_msa_vendor
+    zone: green
+    position: preferred
+  - rule_key: payment.payment_terms
+    playbook: saas_msa_vendor
+    zone: green
+    position: preferred
+  - rule_key: term.initial_term
+    playbook: saas_msa_vendor
+    zone: green
+    position: preferred
+  - rule_key: service_levels.uptime_commitment
+    playbook: saas_msa_vendor
+    zone: green
+    position: preferred
+  - rule_key: audit.customer_audit_rights
+    playbook: saas_msa_vendor
+    zone: green
+    position: preferred
+  - rule_key: confidentiality.standard_of_care
+    playbook: saas_msa_vendor
+    zone: green
+    position: preferred
+  - rule_key: governing_law.choice_of_law
+    playbook: baseline
+    zone: green
+    position: preferred
+- id: 2
+  file: 02_saas_msa_own_midmarket_yellow
+  contract_type: saas_msa
+  counterparty: Lakeshore Regional Health Group
+  profile: SaaS MSA, Halcyon's own paper, marked up by a mid-market customer; four yellow deviations.
+  context:
+    party_role: vendor
+    paper_origin: own
+    region: us
+    regimes: []
+    deal_value_band: mid
+    counterparty_tier: tier_2
+    data_sensitivity: personal_data
+  findings:
+  - rule_key: payment.payment_terms
+    playbook: saas_msa_vendor
+    zone: yellow
+    position: fallback_2
+    approver_role: deal_desk
+    note: Net 60, clause 3.1 - deviation 1 of 4
+  - rule_key: payment.late_fees
+    playbook: saas_msa_vendor
+    zone: yellow
+    position: fallback_2
+    approver_role: deal_desk
+    note: no late fee, clause 8.4 second paragraph - deviation 4 of 4
+  - rule_key: termination.for_cause_cure_period
+    playbook: saas_msa_vendor
+    zone: yellow
+    position: fallback_2
+    approver_role: commercial_counsel
+    note: 15-day cure period, clause 4.3 - deviation 2 of 4
+  - rule_key: subprocessors.subprocessor_changes
+    playbook: saas_msa_vendor
+    zone: yellow
+    position: fallback_1
+    approver_role: privacy_counsel
+    note: 45 days' notice, clause 8.4 first paragraph - deviation 3 of 4
+  - rule_key: limitation_of_liability.cap_amount
+    playbook: saas_msa_vendor
+    zone: green
+    position: preferred
+  - rule_key: term.initial_term
+    playbook: saas_msa_vendor
+    zone: green
+    position: preferred
+  - rule_key: governing_law.choice_of_law
+    playbook: baseline
+    zone: green
+    position: preferred
+- id: 3
+  file: 03_saas_msa_hipaa_counterparty_hospital_red
+  contract_type: saas_msa
+  counterparty: Castleview Memorial Hospital System
+  profile: SaaS MSA + HIPAA overlay, hospital's own paper; red on liability and audit.
+  context:
+    party_role: vendor
+    paper_origin: counterparty
+    region: us
+    regimes:
+    - hipaa
+    deal_value_band: enterprise
+    counterparty_tier: tier_1
+    data_sensitivity: phi
+  findings:
+  - rule_key: limitation_of_liability.cap_amount
+    playbook: saas_msa_vendor
+    zone: red
+    red_line_key: global-uncapped-liability
+    scope: global
+    note: clause 6.1 states liability is unlimited
+  - rule_key: limitation_of_liability.consequential_damages_exclusion
+    playbook: saas_msa_vendor
+    zone: red
+    red_line_key: lol-consequential-removed
+    note: clause 6.2 removes the exclusion entirely
+  - rule_key: audit.customer_audit_rights
+    playbook: saas_msa_vendor
+    zone: red
+    red_line_key: global-unannounced-audit
+    scope: global
+    note: clause 12.1 - unannounced, unlimited, direct production access
+  - rule_key: indemnification.ip_infringement_indemnity
+    playbook: saas_msa_vendor
+    zone: red
+    red_line_key: global-indemnity-own-negligence
+    scope: global
+    note: clause 7.1 second limb indemnifies Customer for Customer's own use, regardless of cause
+  - rule_key: data_protection.customer_data_use
+    playbook: saas_msa_vendor
+    zone: yellow
+    position: fallback_2
+    approver_role: commercial_counsel
+    note: clause 8.1 - service purpose only, no analytics carve-out
+  - rule_key: breach_notification.notification_timeline
+    playbook: hipaa_overlay
+    zone: yellow
+    position: fallback_2
+    approver_role: security_lead
+    note: clause 8.2 - 24 hours after confirmation
+  - rule_key: governing_law.choice_of_law
+    playbook: baseline
+    zone: yellow
+    position: fallback_2
+    approver_role: commercial_counsel
+    note: clause 13.1 - Illinois, another US state
+  - rule_key: security.safeguards
+    playbook: hipaa_overlay
+    zone: green
+    position: preferred
+    note: clause 9.1
+  - rule_key: subprocessors.subcontractor_baa_flow_down
+    playbook: hipaa_overlay
+    zone: green
+    position: preferred
+    note: clause 10.1
+  - rule_key: payment.payment_terms
+    playbook: saas_msa_vendor
+    zone: green
+    position: fallback_1
+    note: clause 3.1 - Net 45
+- id: 4
+  file: 04_saas_msa_gdpr_counterparty_euclinic_yellow
+  contract_type: saas_msa
+  counterparty: Clairvoie Clinique Group SA
+  profile: SaaS MSA + GDPR overlay, EU clinic group's own paper; yellow on residency and sub-processors.
+  context:
+    party_role: vendor
+    paper_origin: counterparty
+    region: eu
+    regimes:
+    - gdpr
+    deal_value_band: mid
+    counterparty_tier: tier_1
+    data_sensitivity: special_category
+  findings:
+  - rule_key: data_transfers.data_residency
+    playbook: gdpr_overlay
+    zone: yellow
+    position: fallback_2
+    approver_role: security_lead
+    note: clause 9.3 - named single country (France)
+  - rule_key: subprocessors.authorisation_model
+    playbook: gdpr_overlay
+    zone: yellow
+    position: fallback_1
+    approver_role: privacy_counsel
+    note: clause 9.4 - 60 days' notice
+  - rule_key: limitation_of_liability.cap_amount
+    playbook: saas_msa_vendor
+    zone: green
+    position: preferred
+  - rule_key: breach_notification.notification_timeline
+    playbook: gdpr_overlay
+    zone: green
+    position: preferred
+    note: clause 9.2 - 72 hours
+  - rule_key: governing_law.choice_of_law
+    playbook: gdpr_overlay
+    zone: green
+    position: preferred
+    note: clause 13.1 - Irish law
+  - rule_key: audit.customer_audit_rights
+    playbook: saas_msa_vendor
+    zone: green
+    position: preferred
+  - rule_key: security.certifications
+    playbook: saas_msa_vendor
+    zone: green
+    position: preferred
+  - rule_key: warranties.performance_warranty
+    playbook: saas_msa_vendor
+    zone: green
+    position: preferred
+    note: clause 2.4 - 30-day cure
+  - rule_key: warranties.disclaimer
+    playbook: saas_msa_vendor
+    zone: green
+    position: preferred
+    note: clause 2.5 - full disclaimer with medical-advice statement
+  - rule_key: intellectual_property.feedback_license
+    playbook: saas_msa_vendor
+    zone: green
+    position: preferred
+    note: clause 8.3
+  - rule_key: intellectual_property.usage_data
+    playbook: saas_msa_vendor
+    zone: green
+    position: preferred
+    note: clause 8.4
+  - rule_key: compliance.compliance_with_laws
+    playbook: saas_msa_vendor
+    zone: green
+    position: preferred
+    note: clause 15.1
+  - rule_key: compliance.anti_corruption
+    playbook: saas_msa_vendor
+    zone: green
+    position: preferred
+    note: clause 15.2
+- id: 5
+  file: 05_saas_msa_counterparty_strategic
+  contract_type: saas_msa
+  counterparty: Pinnacle National Health Alliance
+  profile: SaaS MSA, counterparty paper, strategic deal (over $1.8M a year); several fallbacks that are valid only because of the deal-value band.
+  context:
+    party_role: vendor
+    paper_origin: counterparty
+    region: us
+    regimes: []
+    deal_value_band: strategic
+    counterparty_tier: tier_1
+    data_sensitivity: personal_data
+  findings:
+  - rule_key: limitation_of_liability.cap_amount
+    playbook: saas_msa_vendor
+    zone: yellow
+    position: fallback_3
+    approver_role: general_counsel
+    note: clause 6.1 - 36-month cap, strategic deals only
+  - rule_key: limitation_of_liability.data_breach_super_cap
+    playbook: saas_msa_vendor
+    zone: yellow
+    position: fallback_2
+    approver_role: general_counsel
+    note: clause 6.2 - 3x annual Fees, $5M ceiling, requires enterprise/strategic band
+  - rule_key: termination.for_convenience
+    playbook: saas_msa_vendor
+    zone: yellow
+    position: fallback_2
+    approver_role: vp_sales
+    note: clause 4.3 - after month 12, 90 days' notice, no refund, requires enterprise/strategic band
+  - rule_key: payment.price_increases
+    playbook: saas_msa_vendor
+    zone: yellow
+    position: fallback_2
+    approver_role: deal_desk
+    note: clause 3.2 - fixed price for the renewal term, requires enterprise/strategic band
+  - rule_key: service_levels.service_credits
+    playbook: saas_msa_vendor
+    zone: yellow
+    position: fallback_2
+    approver_role: vp_customer_success
+    note: clause 5.2 - 25% cap, requires tier_1 counterparty and enterprise/strategic band
+  - rule_key: audit.customer_audit_rights
+    playbook: saas_msa_vendor
+    zone: yellow
+    position: fallback_2
+    approver_role: security_lead
+    note: clause 11.1 - on-site audit at Customer's cost, requires tier_1 counterparty and enterprise/strategic band
+  - rule_key: payment.payment_terms
+    playbook: saas_msa_vendor
+    zone: green
+    position: preferred
+    note: clause 3.1 - Net 30
+  - rule_key: warranties.performance_warranty
+    playbook: saas_msa_vendor
+    zone: green
+    position: preferred
+    note: clause 2.4 - 30-day cure
+  - rule_key: warranties.disclaimer
+    playbook: saas_msa_vendor
+    zone: green
+    position: preferred
+    note: clause 2.5 - full disclaimer with medical-advice statement
+  - rule_key: intellectual_property.feedback_license
+    playbook: saas_msa_vendor
+    zone: green
+    position: preferred
+    note: clause 8.3
+  - rule_key: intellectual_property.usage_data
+    playbook: saas_msa_vendor
+    zone: green
+    position: preferred
+    note: clause 8.4
+  - rule_key: compliance.compliance_with_laws
+    playbook: saas_msa_vendor
+    zone: green
+    position: preferred
+    note: clause 15.1
+  - rule_key: compliance.anti_corruption
+    playbook: saas_msa_vendor
+    zone: green
+    position: preferred
+    note: clause 15.2
+- id: 6
+  file: 06_dpa_gdpr_own_clean
+  contract_type: dpa
+  counterparty: Solheim Clinic Network AB
+  profile: DPA + GDPR overlay, Halcyon's own paper, clean.
+  context:
+    party_role: vendor
+    paper_origin: own
+    region: eu
+    regimes:
+    - gdpr
+    deal_value_band: mid
+    counterparty_tier: tier_2
+    data_sensitivity: special_category
+  findings:
+  - rule_key: definitions.roles_of_parties
+    playbook: dpa_processor
+    zone: green
+    position: preferred
+    note: clause 1.1
+  - rule_key: data_protection.processing_instructions
+    playbook: gdpr_overlay
+    zone: green
+    position: preferred
+    note: clause 2.1-2.2
+  - rule_key: data_protection.purpose_limitation
+    playbook: dpa_processor
+    zone: green
+    position: preferred
+    note: clause 2.3
+  - rule_key: data_protection.data_subject_requests
+    playbook: gdpr_overlay
+    zone: green
+    position: preferred
+    note: clause 3.1-3.2
+  - rule_key: data_protection.personnel_confidentiality
+    playbook: dpa_processor
+    zone: green
+    position: preferred
+    note: clause 4.1
+  - rule_key: data_protection.dpia_assistance
+    playbook: gdpr_overlay
+    zone: green
+    position: preferred
+    note: clause 6.1
+  - rule_key: breach_notification.notification_timeline
+    playbook: gdpr_overlay
+    zone: green
+    position: preferred
+    note: clause 7.1 - 72 hours, phased notice
+  - rule_key: subprocessors.authorisation_model
+    playbook: gdpr_overlay
+    zone: green
+    position: preferred
+    note: clause 8.1
+  - rule_key: audit.supervisory_authority_cooperation
+    playbook: gdpr_overlay
+    zone: green
+    position: preferred
+    note: clause 10.2
+  - rule_key: data_protection.data_return_and_deletion
+    playbook: dpa_processor
+    zone: green
+    position: preferred
+    note: clause 11.1 - 30-day export, 60-day deletion
+  - rule_key: security.technical_organisational_measures
+    playbook: dpa_processor
+    zone: green
+    position: preferred
+    note: clause 5.1 - Annex 2, no-reduction update right
+  - rule_key: breach_notification.notification_content
+    playbook: dpa_processor
+    zone: green
+    position: preferred
+    note: clause 7.1 - Annex 3, phased notice permitted
+  - rule_key: compliance.gdpr_compliance
+    playbook: gdpr_overlay
+    zone: green
+    position: preferred
+    note: clause 13.1 - compliance allocated by role
+  - rule_key: data_protection.records_of_processing
+    playbook: gdpr_overlay
+    zone: green
+    position: preferred
+    note: clause 14.1 - central record, available within ten business days
+  - rule_key: subprocessors.subprocessor_changes
+    playbook: dpa_processor
+    zone: green
+    position: preferred
+    note: clause 8.1/8.4 - 30 days notice, objection, partial termination remedy
+- id: 7
+  file: 07_dpa_counterparty_subprocessor_breach
+  contract_type: dpa
+  counterparty: Vantage Point Diagnostics, Inc.
+  profile: DPA, counterparty paper; per-sub-processor consent and a 24-hour breach notice.
+  context:
+    party_role: vendor
+    paper_origin: counterparty
+    region: us
+    regimes: []
+    deal_value_band: enterprise
+    counterparty_tier: tier_1
+    data_sensitivity: personal_data
+  findings:
+  - rule_key: subprocessors.authorisation_model
+    playbook: dpa_processor
+    zone: red
+    red_line_key: subproc-specific-consent-required
+    note: clause 9.1 - prior written consent required for each Sub-processor
+  - rule_key: data_protection.data_return_and_deletion
+    playbook: dpa_processor
+    zone: red
+    red_line_key: return-indefinite-retention
+    note: clause 11.1 - no outer deletion period stated
+  - rule_key: breach_notification.notification_timeline
+    playbook: dpa_processor
+    zone: yellow
+    position: fallback_2
+    approver_role: security_lead
+    note: clause 8.1 - 24 hours from confirmation
+  - rule_key: definitions.roles_of_parties
+    playbook: dpa_processor
+    zone: green
+    position: preferred
+    note: clause 1.1
+  - rule_key: security.technical_organisational_measures
+    playbook: dpa_processor
+    zone: green
+    position: preferred
+    note: clause 7.1
+  - rule_key: governing_law.choice_of_law
+    playbook: baseline
+    zone: green
+    position: preferred
+    note: clause 14.1 - Delaware
+- id: 8
+  file: 08_baa_hipaa_counterparty_missing
+  contract_type: hipaa
+  counterparty: Brightwater County Hospital
+  profile: BAA under HIPAA, counterparty's county-procurement paper; several required clauses are missing entirely.
+  context:
+    party_role: vendor
+    paper_origin: counterparty
+    region: us
+    regimes:
+    - hipaa
+    deal_value_band: standard
+    counterparty_tier: tier_1
+    data_sensitivity: phi
+  findings:
+  - rule_key: breach_notification.notification_content
+    playbook: hipaa_overlay
+    zone: red
+    position: missing
+    note: Gap Note at section 3 - no content list for the notice
+  - rule_key: security.safeguards
+    playbook: hipaa_overlay
+    zone: red
+    position: missing
+    note: 'Gap Note at section 4 - no Security Rule safeguards provision at all; negotiable: false'
+  - rule_key: data_protection.individual_rights_support
+    playbook: hipaa_overlay
+    zone: red
+    position: missing
+    note: Gap Note at section 5
+  - rule_key: subprocessors.subcontractor_baa_flow_down
+    playbook: hipaa_overlay
+    zone: red
+    position: missing
+    note: 'Gap Note at section 6; negotiable: false'
+  - rule_key: audit.hhs_access
+    playbook: hipaa_overlay
+    zone: red
+    position: missing
+    note: 'Gap Note at section 7; negotiable: false'
+  - rule_key: compliance.hipaa_compliance
+    playbook: hipaa_overlay
+    zone: red
+    position: missing
+    note: 'Gap Note at section 9; negotiable: false'
+  - rule_key: data_protection.permitted_uses_of_phi
+    playbook: hipaa_overlay
+    zone: yellow
+    position: fallback_2
+    approver_role: privacy_counsel
+    note: clause 2.1 - management/administration use only, no Data Aggregation limb
+  - rule_key: breach_notification.notification_timeline
+    playbook: hipaa_overlay
+    zone: green
+    position: preferred
+    note: clause 3.1 - 72 hours after confirmation
+- id: 9
+  file: 09_mutual_nda_own_clean
+  contract_type: nda
+  counterparty: Juniper Analytics Corp
+  profile: Mutual NDA, Halcyon's own paper, clean.
+  context:
+    party_role: mutual
+    paper_origin: own
+    region: us
+    regimes: []
+    deal_value_band: standard
+    counterparty_tier: tier_3
+    data_sensitivity: none
+  findings:
+  - rule_key: definitions.confidential_information_scope
+    playbook: mutual_nda
+    zone: green
+    position: preferred
+    note: clause 1.1
+  - rule_key: confidentiality.standard_of_care
+    playbook: mutual_nda
+    zone: green
+    position: preferred
+    note: clause 2.1
+  - rule_key: confidentiality.residuals
+    playbook: mutual_nda
+    zone: green
+    position: preferred
+    note: clause 5.1 - no residuals clause
+  - rule_key: term.agreement_term
+    playbook: mutual_nda
+    zone: green
+    position: preferred
+    note: clause 8.1 - two-year term
+  - rule_key: term.survival_period
+    playbook: mutual_nda
+    zone: green
+    position: preferred
+    note: clause 8.2 - flat three-year survival
+  - rule_key: governing_law.choice_of_law
+    playbook: mutual_nda
+    zone: green
+    position: preferred
+    note: clause 12.1 - Delaware
+- id: 10
+  file: 10_mutual_nda_counterparty_residuals
+  contract_type: nda
+  counterparty: Omnivault Technologies, Inc.
+  profile: Mutual NDA, counterparty's standard form; residuals clause and perpetual survival.
+  context:
+    party_role: mutual
+    paper_origin: counterparty
+    region: us
+    regimes: []
+    deal_value_band: standard
+    counterparty_tier: tier_1
+    data_sensitivity: none
+  findings:
+  - rule_key: confidentiality.residuals
+    playbook: mutual_nda
+    zone: red
+    red_line_key: resid-missing-source-code-or-phi-exclusion
+    note: clause 5.1 - broad residuals, no source code or PHI exclusion
+  - rule_key: term.survival_period
+    playbook: mutual_nda
+    zone: red
+    red_line_key: surv-perpetual-all-information
+    note: clause 8.2 - perpetual survival for all Confidential Information
+  - rule_key: definitions.confidential_information_scope
+    playbook: mutual_nda
+    zone: yellow
+    position: fallback_1
+    approver_role: contracts_manager
+    note: clause 1.1 - written confirmation within 30 days for oral disclosures
+  - rule_key: confidentiality.standard_of_care
+    playbook: mutual_nda
+    zone: yellow
+    position: fallback_1
+    approver_role: contracts_manager
+    note: clause 2.1 - reasonable care only, no own-practice comparator
+  - rule_key: governing_law.choice_of_law
+    playbook: mutual_nda
+    zone: green
+    position: preferred
+    note: clause 11.1 - Delaware
+  - rule_key: entire_agreement.integration
+    playbook: baseline
+    zone: green
+    position: preferred
+    note: clause 13.2 - entire agreement, supersedes prior proposals and negotiations
+- id: 11
+  file: 11_vendor_msa_counterparty_lowcap
+  contract_type: vendor_msa
+  counterparty: Swiftline Cloud Services LLC
+  profile: Vendor MSA (Halcyon buys), counterparty paper; low liability cap and no breach notice commitment.
+  context:
+    party_role: customer
+    paper_origin: counterparty
+    region: us
+    regimes: []
+    deal_value_band: standard
+    counterparty_tier: tier_3
+    data_sensitivity: personal_data
+  findings:
+  - rule_key: limitation_of_liability.cap_amount
+    playbook: vendor_msa_customer
+    zone: red
+    red_line_key: lol-vendor-cap-under-12-months
+    note: clause 6.1 - 3-month cap
+  - rule_key: breach_notification.notification_timeline
+    playbook: vendor_msa_customer
+    zone: red
+    red_line_key: breach-notice-no-commitment
+    note: clause 13.1 - no stated time limit
+  - rule_key: payment.payment_terms
+    playbook: vendor_msa_customer
+    zone: yellow
+    position: fallback_2
+    approver_role: deal_desk
+    note: clause 3.1 - Net 30
+  - rule_key: service_levels.uptime_commitment
+    playbook: vendor_msa_customer
+    zone: yellow
+    position: fallback_2
+    approver_role: vp_customer_success
+    note: clause 5.1 - 99.5% monthly
+  - rule_key: term.initial_term
+    playbook: vendor_msa_customer
+    zone: green
+    position: preferred
+    note: clause 4.1 - 12-month Initial Term
+- id: 12
+  file: 12_vendor_msa_counterparty_reasonable
+  contract_type: vendor_msa
+  counterparty: Cornerstone Analytics Partners, Inc.
+  profile: Vendor MSA (Halcyon buys), reasonable vendor paper; mostly green.
+  context:
+    party_role: customer
+    paper_origin: counterparty
+    region: us
+    regimes: []
+    deal_value_band: standard
+    counterparty_tier: tier_2
+    data_sensitivity: personal_data
+  findings:
+  - rule_key: limitation_of_liability.cap_amount
+    playbook: vendor_msa_customer
+    zone: green
+    position: fallback_1
+    note: clause 6.1 - 24-month cap with 5x data breach super-cap
+  - rule_key: payment.payment_terms
+    playbook: vendor_msa_customer
+    zone: green
+    position: fallback_1
+    note: clause 3.1 - Net 45
+  - rule_key: term.initial_term
+    playbook: vendor_msa_customer
+    zone: green
+    position: fallback_1
+    note: clause 4.1 - 24-month Initial Term
+  - rule_key: service_levels.uptime_commitment
+    playbook: vendor_msa_customer
+    zone: green
+    position: fallback_1
+    note: clause 5.1 - 99.9% monthly
+  - rule_key: termination.for_cause_cure_period
+    playbook: vendor_msa_customer
+    zone: green
+    position: fallback_1
+    note: clause 4.2 - 20-day cure for Vendor's breach
+  - rule_key: breach_notification.notification_timeline
+    playbook: vendor_msa_customer
+    zone: yellow
+    position: fallback_2
+    approver_role: security_lead
+    note: clause 13.1 - confirmation-only trigger for the non-personal-data case

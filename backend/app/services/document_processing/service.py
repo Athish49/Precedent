@@ -17,6 +17,11 @@ from app.core.storage import get_storage
 from app.db.models.clause import Clause
 from app.db.models.contract import Contract, ContractMetadata, Party
 from app.services.document_processing.clause_types import normalize_clause_type
+from app.services.document_processing.context_capture import (
+    classify_contract_type,
+    derive_deal_value_band,
+    derive_regimes,
+)
 from app.services.document_processing.extraction import (
     ContractMetadataDTO,
     PartyDTO,
@@ -43,6 +48,9 @@ class ProcessedContract(BaseModel):
     canonical_text: str
     paper_origin: str
     counterparty_id: uuid.UUID | None
+    contract_type: str | None = None
+    party_role: str | None = None
+    context: dict | None = None
     clauses: list[ClauseDTO]
     metadata: ContractMetadataDTO
 
@@ -75,6 +83,10 @@ async def process(
     filename: str,
     paper_origin: str,
     session: AsyncSession,
+    *,
+    contract_type: str | None = None,
+    party_role: str | None = None,
+    context: dict | None = None,
 ) -> ProcessedContract:
     """Run the S1 document-processing pipeline and persist all results.
 
@@ -83,6 +95,16 @@ async def process(
         filename: Original filename (used to derive format and as the contract title).
         paper_origin: ``"own"`` or ``"counterparty"``.
         session: Async SQLAlchemy session (caller is responsible for lifecycle).
+        contract_type: Already-validated ``agreement_type`` key supplied by the
+            caller. When ``None``, classified from the title and the first
+            3,000 characters of the canonical text (task 4.1, item 2).
+        party_role: Already-validated ``vendor`` / ``customer`` / ``mutual``,
+            or ``None``.
+        context: Already-validated context dict (deal_value_band,
+            counterparty_tier, data_sensitivity, region, regimes, and the raw
+            ``deal_value`` used to derive deal_value_band when it is not
+            already present). ``regimes`` and ``deal_value_band`` are filled
+            in here when absent (task 4.1, items 3 and 4).
 
     Returns:
         A :class:`ProcessedContract` DTO with all extracted and persisted data.
@@ -129,6 +151,28 @@ async def process(
             await session.flush()
             counterparty_id = new_party.id
 
+    # 6b. Contract type and context capture (task 4.1)
+    if contract_type is None:
+        contract_type = await classify_contract_type(
+            session, title=filename, text_excerpt=parsed_doc.canonical_text
+        )
+
+    resolved_context: dict = dict(context) if context else {}
+
+    if "regimes" not in resolved_context:
+        regimes = derive_regimes(parsed_doc.canonical_text)
+        if regimes:
+            resolved_context["regimes"] = regimes
+
+    if "deal_value_band" not in resolved_context and resolved_context.get(
+        "deal_value"
+    ) is not None:
+        band = await derive_deal_value_band(session, resolved_context["deal_value"])
+        if band is not None:
+            resolved_context["deal_value_band"] = band
+
+    final_context: dict | None = resolved_context or None
+
     # 7. Persist contract
     contract = Contract(
         id=contract_id,
@@ -138,6 +182,9 @@ async def process(
         canonical_text=parsed_doc.canonical_text,
         paper_origin=paper_origin,
         counterparty_id=counterparty_id,
+        contract_type=contract_type,
+        party_role=party_role,
+        context=final_context,
         status="processing",
     )
     session.add(contract)
@@ -224,6 +271,9 @@ async def process(
         canonical_text=parsed_doc.canonical_text,
         paper_origin=paper_origin,
         counterparty_id=counterparty_id,
+        contract_type=contract_type,
+        party_role=party_role,
+        context=final_context,
         clauses=clause_dtos,
         metadata=meta_dto,
     )
