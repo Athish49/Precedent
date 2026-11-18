@@ -1,0 +1,7 @@
+# Failing fixture: edits applied to a copy of fixtures/valid by test_playbook_models.py.
+description: 'Cross-check: no rule_key twice in a playbook.'
+file: playbooks/saas_msa_vendor/risk.yaml
+edits:
+- path: [rules, 1, rule_key]
+  set: limitation_of_liability.cap_amount
+expect: {code: rule.duplicate_key, message: already used, rule_key: limitation_of_liability.cap_amount}

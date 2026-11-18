@@ -33,13 +33,42 @@ def _first_line(text: str) -> str:
     return text.split("\n", 1)[0]
 
 
+# A heading is a short title, not a sentence. Numbered sub-clauses are near-
+# universal in real contracts ("4.1 The initial term is ... months.") and
+# conspicuous ALL-CAPS disclaimer paragraphs are common too (warranty
+# disclaimers, liability caps) — both can be long, full sentences that
+# happen to start with a number or be fully capitalized, or that a document's
+# own paragraph style mis-marks as a heading (e.g. a DOCX "Heading 2" style
+# applied to a numbered clause body rather than a real sub-heading). None of
+# that makes them headings. Gating every scheme on word count keeps genuine
+# short titles ("4. TERM AND TERMINATION", "9. AUDIT") working while stopping
+# long numbered/ALL-CAPS/styled sentences from being sliced out as their own
+# heading-only clause.
+_MAX_HEADING_WORDS = 8
+
+
+def _looks_like_heading_shape(first_line: str) -> bool:
+    """Return True when *first_line* is short enough to plausibly be a title."""
+    stripped = first_line.strip()
+    if not stripped:
+        return False
+    return len(stripped.split()) <= _MAX_HEADING_WORDS
+
+
 def _is_heading_signal(sig: StructureSignal) -> bool:
     """Return True when any heading scheme 1-6 matches the signal.
 
     Priority order (1=highest) — but the result is a plain OR because the
     output does not record which scheme fired.
+
+    Every scheme additionally requires the line to be heading-shaped (short —
+    see ``_looks_like_heading_shape``); a long sentence is body text even
+    when it is numbered, bold, ALL CAPS, or carries an explicit heading style.
     """
     first = _first_line(sig.raw_text)
+
+    if not _looks_like_heading_shape(first):
+        return False
 
     # Scheme 1: structural flag from parser
     if sig.is_heading:
@@ -67,6 +96,24 @@ def _is_heading_signal(sig: StructureSignal) -> bool:
         return True
 
     return False
+
+
+def _is_numbered_subclause_signal(sig: StructureSignal) -> bool:
+    """Return True for a long, decimal-numbered paragraph ("4.2 Following the ...").
+
+    Such a paragraph is not a heading (it fails the heading-shape gate, so its
+    sentence must never become ``heading_text`` — that is what used to send
+    most corpus clauses to ``clause_type="other"``), but its numbering still
+    marks a genuine clause boundary. Treating it as body instead would fold
+    every sub-clause of a section into one multi-topic clause (e.g. "4. TERM
+    AND TERMINATION" swallowing 4.1-4.4), so it starts its own clause and
+    inherits the enclosing section's heading (see :func:`segment`).
+
+    Only decimal numbering qualifies: long ALL-CAPS, bold or heading-styled
+    sentences without numbering stay body text.
+    """
+    first = _first_line(sig.raw_text)
+    return not _looks_like_heading_shape(first) and bool(_RE_DECIMAL.match(first))
 
 
 # ── Output data structure ───────────────────────────────────────────────────────
@@ -99,6 +146,12 @@ def segment(doc: ParsedDocument) -> list[SegmentedClause]:
        deriving ``text`` by slicing ``canonical_text`` directly so the
        ``canonical_text[char_start:char_end] == clause.text`` invariant holds
        trivially.
+    4. A long decimal-numbered paragraph (a sub-clause such as "4.2 Following
+       the Initial Term, ...") also starts a new clause, but it is not a
+       heading: its ``heading_text`` is the most recent real heading's text
+       (e.g. "4. TERM AND TERMINATION"), or its own first line when no heading
+       precedes it. This keeps sub-clauses as separate clauses while giving
+       them a classifiable section title rather than a sentence.
     """
     signals = doc.structure_signals
     canonical = doc.canonical_text
@@ -108,6 +161,9 @@ def segment(doc: ParsedDocument) -> list[SegmentedClause]:
 
     # ── Classify each signal ───────────────────────────────────────────────
     is_heading: list[bool] = [_is_heading_signal(s) for s in signals]
+    is_subclause: list[bool] = [
+        not h and _is_numbered_subclause_signal(s) for s, h in zip(signals, is_heading, strict=True)
+    ]
 
     # ── Unstructured fallback ──────────────────────────────────────────────
     if not any(is_heading):
@@ -127,41 +183,52 @@ def segment(doc: ParsedDocument) -> list[SegmentedClause]:
         return clauses
 
     # ── Group body spans under preceding heading ───────────────────────────
-    # Collect (heading_signal | None, [body_signals]) groups.
-    groups: list[tuple[StructureSignal | None, list[StructureSignal]]] = []
+    # Collect (heading_text | None, [signals]) groups. For a real heading the
+    # heading signal is the first entry of its group; for a numbered
+    # sub-clause the group starts at the sub-clause paragraph itself and the
+    # heading text is inherited from the enclosing section.
+    groups: list[tuple[str | None, list[StructureSignal]]] = []
 
-    current_heading: StructureSignal | None = None
-    current_body: list[StructureSignal] = []
+    current_heading_text: str | None = None
+    current_sigs: list[StructureSignal] = []
+    section_heading_text: str | None = None
 
-    for sig, heading_flag in zip(signals, is_heading, strict=True):
+    for sig, heading_flag, subclause_flag in zip(signals, is_heading, is_subclause, strict=True):
         if heading_flag:
             # Flush the current group before starting a new one.
-            groups.append((current_heading, current_body))
-            current_heading = sig
-            current_body = []
+            groups.append((current_heading_text, current_sigs))
+            current_heading_text = sig.raw_text
+            section_heading_text = sig.raw_text
+            current_sigs = [sig]
+        elif subclause_flag:
+            groups.append((current_heading_text, current_sigs))
+            current_heading_text = (
+                section_heading_text
+                if section_heading_text is not None
+                else _first_line(sig.raw_text)
+            )
+            current_sigs = [sig]
         else:
-            current_body.append(sig)
+            current_sigs.append(sig)
 
     # Flush final group.
-    groups.append((current_heading, current_body))
+    groups.append((current_heading_text, current_sigs))
 
     # ── Build SegmentedClause objects ──────────────────────────────────────
     clauses = []
     ordinal = 0
 
-    for heading_sig, body_sigs in groups:
+    for heading_text, all_sigs in groups:
         # A leading group with no heading and no body is empty — skip it.
-        if heading_sig is None and not body_sigs:
+        if not all_sigs:
             continue
 
         # Determine the character span for this clause.
-        all_sigs = ([heading_sig] if heading_sig is not None else []) + body_sigs
         char_start = all_sigs[0].char_start
         char_end = all_sigs[-1].char_end
 
         # Derive text by slicing; invariant holds by construction.
         text = canonical[char_start:char_end]
-        heading_text = heading_sig.raw_text if heading_sig is not None else None
 
         clauses.append(
             SegmentedClause(

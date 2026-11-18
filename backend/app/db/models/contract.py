@@ -61,6 +61,13 @@ class Contract(Base):
         nullable=True,
     )
     status: Mapped[str] = mapped_column(Text, nullable=False, default="processing", index=True)
+    # New columns (task 1.3; plan section 4). Nullable; `contract_type`
+    # already existed and is populated at upload by a later task — not a
+    # schema change here. `party_role` is `vendor` / `customer` / `mutual`;
+    # `context` carries deal_value_band, counterparty_tier, data_sensitivity,
+    # region and regimes.
+    party_role: Mapped[str | None] = mapped_column(Text, nullable=True)
+    context: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

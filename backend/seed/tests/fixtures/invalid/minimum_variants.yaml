@@ -1,0 +1,7 @@
+# Failing fixture: edits applied to a copy of fixtures/valid by test_playbook_models.py.
+description: 'Per-rule minimum: one acceptable variant.'
+file: playbooks/saas_msa_vendor/risk.yaml
+edits:
+- path: [rules, 0, positions, 3]
+  delete: true
+expect: {code: minimum.variants, message: found 0, rule_key: limitation_of_liability.cap_amount}

@@ -36,6 +36,11 @@ async def draft_clause(body: DraftClauseRequest, session: SessionDep) -> DraftRe
         context=body.context,
         instruction=body.instruction,
         preferred_language=body.preferred_language,
+        contract_type=body.contract_type,
+        party_role=body.party_role,
+        paper_origin=body.paper_origin,
+        deal_context=body.deal_context,
+        mode=body.mode,
     )
     return DraftResponse(text=result.text, source=result.source)
 

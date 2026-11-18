@@ -1,0 +1,2933 @@
+{
+ "object": "parse_run",
+ "cacheHit": false,
+ "id": "pr_tzHJxRMWCHetvbAVG3AmE",
+ "file": {
+  "object": "file",
+  "id": "file_lYH8OdYmmAokEQAZueDXU",
+  "name": "msa_styled.docx",
+  "type": "PDF",
+  "parentFileId": null,
+  "metadata": {
+   "pageCount": 4
+  },
+  "dataRetention": {
+   "mode": "workspace_default",
+   "status": "available"
+  },
+  "createdAt": "2026-11-17T03:44:47.474Z",
+  "updatedAt": "2026-11-17T03:44:54.394Z"
+ },
+ "status": "PROCESSED",
+ "failureReason": null,
+ "failureMessage": null,
+ "metadata": null,
+ "dataRetention": {
+  "mode": "workspace_default",
+  "status": "available"
+ },
+ "output": {
+  "chunks": [
+   {
+    "object": "chunk",
+    "id": "chunk_document_S1BlJC",
+    "type": "document",
+    "content": "Halcyon Systems, Inc. - Confidential\n\n# MASTER SERVICES AGREEMENT\n\nThis Master Services Agreement (the \"Agreement\") is entered into as of March 3, 2025 (the \"Effective Date\") by and between Halcyon Systems, Inc., a Delaware corporation with offices at 400 Harbor Street, Boston, Massachusetts 02110 (\"Supplier\"), and Northwind Retail Group LLC, an Ohio limited liability company with offices at 1200 Lakeshore Avenue, Cleveland, Ohio 44114 (\"Customer\").\n\n### 1. Definitions\n\n\"Confidential Information\" means all non-public information disclosed by one party to the other, whether orally or in writing, that is designated as confidential or that reasonably should be understood to be confidential.\n\n\"Services\" means the hosted inventory analytics services described in Exhibit A.\n\n\"Fees\" means the amounts set out in the fee schedule in Section 4.\n\n### 2. Services\n\nSupplier shall provide the Services to Customer in accordance with this Agreement and each Order Form.\n\n(a) Supplier shall perform the Services in a professional and workmanlike manner.\n\n(b) Customer shall provide Supplier with the access and information reasonably required to perform the Services.\n\n### 3. Term and Renewal\n\nThis Agreement commences on the Effective Date and continues for an initial term of three (3) years.\n\nThereafter, this Agreement shall automatically renew for successive renewal terms of twelve (12) months each, unless either party gives written notice of non-renewal at least\n\n90 days before the end of the then-current term.\n\n### 4. Fees and Payment\n\nCustomer shall pay the Fees set out in the table below. Supplier shall invoice Customer annually in advance.\n\n| Item | Annual Fee |\n| --- | --- |\n| Platform subscription | $210,000 |\n\nMSA-2025-0147 Page 1\n\n# Halcyon Systems, Inc. - Confidential\n\n| Premium support | $40,000 |\n| --- | --- |\n| Total annual Fees | $250,000 |\n\nAll invoices are due and payable within forty-five (45) days after the invoice date. Late amounts accrue interest at 1.5% per month. Fees are exclusive of taxes.\n\n### 5. Service Levels\n\nSupplier shall make the Services available with a monthly uptime of at least 99.9%. Supplier shall respond to Severity 1 incidents within 2 hours.\n\n### 6. Confidentiality\n\nEach party shall protect the other party's Confidential Information using at least reasonable care and shall not disclose it to any third party without the disclosing party's prior written consent.\n\nThe obligations in this Section survive for five (5) years after termination or expiration of this Agreement.\n\n### 7. Data Protection and Security\n\nSupplier shall process personal data only in accordance with the Data Processing Agreement attached as Exhibit B and applicable law, including the GDPR where it applies.\n\nSupplier shall notify Customer of any confirmed security breach affecting Customer data within 72 hours.\n\n### 8. Intellectual Property\n\nSupplier retains all intellectual property rights in the Services. Customer retains all rights in Customer data. I. No rights are granted except as expressly set out in this Agreement.\n\n### 9. Warranties and Disclaimer\n\nSupplier warrants that the Services will conform in all material respects to the documentation for a period of ninety (90) days from delivery.\n\nEXCEPT AS EXPRESSLY SET OUT IN THIS AGREEMENT, SUPPLIER DISCLAIMS ALL WARRANTIES, WHETHER EXPRESS OR IMPLIED, INCLUDING ANY WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.\n\n### 10. Indemnification\n\nSupplier shall defend and indemnify Customer against any third-party claim alleging that the Services infringe any patent, copyright or trade secret.\n\nMSA-2025-0147 Page 2\n\n# Halcyon Systems, Inc. - Confidential\n\n(a) Customer shall give Supplier prompt written notice of the claim.\n\n(b) Supplier shall have sole control of the defence and settlement of the claim.\n\n30 days after receipt of notice, Supplier shall assume the defence of the claim.\n\n### 11. Limitation of Liability\n\nIN NO EVENT SHALL EITHER PARTY BE LIABLE FOR ANY INDIRECT, INCIDENTAL OR CONSEQUENTIAL DAMAGES.\n\nEach party's total aggregate liability arising out of this Agreement shall not exceed the greater of (i) the Fees paid or payable in the twelve (12) months preceding the claim and (ii) $500,000.\n\nThe limitations in this Section do not apply to a party's fraud, gross negligence or wilful misconduct, or to a breach of Section 6 (Confidentiality).\n\n### 12. Termination\n\nEither party may terminate this Agreement for material breach if the breach is not cured within thirty (30) days after written notice.\n\nCustomer may terminate this Agreement for convenience upon sixty (60) days' written notice to Supplier. Supplier has no right to terminate for convenience.\n\n### 13. Governing Law and Disputes\n\nThis Agreement is governed by the laws of the State of New York, without regard to its conflict of laws rules.\n\nAny dispute arising out of this Agreement shall be resolved exclusively by the state and federal courts located in New York County, New York. The parties agree that arbitration shall not apply to any dispute under this Agreement.\n\n### 14. General\n\nNeither party may assign this Agreement without the prior written consent of the other party, except to a successor in a merger or sale of substantially all of its assets.\n\nNotices must be in writing and sent to the addresses set out above. Notices to Supplier must be marked for the attention of the Legal Department.\n\nThis Agreement is the entire agreement between the parties and may be amended only in a writing signed by both parties. Neither party is liable for delay caused by a force majeure event.\n\nIN WITNESS WHEREOF, the parties have executed this Agreement as of the Effective Date.\n\nMSA-2025-0147 Page 3\n\n# Halcyon Systems, Inc. - Confidential\n\n### HALCYON SYSTEMS, INC.\n\nBy: /s/ Dana Whitfield\nName: Dana Whitfield\nTitle: Chief Revenue Officer\nDate: March 1, 2025\n\n### NORTHWIND RETAIL GROUP LLC\n\nBy: /s/ Priya Raman\nName: Priya Raman\nTitle: General Counsel\nDate: March 3, 2025\n\nMSA-2025-0147 Page 4",
+    "metadata": {
+     "pageRange": {
+      "start": 1,
+      "end": 4
+     },
+     "minOcrConfidence": 0.839,
+     "avgOcrConfidence": 0.994
+    },
+    "blocks": [
+     {
+      "object": "block",
+      "id": "block_1_KEP1FH",
+      "type": "header",
+      "content": "Halcyon Systems, Inc. - Confidential",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 1,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.989,
+       "avgOcrConfidence": 0.993,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.74550955830094,
+        "y": 78.18022762026105
+       },
+       {
+        "x": 521.600561040152,
+        "y": 78.18022762026105
+       },
+       {
+        "x": 521.600561040152,
+        "y": 101.27178948266166
+       },
+       {
+        "x": 186.74550955830094,
+        "y": 101.27178948266166
+       }
+      ],
+      "boundingBox": {
+       "left": 186.74550955830094,
+       "top": 78.18022762026105,
+       "right": 521.600561040152,
+       "bottom": 101.27178948266166
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_1_7deaBu",
+      "type": "heading",
+      "content": "# MASTER SERVICES AGREEMENT",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 1,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.992,
+       "avgOcrConfidence": 0.994,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 190.2103264560903,
+        "y": 165.1176380429949
+       },
+       {
+        "x": 892.8384746945202,
+        "y": 165.1176380429949
+       },
+       {
+        "x": 892.8384746945202,
+        "y": 202.06983988625663
+       },
+       {
+        "x": 190.2103264560903,
+        "y": 202.06983988625663
+       }
+      ],
+      "boundingBox": {
+       "left": 190.2103264560903,
+       "top": 165.1176380429949,
+       "right": 892.8384746945202,
+       "bottom": 202.06983988625663
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_1_15V9R9",
+      "type": "text",
+      "content": "This Master Services Agreement (the \"Agreement\") is entered into as of March 3, 2025 (the \"Effective Date\") by and between Halcyon Systems, Inc., a Delaware corporation with offices at 400 Harbor Street, Boston, Massachusetts 02110 (\"Supplier\"), and Northwind Retail Group LLC, an Ohio limited liability company with offices at 1200 Lakeshore Avenue, Cleveland, Ohio 44114 (\"Customer\").",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 1,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.839,
+       "avgOcrConfidence": 0.989,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 187.03740313384031,
+        "y": 261.0498015539987
+       },
+       {
+        "x": 1070.4599387280882,
+        "y": 261.0498015539987
+       },
+       {
+        "x": 1070.4599387280882,
+        "y": 403.14925711495533
+       },
+       {
+        "x": 187.03740313384031,
+        "y": 403.14925711495533
+       }
+      ],
+      "boundingBox": {
+       "left": 187.03740313384031,
+       "top": 261.0498015539987,
+       "right": 1070.4599387280882,
+       "bottom": 403.14925711495533
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_1_cF7XzW",
+      "type": "section_heading",
+      "content": "### 1. Definitions",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 1,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.992,
+       "avgOcrConfidence": 0.994,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 188.49851533611474,
+        "y": 464.79638017926897
+       },
+       {
+        "x": 348.1556468162672,
+        "y": 464.79638017926897
+       },
+       {
+        "x": 348.1556468162672,
+        "y": 487.4519048418317
+       },
+       {
+        "x": 188.49851533611474,
+        "y": 487.4519048418317
+       }
+      ],
+      "boundingBox": {
+       "left": 188.49851533611474,
+       "top": 464.79638017926897,
+       "right": 348.1556468162672,
+       "bottom": 487.4519048418317
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_1_jVtJK0",
+      "type": "text",
+      "content": "\"Confidential Information\" means all non-public information disclosed by one party to the other, whether orally or in writing, that is designated as confidential or that reasonably should be understood to be confidential.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 1,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.946,
+       "avgOcrConfidence": 0.994,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 187.3530615266956,
+        "y": 502.94742911202565
+       },
+       {
+        "x": 1068.986485437142,
+        "y": 502.94742911202565
+       },
+       {
+        "x": 1068.986485437142,
+        "y": 582.174182346889
+       },
+       {
+        "x": 187.3530615266956,
+        "y": 582.174182346889
+       }
+      ],
+      "boundingBox": {
+       "left": 187.3530615266956,
+       "top": 502.94742911202565,
+       "right": 1068.986485437142,
+       "bottom": 582.174182346889
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_1_rg5VdI",
+      "type": "text",
+      "content": "\"Services\" means the hosted inventory analytics services described in Exhibit A.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 1,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.897,
+       "avgOcrConfidence": 0.986,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 188.4339539605952,
+        "y": 613.8453527178084
+       },
+       {
+        "x": 928.6996359502718,
+        "y": 613.8453527178084
+       },
+       {
+        "x": 928.6996359502718,
+        "y": 637.0537921360561
+       },
+       {
+        "x": 188.4339539605952,
+        "y": 637.0537921360561
+       }
+      ],
+      "boundingBox": {
+       "left": 188.4339539605952,
+       "top": 613.8453527178084,
+       "right": 928.6996359502718,
+       "bottom": 637.0537921360561
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_1_8aE7se",
+      "type": "text",
+      "content": "\"Fees\" means the amounts set out in the fee schedule in Section 4.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 1,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.913,
+       "avgOcrConfidence": 0.99,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 188.38858791093386,
+        "y": 665.1860035487584
+       },
+       {
+        "x": 798.9322404420249,
+        "y": 665.1860035487584
+       },
+       {
+        "x": 798.9322404420249,
+        "y": 684.7934722900391
+       },
+       {
+        "x": 188.38858791093386,
+        "y": 684.7934722900391
+       }
+      ],
+      "boundingBox": {
+       "left": 188.38858791093386,
+       "top": 665.1860035487584,
+       "right": 798.9322404420249,
+       "bottom": 684.7934722900391
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_1_4ovVCR",
+      "type": "section_heading",
+      "content": "### 2. Services",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 1,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.994,
+       "avgOcrConfidence": 0.994,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.9385878810679,
+        "y": 748.804861341204
+       },
+       {
+        "x": 314.20318291280614,
+        "y": 748.804861341204
+       },
+       {
+        "x": 314.20318291280614,
+        "y": 771.336916242327
+       },
+       {
+        "x": 186.9385878810679,
+        "y": 771.336916242327
+       }
+      ],
+      "boundingBox": {
+       "left": 186.9385878810679,
+       "top": 748.804861341204,
+       "right": 314.20318291280614,
+       "bottom": 771.336916242327
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_1_xYemAX",
+      "type": "text",
+      "content": "Supplier shall provide the Services to Customer in accordance with this Agreement and each Order Form.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 1,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.989,
+       "avgOcrConfidence": 0.996,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.69574710397958,
+        "y": 787.4951907566616
+       },
+       {
+        "x": 1044.7658959656849,
+        "y": 787.4951907566616
+       },
+       {
+        "x": 1044.7658959656849,
+        "y": 836.0476673671177
+       },
+       {
+        "x": 186.69574710397958,
+        "y": 836.0476673671177
+       }
+      ],
+      "boundingBox": {
+       "left": 186.69574710397958,
+       "top": 787.4951907566616,
+       "right": 1044.7658959656849,
+       "bottom": 836.0476673671177
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_1_TqDBAB",
+      "type": "text",
+      "content": "(a) Supplier shall perform the Services in a professional and workmanlike manner.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 1,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.989,
+       "avgOcrConfidence": 0.996,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 189.17706750890113,
+        "y": 868.2430305480957
+       },
+       {
+        "x": 960.5525223810052,
+        "y": 868.2430305480957
+       },
+       {
+        "x": 960.5525223810052,
+        "y": 891.5202642168318
+       },
+       {
+        "x": 189.17706750890113,
+        "y": 891.5202642168318
+       }
+      ],
+      "boundingBox": {
+       "left": 189.17706750890113,
+       "top": 868.2430305480957,
+       "right": 960.5525223810052,
+       "bottom": 891.5202642168318
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_1_ypkRKq",
+      "type": "text",
+      "content": "(b) Customer shall provide Supplier with the access and information reasonably required to perform the Services.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 1,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.988,
+       "avgOcrConfidence": 0.995,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 187.24110898598235,
+        "y": 918.9465386526925
+       },
+       {
+        "x": 1041.698036329602,
+        "y": 918.9465386526925
+       },
+       {
+        "x": 1041.698036329602,
+        "y": 972.0709261213029
+       },
+       {
+        "x": 187.24110898598235,
+        "y": 972.0709261213029
+       }
+      ],
+      "boundingBox": {
+       "left": 187.24110898598235,
+       "top": 918.9465386526925,
+       "right": 1041.698036329602,
+       "bottom": 972.0709261213029
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_1_UzhDXd",
+      "type": "section_heading",
+      "content": "### 3. Term and Renewal",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 1,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.992,
+       "avgOcrConfidence": 0.993,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 187.48109383090954,
+        "y": 1033.1831289018903
+       },
+       {
+        "x": 442.63355214400644,
+        "y": 1033.1831289018903
+       },
+       {
+        "x": 442.63355214400644,
+        "y": 1055.5939979553223
+       },
+       {
+        "x": 187.48109383090954,
+        "y": 1055.5939979553223
+       }
+      ],
+      "boundingBox": {
+       "left": 187.48109383090954,
+       "top": 1033.1831289018903,
+       "right": 442.63355214400644,
+       "bottom": 1055.5939979553223
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_1_kwlk1b",
+      "type": "text",
+      "content": "This Agreement commences on the Effective Date and continues for an initial term of three (3) years.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 1,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.958,
+       "avgOcrConfidence": 0.993,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 185.93951357641254,
+        "y": 1070.0735266549248
+       },
+       {
+        "x": 1066.021300889419,
+        "y": 1070.0735266549248
+       },
+       {
+        "x": 1066.021300889419,
+        "y": 1124.4319888523648
+       },
+       {
+        "x": 185.93951357641254,
+        "y": 1124.4319888523648
+       }
+      ],
+      "boundingBox": {
+       "left": 185.93951357641254,
+       "top": 1070.0735266549248,
+       "right": 1066.021300889419,
+       "bottom": 1124.4319888523648
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_1_cKoAFq",
+      "type": "text",
+      "content": "Thereafter, this Agreement shall automatically renew for successive renewal terms of twelve (12) months each, unless either party gives written notice of non-renewal at least",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 1,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.985,
+       "avgOcrConfidence": 0.996,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.85310031171372,
+        "y": 1152.104579925537
+       },
+       {
+        "x": 1049.2403973888247,
+        "y": 1152.104579925537
+       },
+       {
+        "x": 1049.2403973888247,
+        "y": 1205.1927708217077
+       },
+       {
+        "x": 186.85310031171372,
+        "y": 1205.1927708217077
+       }
+      ],
+      "boundingBox": {
+       "left": 186.85310031171372,
+       "top": 1152.104579925537,
+       "right": 1049.2403973888247,
+       "bottom": 1205.1927708217077
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_1_X4A9PK",
+      "type": "text",
+      "content": "90 days before the end of the then-current term.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 1,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.992,
+       "avgOcrConfidence": 0.997,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 187.5679660946449,
+        "y": 1233.2420000348773
+       },
+       {
+        "x": 635.670818722545,
+        "y": 1233.2420000348773
+       },
+       {
+        "x": 635.670818722545,
+        "y": 1256.3351364135742
+       },
+       {
+        "x": 187.5679660946449,
+        "y": 1256.3351364135742
+       }
+      ],
+      "boundingBox": {
+       "left": 187.5679660946449,
+       "top": 1233.2420000348773,
+       "right": 635.670818722545,
+       "bottom": 1256.3351364135742
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_1_GiXiHt",
+      "type": "section_heading",
+      "content": "### 4. Fees and Payment",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 1,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.993,
+       "avgOcrConfidence": 0.996,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.60248793741138,
+        "y": 1316.3237228393555
+       },
+       {
+        "x": 437.7452694224294,
+        "y": 1316.3237228393555
+       },
+       {
+        "x": 437.7452694224294,
+        "y": 1342.8439756120954
+       },
+       {
+        "x": 186.60248793741138,
+        "y": 1342.8439756120954
+       }
+      ],
+      "boundingBox": {
+       "left": 186.60248793741138,
+       "top": 1316.3237228393555,
+       "right": 437.7452694224294,
+       "bottom": 1342.8439756120954
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_1_BbhYyE",
+      "type": "text",
+      "content": "Customer shall pay the Fees set out in the table below. Supplier shall invoice Customer annually in advance.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 1,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.992,
+       "avgOcrConfidence": 0.996,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.6982395538656,
+        "y": 1354.647657121931
+       },
+       {
+        "x": 1078.3991531969389,
+        "y": 1354.647657121931
+       },
+       {
+        "x": 1078.3991531969389,
+        "y": 1402.9520176478795
+       },
+       {
+        "x": 186.6982395538656,
+        "y": 1402.9520176478795
+       }
+      ],
+      "boundingBox": {
+       "left": 186.6982395538656,
+       "top": 1354.647657121931,
+       "right": 1078.3991531969389,
+       "bottom": 1402.9520176478795
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_1_fIek4u",
+      "type": "table",
+      "content": "| Item | Annual Fee |\n| --- | --- |\n| Platform subscription | $210,000 |",
+      "details": {
+       "type": "table_details",
+       "rowCount": 2,
+       "columnCount": 2
+      },
+      "metadata": {
+       "page": {
+        "number": 1,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.991,
+       "avgOcrConfidence": 0.994,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 175.24839211189024,
+        "y": 1432.142373221261
+       },
+       {
+        "x": 1076.5144456748012,
+        "y": 1432.142373221261
+       },
+       {
+        "x": 1076.5144456748012,
+        "y": 1488.7351259504046
+       },
+       {
+        "x": 175.24839211189024,
+        "y": 1488.7351259504046
+       }
+      ],
+      "boundingBox": {
+       "left": 175.24839211189024,
+       "top": 1432.142373221261,
+       "right": 1076.5144456748012,
+       "bottom": 1488.7351259504046
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_1_iXb6U5",
+      "type": "footer",
+      "content": "MSA-2025-0147 Page 1",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 1,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.992,
+       "avgOcrConfidence": 0.992,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 526.1143877837158,
+        "y": 1552.3264825003487
+       },
+       {
+        "x": 671.4652377091269,
+        "y": 1552.3264825003487
+       },
+       {
+        "x": 671.4652377091269,
+        "y": 1570.4224155970983
+       },
+       {
+        "x": 526.1143877837158,
+        "y": 1570.4224155970983
+       }
+      ],
+      "boundingBox": {
+       "left": 526.1143877837158,
+       "top": 1552.3264825003487,
+       "right": 671.4652377091269,
+       "bottom": 1570.4224155970983
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_1_0S80rV",
+      "type": "page_number",
+      "content": "",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 1,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.984,
+       "avgOcrConfidence": 0.988,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 692.0456733567859,
+        "y": 1552.2477220807757
+       },
+       {
+        "x": 749.2631145219361,
+        "y": 1552.2477220807757
+       },
+       {
+        "x": 749.2631145219361,
+        "y": 1575.3466720581055
+       },
+       {
+        "x": 692.0456733567859,
+        "y": 1575.3466720581055
+       }
+      ],
+      "boundingBox": {
+       "left": 692.0456733567859,
+       "top": 1552.2477220807757,
+       "right": 749.2631145219361,
+       "bottom": 1575.3466720581055
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_2_p7FgMq",
+      "type": "heading",
+      "content": "# Halcyon Systems, Inc. - Confidential",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 2,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.99,
+       "avgOcrConfidence": 0.993,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.87066862167413,
+        "y": 78.25057043348039
+       },
+       {
+        "x": 521.7851061837954,
+        "y": 78.25057043348039
+       },
+       {
+        "x": 521.7851061837954,
+        "y": 101.2085406439645
+       },
+       {
+        "x": 186.87066862167413,
+        "y": 101.2085406439645
+       }
+      ],
+      "boundingBox": {
+       "left": 186.87066862167413,
+       "top": 78.25057043348039,
+       "right": 521.7851061837954,
+       "bottom": 101.2085406439645
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_2_OWJ2ks",
+      "type": "table",
+      "content": "| Premium support | $40,000 |\n| --- | --- |\n| Total annual Fees | $250,000 |",
+      "details": {
+       "type": "table_details",
+       "rowCount": 2,
+       "columnCount": 2
+      },
+      "metadata": {
+       "page": {
+        "number": 2,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.992,
+       "avgOcrConfidence": 0.995,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 175.45306725009905,
+        "y": 149.06381797790527
+       },
+       {
+        "x": 1076.4153707918324,
+        "y": 149.06381797790527
+       },
+       {
+        "x": 1076.4153707918324,
+        "y": 205.9622691018241
+       },
+       {
+        "x": 175.45306725009905,
+        "y": 205.9622691018241
+       }
+      ],
+      "boundingBox": {
+       "left": 175.45306725009905,
+       "top": 149.06381797790527,
+       "right": 1076.4153707918324,
+       "bottom": 205.9622691018241
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_2_SR2rKd",
+      "type": "text",
+      "content": "All invoices are due and payable within forty-five (45) days after the invoice date. Late amounts accrue interest at 1.5% per month. Fees are exclusive of taxes.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 2,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.984,
+       "avgOcrConfidence": 0.994,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.05530864403343,
+        "y": 209.247713633946
+       },
+       {
+        "x": 1077.0385524980538,
+        "y": 209.247713633946
+       },
+       {
+        "x": 1077.0385524980538,
+        "y": 262.45144980294367
+       },
+       {
+        "x": 186.05530864403343,
+        "y": 262.45144980294367
+       }
+      ],
+      "boundingBox": {
+       "left": 186.05530864403343,
+       "top": 209.247713633946,
+       "right": 1077.0385524980538,
+       "bottom": 262.45144980294367
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_2_mp7hnh",
+      "type": "section_heading",
+      "content": "### 5. Service Levels",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 2,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.989,
+       "avgOcrConfidence": 0.993,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 187.74570892714095,
+        "y": 322.21783910478865
+       },
+       {
+        "x": 383.3080868704039,
+        "y": 322.21783910478865
+       },
+       {
+        "x": 383.3080868704039,
+        "y": 344.2943224225725
+       },
+       {
+        "x": 187.74570892714095,
+        "y": 344.2943224225725
+       }
+      ],
+      "boundingBox": {
+       "left": 187.74570892714095,
+       "top": 322.21783910478865,
+       "right": 383.3080868704039,
+       "bottom": 344.2943224225725
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_2_5ghL7R",
+      "type": "text",
+      "content": "Supplier shall make the Services available with a monthly uptime of at least 99.9%. Supplier shall respond to Severity 1 incidents within 2 hours.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 2,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.932,
+       "avgOcrConfidence": 0.993,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.98106338120863,
+        "y": 360.35951014927457
+       },
+       {
+        "x": 1043.450574773062,
+        "y": 360.35951014927457
+       },
+       {
+        "x": 1043.450574773062,
+        "y": 413.6649842943464
+       },
+       {
+        "x": 186.98106338120863,
+        "y": 413.6649842943464
+       }
+      ],
+      "boundingBox": {
+       "left": 186.98106338120863,
+       "top": 360.35951014927457,
+       "right": 1043.450574773062,
+       "bottom": 413.6649842943464
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_2_0X54fX",
+      "type": "section_heading",
+      "content": "### 6. Confidentiality",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 2,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.992,
+       "avgOcrConfidence": 0.992,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 187.54345700409914,
+        "y": 473.80673136029924
+       },
+       {
+        "x": 394.6042159273955,
+        "y": 473.80673136029924
+       },
+       {
+        "x": 394.6042159273955,
+        "y": 500.9890768868583
+       },
+       {
+        "x": 187.54345700409914,
+        "y": 500.9890768868583
+       }
+      ],
+      "boundingBox": {
+       "left": 187.54345700409914,
+       "top": 473.80673136029924,
+       "right": 394.6042159273955,
+       "bottom": 500.9890768868583
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_2_XzF7Dp",
+      "type": "text",
+      "content": "Each party shall protect the other party's Confidential Information using at least reasonable care and shall not disclose it to any third party without the disclosing party's prior written consent.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 2,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.989,
+       "avgOcrConfidence": 0.996,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.83608587950576,
+        "y": 511.2302845546178
+       },
+       {
+        "x": 1043.2220309654588,
+        "y": 511.2302845546178
+       },
+       {
+        "x": 1043.2220309654588,
+        "y": 590.7793464660645
+       },
+       {
+        "x": 186.83608587950576,
+        "y": 590.7793464660645
+       }
+      ],
+      "boundingBox": {
+       "left": 186.83608587950576,
+       "top": 511.2302845546178,
+       "right": 1043.2220309654588,
+       "bottom": 590.7793464660645
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_2_qFc7UJ",
+      "type": "text",
+      "content": "The obligations in this Section survive for five (5) years after termination or expiration of this Agreement.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 2,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.987,
+       "avgOcrConfidence": 0.995,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.5337032440294,
+        "y": 623.2943883623395
+       },
+       {
+        "x": 1059.4107699139686,
+        "y": 623.2943883623395
+       },
+       {
+        "x": 1059.4107699139686,
+        "y": 676.5505507332938
+       },
+       {
+        "x": 186.5337032440294,
+        "y": 676.5505507332938
+       }
+      ],
+      "boundingBox": {
+       "left": 186.5337032440294,
+       "top": 623.2943883623395,
+       "right": 1059.4107699139686,
+       "bottom": 676.5505507332938
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_2_Znl0Cb",
+      "type": "section_heading",
+      "content": "### 7. Data Protection and Security",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 2,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.992,
+       "avgOcrConfidence": 0.994,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 187.69914857857592,
+        "y": 737.3987884521484
+       },
+       {
+        "x": 563.6962048948023,
+        "y": 737.3987884521484
+       },
+       {
+        "x": 563.6962048948023,
+        "y": 763.8000008719308
+       },
+       {
+        "x": 187.69914857857592,
+        "y": 763.8000008719308
+       }
+      ],
+      "boundingBox": {
+       "left": 187.69914857857592,
+       "top": 737.3987884521484,
+       "right": 563.6962048948023,
+       "bottom": 763.8000008719308
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_2_F9e75f",
+      "type": "text",
+      "content": "Supplier shall process personal data only in accordance with the Data Processing Agreement attached as Exhibit B and applicable law, including the GDPR where it applies.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 2,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.987,
+       "avgOcrConfidence": 0.994,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.6998838784432,
+        "y": 774.41777747018
+       },
+       {
+        "x": 1046.2540270170707,
+        "y": 774.41777747018
+       },
+       {
+        "x": 1046.2540270170707,
+        "y": 828.521963936942
+       },
+       {
+        "x": 186.6998838784432,
+        "y": 828.521963936942
+       }
+      ],
+      "boundingBox": {
+       "left": 186.6998838784432,
+       "top": 774.41777747018,
+       "right": 1046.2540270170707,
+       "bottom": 828.521963936942
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_2_4NKIp3",
+      "type": "text",
+      "content": "Supplier shall notify Customer of any confirmed security breach affecting Customer data within 72 hours.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 2,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.991,
+       "avgOcrConfidence": 0.995,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.5470136187679,
+        "y": 856.3248765128
+       },
+       {
+        "x": 1078.169709337988,
+        "y": 856.3248765128
+       },
+       {
+        "x": 1078.169709337988,
+        "y": 904.6645338875907
+       },
+       {
+        "x": 186.5470136187679,
+        "y": 904.6645338875907
+       }
+      ],
+      "boundingBox": {
+       "left": 186.5470136187679,
+       "top": 856.3248765128,
+       "right": 1078.169709337988,
+       "bottom": 904.6645338875907
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_2_XPqE3q",
+      "type": "section_heading",
+      "content": "### 8. Intellectual Property",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 2,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.992,
+       "avgOcrConfidence": 0.994,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.93673585233316,
+        "y": 968.8911645071847
+       },
+       {
+        "x": 465.71408811413096,
+        "y": 968.8911645071847
+       },
+       {
+        "x": 465.71408811413096,
+        "y": 995.9653701782227
+       },
+       {
+        "x": 186.93673585233316,
+        "y": 995.9653701782227
+       }
+      ],
+      "boundingBox": {
+       "left": 186.93673585233316,
+       "top": 968.8911645071847,
+       "right": 465.71408811413096,
+       "bottom": 995.9653701782227
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_2_RoMAjm",
+      "type": "text",
+      "content": "Supplier retains all intellectual property rights in the Services. Customer retains all rights in Customer data. I. No rights are granted except as expressly set out in this Agreement.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 2,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.984,
+       "avgOcrConfidence": 0.995,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.71852532654893,
+        "y": 1007.4468814304896
+       },
+       {
+        "x": 1043.116586488337,
+        "y": 1007.4468814304896
+       },
+       {
+        "x": 1043.116586488337,
+        "y": 1060.3677237374443
+       },
+       {
+        "x": 186.71852532654893,
+        "y": 1060.3677237374443
+       }
+      ],
+      "boundingBox": {
+       "left": 186.71852532654893,
+       "top": 1007.4468814304896,
+       "right": 1043.116586488337,
+       "bottom": 1060.3677237374443
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_2_Wi8MFq",
+      "type": "section_heading",
+      "content": "### 9. Warranties and Disclaimer",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 2,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.992,
+       "avgOcrConfidence": 0.995,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 187.86416953144547,
+        "y": 1121.106610434396
+       },
+       {
+        "x": 536.7836656943759,
+        "y": 1121.106610434396
+       },
+       {
+        "x": 536.7836656943759,
+        "y": 1143.691056932722
+       },
+       {
+        "x": 187.86416953144547,
+        "y": 1143.691056932722
+       }
+      ],
+      "boundingBox": {
+       "left": 187.86416953144547,
+       "top": 1121.106610434396,
+       "right": 536.7836656943759,
+       "bottom": 1143.691056932722
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_2_ZGCwop",
+      "type": "text",
+      "content": "Supplier warrants that the Services will conform in all material respects to the documentation for a period of ninety (90) days from delivery.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 2,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.988,
+       "avgOcrConfidence": 0.995,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.59097766536834,
+        "y": 1159.7554141453334
+       },
+       {
+        "x": 1062.6264456752356,
+        "y": 1159.7554141453334
+       },
+       {
+        "x": 1062.6264456752356,
+        "y": 1212.4763793945312
+       },
+       {
+        "x": 186.59097766536834,
+        "y": 1212.4763793945312
+       }
+      ],
+      "boundingBox": {
+       "left": 186.59097766536834,
+       "top": 1159.7554141453334,
+       "right": 1062.6264456752356,
+       "bottom": 1212.4763793945312
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_2_sdff4H",
+      "type": "text",
+      "content": "EXCEPT AS EXPRESSLY SET OUT IN THIS AGREEMENT, SUPPLIER DISCLAIMS ALL WARRANTIES, WHETHER EXPRESS OR IMPLIED, INCLUDING ANY WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 2,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.989,
+       "avgOcrConfidence": 0.994,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.64922137277406,
+        "y": 1239.9520002092634
+       },
+       {
+        "x": 972.2482050016682,
+        "y": 1239.9520002092634
+       },
+       {
+        "x": 972.2482050016682,
+        "y": 1319.038396562849
+       },
+       {
+        "x": 186.64922137277406,
+        "y": 1319.038396562849
+       }
+      ],
+      "boundingBox": {
+       "left": 186.64922137277406,
+       "top": 1239.9520002092634,
+       "right": 972.2482050016682,
+       "bottom": 1319.038396562849
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_2_CUREdi",
+      "type": "section_heading",
+      "content": "### 10. Indemnification",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 2,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.975,
+       "avgOcrConfidence": 0.986,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 188.56013423607445,
+        "y": 1383.6342599051338
+       },
+       {
+        "x": 422.0060022700299,
+        "y": 1383.6342599051338
+       },
+       {
+        "x": 422.0060022700299,
+        "y": 1406.520598275321
+       },
+       {
+        "x": 188.56013423607445,
+        "y": 1406.520598275321
+       }
+      ],
+      "boundingBox": {
+       "left": 188.56013423607445,
+       "top": 1383.6342599051338,
+       "right": 422.0060022700299,
+       "bottom": 1406.520598275321
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_2_bfmzQB",
+      "type": "text",
+      "content": "Supplier shall defend and indemnify Customer against any third-party claim alleging that the Services infringe any patent, copyright or trade secret.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 2,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.985,
+       "avgOcrConfidence": 0.996,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.54189024955775,
+        "y": 1422.472282409668
+       },
+       {
+        "x": 1057.5745266951699,
+        "y": 1422.472282409668
+       },
+       {
+        "x": 1057.5745266951699,
+        "y": 1475.7872728620257
+       },
+       {
+        "x": 186.54189024955775,
+        "y": 1475.7872728620257
+       }
+      ],
+      "boundingBox": {
+       "left": 186.54189024955775,
+       "top": 1422.472282409668,
+       "right": 1057.5745266951699,
+       "bottom": 1475.7872728620257
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_2_Y25wtE",
+      "type": "footer",
+      "content": "MSA-2025-0147 Page 2",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 2,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.992,
+       "avgOcrConfidence": 0.992,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 524.3049730185512,
+        "y": 1552.5622100830078
+       },
+       {
+        "x": 670.0192706016459,
+        "y": 1552.5622100830078
+       },
+       {
+        "x": 670.0192706016459,
+        "y": 1570.2794287545341
+       },
+       {
+        "x": 524.3049730185512,
+        "y": 1570.2794287545341
+       }
+      ],
+      "boundingBox": {
+       "left": 524.3049730185512,
+       "top": 1552.5622100830078,
+       "right": 670.0192706016459,
+       "bottom": 1570.2794287545341
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_2_6iXReU",
+      "type": "page_number",
+      "content": "",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 2,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.992,
+       "avgOcrConfidence": 0.994,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 691.297938390983,
+        "y": 1552.403443472726
+       },
+       {
+        "x": 749.6419669046096,
+        "y": 1552.403443472726
+       },
+       {
+        "x": 749.6419669046096,
+        "y": 1575.2279085431778
+       },
+       {
+        "x": 691.297938390983,
+        "y": 1575.2279085431778
+       }
+      ],
+      "boundingBox": {
+       "left": 691.297938390983,
+       "top": 1552.403443472726,
+       "right": 749.6419669046096,
+       "bottom": 1575.2279085431778
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_3_7yt468",
+      "type": "heading",
+      "content": "# Halcyon Systems, Inc. - Confidential",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 3,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.989,
+       "avgOcrConfidence": 0.992,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.97298022775888,
+        "y": 78.25314848763603
+       },
+       {
+        "x": 521.9436536904332,
+        "y": 78.25314848763603
+       },
+       {
+        "x": 521.9436536904332,
+        "y": 101.21094567435128
+       },
+       {
+        "x": 186.97298022775888,
+        "y": 101.21094567435128
+       }
+      ],
+      "boundingBox": {
+       "left": 186.97298022775888,
+       "top": 78.25314848763603,
+       "right": 521.9436536904332,
+       "bottom": 101.21094567435128
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_3_qGRqfv",
+      "type": "text",
+      "content": "(a) Customer shall give Supplier prompt written notice of the claim.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 3,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.989,
+       "avgOcrConfidence": 0.995,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 189.1027094206352,
+        "y": 153.3102538245065
+       },
+       {
+        "x": 817.233469138366,
+        "y": 153.3102538245065
+       },
+       {
+        "x": 817.233469138366,
+        "y": 176.43463829585482
+       },
+       {
+        "x": 189.1027094206352,
+        "y": 176.43463829585482
+       }
+      ],
+      "boundingBox": {
+       "left": 189.1027094206352,
+       "top": 153.3102538245065,
+       "right": 817.233469138366,
+       "bottom": 176.43463829585482
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_3_uZT2QX",
+      "type": "text",
+      "content": "(b) Supplier shall have sole control of the defence and settlement of the claim.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 3,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.992,
+       "avgOcrConfidence": 0.996,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 188.64655647413588,
+        "y": 204.02341665540422
+       },
+       {
+        "x": 911.1596429899495,
+        "y": 204.02341665540422
+       },
+       {
+        "x": 911.1596429899495,
+        "y": 227.74997574942452
+       },
+       {
+        "x": 188.64655647413588,
+        "y": 227.74997574942452
+       }
+      ],
+      "boundingBox": {
+       "left": 188.64655647413588,
+       "top": 204.02341665540422,
+       "right": 911.1596429899495,
+       "bottom": 227.74997574942452
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_3_KgydXs",
+      "type": "text",
+      "content": "30 days after receipt of notice, Supplier shall assume the defence of the claim.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 3,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.989,
+       "avgOcrConfidence": 0.996,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 187.59765048044008,
+        "y": 255.1099474770682
+       },
+       {
+        "x": 905.7344104047347,
+        "y": 255.1099474770682
+       },
+       {
+        "x": 905.7344104047347,
+        "y": 278.38071005684986
+       },
+       {
+        "x": 187.59765048044008,
+        "y": 278.38071005684986
+       }
+      ],
+      "boundingBox": {
+       "left": 187.59765048044008,
+       "top": 255.1099474770682,
+       "right": 905.7344104047347,
+       "bottom": 278.38071005684986
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_3_1O46KM",
+      "type": "section_heading",
+      "content": "### 11. Limitation of Liability",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 3,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.994,
+       "avgOcrConfidence": 0.995,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 188.48420105794995,
+        "y": 337.6365408216204
+       },
+       {
+        "x": 487.73142112107473,
+        "y": 337.6365408216204
+       },
+       {
+        "x": 487.73142112107473,
+        "y": 365.15721702575684
+       },
+       {
+        "x": 188.48420105794995,
+        "y": 365.15721702575684
+       }
+      ],
+      "boundingBox": {
+       "left": 188.48420105794995,
+       "top": 337.6365408216204,
+       "right": 487.73142112107473,
+       "bottom": 365.15721702575684
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_3_7jlf62",
+      "type": "text",
+      "content": "IN NO EVENT SHALL EITHER PARTY BE LIABLE FOR ANY INDIRECT, INCIDENTAL OR CONSEQUENTIAL DAMAGES.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 3,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.992,
+       "avgOcrConfidence": 0.994,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.94788264210112,
+        "y": 375.71000589643205
+       },
+       {
+        "x": 1001.4165152010121,
+        "y": 375.71000589643205
+       },
+       {
+        "x": 1001.4165152010121,
+        "y": 427.89560100010465
+       },
+       {
+        "x": 186.94788264210112,
+        "y": 427.89560100010465
+       }
+      ],
+      "boundingBox": {
+       "left": 186.94788264210112,
+       "top": 375.71000589643205,
+       "right": 1001.4165152010121,
+       "bottom": 427.89560100010465
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_3_6UW6kn",
+      "type": "text",
+      "content": "Each party's total aggregate liability arising out of this Agreement shall not exceed the greater of (i) the Fees paid or payable in the twelve (12) months preceding the claim and (ii) $500,000.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 3,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.977,
+       "avgOcrConfidence": 0.994,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 187.652432451893,
+        "y": 457.31054142543246
+       },
+       {
+        "x": 1086.1852897019573,
+        "y": 457.31054142543246
+       },
+       {
+        "x": 1086.1852897019573,
+        "y": 511.32894270760676
+       },
+       {
+        "x": 187.652432451893,
+        "y": 511.32894270760676
+       }
+      ],
+      "boundingBox": {
+       "left": 187.652432451893,
+       "top": 457.31054142543246,
+       "right": 1086.1852897019573,
+       "bottom": 511.32894270760676
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_3_dZkkNT",
+      "type": "text",
+      "content": "The limitations in this Section do not apply to a party's fraud, gross negligence or wilful misconduct, or to a breach of Section 6 (Confidentiality).",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 3,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.983,
+       "avgOcrConfidence": 0.995,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.88915429166207,
+        "y": 539.336992263794
+       },
+       {
+        "x": 1001.7406029209124,
+        "y": 539.336992263794
+       },
+       {
+        "x": 1001.7406029209124,
+        "y": 592.0874753679548
+       },
+       {
+        "x": 186.88915429166207,
+        "y": 592.0874753679548
+       }
+      ],
+      "boundingBox": {
+       "left": 186.88915429166207,
+       "top": 539.336992263794,
+       "right": 1001.7406029209124,
+       "bottom": 592.0874753679548
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_3_0RCjR2",
+      "type": "section_heading",
+      "content": "### 12. Termination",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 3,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.993,
+       "avgOcrConfidence": 0.995,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 188.70293084412705,
+        "y": 652.299054827009
+       },
+       {
+        "x": 379.0328429687065,
+        "y": 652.299054827009
+       },
+       {
+        "x": 379.0328429687065,
+        "y": 674.5270031520299
+       },
+       {
+        "x": 188.70293084412705,
+        "y": 674.5270031520299
+       }
+      ],
+      "boundingBox": {
+       "left": 188.70293084412705,
+       "top": 652.299054827009,
+       "right": 379.0328429687065,
+       "bottom": 674.5270031520299
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_3_XmPczZ",
+      "type": "text",
+      "content": "Either party may terminate this Agreement for material breach if the breach is not cured within thirty (30) days after written notice.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 3,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.989,
+       "avgOcrConfidence": 0.996,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.9455632790128,
+        "y": 690.4923907688686
+       },
+       {
+        "x": 1081.3108193068317,
+        "y": 690.4923907688686
+       },
+       {
+        "x": 1081.3108193068317,
+        "y": 743.5675010681152
+       },
+       {
+        "x": 186.9455632790128,
+        "y": 743.5675010681152
+       }
+      ],
+      "boundingBox": {
+       "left": 186.9455632790128,
+       "top": 690.4923907688686,
+       "right": 1081.3108193068317,
+       "bottom": 743.5675010681152
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_3_ppT41C",
+      "type": "text",
+      "content": "Customer may terminate this Agreement for convenience upon sixty (60) days' written notice to Supplier. Supplier has no right to terminate for convenience.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 3,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.992,
+       "avgOcrConfidence": 0.995,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.53771885773466,
+        "y": 771.8766811915807
+       },
+       {
+        "x": 1083.7609667794982,
+        "y": 771.8766811915807
+       },
+       {
+        "x": 1083.7609667794982,
+        "y": 825.57744543893
+       },
+       {
+        "x": 186.53771885773466,
+        "y": 825.57744543893
+       }
+      ],
+      "boundingBox": {
+       "left": 186.53771885773466,
+       "top": 771.8766811915807,
+       "right": 1083.7609667794982,
+       "bottom": 825.57744543893
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_3_s122mZ",
+      "type": "section_heading",
+      "content": "### 13. Governing Law and Disputes",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 3,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.993,
+       "avgOcrConfidence": 0.997,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 188.63148061406142,
+        "y": 885.3561886378696
+       },
+       {
+        "x": 574.4973749452638,
+        "y": 885.3561886378696
+       },
+       {
+        "x": 574.4973749452638,
+        "y": 912.1217891148159
+       },
+       {
+        "x": 188.63148061406142,
+        "y": 912.1217891148159
+       }
+      ],
+      "boundingBox": {
+       "left": 188.63148061406142,
+       "top": 885.3561886378696,
+       "right": 574.4973749452638,
+       "bottom": 912.1217891148159
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_3_au7PNx",
+      "type": "text",
+      "content": "This Agreement is governed by the laws of the State of New York, without regard to its conflict of laws rules.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 3,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.991,
+       "avgOcrConfidence": 0.996,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.2733287743402,
+        "y": 923.1452026367188
+       },
+       {
+        "x": 1064.7587365527172,
+        "y": 923.1452026367188
+       },
+       {
+        "x": 1064.7587365527172,
+        "y": 972.041996547154
+       },
+       {
+        "x": 186.2733287743402,
+        "y": 972.041996547154
+       }
+      ],
+      "boundingBox": {
+       "left": 186.2733287743402,
+       "top": 923.1452026367188,
+       "right": 1064.7587365527172,
+       "bottom": 972.041996547154
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_3_O15zmP",
+      "type": "text",
+      "content": "Any dispute arising out of this Agreement shall be resolved exclusively by the state and federal courts located in New York County, New York. The parties agree that arbitration shall not apply to any dispute under this Agreement.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 3,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.989,
+       "avgOcrConfidence": 0.995,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.6017955902208,
+        "y": 1004.4723260062083
+       },
+       {
+        "x": 1077.4340212133006,
+        "y": 1004.4723260062083
+       },
+       {
+        "x": 1077.4340212133006,
+        "y": 1088.3416530064173
+       },
+       {
+        "x": 186.6017955902208,
+        "y": 1088.3416530064173
+       }
+      ],
+      "boundingBox": {
+       "left": 186.6017955902208,
+       "top": 1004.4723260062083,
+       "right": 1077.4340212133006,
+       "bottom": 1088.3416530064173
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_3_yDSfhB",
+      "type": "section_heading",
+      "content": "### 14. General",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 3,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.995,
+       "avgOcrConfidence": 0.996,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 188.54422755937136,
+        "y": 1147.8731798444476
+       },
+       {
+        "x": 325.6719487417635,
+        "y": 1147.8731798444476
+       },
+       {
+        "x": 325.6719487417635,
+        "y": 1170.3543657575335
+       },
+       {
+        "x": 188.54422755937136,
+        "y": 1170.3543657575335
+       }
+      ],
+      "boundingBox": {
+       "left": 188.54422755937136,
+       "top": 1147.8731798444476,
+       "right": 325.6719487417635,
+       "bottom": 1170.3543657575335
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_3_n4LVgL",
+      "type": "text",
+      "content": "Neither party may assign this Agreement without the prior written consent of the other party, except to a successor in a merger or sale of substantially all of its assets.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 3,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.989,
+       "avgOcrConfidence": 0.996,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.66012584102535,
+        "y": 1186.596176147461
+       },
+       {
+        "x": 1062.4395119337848,
+        "y": 1186.596176147461
+       },
+       {
+        "x": 1062.4395119337848,
+        "y": 1239.2199020385742
+       },
+       {
+        "x": 186.66012584102535,
+        "y": 1239.2199020385742
+       }
+      ],
+      "boundingBox": {
+       "left": 186.66012584102535,
+       "top": 1186.596176147461,
+       "right": 1062.4395119337848,
+       "bottom": 1239.2199020385742
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_3_LLVhRK",
+      "type": "text",
+      "content": "Notices must be in writing and sent to the addresses set out above. Notices to Supplier must be marked for the attention of the Legal Department.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 3,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.992,
+       "avgOcrConfidence": 0.995,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.39821089883716,
+        "y": 1267.2990297589984
+       },
+       {
+        "x": 1065.7191605754595,
+        "y": 1267.2990297589984
+       },
+       {
+        "x": 1065.7191605754595,
+        "y": 1320.4079142979213
+       },
+       {
+        "x": 186.39821089883716,
+        "y": 1320.4079142979213
+       }
+      ],
+      "boundingBox": {
+       "left": 186.39821089883716,
+       "top": 1267.2990297589984,
+       "right": 1065.7191605754595,
+       "bottom": 1320.4079142979213
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_3_I3HLA5",
+      "type": "text",
+      "content": "This Agreement is the entire agreement between the parties and may be amended only in a writing signed by both parties. Neither party is liable for delay caused by a force majeure event.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 3,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.992,
+       "avgOcrConfidence": 0.996,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.20594608401913,
+        "y": 1348.3904255458287
+       },
+       {
+        "x": 1075.5401747082476,
+        "y": 1348.3904255458287
+       },
+       {
+        "x": 1075.5401747082476,
+        "y": 1402.519181387765
+       },
+       {
+        "x": 186.20594608401913,
+        "y": 1402.519181387765
+       }
+      ],
+      "boundingBox": {
+       "left": 186.20594608401913,
+       "top": 1348.3904255458287,
+       "right": 1075.5401747082476,
+       "bottom": 1402.519181387765
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_3_V7g6iB",
+      "type": "text",
+      "content": "IN WITNESS WHEREOF, the parties have executed this Agreement as of the Effective Date.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 3,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.992,
+       "avgOcrConfidence": 0.995,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.62886636537164,
+        "y": 1429.8671798706055
+       },
+       {
+        "x": 1026.4769218146164,
+        "y": 1429.8671798706055
+       },
+       {
+        "x": 1026.4769218146164,
+        "y": 1453.4638846261162
+       },
+       {
+        "x": 186.62886636537164,
+        "y": 1453.4638846261162
+       }
+      ],
+      "boundingBox": {
+       "left": 186.62886636537164,
+       "top": 1429.8671798706055,
+       "right": 1026.4769218146164,
+       "bottom": 1453.4638846261162
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_3_jgySgJ",
+      "type": "footer",
+      "content": "MSA-2025-0147 Page 3",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 3,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.992,
+       "avgOcrConfidence": 0.992,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 524.547709943561,
+        "y": 1552.5224838256836
+       },
+       {
+        "x": 670.0734813866667,
+        "y": 1552.5224838256836
+       },
+       {
+        "x": 670.0734813866667,
+        "y": 1570.2913327898298
+       },
+       {
+        "x": 524.547709943561,
+        "y": 1570.2913327898298
+       }
+      ],
+      "boundingBox": {
+       "left": 524.547709943561,
+       "top": 1552.5224838256836,
+       "right": 670.0734813866667,
+       "bottom": 1570.2913327898298
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_3_41ZczL",
+      "type": "page_number",
+      "content": "",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 3,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.977,
+       "avgOcrConfidence": 0.984,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 691.4313536946036,
+        "y": 1552.2452305385045
+       },
+       {
+        "x": 749.5962719900328,
+        "y": 1552.2452305385045
+       },
+       {
+        "x": 749.5962719900328,
+        "y": 1575.3198187691826
+       },
+       {
+        "x": 691.4313536946036,
+        "y": 1575.3198187691826
+       }
+      ],
+      "boundingBox": {
+       "left": 691.4313536946036,
+       "top": 1552.2452305385045,
+       "right": 749.5962719900328,
+       "bottom": 1575.3198187691826
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_4_0u29hB",
+      "type": "heading",
+      "content": "# Halcyon Systems, Inc. - Confidential",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 4,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.992,
+       "avgOcrConfidence": 0.994,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.57295932973406,
+        "y": 77.63998685564314
+       },
+       {
+        "x": 522.830792763055,
+        "y": 77.63998685564314
+       },
+       {
+        "x": 522.830792763055,
+        "y": 101.5951189994812
+       },
+       {
+        "x": 186.57295932973406,
+        "y": 101.5951189994812
+       }
+      ],
+      "boundingBox": {
+       "left": 186.57295932973406,
+       "top": 77.63998685564314,
+       "right": 522.830792763055,
+       "bottom": 101.5951189994812
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_4_ACy3I6",
+      "type": "section_heading",
+      "content": "### HALCYON SYSTEMS, INC.",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 4,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.988,
+       "avgOcrConfidence": 0.992,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.49782235087875,
+        "y": 152.23205620901925
+       },
+       {
+        "x": 427.80963721224424,
+        "y": 152.23205620901925
+       },
+       {
+        "x": 427.80963721224424,
+        "y": 174.55409485953194
+       },
+       {
+        "x": 186.49782235087875,
+        "y": 174.55409485953194
+       }
+      ],
+      "boundingBox": {
+       "left": 186.49782235087875,
+       "top": 152.23205620901925,
+       "right": 427.80963721224424,
+       "bottom": 174.55409485953194
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_4_FcTe8O",
+      "type": "key_value",
+      "content": "By: /s/ Dana Whitfield\nName: Dana Whitfield\nTitle: Chief Revenue Officer\nDate: March 1, 2025",
+      "details": {
+       "type": "key_value_details"
+      },
+      "metadata": {
+       "page": {
+        "number": 4,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.989,
+       "avgOcrConfidence": 0.994,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 185.48943597651038,
+        "y": 202.56932490212577
+       },
+       {
+        "x": 445.2915076259192,
+        "y": 202.56932490212577
+       },
+       {
+        "x": 445.2915076259192,
+        "y": 379.0582234518869
+       },
+       {
+        "x": 185.48943597651038,
+        "y": 379.0582234518869
+       }
+      ],
+      "boundingBox": {
+       "left": 185.48943597651038,
+       "top": 202.56932490212577,
+       "right": 445.2915076259192,
+       "bottom": 379.0582234518869
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_4_eZykgu",
+      "type": "section_heading",
+      "content": "### NORTHWIND RETAIL GROUP LLC",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 4,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.992,
+       "avgOcrConfidence": 0.993,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 186.92731993054161,
+        "y": 458.50326347351074
+       },
+       {
+        "x": 508.9475007243852,
+        "y": 458.50326347351074
+       },
+       {
+        "x": 508.9475007243852,
+        "y": 478.9398275102888
+       },
+       {
+        "x": 186.92731993054161,
+        "y": 478.9398275102888
+       }
+      ],
+      "boundingBox": {
+       "left": 186.92731993054161,
+       "top": 458.50326347351074,
+       "right": 508.9475007243852,
+       "bottom": 478.9398275102888
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_4_IBXiTK",
+      "type": "key_value",
+      "content": "By: /s/ Priya Raman\nName: Priya Raman\nTitle: General Counsel\nDate: March 3, 2025",
+      "details": {
+       "type": "key_value_details"
+      },
+      "metadata": {
+       "page": {
+        "number": 4,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.989,
+       "avgOcrConfidence": 0.994,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 185.4017328961464,
+        "y": 509.0883887154716
+       },
+       {
+        "x": 392.70098811791036,
+        "y": 509.0883887154716
+       },
+       {
+        "x": 392.70098811791036,
+        "y": 685.4141431535993
+       },
+       {
+        "x": 185.4017328961464,
+        "y": 685.4141431535993
+       }
+      ],
+      "boundingBox": {
+       "left": 185.4017328961464,
+       "top": 509.0883887154716,
+       "right": 392.70098811791036,
+       "bottom": 685.4141431535993
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_4_FZMAM3",
+      "type": "footer",
+      "content": "MSA-2025-0147 Page 4",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 4,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.993,
+       "avgOcrConfidence": 0.993,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 523.897284375391,
+        "y": 1552.259072440011
+       },
+       {
+        "x": 670.519145273229,
+        "y": 1552.259072440011
+       },
+       {
+        "x": 670.519145273229,
+        "y": 1570.7737230573382
+       },
+       {
+        "x": 523.897284375391,
+        "y": 1570.7737230573382
+       }
+      ],
+      "boundingBox": {
+       "left": 523.897284375391,
+       "top": 1552.259072440011,
+       "right": 670.519145273229,
+       "bottom": 1570.7737230573382
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_4_tql1Hr",
+      "type": "page_number",
+      "content": "",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 4,
+        "width": 1275,
+        "height": 1651
+       },
+       "minOcrConfidence": 0.99,
+       "avgOcrConfidence": 0.992,
+       "hasHandwriting": false
+      },
+      "polygon": [
+       {
+        "x": 690.4517516546827,
+        "y": 1552.086879185268
+       },
+       {
+        "x": 750.8044870722761,
+        "y": 1552.086879185268
+       },
+       {
+        "x": 750.8044870722761,
+        "y": 1575.4949188232422
+       },
+       {
+        "x": 690.4517516546827,
+        "y": 1575.4949188232422
+       }
+      ],
+      "boundingBox": {
+       "left": 690.4517516546827,
+       "top": 1552.086879185268,
+       "right": 750.8044870722761,
+       "bottom": 1575.4949188232422
+      }
+     }
+    ]
+   }
+  ],
+  "metadata": {
+   "originalMimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+   "finalMimeType": "application/pdf",
+   "languageDetected": {
+    "languageCode": "en",
+    "confidence": 0.997,
+    "languages": [
+     {
+      "languageCode": "en",
+      "confidence": 0.997,
+      "coverage": 0.9854
+     }
+    ],
+    "undeterminedCoverage": 0.0146
+   },
+   "pages": [
+    {
+     "number": 1,
+     "rotationApplied": 0,
+     "originalPageWidth": 612,
+     "originalPageHeight": 792,
+     "dpi": 150
+    },
+    {
+     "number": 2,
+     "rotationApplied": 0,
+     "originalPageWidth": 612,
+     "originalPageHeight": 792,
+     "dpi": 150
+    },
+    {
+     "number": 3,
+     "rotationApplied": 0,
+     "originalPageWidth": 612,
+     "originalPageHeight": 792,
+     "dpi": 150
+    },
+    {
+     "number": 4,
+     "rotationApplied": 0,
+     "originalPageWidth": 612,
+     "originalPageHeight": 792,
+     "dpi": 150
+    }
+   ]
+  }
+ },
+ "outputUrl": null,
+ "metrics": {
+  "processingTimeMs": 3563,
+  "pageCount": 4
+ },
+ "config": {
+  "target": "markdown",
+  "chunkingStrategy": {
+   "type": "document"
+  },
+  "blockOptions": {
+   "tables": {
+    "targetFormat": "markdown"
+   }
+  },
+  "engine": "parse_light",
+  "engineVersion": "1.0.0"
+ },
+ "batchId": null,
+ "usage": {
+  "credits": 2,
+  "totalCredits": 2,
+  "breakdown": [
+   {
+    "object": "parse_run",
+    "id": "pr_tzHJxRMWCHetvbAVG3AmE",
+    "credits": 2,
+    "charges": [
+     {
+      "product": "parse_light",
+      "unit": "page",
+      "quantity": 4,
+      "credits": 2
+     }
+    ]
+   }
+  ]
+ }
+}

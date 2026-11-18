@@ -1,0 +1,3035 @@
+rules:
+  - rule_key: definitions.confidential_information_scope
+    title: Scope of Confidential Information
+    required: true
+    risk_weight: 6
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Confidential Information is defined broadly to cover anything disclosed
+      in connection with the Purpose that a reasonable person would
+      understand to be confidential, without requiring every disclosure to
+      carry a written legend.
+    risk_rationale: >
+      Halcyon exchanges early pricing, roadmap and security documentation
+      with counterparties across roughly 310 active and prospective customer
+      relationships well before any Order Form is signed, and those
+      discussions move faster than either side's internal marking habits. A
+      definition that depends on a confidentiality legend lets a
+      counterparty argue later that an unmarked architecture walkthrough or
+      slide deck was never protected at all.
+    detection_guidance: >
+      Look for the definition of "Confidential Information" and for "marked
+      or designated as confidential", "confirmed in writing within thirty
+      days of oral disclosure", "reasonably understood to be confidential"
+      and "whether disclosed before or after the Effective Date". Absence of
+      a definition in a confidentiality agreement is a missing clause.
+    source_ref: Halcyon Information Classification Policy IC-01
+    authored_by: Contracts Manager
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-01
+    positions:
+      - kind: preferred
+        label: Reasonable-person standard, no marking required
+        zone: green
+        summary: >
+          Confidential Information covers anything a reasonable person would
+          understand to be confidential, whether or not marked.
+        language: >
+          "Confidential Information" means any information disclosed by
+          either party (the "Disclosing Party") to the other party (the
+          "Receiving Party"), whether orally, in writing, electronically or
+          by observation, in connection with the Purpose, that is either
+          marked or identified as confidential at the time of disclosure or
+          that a reasonable person would understand to be confidential given
+          its nature and the circumstances of disclosure, including
+          information disclosed before the Effective Date in connection with
+          the Purpose.
+      - kind: fallback
+        rung: 1
+        label: Written confirmation within 30 days for oral disclosures
+        zone: yellow
+        approver_role: contracts_manager
+        give_get: >
+          Ask for a Purpose definition broad enough to cover every category
+          of information actually being exchanged, so the confirmation
+          requirement does not create gaps.
+        summary: >
+          Oral or visual disclosures must be confirmed in a written summary
+          within 30 days to be treated as confidential.
+        language: >
+          "Confidential Information" means any information disclosed by
+          either party in connection with the Purpose that is marked or
+          identified as confidential in writing at the time of disclosure,
+          or, if disclosed orally or visually, is confirmed in a written
+          summary identifying it as confidential and delivered to the
+          Receiving Party within thirty (30) days of disclosure.
+      - kind: fallback
+        rung: 2
+        label: Strict marking, 10-day confirmation window
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: >
+          Require that the agreed Purpose cannot later be narrowed to argue
+          that information fell outside it, since the marking burden shifts
+          entirely onto Halcyon.
+        summary: >
+          Only conspicuously marked information, or orally disclosed
+          information confirmed in writing within 10 days, is protected.
+        language: >
+          "Confidential Information" means only information that bears a
+          conspicuous legend such as "Confidential" or "Proprietary" at the
+          time of disclosure, or, if disclosed orally, is confirmed in a
+          written summary delivered to the Receiving Party within ten (10)
+          days identifying the information disclosed and its confidential
+          nature; information not so marked or confirmed is not Confidential
+          Information regardless of its sensitivity.
+      - kind: acceptable_variant
+        label: Knew-or-should-have-known wording
+        zone: green
+        summary: >
+          Different wording reaching the same reasonable-person standard.
+        language: >
+          "Confidential Information" includes all non-public information
+          disclosed by one party to the other in connection with the
+          Purpose that, because of its nature or the circumstances of its
+          disclosure, the Receiving Party knows or should reasonably know is
+          proprietary or confidential to the Disclosing Party, whether or
+          not it is labelled as such.
+    parameters:
+      - key: ci_scope_standard
+        label: Confidential information scope standard
+        value_type: enum
+        direction: set_membership
+        preferred_value: no_marking_required
+        green_limit: [no_marking_required]
+        yellow_limit: [written_confirmation_30_days, strict_marking_10_days]
+        allowed_values:
+          - no_marking_required
+          - written_confirmation_30_days
+          - strict_marking_10_days
+          - named_schedule_only
+        extraction_hint: >
+          Classify the drafted standard. "named_schedule_only", where
+          protection is limited to items listed on an attached schedule or
+          exhibit, is the most restrictive and is red.
+    red_lines:
+      - key: ci-named-schedule-only
+        description: >
+          Confidential Information is limited to items specifically listed
+          on an attached schedule or exhibit, so information exchanged in
+          meetings, demonstrations or unlisted documents is unprotected.
+        condition_type: parameter
+        condition: {parameter_key: ci_scope_standard, op: eq, value: named_schedule_only}
+        action: escalate
+        approver_role: general_counsel
+        rationale: >
+          Halcyon's security and solutions teams routinely walk
+          counterparties through architecture and PHI-handling controls in
+          meetings that are never reduced to a schedule; a schedule-only
+          definition would leave that discussion unprotected.
+    objections:
+      - objection: >
+          Your definition is too broad - we would be liable for things we
+          didn't even realize were confidential.
+        their_rationale: >
+          Recipients worry about inadvertently misusing information they
+          could not identify as sensitive at the time.
+        response: >
+          The reasonable-person standard only catches information a
+          reasonable person would recognize as confidential given its nature
+          and the context of disclosure, so routine business chatter is not
+          swept in. If your team still wants more certainty, we can require
+          written confirmation of anything shared orally within thirty days.
+        talking_points:
+          - The reasonable-person standard is the market default for mutual NDAs.
+          - We can move to written confirmation for oral disclosures as a fallback.
+        recommended_position: {rule_key: definitions.confidential_information_scope, rung: 1}
+        frequency: common
+        counterparty_profile: Large technology and hospital-system counterparties
+      - objection: We only protect information you mark "Confidential" in writing.
+        their_rationale: >
+          Standardizing on a bright-line marking rule limits the
+          counterparty's own compliance burden across many NDAs.
+        response: >
+          A pure marking rule would leave live product and security
+          walkthroughs unprotected, which is most of what we need to cover
+          before a deal is signed. We can agree to a short written-
+          confirmation window for anything disclosed orally or in a meeting,
+          which gives your team the same certainty without losing coverage.
+        talking_points:
+          - Offer the 30-day written confirmation fallback before conceding to strict marking.
+          - Note that security and architecture walkthroughs happen before any document changes hands.
+        recommended_position: {rule_key: definitions.confidential_information_scope, rung: 1}
+        frequency: occasional
+        counterparty_profile: Large enterprise counterparties with standard NDA templates
+    test_cases:
+      - name: Reasonable-person standard, different phrasing
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Confidential Information means any non-public information that one
+          party shares with the other in connection with the Purpose which,
+          given the circumstances of disclosure, a person exercising
+          reasonable business judgment would treat as proprietary, whether or
+          not it carries a confidentiality legend.
+      - name: Knew-or-should-have-known variant
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Confidential Information includes information a party discloses to
+          the other in connection with the Purpose that the recipient knows
+          or ought reasonably to know is proprietary to the discloser,
+          regardless of labelling.
+      - name: Written confirmation required for oral disclosures
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: yellow
+        sample_text: >
+          Information disclosed in writing and marked "Confidential" is
+          Confidential Information; information disclosed orally is
+          Confidential Information only if the disclosing party sends a
+          written summary of it within thirty days.
+      - name: Definition silent on oral disclosures and pre-signing exchanges
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Confidential Information means any information identified in
+          writing as confidential by the disclosing party at the time of
+          disclosure, exchanged by the parties on or after the date of this
+          Agreement.
+      - name: Protection limited to a fixed schedule
+        expected_outcome: red_line
+        expected_red_line_key: ci-named-schedule-only
+        expected_zone: red
+        sample_text: >
+          Only the items listed in Schedule 1 to this Agreement constitute
+          Confidential Information; no other information disclosed by either
+          party is protected under this Agreement.
+
+  - rule_key: confidentiality.standard_of_care
+    title: Standard of care for Confidential Information
+    required: true
+    risk_weight: 8
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      The Receiving Party must protect Confidential Information using at
+      least the same degree of care it uses for its own confidential
+      information of similar importance, and never less than a reasonable
+      standard of care, and may use it solely for the Purpose.
+    risk_rationale: >
+      Confidential Information exchanged under this NDA frequently includes
+      Halcyon Engage architecture diagrams, SOC 2 and ISO 27001 audit
+      extracts and, on diligence calls, de-identified clinical workflow
+      examples. A care standard that falls below "reasonable" gives Halcyon
+      no practical basis to show a breach if a counterparty mishandles that
+      material, and the $10M cyber and E&O cover does not respond to a
+      counterparty's mishandling of Halcyon's own information.
+    detection_guidance: >
+      Look for "the same degree of care that it uses to protect its own
+      confidential information, but no less than reasonable care", "strict
+      confidence" and "solely for the Purpose" and "shall not disclose to
+      any third party". Absence of any stated standard in a confidentiality
+      clause is a deviation; absence of a confidentiality clause altogether
+      is a missing clause.
+    source_ref: Halcyon Information Classification Policy IC-01
+    authored_by: Contracts Manager
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-03
+    positions:
+      - kind: preferred
+        label: Own-care-but-not-less-than-reasonable, Purpose-limited use
+        zone: green
+        summary: >
+          Reasonable care floor measured against the Receiving Party's own
+          practice, use limited strictly to the Purpose.
+        language: >
+          The Receiving Party shall protect the Disclosing Party's
+          Confidential Information using the same degree of care that it
+          uses to protect its own confidential information of a similar
+          nature, but in no event less than a reasonable degree of care, and
+          shall use Confidential Information solely for the Purpose and for
+          no other purpose whatsoever.
+      - kind: fallback
+        rung: 1
+        label: Reasonable care only, no own-practice comparator
+        zone: yellow
+        approver_role: contracts_manager
+        give_get: >
+          Ask for an express acknowledgement that the Receiving Party's
+          internal information security policy already meets or exceeds this
+          standard, to keep a record for later disputes.
+        summary: >
+          Drops the own-practice comparator but keeps a reasonable-care
+          floor and Purpose-limited use.
+        language: >
+          The Receiving Party shall protect Confidential Information using a
+          reasonable degree of care and shall use it solely for the Purpose.
+      - kind: fallback
+        rung: 2
+        label: Reasonable care with a wider permitted-use carve-in
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: >
+          Require that the wider permitted use is limited to evaluating a
+          potential business relationship and excludes use in developing a
+          competing product.
+        summary: >
+          Reasonable care, but use is permitted for evaluating the Purpose
+          and any related business opportunity between the parties, not only
+          the Purpose as narrowly stated.
+        language: >
+          The Receiving Party shall protect Confidential Information using a
+          reasonable degree of care and shall use it solely to evaluate the
+          Purpose and any related business opportunity between the parties.
+      - kind: acceptable_variant
+        label: Strict-confidence wording
+        zone: green
+        summary: Different wording for the same reasonable-care, Purpose-limited standard.
+        language: >
+          The Receiving Party shall hold the Disclosing Party's Confidential
+          Information in strict confidence, using at least the same measures
+          it applies to protect its own similarly sensitive information and
+          never less than reasonable measures, and shall not use it other
+          than in connection with the Purpose.
+    parameters:
+      - key: care_standard
+        label: Standard of care for Confidential Information
+        value_type: enum
+        direction: set_membership
+        preferred_value: own_practice_floor_reasonable
+        green_limit: [own_practice_floor_reasonable]
+        yellow_limit: [reasonable_care_only, reasonable_care_wider_use, no_stated_standard]
+        allowed_values:
+          - own_practice_floor_reasonable
+          - reasonable_care_only
+          - reasonable_care_wider_use
+          - no_stated_standard
+        extraction_hint: >
+          "no_stated_standard" means the clause imposes confidentiality
+          obligations but never states a care standard; that is a deviation,
+          not this rule's red zone, unless no confidentiality clause exists
+          at all, which is a missing clause.
+      - key: use_limited_to_purpose
+        label: Use is limited strictly to the Purpose
+        value_type: boolean
+        direction: exact
+        preferred_value: true
+        green_limit: true
+        yellow_limit: false
+        extraction_hint: >
+          True only if use is confined to the stated Purpose; false if the
+          clause permits use to evaluate a wider business opportunity (the
+          rung-2 fallback) or any use consistent with the recipient's
+          business; silence on permitted use is a deviation, handled by the
+          care_standard parameter rather than this one.
+    red_lines:
+      - key: soc-unrestricted-use
+        description: >
+          The clause imposes no limit on how the Receiving Party may use
+          Confidential Information once disclosed, beyond confidentiality
+          itself.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause allows the Receiving Party to use the other party's
+            Confidential Information for any purpose of its choosing, or for
+            its general business purposes, rather than limiting use to the
+            stated Purpose or evaluating the parties' potential relationship.
+        action: escalate
+        approver_role: general_counsel
+        rationale: >
+          Unrestricted use rights would let a counterparty apply Halcyon's
+          architecture or security documentation to build a competing
+          product, which no care standard, however strict, would prevent.
+    objections:
+      - objection: >
+          "Reasonable care" is too vague; we'd rather measure against an
+          industry standard like ISO 27001.
+        their_rationale: >
+          Counsel prefers an externally verifiable benchmark to a
+          subjective comparator.
+        response: >
+          We're comfortable citing Halcyon's own certifications for
+          context, but the obligation here is the recipient's duty to
+          protect what it receives, which is why the standard is measured
+          against the recipient's own practice with a reasonable-care floor.
+          We can drop the own-practice comparator if that is the sticking
+          point, leaving a straightforward reasonable-care standard.
+        talking_points:
+          - Explain that the comparator measures the recipient's conduct, not Halcyon's.
+          - Offer the reasonable-care-only fallback.
+        recommended_position: {rule_key: confidentiality.standard_of_care, rung: 1}
+        frequency: occasional
+        counterparty_profile: Enterprise counterparties with mature security programs
+      - objection: >
+          We need to be able to use the information for any legitimate
+          business purpose related to our relationship, not just the narrow
+          Purpose stated in the recitals.
+        their_rationale: >
+          A narrowly drafted Purpose can lag behind how a commercial
+          relationship actually develops.
+        response: >
+          We can broaden permitted use to cover evaluating any related
+          business opportunity between the parties, provided it still
+          excludes use in developing a competing product and stays within
+          this Agreement's confidentiality protections.
+        talking_points:
+          - Offer the rung-2 fallback rather than removing the use restriction entirely.
+          - Confirm the broadened use still excludes competing-product development.
+        recommended_position: {rule_key: confidentiality.standard_of_care, rung: 2}
+        frequency: occasional
+        counterparty_profile: Strategic partners exploring multiple joint initiatives
+    dependencies:
+      - related_rule_key: confidentiality.residuals
+        relation: trade_against
+        note: >
+          Offer the reasonable-care-only fallback on standard of care before
+          conceding residuals, which weakens protection far more.
+      - related_rule_key: intellectual_property.no_license
+        relation: requires
+        note: >
+          The Purpose-limited use restriction and the no-licence statement
+          work together: use is limited to the Purpose and no licence to
+          exploit Confidential Information is implied.
+    test_cases:
+      - name: Own-practice floor, different phrasing
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Each receiving party will safeguard the other's Confidential
+          Information with the same precautions it applies to its own
+          confidential materials of like sensitivity, and in any event no
+          less carefully than a reasonably prudent business would, and will
+          use it only in connection with the Purpose.
+      - name: Strict-confidence variant
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Each party shall keep the other's Confidential Information
+          strictly confidential, applying measures at least as protective as
+          those it uses for its own comparable information and never less
+          than reasonable measures, and shall not use it for any purpose
+          outside the Purpose.
+      - name: Reasonable care without own-practice comparator
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: yellow
+        sample_text: >
+          The Receiving Party will take reasonable measures to protect the
+          Confidential Information and will use it solely in furtherance of
+          the Purpose.
+      - name: No stated standard of care
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Each party shall keep the other's Confidential Information
+          confidential and shall not disclose it to any third party without
+          consent.
+      - name: Unrestricted use for the recipient's business
+        expected_outcome: red_line
+        expected_red_line_key: soc-unrestricted-use
+        expected_zone: red
+        sample_text: >
+          The Receiving Party may use the Disclosing Party's Confidential
+          Information for any purpose in connection with its business
+          operations.
+      - name: Trap - negated unrestricted-use wording
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Nothing in this Agreement permits the Receiving Party to use
+          Confidential Information for any purpose other than the Purpose,
+          and the Receiving Party shall protect it with the same degree of
+          care it applies to its own confidential information, but never
+          less than a reasonable degree of care.
+
+  - rule_key: confidentiality.permitted_disclosures
+    title: Permitted disclosures to representatives
+    required: false
+    risk_weight: 6
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      The Receiving Party may share Confidential Information with employees,
+      affiliates, contractors and professional advisers who need to know it
+      for the Purpose and are bound by confidentiality obligations at least
+      as protective, and remains responsible for their breaches.
+    risk_rationale: >
+      Diligence on a prospective Halcyon relationship routinely involves the
+      counterparty's outside counsel, auditors and, for larger health
+      systems, an affiliated purchasing or IT security group. Without an
+      express permitted-disclosures clause, any such onward sharing is
+      technically a breach, which is unworkable in practice and pushes
+      Halcyon's own team toward accepting undocumented exceptions.
+    detection_guidance: >
+      Look for "Representatives", "need to know", "employees, agents,
+      contractors and professional advisers", "bound by obligations no less
+      protective" and "shall be responsible for any breach by". Absence
+      means any onward disclosure, even to an affiliate or adviser, is
+      technically a breach, which is usually unworkable and should be
+      flagged.
+    source_ref: Halcyon Information Classification Policy IC-01
+    authored_by: Contracts Manager
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-04
+    positions:
+      - kind: preferred
+        label: Named representative categories, discloser liable for breach
+        zone: green
+        summary: >
+          Disclosure to a defined list of representative categories on a
+          need-to-know basis, bound by equivalent obligations, with the
+          Receiving Party liable for their breaches.
+        language: >
+          The Receiving Party may disclose Confidential Information to its
+          directors, officers, employees, affiliates, contractors and
+          professional advisers (collectively, "Representatives") who have a
+          need to know such information for the Purpose, provided that each
+          Representative is bound by confidentiality obligations no less
+          protective than those in this Agreement, and the Receiving Party
+          shall be responsible for any breach of this Agreement by its
+          Representatives as if committed by the Receiving Party itself.
+      - kind: fallback
+        rung: 1
+        label: Narrower representative list, same liability standard
+        zone: yellow
+        approver_role: contracts_manager
+        give_get: >
+          Ask for written acknowledgement forms for any contractor given
+          access, to keep an audit trail.
+        summary: >
+          Limits representatives to employees and professional advisers only,
+          excluding affiliates and contractors, while keeping the liability
+          standard.
+        language: >
+          The Receiving Party may disclose Confidential Information to its
+          employees and professional advisers who have a need to know such
+          information for the Purpose and are bound by confidentiality
+          obligations no less protective than those in this Agreement, and
+          the Receiving Party shall be responsible for any breach of this
+          Agreement by them.
+      - kind: fallback
+        rung: 2
+        label: Named representatives, no express liability for their breach
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: >
+          Require a separate acknowledgement that the Receiving Party will
+          promptly notify Halcyon of any known breach by a Representative.
+        summary: >
+          Permits disclosure to the named representative categories but does
+          not expressly make the Receiving Party liable for their breaches.
+        language: >
+          The Receiving Party may disclose Confidential Information to its
+          Representatives who have a need to know such information for the
+          Purpose and are informed of its confidential nature.
+      - kind: acceptable_variant
+        label: Representatives list with contractual undertaking
+        zone: green
+        summary: Different wording for the same named-categories, liable-for-breach outcome.
+        language: >
+          The Receiving Party may share Confidential Information only with
+          its Representatives who require access to perform the Purpose and
+          who are contractually or professionally obligated to maintain its
+          confidentiality on terms at least as strict as this Agreement; the
+          Receiving Party remains liable for any Representative's
+          non-compliance.
+    parameters:
+      - key: representative_liability
+        label: Receiving Party liable for its representatives' breaches
+        value_type: boolean
+        direction: exact
+        preferred_value: true
+        green_limit: true
+        yellow_limit: false
+        extraction_hint: >
+          True if the clause expressly makes the Receiving Party responsible
+          for a Representative's breach; false if liability is not addressed
+          or is expressly excluded.
+    red_lines:
+      - key: pd-unrestricted-third-party-sharing
+        description: >
+          Confidential Information may be shared with any third party the
+          Receiving Party chooses, with no need-to-know limitation and no
+          confidentiality undertaking required of the recipient.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause permits the Receiving Party to disclose the other
+            party's Confidential Information to third parties generally,
+            without limiting disclosure to representatives who need the
+            information for the Purpose and without requiring those third
+            parties to keep it confidential.
+        action: block
+        rationale: >
+          Unrestricted onward disclosure defeats the purpose of the NDA and
+          would expose Halcyon's pricing, roadmap and security posture to
+          parties with no confidentiality obligation at all.
+    objections:
+      - objection: >
+          We can't promise to be liable for every contractor's breach; we
+          only control our own employees directly.
+        their_rationale: >
+          Larger organizations use many contractors and are reluctant to
+          underwrite their conduct contractually.
+        response: >
+          We can narrow the categories you are liable for to employees and
+          professional advisers, where you do have direct control, and treat
+          contractor access separately if your project needs it.
+        talking_points:
+          - Offer the rung-1 narrower-category fallback.
+          - Note that excluding liability entirely leaves Halcyon with no recourse for a contractor's misuse.
+        recommended_position: {rule_key: confidentiality.permitted_disclosures, rung: 1}
+        frequency: occasional
+        counterparty_profile: Counterparties with extensive outsourced operations
+      - objection: Our standard NDA does not make us liable for our advisers' conduct.
+        their_rationale: >
+          Standard templates often omit an express liability-for-breach
+          sentence, relying on the adviser's own professional obligations.
+        response: >
+          We're comfortable with professional advisers' own ethical duties
+          covering most cases, but we still need the agreement to say so
+          expressly so there is a clear remedy if something goes wrong. We
+          can live with that sentence alone if the rest of the representative
+          list stays as drafted.
+        talking_points:
+          - Point out this is a one-sentence addition, not a renegotiation of scope.
+          - Offer to accept the rung-2 position if the liability sentence truly cannot be added.
+        recommended_position: {rule_key: confidentiality.permitted_disclosures, rung: 2}
+        frequency: rare
+        counterparty_profile: Counterparties using boilerplate mutual NDA templates
+    dependencies:
+      - related_rule_key: confidentiality.standard_of_care
+        relation: read_with
+        note: >
+          A Representative's access is conditioned on being bound by
+          obligations no less protective than the standard of care in this
+          Agreement.
+    test_cases:
+      - name: Named categories, liable for breach
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Either party may share the other's Confidential Information with
+          its officers, employees, affiliates, contractors and outside
+          counsel who need it for the Purpose, each bound by confidentiality
+          duties as strict as this Agreement, and remains answerable for any
+          failure by those persons to comply.
+      - name: Contractual-undertaking variant
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          A party may disclose Confidential Information only to
+          representatives who need it to carry out the Purpose and who are
+          bound, by contract or professional duty, to protect it no less
+          strictly than this Agreement requires; the disclosing party's
+          counterparty remains liable for their non-compliance.
+      - name: Employees and advisers only
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: yellow
+        sample_text: >
+          A party may disclose Confidential Information to its employees and
+          outside legal counsel who need it for the Purpose and are bound by
+          confidentiality obligations no less protective than this
+          Agreement; it is responsible for their compliance.
+      - name: No need-to-know limitation, but confidentiality still required
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Either party may share Confidential Information with any of its
+          employees, affiliates and advisers, each of whom must be bound by
+          confidentiality obligations no less protective than this
+          Agreement.
+      - name: Open-ended third-party sharing
+        expected_outcome: red_line
+        expected_red_line_key: pd-unrestricted-third-party-sharing
+        expected_zone: red
+        sample_text: >
+          Either party may share Confidential Information with any third
+          party it engages in connection with its business.
+
+  - rule_key: confidentiality.exclusions
+    title: Exclusions from Confidential Information
+    required: true
+    risk_weight: 5
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Confidential Information excludes the four standard categories -
+      information that is public, already known, independently developed or
+      lawfully received from a third party - with the burden of proving an
+      exclusion applies resting on the Receiving Party.
+    risk_rationale: >
+      Halcyon's engineering and clinical teams build features independently
+      of what any single counterparty shares during diligence, so the
+      independent-development and already-known exclusions matter in
+      practice, not just in theory. Shifting the burden of proving an
+      exclusion onto the Disclosing Party would let a counterparty assert an
+      exclusion informally and force Halcyon to disprove it after the fact.
+    detection_guidance: >
+      Look for "Confidential Information does not include" or "the
+      obligations in this section shall not apply to information that",
+      followed by limbs mentioning "publicly available", "already known",
+      "independently developed" and "rightfully received from a third
+      party". Count the limbs; fewer than the usual four is a deviation, and
+      no exclusions at all is a missing issue.
+    source_ref: Halcyon Information Classification Policy IC-01
+    authored_by: Contracts Manager
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-05
+    positions:
+      - kind: preferred
+        label: Four standard exclusions, burden of proof on Receiving Party
+        zone: green
+        summary: >
+          Public, already-known, independently-developed and rightfully-
+          received exclusions, with the Receiving Party bearing the burden
+          of proving an exclusion applies.
+        language: >
+          Confidential Information does not include information that (a) is
+          or becomes generally available to the public through no fault of
+          the Receiving Party; (b) was already known to the Receiving Party
+          without an obligation of confidentiality before disclosure by the
+          Disclosing Party; (c) is independently developed by the Receiving
+          Party without use of or reference to the Disclosing Party's
+          Confidential Information, as shown by contemporaneous written
+          records; or (d) is rightfully received by the Receiving Party from
+          a third party without a duty of confidentiality owed to the
+          Disclosing Party. The Receiving Party bears the burden of
+          establishing that an exclusion applies.
+      - kind: fallback
+        rung: 1
+        label: Four standard exclusions, no stated burden of proof
+        zone: yellow
+        approver_role: contracts_manager
+        give_get: >
+          Ask for an express carve-out stating that personal data and PHI
+          disclosed in the course of the Purpose are never excluded merely
+          because similar data is public in de-identified form.
+        summary: >
+          Keeps all four standard exclusions but drops the express
+          burden-of-proof sentence.
+        language: >
+          Confidential Information does not include information that (a) is
+          or becomes publicly available through no fault of the Receiving
+          Party; (b) was already known to the Receiving Party before
+          disclosure; (c) is independently developed without use of the
+          Disclosing Party's Confidential Information; or (d) is rightfully
+          received from a third party without an obligation of
+          confidentiality.
+      - kind: fallback
+        rung: 2
+        label: Three exclusions, independent development removed
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: >
+          Require written notice before the Receiving Party relies on the
+          already-known or third-party exclusion in response to a demand for
+          return or destruction.
+        summary: >
+          Drops the independent-development exclusion, leaving only public,
+          already-known and third-party-received information excluded.
+        language: >
+          Confidential Information does not include information that is or
+          becomes publicly available through no fault of the Receiving
+          Party, was already known to the Receiving Party before disclosure,
+          or is rightfully received from a third party without an obligation
+          of confidentiality.
+      - kind: acceptable_variant
+        label: Four exclusions, counterparty phrasing
+        zone: green
+        summary: Different wording for the same four standard exclusions.
+        language: >
+          The obligations in this Agreement do not apply to information that
+          the Receiving Party can show by written evidence (i) was in the
+          public domain other than through its own act or omission, (ii) was
+          lawfully in its possession before receipt, (iii) was developed
+          independently without reference to the Disclosing Party's
+          Confidential Information, or (iv) was lawfully obtained from a
+          third party free of any duty of confidence.
+    parameters:
+      - key: exclusion_limb_count
+        label: Number of standard exclusion limbs
+        value_type: number
+        unit: limbs
+        direction: higher_is_better
+        preferred_value: 4
+        green_limit: 4
+        yellow_limit: 3
+        extraction_hint: >
+          Count distinct exclusion limbs among: public domain, already known,
+          independently developed, rightfully received from a third party.
+          Fewer than three, or none, is red.
+      - key: burden_of_proof_on_recipient
+        label: Receiving Party bears the burden of proving an exclusion applies
+        value_type: boolean
+        direction: exact
+        preferred_value: true
+        green_limit: true
+        yellow_limit: false
+        extraction_hint: >
+          True only if the clause expressly places the burden of proof on
+          the Receiving Party; false if silent or if it places the burden on
+          the Disclosing Party.
+    red_lines:
+      - key: excl-no-exclusions
+        description: >
+          The confidentiality clause contains no exclusions at all, so even
+          public or independently developed information is treated as
+          Confidential Information.
+        condition_type: parameter
+        condition: {parameter_key: exclusion_limb_count, op: lte, value: 0}
+        action: escalate
+        approver_role: general_counsel
+        rationale: >
+          Without exclusions, Halcyon's own independently developed features
+          or publicly available competitor information could be challenged as
+          a breach, which is unworkable and not a risk any counterparty
+          should expect Halcyon to accept.
+    objections:
+      - objection: >
+          We don't think the burden of proof should sit with us; it's
+          unfair to make the recipient prove a negative.
+        their_rationale: >
+          Recipients worry that keeping contemporaneous proof of independent
+          development is burdensome in practice.
+        response: >
+          The burden only applies if you want to rely on an exclusion, which
+          is a normal evidentiary allocation in every mutual NDA we sign. If
+          it remains a sticking point, we can drop the express sentence and
+          keep the four exclusions, which is our next position.
+        talking_points:
+          - Point out that keeping contemporaneous records is standard practice for any engineering organization.
+          - Offer the rung-1 fallback if the burden sentence is the only issue.
+        recommended_position: {rule_key: confidentiality.exclusions, rung: 1}
+        frequency: common
+        counterparty_profile: Technology companies with in-house product development
+      - objection: >
+          Independent development is too hard to prove either way; let's
+          drop that exclusion and keep the other three.
+        their_rationale: >
+          Some counterparties prefer to avoid disputes over whether
+          development was truly independent.
+        response: >
+          Removing that exclusion would expose both of our product teams to
+          claims every time a similar feature ships, which is a real risk for
+          us given how much of our roadmap overlaps with common health-tech
+          functionality. We would rather keep it and resolve any dispute on
+          the facts if it ever arises.
+        talking_points:
+          - Explain that dropping the exclusion cuts both ways and exposes both parties.
+          - Offer the rung-2 fallback only if the counterparty will not move.
+        recommended_position: {rule_key: confidentiality.exclusions, rung: 2}
+        frequency: rare
+        counterparty_profile: Counterparties building overlapping health-tech products
+    dependencies:
+      - related_rule_key: confidentiality.compelled_disclosure
+        relation: read_with
+        note: >
+          Compelled disclosure is sometimes drafted as a fifth exclusion
+          limb rather than a separate clause; check both sections together
+          before concluding an exclusion is missing.
+    test_cases:
+      - name: Four exclusions with burden of proof
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Confidential Information excludes anything that is publicly known
+          through no act of the recipient, was already known to the
+          recipient, is independently developed without reference to the
+          discloser's information as shown by dated records, or is received
+          from a third party free of a confidentiality duty; the recipient
+          must prove any such exclusion applies.
+      - name: Counterparty-phrased four exclusions
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Information is not Confidential Information if the recipient
+          establishes with written evidence that it was public through no
+          fault of its own, already in its possession, independently
+          developed, or lawfully received from a third party free of any
+          confidentiality duty.
+      - name: Four exclusions, no burden-of-proof sentence
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: yellow
+        sample_text: >
+          Confidential Information does not include information that becomes
+          public, was already known, is independently developed, or is
+          received from a third party without a duty of confidentiality.
+      - name: Three exclusions, third-party-received limb dropped
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Confidential Information does not include information that is
+          publicly available through no fault of the recipient, that was
+          already known to the recipient before disclosure, or that the
+          recipient independently developed without reference to the
+          discloser's Confidential Information.
+      - name: No exclusions at all
+        expected_outcome: red_line
+        expected_red_line_key: excl-no-exclusions
+        expected_zone: red
+        sample_text: >
+          All information disclosed by either party under this Agreement is
+          Confidential Information, without exception.
+      - name: Trap - double-negative burden-of-proof wording
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Information is not excluded from the definition of Confidential
+          Information unless the Receiving Party can show that it is
+          publicly available through no fault of its own, was already
+          known to it, was independently developed without reference to
+          the Disclosing Party's Confidential Information, or was
+          rightfully received from a third party free of a confidentiality
+          duty.
+
+  - rule_key: confidentiality.compelled_disclosure
+    title: Compelled disclosure
+    required: true
+    risk_weight: 6
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      A party may disclose Confidential Information when compelled by law,
+      court order, subpoena or a regulator, provided it gives the Disclosing
+      Party prompt prior notice where legally permitted, cooperates with
+      efforts to seek protective treatment, and discloses only the minimum
+      required.
+    risk_rationale: >
+      As a HIPAA business associate and GDPR processor, Halcyon is itself
+      sometimes the party compelled to produce information by a regulator or
+      a court, and it needs the same notice-and-minimum-disclosure protection
+      it expects to give a counterparty. Losing the right to prior notice
+      removes any chance to seek a protective order before information such
+      as pricing or security findings becomes part of a public record.
+    detection_guidance: >
+      Look for "required by law", "court order", "subpoena", "governmental
+      or regulatory authority", "prompt prior notice where legally
+      permitted" and "protective order". It may be drafted as an exclusion
+      or as a separate sub-clause. Absence means a legally compelled
+      disclosure would breach the clause, which is a missing issue.
+    source_ref: Halcyon Information Classification Policy IC-01
+    authored_by: Contracts Manager
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-08
+    positions:
+      - kind: preferred
+        label: Prior notice, cooperation, minimum necessary disclosure
+        zone: green
+        summary: >
+          Compelled disclosure is permitted with prompt prior notice where
+          legally permitted, cooperation in seeking protective treatment, and
+          disclosure limited to the legally required minimum.
+        language: >
+          A party may disclose Confidential Information to the extent
+          required by applicable law, a valid court order, subpoena, or a
+          governmental or regulatory authority with jurisdiction over it,
+          provided that, where legally permitted, it gives the Disclosing
+          Party prior written notice at least five (5) business days before
+          disclosure so that the Disclosing Party may seek a protective
+          order or other appropriate remedy, provides reasonable cooperation
+          with that effort at the Disclosing Party's expense, and discloses
+          only the portion of the Confidential Information that it is
+          legally required to disclose.
+      - kind: fallback
+        rung: 1
+        label: Prior notice and minimum disclosure, no cooperation duty
+        zone: yellow
+        approver_role: contracts_manager
+        give_get: >
+          Ask for a shortened notice period of at least two business days
+          where feasible, to preserve a practical chance of seeking relief.
+        summary: >
+          Keeps prior notice and minimum-necessary disclosure, drops the
+          express duty to cooperate with a protective order.
+        language: >
+          A party may disclose Confidential Information to the extent
+          required by law or legal process, provided that, where legally
+          permitted, it gives the Disclosing Party prompt prior written
+          notice and discloses only the portion legally required.
+      - kind: fallback
+        rung: 2
+        label: Notice only where not prohibited, no minimum-disclosure limit
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: >
+          Require that the notice obligation survive even if the specific
+          legal process includes a non-disclosure order, to the extent the
+          party can give notice without violating that order.
+        summary: >
+          Notice is given only where not legally prohibited, and the clause
+          does not separately require disclosure to be limited to the
+          minimum required.
+        language: >
+          A party required by law or legal process to disclose Confidential
+          Information may do so, and shall give the Disclosing Party notice
+          of the requirement to the extent not prohibited from doing so.
+      - kind: acceptable_variant
+        label: Counterparty phrasing of the same protection
+        zone: green
+        summary: Different wording reaching the same notice, cooperation and minimum-disclosure outcome.
+        language: >
+          If a party becomes legally compelled to disclose Confidential
+          Information, it will, unless prohibited by law, notify the other
+          party before disclosure so that a protective order may be sought,
+          will reasonably assist in obtaining one at the other party's cost,
+          and will furnish only the Confidential Information it is legally
+          obligated to furnish.
+    parameters:
+      - key: compelled_disclosure_notice_days
+        label: Business days of prior notice before compelled disclosure
+        value_type: number
+        unit: business days
+        direction: higher_is_better
+        preferred_value: 5
+        green_limit: 3
+        yellow_limit: 1
+        extraction_hint: >
+          Extract the stated notice period before a legally compelled
+          disclosure. "Prompt" notice with no number is treated as meeting
+          the preferred value. No notice obligation at all is red.
+    red_lines:
+      - key: cd-no-notice-right
+        description: >
+          The clause permits compelled disclosure with no notice to the
+          Disclosing Party at all, even where notice would not violate the
+          legal process compelling disclosure.
+        condition_type: parameter
+        condition: {parameter_key: compelled_disclosure_notice_days, op: eq, value: 0}
+        action: escalate
+        approver_role: general_counsel
+        rationale: >
+          Removing any notice right eliminates Halcyon's only practical
+          opportunity to seek a protective order before sensitive pricing or
+          security information enters a public record.
+    objections:
+      - objection: >
+          We may be barred by the order itself from telling you about it; we
+          can't promise notice in every case.
+        their_rationale: >
+          Some subpoenas and national-security requests include a
+          non-disclosure order.
+        response: >
+          That's exactly why the obligation is "where legally permitted" -
+          it only asks for notice when the recipient is free to give it. We
+          are not asking anyone to violate an order.
+        talking_points:
+          - Clarify the "where legally permitted" qualifier already covers this.
+          - Offer the rung-1 fallback only if the counterparty still wants the cooperation sentence removed.
+        recommended_position: {rule_key: confidentiality.compelled_disclosure, rung: 1}
+        frequency: common
+        counterparty_profile: Counterparties subject to frequent regulatory inquiry
+      - objection: >
+          We don't want an open-ended obligation to help pay for your legal
+          fees in seeking a protective order.
+        their_rationale: >
+          Cooperation duties are sometimes read as an open-ended cost
+          commitment.
+        response: >
+          The cooperation duty is reasonable assistance at the Disclosing
+          Party's own expense, not a fee-shifting obligation, so it should
+          not create a material cost for your side. If that wording still
+          concerns you, we can drop the cooperation sentence and keep notice
+          and minimum disclosure.
+        talking_points:
+          - Point out cooperation is expressly at the Disclosing Party's expense.
+          - Offer the rung-1 fallback if cooperation remains contentious.
+        recommended_position: {rule_key: confidentiality.compelled_disclosure, rung: 1}
+        frequency: occasional
+        counterparty_profile: Smaller counterparties wary of open-ended cost exposure
+    test_cases:
+      - name: Prior notice, cooperation and minimum disclosure
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          A party compelled by subpoena or regulatory demand to disclose
+          Confidential Information will, where not legally barred from doing
+          so, give the other party advance written notice, assist at that
+          party's expense in resisting or narrowing the disclosure, and
+          disclose no more than is legally required.
+      - name: Counterparty-phrased equivalent
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Before disclosing Confidential Information under compulsion of
+          law, a party will, unless prohibited, alert the other party so it
+          may seek protective treatment, will reasonably help in that
+          effort, and will disclose only what the law requires.
+      - name: Notice and minimum disclosure, no cooperation
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: yellow
+        sample_text: >
+          A party required by law to disclose Confidential Information will
+          give prompt notice where legally permitted and will limit the
+          disclosure to what is legally required.
+      - name: Notice only where not prohibited, no minimum-disclosure limit
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          A party may disclose Confidential Information if compelled by
+          applicable law or court order, after giving notice to the other
+          party where not prohibited from doing so.
+      - name: Notice given before disclosure, but only if requested rather than required
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          A party may disclose Confidential Information to any governmental
+          or regulatory authority that requests it, after giving the other
+          party prompt prior notice of the request where legally permitted.
+      - name: No notice obligation under any circumstance
+        expected_outcome: red_line
+        expected_red_line_key: cd-no-notice-right
+        expected_zone: red
+        sample_text: >
+          Either party may disclose Confidential Information to the extent
+          required by law, court order or regulatory demand, without any
+          obligation to notify the other party.
+
+  - rule_key: confidentiality.residuals
+    title: Residuals
+    required: false
+    risk_weight: 7
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: true
+    judgment_note: >
+      Whether a proposed residuals carve-out meaningfully excludes source
+      code and PHI, as opposed to excluding them in name while still
+      covering architecture and security control details that function the
+      same way, requires reading the full definition of what is excluded
+      against what Halcyon actually plans to share with this counterparty.
+    position_summary: >
+      Halcyon's preferred position is no residuals clause at all. If a
+      counterparty insists, the fallback is a narrow unaided-memory residuals
+      clause that expressly excludes source code and protected health
+      information, consistent with section 2.4's residuals anchor.
+    risk_rationale: >
+      A broad residuals clause lets a large counterparty's engineers retain
+      and reuse ideas and know-how from reviewing Halcyon Engage's
+      architecture, which can operate as a free licence that hollows out the
+      confidentiality obligation entirely. Given that Halcyon's product
+      differentiation sits in its HL7 FHIR integration approach and its
+      HITRUST-aligned security controls, an unqualified residuals clause is
+      one of the few NDA terms that can cause damage no liability cap or
+      insurance policy would ever compensate.
+    detection_guidance: >
+      Look for "residuals", "retained in the unaided memory", "general
+      knowledge, skills and experience" or "without reference to the
+      Confidential Information". The clause is commonly proposed by large
+      technology counterparties in NDAs. Absence is the preferred position
+      and should not be flagged as missing.
+    source_ref: Halcyon Risk Policy RP-04; Halcyon Information Classification Policy IC-01
+    authored_by: Contracts Manager
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-10
+    positions:
+      - kind: preferred
+        label: No residuals clause
+        zone: green
+        summary: >
+          The Agreement does not include a residuals carve-out; use of
+          Confidential Information remains governed solely by the standard
+          of care and Purpose-limited-use provisions.
+        language: >
+          This Agreement contains no residuals clause. Nothing in this
+          Agreement permits either party to use retained, unaided memories of
+          Confidential Information outside the Purpose, and the standard of
+          care and permitted-use provisions of this Agreement govern all use
+          of Confidential Information.
+      - kind: fallback
+        rung: 1
+        label: Narrow residuals, excluding source code, PHI and personal data
+        zone: yellow
+        approver_role: commercial_counsel
+        conditions: {data_sensitivity: [none, personal_data]}
+        give_get: >
+          Require a written list, maintained by Halcyon, of which personnel
+          on the counterparty's side were exposed to source code or PHI, so
+          the exclusion has a factual anchor if disputed.
+        summary: >
+          Permits use of general ideas, concepts, know-how and techniques
+          retained in unaided memory, but expressly excludes source code,
+          protected health information, and any other personal data, and
+          does not grant any licence to Halcyon's intellectual property.
+          This exclusion list is broader than section 2.4's stated anchor.
+        language: >
+          Subject to the exclusions below, nothing in this Agreement
+          prevents either party's personnel who have had access to
+          Confidential Information from using general ideas, concepts,
+          know-how and techniques retained in their unaided memory, provided
+          that this sentence does not grant, and shall not be construed as
+          granting, any licence under either party's patents or copyrights,
+          and does not extend to source code, protected health information,
+          or other personal data, each of which remains fully protected
+          under the other provisions of this Agreement.
+      - kind: fallback
+        rung: 2
+        label: Unaided-memory residuals excluding source code and PHI
+        zone: yellow
+        approver_role: commercial_counsel
+        conditions: {data_sensitivity: [none]}
+        give_get: >
+          Require that the residuals carve-out automatically terminates for
+          any individual who has reviewed source code, security
+          documentation, or any information marked PHI, regardless of
+          whether that individual retains a memory of the specific details.
+        summary: >
+          Unaided-memory residuals excluding source code and PHI, matching
+          section 2.4's stated anchor exactly, used only where no personal
+          data at all is exchanged under the agreement.
+        language: >
+          Nothing in this Agreement prevents a party's personnel from using
+          general knowledge, skills and experience, including ideas, concepts
+          and techniques, retained in unaided memory after exposure to the
+          other party's Confidential Information, except that this provision
+          never applies to source code or to any information that
+          constitutes protected health information under HIPAA.
+      - kind: acceptable_variant
+        label: No residuals, counterparty phrasing
+        zone: green
+        summary: Different wording confirming no residuals right exists.
+        language: >
+          The parties agree that no residuals clause applies to this
+          Agreement, and all use of Confidential Information remains subject
+          to the Purpose and standard-of-care provisions above.
+    parameters:
+      - key: residuals_permitted
+        label: A residuals carve-out is included
+        value_type: boolean
+        direction: exact
+        preferred_value: false
+        green_limit: false
+        yellow_limit: true
+        extraction_hint: >
+          False when the Agreement has no residuals language or expressly
+          disclaims one; true when any residuals carve-out, however narrow,
+          is present.
+    red_lines:
+      - key: resid-missing-source-code-or-phi-exclusion
+        description: >
+          A residuals clause omits an exclusion for source code, an
+          exclusion for protected health information, or both, from the
+          categories a party's personnel may use from unaided memory.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause permits a party's personnel to use information
+            retained in unaided memory without an exclusion that covers both
+            source code and protected health information; it is enough that
+            either category alone is left out of the exclusion.
+        action: block
+        rationale: >
+          A residuals right that reaches source code or PHI operates as an
+          unlimited licence to Halcyon's core product or to patient data,
+          which no narrowing of the standard of care could offset. Section
+          2.4 treats excluding both categories as the minimum acceptable
+          concession; excluding only one is not enough.
+    objections:
+      - objection: >
+          Our engineers constantly move between projects; we can't police
+          what stays in someone's head after a meeting.
+        their_rationale: >
+          Large technology counterparties routinely propose residuals
+          clauses as a standard risk-allocation term.
+        response: >
+          We understand the practical concern, which is why our fallback
+          residuals language protects exactly that - general know-how
+          retained in memory - while still excluding source code and PHI by
+          name, which are the categories that create real risk for us.
+        talking_points:
+          - Explain the fallback already addresses the stated concern.
+          - Confirm the exclusion is limited to source code and PHI, not all technical detail.
+        recommended_position: {rule_key: confidentiality.residuals, rung: 1}
+        frequency: common
+        counterparty_profile: Large technology and platform vendors
+      - objection: >
+          Excluding "PHI" from residuals is meaningless to us; we're not a
+          healthcare company and won't see any PHI under this NDA.
+        their_rationale: >
+          Non-healthcare counterparties may see the PHI exclusion as
+          irrelevant boilerplate.
+        response: >
+          If no PHI will be shared under this NDA, the exclusion costs you
+          nothing to agree to, and it protects us in case the relationship
+          later involves a diligence call that touches de-identified clinical
+          workflow examples.
+        talking_points:
+          - Note the exclusion is a no-cost protection if no PHI will be shared.
+          - Keep the source-code exclusion non-negotiable regardless of the counterparty's sector.
+        recommended_position: {rule_key: confidentiality.residuals, rung: 1}
+        frequency: occasional
+        counterparty_profile: Non-healthcare technology counterparties
+    dependencies:
+      - related_rule_key: confidentiality.standard_of_care
+        relation: trade_against
+        note: >
+          Offer the reasonable-care-only fallback on standard of care before
+          conceding any residuals carve-out, which weakens protection far
+          more.
+      - related_rule_key: termination.return_or_destruction
+        relation: conflicts_with
+        note: >
+          A residuals carve-out limits how meaningful the return-or-
+          destruction obligation is for information retained in memory;
+          flag both together when either is negotiated.
+    test_cases:
+      - name: No residuals language present
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          This Agreement does not include any provision permitting use of
+          retained memories of Confidential Information; all use remains
+          subject to the Purpose stated above.
+      - name: Counterparty confirms no residuals right
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          For the avoidance of doubt, neither party has any residuals right
+          under this Agreement, and the Purpose and care provisions above
+          govern all permitted use.
+      - name: Residuals language with no stated exclusions either way
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Any residuals that arise from a party's personnel reviewing
+          Confidential Information remain subject to this Agreement, as the
+          parties may later agree.
+      - name: Narrow residuals excluding source code, PHI and personal data
+        expected_outcome: fallback
+        expected_position_rung: 1
+        context: {data_sensitivity: personal_data}
+        expected_zone: yellow
+        sample_text: >
+          Personnel who have seen Confidential Information may use general
+          ideas and know-how retained in unaided memory, excluding source
+          code, protected health information and any other personal data,
+          and granting no licence under either party's patents or
+          copyrights.
+      - name: Residuals clause excluding only source code
+        expected_outcome: red_line
+        expected_red_line_key: resid-missing-source-code-or-phi-exclusion
+        expected_zone: red
+        sample_text: >
+          Nothing restricts a party's personnel from using general knowledge
+          retained in unaided memory after access to Confidential
+          Information, except that this does not extend to source code.
+      - name: Broad residuals with no exclusions
+        expected_outcome: red_line
+        expected_red_line_key: resid-missing-source-code-or-phi-exclusion
+        expected_zone: red
+        sample_text: >
+          Either party's personnel may freely use any ideas, concepts, or
+          techniques, including those embodied in source code or patient
+          data, that are retained in unaided memory following exposure to
+          the other party's Confidential Information.
+
+  - rule_key: confidentiality.equitable_relief
+    title: Equitable relief
+    required: false
+    risk_weight: 4
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Either party may seek an injunction or specific performance for a
+      breach or threatened breach of confidentiality, without needing to
+      post a bond or prove actual damages, in addition to any other
+      available remedy.
+    risk_rationale: >
+      Confidentiality breaches affecting Halcyon Engage's architecture or
+      security posture are rarely compensable with damages alone, because
+      the harm is competitive exposure and loss of trust with health-system
+      customers, not a sum that can be calculated after the fact. An
+      equitable-relief clause removes a procedural obstacle to getting a
+      court's attention quickly, which matters more than any damages award
+      given the $165k median contract size most individual disputes involve.
+    detection_guidance: >
+      Look for "irreparable harm", "injunctive relief", "specific
+      performance", "without the necessity of posting a bond" and "in
+      addition to any other remedies". It often appears under "Remedies".
+      Absence does not remove the right to seek an injunction under general
+      law, so treat it as a low-severity missing issue.
+    source_ref: Halcyon Risk Policy RP-04
+    authored_by: Contracts Manager
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-11
+    positions:
+      - kind: preferred
+        label: Injunction without bond, cumulative with other remedies
+        zone: green
+        summary: >
+          Breach or threatened breach may cause irreparable harm not fully
+          compensable by damages, so injunctive relief is available without
+          posting a bond, in addition to other remedies.
+        language: >
+          Each party acknowledges that a breach or threatened breach of this
+          Agreement's confidentiality obligations may cause the other party
+          irreparable harm for which monetary damages would be an
+          inadequate remedy, and that the non-breaching party shall be
+          entitled to seek injunctive relief or specific performance,
+          without the necessity of posting a bond and without proof of
+          actual damages, in addition to any other remedies available at law
+          or in equity.
+      - kind: fallback
+        rung: 1
+        label: Injunction available, bond requirement not waived
+        zone: yellow
+        approver_role: contracts_manager
+        give_get: >
+          Ask for an express acknowledgement of irreparable harm, even if
+          the bond waiver is not agreed, since that acknowledgement helps
+          satisfy the standard for interim relief in most jurisdictions.
+        summary: >
+          Confirms the right to seek injunctive relief for breach but does
+          not waive any bond requirement that a court might otherwise apply.
+        language: >
+          Each party acknowledges that a breach of this Agreement's
+          confidentiality obligations may cause irreparable harm, and that
+          the non-breaching party may seek injunctive relief or specific
+          performance in addition to any other available remedy, subject to
+          the applicable rules of the court in which relief is sought.
+      - kind: fallback
+        rung: 2
+        label: General reference to available legal and equitable remedies
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: >
+          Require that the clause at minimum names injunctive relief
+          expressly rather than relying on an unspecified reference to
+          "remedies available at law".
+        summary: >
+          Refers generally to remedies available at law and in equity
+          without a specific irreparable-harm acknowledgement.
+        language: >
+          Nothing in this Agreement limits either party's right to pursue
+          any remedy available to it at law or in equity for a breach of
+          this Agreement.
+      - kind: acceptable_variant
+        label: Counterparty phrasing of the same outcome
+        zone: green
+        summary: Different wording for the same bond-waived injunction right.
+        language: >
+          The parties agree that damages alone would not adequately
+          compensate a breach of confidentiality, and that the aggrieved
+          party may obtain equitable relief, including an injunction,
+          without being required to post security, cumulative with any other
+          remedy it may have.
+    parameters:
+      - key: bond_requirement_waived
+        label: Bond or security requirement is waived for injunctive relief
+        value_type: boolean
+        direction: exact
+        preferred_value: true
+        green_limit: true
+        yellow_limit: false
+        extraction_hint: >
+          True only if the clause expressly waives any bond or security
+          requirement for seeking an injunction.
+    red_lines:
+      - key: eqr-one-sided-injunctive-right
+        description: >
+          Only one party, rather than both, may seek injunctive relief for
+          a breach of confidentiality.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause grants the right to seek an injunction or specific
+            performance for a breach of confidentiality to only one of the
+            parties, rather than to either party on the same terms.
+        action: escalate
+        approver_role: commercial_counsel
+        rationale: >
+          A one-sided equitable-relief right gives the counterparty
+          litigation leverage that Halcyon does not have for the same kind
+          of breach, which is inconsistent with the mutual structure of this
+          Agreement.
+    objections:
+      - objection: >
+          We'd rather not pre-concede "irreparable harm" before any dispute
+          has even happened.
+        their_rationale: >
+          Counsel is cautious about contractual language that could be read
+          as a factual admission relevant to a later dispute.
+        response: >
+          The acknowledgement only applies to confidentiality breaches and
+          is standard in mutual NDAs precisely because it is mutual - it
+          protects whichever of us is harmed. If the bond waiver is the
+          real concern, we can drop that and keep the irreparable-harm
+          acknowledgement.
+        talking_points:
+          - Point out the acknowledgement is mutual and applies equally to both parties.
+          - Offer the rung-1 fallback if the bond waiver specifically is the objection.
+        recommended_position: {rule_key: confidentiality.equitable_relief, rung: 1}
+        frequency: occasional
+        counterparty_profile: Counterparties with conservative litigation counsel
+      - objection: This clause is unnecessary; general law already allows injunctions.
+        their_rationale: >
+          Some counterparties see the clause as redundant boilerplate.
+        response: >
+          That's true as a general matter, but naming irreparable harm and
+          waiving the bond requirement in the contract itself makes it
+          faster and cheaper to get interim relief if we ever need it, which
+          benefits both sides equally.
+        talking_points:
+          - Note the clause speeds up, rather than creates, an existing right.
+          - Offer the rung-2 general-remedies fallback if the counterparty insists on removing the specific language.
+        recommended_position: {rule_key: confidentiality.equitable_relief, rung: 2}
+        frequency: rare
+        counterparty_profile: Smaller counterparties with limited outside counsel budget
+    test_cases:
+      - name: Bond-waived injunction, irreparable harm acknowledged
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          The parties agree that a breach of the confidentiality obligations
+          in this Agreement may cause harm for which money damages are an
+          inadequate remedy, and that the harmed party may seek an
+          injunction without posting any bond, in addition to its other
+          remedies.
+      - name: Counterparty-phrased equivalent
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Because damages may not fully compensate a breach of
+          confidentiality, the non-breaching party may seek injunctive
+          relief without furnishing security, on top of any other remedy
+          available to it.
+      - name: Injunction available, bond not waived
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: yellow
+        sample_text: >
+          A party may seek injunctive relief for a breach of confidentiality
+          in addition to other remedies, subject to the bond or security
+          requirements of the court in which relief is sought.
+      - name: General remedies-at-law-and-equity reference only
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Nothing in this section limits a party's remedies at law or in
+          equity for breach of this Agreement.
+      - name: Injunction available only after proving actual damages
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          A party that proves it has suffered actual damages from a breach
+          of confidentiality may also seek an injunction against further
+          breaches, in addition to a damages award.
+      - name: Trap - remedies clause with negated exclusivity wording
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          No remedy described in this Agreement is exclusive of any other
+          remedy; a party may seek an injunction for breach of
+          confidentiality without posting a bond and without first proving
+          actual damages, in addition to any other relief available to it.
+      - name: Injunctive relief available only to the Disclosing Party
+        expected_outcome: red_line
+        expected_red_line_key: eqr-one-sided-injunctive-right
+        expected_zone: red
+        sample_text: >
+          The Disclosing Party alone may seek an injunction or specific
+          performance for a breach of this Agreement's confidentiality
+          obligations; the Receiving Party may not seek equivalent relief.
+
+  - rule_key: term.agreement_term
+    title: Agreement term
+    required: true
+    risk_weight: 4
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      The Agreement remains in effect for two years from the Effective Date,
+      during which either party may disclose Confidential Information under
+      its protection, regardless of when the confidentiality obligations
+      themselves lapse.
+    risk_rationale: >
+      Most Halcyon diligence relationships, whether with a prospective
+      customer evaluating Halcyon Engage or a vendor being evaluated for a
+      subcontractor role, resolve into a signed Order Form, Vendor agreement
+      or a clear decision not to proceed within about two years. An NDA that
+      runs indefinitely leaves a standing disclosure channel open long after
+      the relationship that justified it has ended, with no corresponding
+      business reason to keep sharing information under it.
+    detection_guidance: >
+      Look for "this Agreement shall remain in effect for", "from the
+      Effective Date", "until terminated by either party on thirty days'
+      written notice" and "information disclosed during the term". Absence
+      of a term in an NDA means it runs indefinitely until terminated, which
+      is a deviation.
+    source_ref: Halcyon Information Classification Policy IC-01
+    authored_by: Contracts Manager
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-12
+    positions:
+      - kind: preferred
+        label: Two-year term
+        zone: green
+        summary: The Agreement runs for two years from the Effective Date.
+        language: >
+          This Agreement shall remain in effect for two (2) years from the
+          Effective Date (the "Term"), unless earlier terminated as provided
+          below. Information disclosed during the Term remains Confidential
+          Information for the survival period stated in this Agreement
+          regardless of when the Term ends.
+      - kind: fallback
+        rung: 1
+        label: Three-year term
+        zone: yellow
+        approver_role: contracts_manager
+        give_get: >
+          Ask for a right for either party to terminate the Term early on
+          thirty days' written notice if no further disclosures are
+          anticipated.
+        summary: The Agreement runs for three years from the Effective Date.
+        language: >
+          This Agreement shall remain in effect for three (3) years from the
+          Effective Date, unless earlier terminated as provided below.
+      - kind: fallback
+        rung: 2
+        label: Open-ended term, terminable on notice
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: >
+          Require that either party may terminate the Term at any time on
+          thirty days' written notice, so the open-ended term is not
+          effectively perpetual.
+        summary: >
+          The Agreement continues until terminated by either party on
+          thirty days' written notice, rather than ending on a fixed date.
+        language: >
+          This Agreement shall remain in effect until terminated by either
+          party upon thirty (30) days' prior written notice to the other
+          party.
+      - kind: acceptable_variant
+        label: Two-year term, counterparty phrasing
+        zone: green
+        summary: Different wording for the same two-year term.
+        language: >
+          The term of this Agreement begins on the Effective Date and
+          continues for a period of twenty-four (24) months, unless sooner
+          terminated in accordance with this Agreement.
+    parameters:
+      - key: term_years
+        label: Agreement term in years
+        value_type: number
+        unit: years
+        direction: lower_is_better
+        preferred_value: 2
+        green_limit: 2
+        yellow_limit: 4
+        extraction_hint: >
+          Convert months to years. An open-ended term terminable on 30 days'
+          notice is treated as equivalent to the yellow_limit for scoring
+          purposes, since either party can end it promptly; an open-ended
+          term with no termination right at all is red.
+    red_lines:
+      - key: term-no-end-no-termination-right
+        description: >
+          The Agreement has no stated term and no right for either party to
+          terminate it, so it runs forever with no exit mechanism.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause establishes no fixed term for the Agreement and gives
+            neither party any right to terminate it on notice, so the
+            disclosure relationship it governs cannot be ended by either
+            side.
+        action: escalate
+        approver_role: general_counsel
+        rationale: >
+          An agreement with no term and no termination right creates a
+          standing disclosure obligation that outlives any business reason
+          for it and that Halcyon's contracts team cannot track for review.
+    objections:
+      - objection: >
+          Two years is too short; our diligence and partnership discussions
+          often run longer than that.
+        their_rationale: >
+          Complex partnership evaluations, especially those involving
+          regulatory approval steps, can extend past two years.
+        response: >
+          We can extend to a three-year term, which covers the large
+          majority of partnership timelines we see, and in return we would
+          like either party to be able to terminate early on notice once
+          discussions conclude.
+        talking_points:
+          - Offer the three-year fallback before the open-ended term.
+          - Ask for an early-termination right in exchange for the longer term.
+        recommended_position: {rule_key: term.agreement_term, rung: 1}
+        frequency: common
+        counterparty_profile: Large health systems with multi-year evaluation cycles
+      - objection: We prefer the Agreement to run until either side wants to end it, rather than expire on a fixed date.
+        their_rationale: >
+          Some counterparties dislike tracking expiration dates across many
+          NDAs and prefer an evergreen term.
+        response: >
+          We can accept an open-ended term provided either party may end it
+          on thirty days' notice, which keeps the relationship flexible
+          without leaving a disclosure channel open indefinitely with no
+          exit.
+        talking_points:
+          - Confirm the open-ended fallback still requires a termination-on-notice right.
+          - Note that survival of confidentiality is tracked separately from the Term itself.
+        recommended_position: {rule_key: term.agreement_term, rung: 2}
+        frequency: occasional
+        counterparty_profile: Counterparties managing a large NDA portfolio
+    dependencies:
+      - related_rule_key: term.survival_period
+        relation: read_with
+        note: >
+          The Term governs how long new disclosures may be made; the
+          survival period governs how long confidentiality obligations last
+          for information already disclosed. Read the two together to
+          confirm neither leaves a gap.
+    test_cases:
+      - name: Two-year term, standard phrasing
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          This Agreement is effective for a period of two years beginning on
+          the Effective Date, unless terminated earlier as set out below.
+      - name: Twenty-four-month term variant
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          The term of this Agreement is twenty-four months from the
+          Effective Date, subject to earlier termination under this
+          Agreement.
+      - name: Three-year term
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: yellow
+        sample_text: This Agreement continues in effect for three years from the Effective Date.
+      - name: Automatic annual renewal with a non-renewal notice right
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          This Agreement automatically renews for successive one-year
+          periods unless either party gives notice of non-renewal at least
+          thirty days before the next renewal date.
+      - name: No term and no termination right
+        expected_outcome: red_line
+        expected_red_line_key: term-no-end-no-termination-right
+        expected_zone: red
+        sample_text: >
+          This Agreement shall continue in perpetuity, and neither party may
+          terminate it.
+
+  - rule_key: term.survival_period
+    title: Survival period for confidentiality obligations
+    required: true
+    risk_weight: 7
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Confidentiality obligations survive for a flat three years after the
+      Agreement ends. Indefinite survival carved out specifically for trade
+      secrets is an acceptable concession, not the preferred position.
+    risk_rationale: >
+      A short survival period lets a counterparty treat Halcyon's pricing,
+      architecture and security documentation as freely usable almost as
+      soon as discussions end, while a perpetual survival period for all
+      information, however routine, is impossible for Halcyon's two
+      contracts managers to track and enforce across roughly 310
+      counterparty relationships. A flat three years matches how long the
+      competitive sensitivity of a typical diligence disclosure actually
+      lasts; an indefinite carve-out is reserved as a concession for
+      information that genuinely qualifies as a trade secret, not a
+      starting position.
+    detection_guidance: >
+      Look for "shall survive termination or expiration for a period of",
+      "for so long as the information remains a trade secret", "in
+      perpetuity" and "indefinitely". Note any different period for
+      personal data. Absence means it is unclear whether obligations
+      outlast the agreement, which is a missing issue.
+    source_ref: Halcyon Risk Policy RP-04
+    authored_by: Contracts Manager
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-15
+    positions:
+      - kind: preferred
+        label: Flat three-year survival
+        zone: green
+        summary: >
+          Confidentiality obligations survive a flat three years after
+          termination or expiration, with no indefinite carve-out.
+        language: >
+          The confidentiality obligations in this Agreement shall survive
+          termination or expiration of this Agreement for a period of three
+          (3) years.
+      - kind: fallback
+        rung: 1
+        label: Flat five-year survival
+        zone: green
+        give_get: >
+          Ask for a right to extend survival further by mutual written
+          agreement if a later dispute shows particular information needs
+          longer protection.
+        summary: >
+          A single five-year survival period for all Confidential
+          Information, with no indefinite carve-out.
+        language: >
+          The confidentiality obligations in this Agreement shall survive
+          termination or expiration of this Agreement for a period of five
+          (5) years.
+      - kind: fallback
+        rung: 2
+        label: Indefinite survival for trade secrets only
+        zone: yellow
+        approver_role: contracts_manager
+        give_get: >
+          Require a written log identifying which disclosed information
+          Halcyon considers a trade secret, so the indefinite carve-out has
+          a documented basis.
+        summary: >
+          Confidentiality obligations survive five years generally, and
+          indefinitely for information that qualifies as a trade secret,
+          matching the risk appetite ceiling for this issue.
+        language: >
+          The confidentiality obligations in this Agreement shall survive
+          termination or expiration of this Agreement for a period of five
+          (5) years, except that obligations with respect to trade secrets
+          shall survive indefinitely for so long as the information remains
+          a trade secret under applicable law.
+      - kind: acceptable_variant
+        label: Flat three-year survival, counterparty phrasing
+        zone: green
+        summary: Different wording for the same flat three-year outcome.
+        language: >
+          Each party's confidentiality duties under this Agreement continue
+          for three years following termination or expiration of this
+          Agreement.
+    parameters:
+      - key: survival_years
+        label: Fixed survival period in years
+        value_type: number
+        unit: years
+        direction: lower_is_better
+        preferred_value: 3
+        green_limit: 5
+        yellow_limit: 5
+        extraction_hint: >
+          Extract the fixed-year survival period that applies to
+          Confidential Information generally, separate from any indefinite
+          trade-secret carve-out, which is captured by the survival_scope
+          parameter. A fixed period above five years, with no indefinite
+          carve-out and no perpetual wording, is treated as red: section 2.4
+          names no anchor for a long fixed number that is neither the
+          5-year green ceiling nor the trade-secret-only yellow concession.
+      - key: survival_scope
+        label: Survival treatment for trade secrets and other information
+        value_type: enum
+        direction: set_membership
+        preferred_value: fixed_years_only
+        green_limit: [fixed_years_only]
+        yellow_limit: [indefinite_trade_secrets_only]
+        allowed_values:
+          - fixed_years_only
+          - indefinite_trade_secrets_only
+          - perpetual_all_information
+        extraction_hint: >
+          "perpetual_all_information" means every category of Confidential
+          Information, not only trade secrets, survives forever; that is
+          red regardless of how it is phrased.
+    red_lines:
+      - key: surv-perpetual-all-information
+        description: >
+          All Confidential Information, not only trade secrets, is subject
+          to a perpetual survival obligation.
+        condition_type: parameter
+        condition: {parameter_key: survival_scope, op: eq, value: perpetual_all_information}
+        action: block
+        rationale: >
+          Perpetual survival for every category of information, however
+          routine, cannot be administered by a two-person contracts team
+          across hundreds of counterparty relationships and provides no
+          proportionate benefit over a long fixed term with a trade-secret
+          carve-out.
+    objections:
+      - objection: >
+          Three years is too short for information that could remain
+          competitively sensitive much longer, like your product roadmap.
+        their_rationale: >
+          Disclosing parties sometimes want longer protection than three
+          years for strategically important information.
+        response: >
+          We can move to a flat five-year survival period, which covers the
+          overwhelming majority of what either side considers sensitive. If
+          particular information needs protection beyond that, we can also
+          discuss an indefinite carve-out limited to genuine trade secrets.
+        talking_points:
+          - Offer the flat five-year fallback before discussing an indefinite trade-secret carve-out.
+          - Note that a true trade secret is already protected for as long as it remains one, at the next rung.
+        recommended_position: {rule_key: term.survival_period, rung: 1}
+        frequency: common
+        counterparty_profile: Counterparties sharing long-horizon roadmap or strategic information
+      - objection: >
+          We'd like everything disclosed under this NDA to stay confidential
+          forever, not just for a few years.
+        their_rationale: >
+          Some counterparties, especially those disclosing highly sensitive
+          material themselves, want maximal protection regardless of
+          administrative burden.
+        response: >
+          We can agree that trade secrets are protected for as long as they
+          remain trade secrets, which in practice can be indefinite, but a
+          perpetual obligation covering routine information as well is not
+          something either of our legal teams can track or enforce
+          meaningfully decades from now.
+        talking_points:
+          - Distinguish the indefinite trade-secret carve-out from a blanket perpetual obligation.
+          - Offer the rung-2 fallback as the practical ceiling.
+        recommended_position: {rule_key: term.survival_period, rung: 2}
+        frequency: occasional
+        counterparty_profile: Counterparties disclosing highly sensitive proprietary technology
+    test_cases:
+      - name: Flat three-year survival
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Confidentiality duties under this Agreement continue for three
+          years after it ends.
+      - name: Counterparty-phrased flat three-year survival
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          For three years following expiration or termination, each party
+          must keep the other's Confidential Information confidential.
+      - name: Flat five-year survival
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          The obligation to keep Confidential Information confidential
+          survives for five years after this Agreement terminates or
+          expires.
+      - name: Five years generally, indefinite for trade secrets
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Confidentiality obligations survive for five years after this
+          Agreement ends, except that information remaining a trade secret
+          under applicable law stays protected for as long as it remains a
+          trade secret.
+      - name: Survival runs from each disclosure rather than from termination
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Confidentiality obligations with respect to each item of
+          Confidential Information survive for three years from the date
+          that item was disclosed.
+      - name: Survival period not addressed at all
+        expected_outcome: missing
+        expected_zone: yellow
+        sample_text: ""
+      - name: Perpetual survival for all information
+        expected_outcome: red_line
+        expected_red_line_key: surv-perpetual-all-information
+        expected_zone: red
+        sample_text: >
+          All Confidential Information disclosed under this Agreement
+          remains subject to the confidentiality obligations in this
+          Agreement in perpetuity.
+      - name: Trap - negated phrasing of the flat three-year term
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Nothing in this Agreement excuses the Receiving Party from
+          confidentiality once this Agreement ends; those obligations
+          continue, for three years and no longer, following termination or
+          expiration.
+
+  - rule_key: termination.return_or_destruction
+    title: Return or destruction of Confidential Information
+    required: true
+    risk_weight: 5
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      On termination, expiration, or request, the Receiving Party must
+      return or destroy all Confidential Information within 10 business
+      days and certify this in writing, subject only to archival copies kept
+      under routine backup processes or legal retention duties.
+    risk_rationale: >
+      Without a return-or-destroy obligation, a counterparty that walks away
+      from a diligence process keeps an indefinite, unaccounted-for copy of
+      Halcyon's architecture diagrams, pricing and security documentation.
+      A short, certified window gives Halcyon's contracts team something
+      concrete to point to if information later surfaces somewhere it
+      should not.
+    detection_guidance: >
+      Look for "return or destroy", "promptly upon request", "certify in
+      writing" and exceptions such as "archival copies", "automated backup
+      systems" or "as required by applicable law". This issue concerns
+      confidential information generally, most often in an NDA; return and
+      deletion of personal data or PHI is a separate issue under data
+      protection. Absence is a missing clause.
+    source_ref: Halcyon Information Classification Policy IC-01
+    authored_by: Contracts Manager
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-18
+    positions:
+      - kind: preferred
+        label: 10-day return or destruction, written certification
+        zone: green
+        summary: >
+          Within 10 business days of a written request, termination or
+          expiration, the Receiving Party returns or destroys Confidential
+          Information and certifies this in writing, subject to a backup and
+          legal-retention exception.
+        language: >
+          Upon the Disclosing Party's written request, or upon termination
+          or expiration of this Agreement, the Receiving Party shall, within
+          ten (10) business days, return or destroy all Confidential
+          Information in its possession, including copies, and shall certify
+          such return or destruction in writing, except that the Receiving
+          Party may retain copies stored solely in its routine, automated
+          backup systems until the ordinary deletion cycle of those systems
+          and copies it is required to retain by applicable law or a bona
+          fide record-keeping policy, each of which remains subject to this
+          Agreement's confidentiality obligations.
+      - kind: fallback
+        rung: 1
+        label: 30-day return or destruction, written certification
+        zone: yellow
+        approver_role: contracts_manager
+        give_get: >
+          Ask for the certification to identify the specific systems from
+          which Confidential Information was deleted, rather than a general
+          statement.
+        summary: >
+          Extends the return-or-destroy window to 30 days but keeps the
+          written certification requirement and the backup and legal
+          exceptions.
+        language: >
+          Within thirty (30) days of the Disclosing Party's written request
+          or of termination or expiration of this Agreement, the Receiving
+          Party shall return or destroy all Confidential Information in its
+          possession and shall certify such return or destruction in
+          writing, subject to retention of copies in routine backup systems
+          and copies required by law.
+      - kind: fallback
+        rung: 2
+        label: 30-day return or destruction, no written certification
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: >
+          Require a written statement, even if informal, confirming that
+          return or destruction has occurred, in place of a formal
+          certification.
+        summary: >
+          Keeps the 30-day window and the backup and legal exceptions but
+          drops the formal written certification requirement.
+        language: >
+          Within thirty (30) days of the Disclosing Party's written request
+          or of termination or expiration of this Agreement, the Receiving
+          Party shall return or destroy all Confidential Information in its
+          possession, subject to retention of copies in routine backup
+          systems and copies required by law.
+      - kind: acceptable_variant
+        label: 10-day return or destruction, counterparty phrasing
+        zone: green
+        summary: Different wording for the same 10-day, certified outcome.
+        language: >
+          No later than ten (10) business days after being asked to do so,
+          or after this Agreement ends, the Receiving Party will return all
+          Confidential Information to the Disclosing Party or destroy it and
+          confirm that destruction in writing, except for copies preserved
+          only in standard backup archives or as required by law.
+    parameters:
+      - key: return_destroy_days
+        label: Days to return or destroy Confidential Information
+        value_type: number
+        unit: business days
+        direction: lower_is_better
+        preferred_value: 10
+        green_limit: 10
+        yellow_limit: 30
+        extraction_hint: >
+          Convert calendar days to business days if stated as calendar days
+          (multiply by roughly 5/7). No stated deadline at all is a
+          deviation.
+      - key: certification_required
+        label: Written certification of return or destruction is required
+        value_type: boolean
+        direction: exact
+        preferred_value: true
+        green_limit: true
+        yellow_limit: false
+        extraction_hint: >
+          True only if the clause requires a written certification or
+          written confirmation of return or destruction, not merely that
+          return or destruction occur.
+    red_lines:
+      - key: rod-no-return-obligation
+        description: >
+          The Agreement imposes no obligation to return or destroy
+          Confidential Information at any point, including on termination.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause, and the Agreement as a whole, impose no requirement
+            on the Receiving Party to return or destroy the Disclosing
+            Party's Confidential Information at termination, expiration, or
+            on request.
+        action: escalate
+        approver_role: general_counsel
+        rationale: >
+          With no return-or-destroy obligation at all, Halcyon has no
+          contractual basis to require a former counterparty to give back or
+          delete architecture, pricing or security material once the
+          relationship ends.
+    objections:
+      - objection: >
+          Ten business days is too tight; locating and purging every copy
+          across our systems takes longer.
+        their_rationale: >
+          Larger organizations with decentralized file storage need more
+          time to complete a thorough purge.
+        response: >
+          We can extend the window to thirty days, which should give your
+          IT team enough time for a thorough search, provided the written
+          certification requirement stays in place so we have confirmation
+          the purge was completed.
+        talking_points:
+          - Offer the rung-1 30-day fallback before dropping certification.
+          - Keep certification non-negotiable if possible, since it is the only confirmation Halcyon receives.
+        recommended_position: {rule_key: termination.return_or_destruction, rung: 1}
+        frequency: common
+        counterparty_profile: Large enterprise counterparties with decentralized IT
+      - objection: We can't certify destruction in writing; that creates a compliance record we'd rather not generate.
+        their_rationale: >
+          Some counterparties are cautious about creating written records
+          that could later be used as evidence against them.
+        response: >
+          We can accept an informal written confirmation rather than a
+          formal certificate if that addresses the concern, but we do need
+          something in writing confirming the information was returned or
+          destroyed, since otherwise we have no way to know the obligation
+          was met.
+        talking_points:
+          - Distinguish an informal written confirmation from a formal certificate.
+          - Offer the rung-2 fallback only if no written confirmation of any kind is achievable.
+        recommended_position: {rule_key: termination.return_or_destruction, rung: 2}
+        frequency: occasional
+        counterparty_profile: Counterparties with conservative internal compliance practices
+    test_cases:
+      - name: 10-day return or destruction, certified
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Within ten business days after termination of this Agreement or a
+          written request, the Receiving Party will return or destroy all
+          Confidential Information and confirm this in writing, except for
+          copies held only in routine backups or as required by law.
+      - name: Counterparty-phrased equivalent
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          The Receiving Party will, within ten business days of being asked
+          or of this Agreement ending, give back or destroy the Disclosing
+          Party's Confidential Information and confirm in writing that it
+          has done so, excluding backup-archive copies and legally required
+          copies.
+      - name: 30-day return or destruction, certified
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: yellow
+        sample_text: >
+          Within thirty days of termination or a written request, the
+          Receiving Party will return or destroy all Confidential
+          Information and certify that it has done so in writing.
+      - name: Return obligation with no stated deadline
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Upon the Disclosing Party's written request, the Receiving Party
+          will return or destroy all Confidential Information in its
+          possession.
+      - name: No return or destruction obligation
+        expected_outcome: red_line
+        expected_red_line_key: rod-no-return-obligation
+        expected_zone: red
+        sample_text: >
+          This Agreement does not require either party to return or destroy
+          any Confidential Information at any time.
+      - name: Trap - negated retention wording
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          The Receiving Party shall not retain any Confidential Information
+          beyond ten business days following the Disclosing Party's written
+          request or the termination of this Agreement, except copies
+          preserved solely within its routine, automated backup systems or
+          as required by applicable law, and shall certify in writing that
+          it has complied with this requirement.
+
+  - rule_key: intellectual_property.no_license
+    title: No licence granted
+    required: true
+    risk_weight: 6
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Disclosing Confidential Information or entering into this Agreement
+      grants no licence, ownership interest, or other right in either
+      party's intellectual property beyond the limited right to use it for
+      the Purpose.
+    risk_rationale: >
+      Without an express no-licence statement, a counterparty that has
+      reviewed Halcyon Engage's architecture or sample integration code
+      during diligence could later argue that access implied a right to use
+      or build on it commercially. Halcyon's product differentiation sits in
+      its HL7 FHIR integration approach, and a single ambiguous diligence
+      exchange should never be read as a licence to that technology.
+    detection_guidance: >
+      Look for "nothing in this Agreement shall be construed as granting",
+      "no licence, express or implied", "by estoppel or otherwise" and "all
+      Confidential Information remains the property of the Disclosing
+      Party". Absence in an NDA is a missing issue; the opposite wording, an
+      express licence to use disclosed information, is a deviation.
+    source_ref: Halcyon Information Classification Policy IC-01
+    authored_by: Contracts Manager
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-20
+    positions:
+      - kind: preferred
+        label: No licence, all intellectual property reserved
+        zone: green
+        summary: >
+          No licence or other right in either party's intellectual property
+          is granted by disclosure or by entering into this Agreement, and
+          all Confidential Information remains the Disclosing Party's
+          property.
+        language: >
+          Nothing in this Agreement shall be construed as granting, by
+          implication, estoppel or otherwise, any licence or right under any
+          patent, copyright, trademark, trade secret or other intellectual
+          property right of either party, other than the limited right to
+          use Confidential Information for the Purpose as expressly set out
+          in this Agreement. All Confidential Information, and all
+          intellectual property rights in it, remain the property of the
+          Disclosing Party.
+      - kind: fallback
+        rung: 1
+        label: No licence, without the express property-ownership sentence
+        zone: yellow
+        approver_role: contracts_manager
+        give_get: >
+          Ask for a separate acknowledgement elsewhere in the Agreement that
+          ownership of pre-existing intellectual property is unaffected by
+          the NDA.
+        summary: >
+          States that no licence is granted but omits the separate sentence
+          confirming the Disclosing Party retains ownership of Confidential
+          Information.
+        language: >
+          Nothing in this Agreement shall be construed as granting any
+          licence or right under either party's intellectual property,
+          other than the limited right to use Confidential Information for
+          the Purpose.
+      - kind: fallback
+        rung: 2
+        label: No licence beyond internal evaluation use
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: >
+          Require that any evaluation use be limited to the Receiving
+          Party's personnel with a need to know, consistent with the
+          permitted-disclosures rule.
+        summary: >
+          Confirms no licence is granted beyond using Confidential
+          Information internally to evaluate the Purpose.
+        language: >
+          No licence under any intellectual property right is granted under
+          this Agreement except a limited, non-exclusive, non-transferable
+          right to use Confidential Information internally to evaluate the
+          Purpose.
+      - kind: acceptable_variant
+        label: No licence, counterparty phrasing
+        zone: green
+        summary: Different wording for the same no-licence outcome.
+        language: >
+          No party receives any licence, title or interest in the other
+          party's intellectual property by virtue of this Agreement or any
+          disclosure made under it, and each party's Confidential
+          Information remains its own property.
+    parameters:
+      - key: license_statement_present
+        label: An express no-licence statement is included
+        value_type: boolean
+        direction: exact
+        preferred_value: true
+        green_limit: true
+        extraction_hint: >
+          True if the Agreement expressly states that no licence is granted
+          by disclosure; false if the Agreement is silent on licensing
+          altogether, which is a missing issue rather than a false value
+          here.
+    red_lines:
+      - key: nol-implied-license-granted
+        description: >
+          The Agreement grants the Receiving Party an express or implied
+          licence to use or exploit the Disclosing Party's intellectual
+          property beyond evaluating the Purpose.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause grants the Receiving Party a licence, right, or
+            permission to use, copy, modify, or commercially exploit the
+            Disclosing Party's intellectual property or Confidential
+            Information for purposes beyond evaluating or carrying out the
+            Purpose stated in the Agreement.
+        action: block
+        rationale: >
+          Any licence beyond Purpose-limited evaluation use would let a
+          counterparty commercially exploit Halcyon Engage's technology
+          without any of the commercial protections, such as IP indemnities
+          or ownership terms, that a signed SaaS or vendor agreement would
+          include.
+    objections:
+      - objection: >
+          This sentence seems unnecessary; we're not trying to claim a
+          licence to anything.
+        their_rationale: >
+          Counterparties sometimes view a no-licence clause as redundant if
+          neither side intends to use disclosed information commercially.
+        response: >
+          If neither side intends to claim a licence, this sentence costs
+          nothing to include and removes any later ambiguity about whether
+          reviewing our architecture or sample materials implied a right to
+          use them.
+        talking_points:
+          - Note the clause is defensive and costs the counterparty nothing if they agree with its premise.
+          - Offer the rung-1 fallback if only the ownership sentence is contested.
+        recommended_position: {rule_key: intellectual_property.no_license, rung: 1}
+        frequency: common
+        counterparty_profile: Counterparties with minimal NDA negotiation experience
+      - objection: >
+          We want to be able to use what we learn during evaluation to
+          inform our own internal roadmap discussions, not just to decide
+          whether to do this deal.
+        their_rationale: >
+          Counterparties sometimes want freedom to let diligence findings
+          inform broader internal strategy, not only the specific
+          transaction.
+        response: >
+          We can agree that your team may use Confidential Information
+          internally to evaluate the Purpose, which includes forming a view
+          on the broader relationship, but we cannot agree to a licence that
+          lets that information be used to build or inform a competing
+          product.
+        talking_points:
+          - Offer the rung-2 fallback, which already covers internal evaluation use.
+          - Hold the line on excluding use to build competing functionality.
+        recommended_position: {rule_key: intellectual_property.no_license, rung: 2}
+        frequency: occasional
+        counterparty_profile: Strategic partners and potential competitors evaluating a relationship
+    dependencies:
+      - related_rule_key: confidentiality.standard_of_care
+        relation: requires
+        note: >
+          The Purpose-limited use restriction and the no-licence statement
+          work together: use is limited to the Purpose and no licence to
+          exploit Confidential Information is implied.
+    test_cases:
+      - name: No licence, ownership reserved
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Disclosure of Confidential Information grants no licence, by
+          implication or otherwise, to any patent, copyright or trade secret
+          of either party beyond the limited right to use it for the
+          Purpose, and all such information remains the property of the
+          party that disclosed it.
+      - name: Counterparty-phrased equivalent
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Neither party obtains any licence or ownership interest in the
+          other's intellectual property as a result of this Agreement or
+          any disclosure under it, and each party keeps title to its own
+          Confidential Information.
+      - name: No licence, ownership sentence omitted
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: yellow
+        sample_text: >
+          This Agreement grants no licence or right under either party's
+          intellectual property other than a limited right to use
+          Confidential Information for the Purpose.
+      - name: No-licence statement present but a feedback licence carved in
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Nothing in this Agreement grants a licence under either party's
+          intellectual property other than the limited right to use
+          Confidential Information for the Purpose, except that the
+          Receiving Party grants the Disclosing Party a perpetual,
+          royalty-free licence to use any feedback or suggestions the
+          Receiving Party provides about the Disclosing Party's products.
+      - name: Licence language entirely absent
+        expected_outcome: missing
+        expected_zone: yellow
+        sample_text: ""
+      - name: Express licence to use and build on disclosed technology
+        expected_outcome: red_line
+        expected_red_line_key: nol-implied-license-granted
+        expected_zone: red
+        sample_text: >
+          The Receiving Party may use the Disclosing Party's Confidential
+          Information, including any technology or source code disclosed, to
+          develop its own products and services.
+
+  - rule_key: non_solicitation.employee_non_solicit
+    title: Employee non-solicitation
+    required: false
+    risk_weight: 4
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      If a non-solicitation clause is included at all, it restricts either
+      party from soliciting for employment the other party's employees with
+      whom it had contact in connection with the Purpose, for twelve months,
+      with a carve-out for general advertising; the absence of any such
+      clause is an equally acceptable, and often preferred, outcome.
+    risk_rationale: >
+      An employee non-solicit is not something Halcyon needs from most
+      counterparties in a diligence NDA. If a counterparty insists on one, a
+      narrow, time-limited, contact-based restriction is the most Halcyon
+      will accept, since broader or longer restrictions raise
+      enforceability concerns in some states and create friction with
+      Halcyon's own hiring across its 430-person workforce.
+    detection_guidance: >
+      Look for "shall not solicit for employment", "directly or indirectly",
+      "for a period of twelve months", "employees with whom it had contact"
+      and "general solicitations not targeted at". Absence is the preferred
+      position in an NDA and should not be flagged as missing.
+    source_ref: Halcyon Risk Policy RP-04
+    authored_by: Contracts Manager
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-22
+    positions:
+      - kind: preferred
+        label: Twelve-month, contact-based mutual non-solicit
+        zone: green
+        summary: >
+          Mutual twelve-month restriction limited to employees with whom the
+          soliciting party had contact in connection with the Purpose, with
+          a general-advertising carve-out.
+        language: >
+          During the Term and for twelve (12) months after it ends, neither
+          party shall directly or indirectly solicit for employment any
+          employee of the other party with whom it had contact in
+          connection with the Purpose, provided that this restriction does
+          not apply to general solicitations of employment not specifically
+          targeted at such employees, or to any employee who responds to
+          such a general solicitation on their own initiative.
+      - kind: fallback
+        rung: 1
+        label: Eighteen-month, contact-based mutual non-solicit
+        zone: yellow
+        approver_role: contracts_manager
+        give_get: >
+          Ask for the general-advertising carve-out to be stated expressly
+          rather than left implicit, so it is enforceable on its own terms.
+        summary: >
+          Extends the restriction to eighteen months, keeping the
+          contact-based limitation and the general-advertising carve-out.
+        language: >
+          During the Term and for eighteen (18) months after it ends,
+          neither party shall solicit for employment any employee of the
+          other party with whom it had contact in connection with the
+          Purpose, excluding general solicitations not targeted at such
+          employees.
+      - kind: fallback
+        rung: 2
+        label: Twenty-four-month restriction extending to contractors
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: >
+          Require that the restriction remain mutual and keep the
+          general-advertising carve-out, since extending scope to
+          contractors is already a significant concession.
+        summary: >
+          Extends the restriction to twenty-four months and to contractors
+          engaged in connection with the Purpose, in addition to employees.
+        language: >
+          During the Term and for twenty-four (24) months after it ends,
+          neither party shall solicit for engagement any employee or
+          individual contractor of the other party with whom it had contact
+          in connection with the Purpose, excluding general solicitations
+          not targeted at such individuals.
+      - kind: acceptable_variant
+        label: Twelve-month non-solicit, counterparty phrasing
+        zone: green
+        summary: Different wording for the same twelve-month, contact-based outcome.
+        language: >
+          Neither party will, during the Term or for one year afterward,
+          induce or attempt to induce any employee of the other party it
+          dealt with in connection with the Purpose to leave that party's
+          employment, except through a general job posting not aimed at
+          that individual.
+    parameters:
+      - key: non_solicit_months
+        label: Non-solicitation duration in months
+        value_type: number
+        unit: months
+        direction: lower_is_better
+        preferred_value: 12
+        green_limit: 12
+        yellow_limit: 24
+        extraction_hint: >
+          Extract the stated post-term duration. If the clause is absent
+          entirely, this parameter does not apply; treat absence under the
+          rule's test cases, not this parameter.
+    red_lines:
+      - key: nonsolicit-no-time-limit
+        description: >
+          The non-solicitation restriction has no end date at all.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause restricts solicitation of the other party's
+            employees or contractors with no stated time limit at all,
+            including "at any time" or perpetual wording.
+        action: block
+        rationale: >
+          An indefinite non-solicit goes beyond even the broadest fallback
+          this rule contemplates and leaves no point at which the
+          restriction on Halcyon's own hiring ends.
+    objections:
+      - objection: We'd rather not have any non-solicitation obligation in a confidentiality agreement at all.
+        their_rationale: >
+          Some counterparties see a non-solicit as out of scope for a
+          document meant only to protect information.
+        response: >
+          We agree a non-solicit is not strictly necessary for an NDA, and
+          we are glad to leave it out entirely; we only include the twelve-
+          month, contact-based version if your side specifically asks for
+          one.
+        talking_points:
+          - Confirm that omitting the clause entirely is Halcyon's own preferred outcome.
+          - Only negotiate duration or scope if the counterparty is the one proposing the clause.
+        frequency: occasional
+        counterparty_profile: Counterparties using a lean, information-only NDA template
+      - objection: Twelve months is too short given how long our diligence and hiring cycles run.
+        their_rationale: >
+          Counterparties with long sales or partnership cycles sometimes
+          want a longer restriction to match.
+        response: >
+          We can extend to eighteen months, which should comfortably cover
+          most diligence cycles, while keeping the restriction limited to
+          people either side actually had contact with in connection with
+          this relationship.
+        talking_points:
+          - Offer the eighteen-month fallback before discussing scope expansion to contractors.
+          - Keep the contact-based limitation in any extended version.
+        recommended_position: {rule_key: non_solicitation.employee_non_solicit, rung: 1}
+        frequency: rare
+        counterparty_profile: Counterparties with extended partnership evaluation cycles
+    dependencies:
+      - related_rule_key: confidentiality.permitted_disclosures
+        relation: trade_against
+        note: >
+          If a counterparty wants a broader list of permitted
+          representatives with access to Confidential Information, a
+          twelve-month non-solicit limited to those same contacted
+          individuals is a reasonable trade.
+    test_cases:
+      - name: Twelve-month contact-based non-solicit
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          For the Term and twelve months afterward, neither party will
+          solicit for employment any employee of the other party it had
+          contact with in connection with the Purpose, excluding responses
+          to general job postings not aimed at that employee.
+      - name: Counterparty-phrased equivalent
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Neither party will try to induce an employee of the other party
+          it dealt with under this Agreement to resign, during the Term or
+          for a year after, except where that employee responds to a general
+          job posting.
+      - name: Eighteen-month contact-based non-solicit
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: yellow
+        sample_text: >
+          Neither party will solicit for employment, during the Term or for
+          eighteen months after, any employee of the other party with whom
+          it had contact in connection with the Purpose.
+      - name: Twelve-month restriction with no contact limitation
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          For twelve months after this Agreement ends, neither party will
+          solicit for employment any employee of the other party.
+      - name: No non-solicitation clause in the Agreement
+        expected_outcome: missing
+        expected_zone: green
+        sample_text: ""
+      - name: Non-solicit with no end date
+        expected_outcome: red_line
+        expected_red_line_key: nonsolicit-no-time-limit
+        expected_zone: red
+        sample_text: >
+          Neither party shall at any time solicit for employment any
+          employee or contractor of the other party.
+      - name: Trap - negated general-advertising wording
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Neither party is restricted from hiring an employee of the other
+          who responds to a general job posting not targeted at that
+          employee, but, during the Term and for twelve months after it
+          ends, neither party shall otherwise solicit for employment any
+          employee of the other party with whom it had contact in
+          connection with the Purpose.
+
+  - rule_key: publicity.name_and_logo_use
+    title: Publicity and use of name and marks
+    required: false
+    risk_weight: 5
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Neither party may disclose the existence or substance of the parties'
+      discussions, or use the other party's name, logo, or marks in any
+      publicity, without the other party's prior written consent.
+    risk_rationale: >
+      Early-stage discussions with a hospital system or health-plan
+      counterparty are often commercially sensitive on both sides before a
+      deal is signed, and premature disclosure that Halcyon is in talks with
+      a specific health system can create competitive or regulatory
+      complications for either party. A mutual consent requirement protects
+      both Halcyon's sales process and the counterparty's own
+      confidentiality needs equally.
+    detection_guidance: >
+      Look for "may use Customer's name and logo", "customer list", "press
+      release", "case study", "without the prior written consent" and "in
+      accordance with trademark usage guidelines". Absence means neither
+      party has a contractual right to use the other's name or marks.
+    source_ref: Halcyon Information Classification Policy IC-01
+    authored_by: Contracts Manager
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-29
+    positions:
+      - kind: preferred
+        label: Mutual consent required for any publicity
+        zone: green
+        summary: >
+          Neither party may disclose the existence of discussions or use the
+          other's name, logo, or marks in publicity without prior written
+          consent.
+        language: >
+          Neither party shall disclose the existence or substance of the
+          discussions contemplated by this Agreement, issue any press
+          release concerning them, or use the other party's name, logo, or
+          trademarks in any publicity, marketing material, or public
+          statement, without the other party's prior written consent in each
+          instance.
+      - kind: fallback
+        rung: 1
+        label: Mutual consent, with a permitted joint press release carve-out
+        zone: yellow
+        approver_role: contracts_manager
+        give_get: >
+          Require that any jointly approved press release be reviewed and
+          agreed by both parties' communications teams before release.
+        summary: >
+          Keeps the mutual consent requirement but permits a single jointly
+          approved press release if the parties later sign a definitive
+          commercial agreement.
+        language: >
+          Neither party shall disclose the existence of the parties'
+          discussions or use the other's name or marks without prior written
+          consent, except that, if the parties enter into a definitive
+          agreement as a result of those discussions, they may issue one
+          press release in a form mutually agreed in writing by both
+          parties.
+      - kind: fallback
+        rung: 2
+        label: Mutual right to disclose the fact that discussions occurred
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: >
+          Require that any such disclosure omit specific commercial terms,
+          pricing, or the substance of what was discussed.
+        summary: >
+          Permits one party to state publicly that discussions took place,
+          without naming specific terms, but still requires consent for use
+          of name, logo, or marks in marketing.
+        language: >
+          A party may disclose the fact that discussions occurred between
+          the parties without the other party's consent, provided that it
+          does not disclose the substance of those discussions or any
+          commercial terms, and provided further that use of the other
+          party's name, logo, or trademarks in any marketing material
+          remains subject to prior written consent.
+      - kind: acceptable_variant
+        label: Mutual consent requirement, counterparty phrasing
+        zone: green
+        summary: Different wording for the same mutual-consent outcome.
+        language: >
+          Each party agrees not to reveal that the parties are discussing a
+          potential relationship, and not to use the other's name or
+          trademarks for promotional purposes, unless the other party agrees
+          in writing beforehand.
+    parameters:
+      - key: consent_required_for_publicity
+        label: Prior written consent is required before any publicity use
+        value_type: boolean
+        direction: exact
+        preferred_value: true
+        green_limit: true
+        yellow_limit: false
+        extraction_hint: >
+          True only if the clause requires prior written consent before
+          either disclosing the existence of discussions or using the other
+          party's name or marks; false if disclosure of the bare fact of
+          discussions is permitted without consent (the rung-2 fallback) or
+          if use of name or marks is permitted without consent.
+    red_lines:
+      - key: pub-unilateral-disclosure-of-terms
+        description: >
+          A party may publicly disclose the substance of the parties'
+          discussions, including commercial terms, or use the other party's
+          name or marks in marketing, without consent.
+        condition_type: phrase
+        condition:
+          any:
+            - may publicize the terms of this Agreement
+            - may disclose the terms of the discussions without consent
+            - may use the other party's name and logo without consent
+          negation_guard: true
+        action: escalate
+        approver_role: general_counsel
+        rationale: >
+          Public disclosure of the substance of early-stage discussions, or
+          unconsented use of Halcyon's name and marks, can disrupt a
+          competitive sales process or create a false impression of an
+          endorsement or partnership that does not yet exist.
+    objections:
+      - objection: We'd like to be able to announce that we're exploring a relationship with you once things are further along.
+        their_rationale: >
+          Counterparties sometimes want early flexibility to generate
+          investor or market interest in a developing relationship.
+        response: >
+          We can agree that if we sign a definitive agreement, the parties
+          will issue one jointly approved press release, but we need to keep
+          consent required for anything before that point, since our sales
+          process depends on confidentiality until a deal is actually
+          signed.
+        talking_points:
+          - Offer the rung-1 joint-press-release fallback tied to a signed definitive agreement.
+          - Explain that premature disclosure can affect Halcyon's broader sales pipeline.
+        recommended_position: {rule_key: publicity.name_and_logo_use, rung: 1}
+        frequency: occasional
+        counterparty_profile: Counterparties with active investor relations or marketing cycles
+      - objection: We don't see why we need your consent just to say that talks are happening, without naming any terms.
+        their_rationale: >
+          Some counterparties distinguish between disclosing that
+          discussions exist and disclosing their content.
+        response: >
+          We can accept disclosure of the bare fact that discussions
+          occurred, provided no commercial terms or substance are shared and
+          any use of our name or marks in marketing still requires our
+          written consent.
+        talking_points:
+          - Offer the rung-2 fallback, limited strictly to the fact of discussions.
+          - Keep consent required for any marketing use of Halcyon's name or logo.
+        recommended_position: {rule_key: publicity.name_and_logo_use, rung: 2}
+        frequency: rare
+        counterparty_profile: Publicly traded counterparties with disclosure obligations of their own
+    test_cases:
+      - name: Mutual consent required, standard phrasing
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Neither party will reveal that the parties are in discussions, or
+          use the other's name, logo, or marks for any publicity purpose,
+          without first obtaining the other's written consent.
+      - name: Counterparty-phrased equivalent
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Each party will keep the existence of these discussions
+          confidential and will not use the other's name or trademarks in
+          any promotional material unless the other party consents in
+          writing in advance.
+      - name: Mutual consent with a definitive-agreement press release carve-out
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: yellow
+        sample_text: >
+          Neither party will disclose that discussions are occurring without
+          the other's consent, except that, upon signing a definitive
+          agreement, the parties may jointly issue one mutually approved
+          press release.
+      - name: Consent addressed for marketing use but silent on existence of discussions
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Neither party may use the other's name, logo, or trademarks in
+          marketing materials without prior written consent.
+      - name: Unconsented disclosure of discussion terms
+        expected_outcome: red_line
+        expected_red_line_key: pub-unilateral-disclosure-of-terms
+        expected_zone: red
+        sample_text: >
+          Either party may disclose the terms of the discussions without
+          consent and may use the other party's name and logo without
+          consent in its marketing materials.
+      - name: Trap - negated consent wording
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Neither party shall disclose that the parties are in discussions,
+          nor shall either party use the other's name, logo, or trademarks
+          in any publicity, without first obtaining the other party's
+          written consent, notwithstanding any routine internal business
+          communications between the parties.
+
+  - rule_key: governing_law.choice_of_law
+    title: Governing law for the mutual NDA
+    required: true
+    risk_weight: 6
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Delaware law governs, with a wider green list than the baseline
+      playbook because a mutual NDA carries materially less financial and
+      operational risk than a commercial agreement: any US state, together
+      with Ireland and England and Wales for non-US counterparties, is
+      acceptable without escalation.
+    risk_rationale: >
+      An NDA creates no payment, liability, or service obligations; the only
+      real exposure is a confidentiality dispute valued, at most, at the
+      cost of the information disclosed rather than at a contract's annual
+      Fees. Given that lower stakes, Halcyon can afford to accept the
+      counterparty's home-state law far more often here than it would for a
+      SaaS MSA worth up to $2.4M, which is why this rule's green list is
+      wider than the baseline playbook's.
+    detection_guidance: >
+      Look for "governed by and construed in accordance with the laws of",
+      "without regard to its conflict of laws principles" and a named state
+      or country, usually near the end of the agreement under "Governing
+      Law" or "General". An agreement with no governing law clause is a
+      missing clause.
+    source_ref: Halcyon Risk Policy RP-04; overrides halcyon-baseline governing_law.choice_of_law for mutual NDAs
+    authored_by: Contracts Manager
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-05
+    positions:
+      - kind: preferred
+        label: Delaware law
+        zone: green
+        summary: Delaware law governs the Agreement.
+        language: >
+          This Agreement is governed by the laws of the State of Delaware,
+          without regard to its conflict of laws rules.
+      - kind: fallback
+        rung: 1
+        label: New York, Massachusetts, California, Ireland, or England and Wales
+        zone: green
+        conditions: {region: [us, eu, uk]}
+        give_get: >
+          Ask that venue be in a court with personal jurisdiction over the
+          counterparty rather than a neutral third location, to keep the
+          dispute process simple.
+        summary: >
+          The law of New York, Massachusetts or California governs for a US
+          counterparty, or of Ireland or England and Wales for an EU or UK
+          counterparty.
+        language: >
+          This Agreement is governed by the laws of the State of [state], or
+          of Ireland, or of England and Wales, as applicable to the
+          counterparty's place of establishment, without regard to conflict
+          of laws rules.
+      - kind: fallback
+        rung: 2
+        label: Any other US state
+        zone: green
+        conditions: {region: [us]}
+        give_get: >
+          Ask that venue be in a court with personal jurisdiction over the
+          counterparty rather than a neutral third location, to keep the
+          dispute process simple.
+        summary: >
+          The law of any other US state in which the counterparty is based
+          governs, which this NDA playbook treats as green, unlike the
+          baseline playbook's treatment of other US states as yellow.
+        language: >
+          This Agreement is governed by the laws of the State of [state],
+          without regard to conflict of laws rules.
+      - kind: acceptable_variant
+        label: Delaware law, counterparty wording
+        zone: green
+        summary: Delaware law expressed in different words.
+        language: >
+          The validity, interpretation and performance of this Agreement
+          shall be determined under the internal laws of the State of
+          Delaware.
+    parameters:
+      - key: governing_law_jurisdiction
+        label: Jurisdiction whose law governs
+        value_type: enum
+        direction: set_membership
+        preferred_value: delaware
+        green_limit:
+          - delaware
+          - new_york
+          - massachusetts
+          - california
+          - ireland
+          - england_and_wales
+          - other_us_state
+        allowed_values:
+          - delaware
+          - new_york
+          - massachusetts
+          - california
+          - ireland
+          - england_and_wales
+          - other_us_state
+          - other
+        extraction_hint: >
+          Map the named state or country to one of the allowed values. Any
+          US state not separately listed is other_us_state, which is green
+          for this NDA playbook, unlike the baseline playbook, where it is
+          yellow. Anything outside the United States, Ireland, and England
+          and Wales is "other" and is red under the global governing-law
+          red line (global-governing-law-outside-lists), regardless of this
+          rule's own ladder.
+    red_lines:
+      - key: gl-counterparty-unilateral-choice
+        description: >
+          The counterparty may choose or later change the governing law
+          unilaterally.
+        condition_type: phrase
+        condition:
+          any:
+            - governing law may be changed by
+            - such law as the other party may designate
+          negation_guard: true
+        action: block
+        rationale: >
+          A governing law chosen or changed later by one party makes the
+          agreement's meaning, and the law applied to any confidentiality
+          dispute, unpredictable for the other side.
+    objections:
+      - objection: We're a public body and our procurement rules require our own state's law.
+        their_rationale: Statutory procurement requirements can mandate home-state law for public counterparties.
+        response: >
+          Because this is an NDA with no payment or liability terms at
+          stake, we can agree to your state's law directly; we only ask that
+          you confirm the specific statute so we can keep a record of why an
+          exception applies.
+        talking_points:
+          - Note the wider green list for NDAs already covers any US state, not only Delaware, New York, Massachusetts and California.
+          - Ask for the statute citation for Halcyon's own records.
+        recommended_position: {rule_key: governing_law.choice_of_law, rung: 2}
+        frequency: common
+        counterparty_profile: Public health systems and government-affiliated counterparties
+      - objection: Our counterparty is based outside the US, the UK and Ireland, and wants its own law to apply.
+        their_rationale: >
+          Non-US, non-UK, non-Ireland counterparties often prefer their home
+          jurisdiction for an NDA just as they would for any other contract.
+        response: >
+          This NDA playbook's ladder does not reach outside the United
+          States, Ireland, and England and Wales; a jurisdiction outside
+          that list requires General Counsel's sign-off under our global
+          governing law policy regardless of how low-risk the NDA itself is.
+          We can raise it, but we cannot commit to it at the contracts-team
+          level.
+        talking_points:
+          - Explain that this is a global policy escalation, not a playbook rung, so it always goes to General Counsel.
+          - Ask whether Halcyon has enforced a judgment in that jurisdiction before, to speed up the review.
+        frequency: occasional
+        counterparty_profile: Counterparties headquartered outside the US, UK and Ireland
+    dependencies:
+      - related_rule_key: dispute_resolution.forum
+        relation: trade_against
+        note: >
+          A wider green list on governing law is easier to agree to if
+          venue or forum stays with a court that has personal jurisdiction
+          over the counterparty; read together with the baseline's dispute
+          resolution rule.
+    test_cases:
+      - name: Delaware law, standard phrasing
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          The laws of Delaware govern this Agreement, excluding its choice
+          of law principles.
+      - name: Delaware law, internal-laws wording
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          This Agreement shall be construed under the internal laws of the
+          State of Delaware.
+      - name: New York law for a US counterparty
+        context: {region: us}
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: This Agreement is governed by the laws of the State of New York.
+      - name: Texas law for a Texas-based counterparty
+        context: {region: us}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: green
+        sample_text: This Agreement is governed by the laws of the State of Texas.
+      - name: Ontario law for a Canadian counterparty
+        context: {region: other}
+        expected_outcome: red_line
+        expected_red_line_key: global-governing-law-outside-lists
+        expected_zone: red
+        sample_text: This Agreement is governed by the laws of the Province of Ontario.
+      - name: Two governing laws stated
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          This Agreement is governed by the laws of Delaware as to its
+          formation and by the laws of the counterparty's home jurisdiction
+          as to its performance.
+      - name: Trap - counterparty may not change the law
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          This Agreement is governed by Delaware law, and the governing law
+          may not be changed by either party except by written amendment
+          signed by both parties.

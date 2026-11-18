@@ -1,0 +1,1217 @@
+# Halcyon Care, Inc. - authority file (task 3.2).
+#
+# Contents: 5 context dimensions, 9 approver roles, 12 global red lines and
+# the escalation matrix. Source facts are playbook_implementation.md
+# sections 2.2 to 2.5.
+#
+# How the escalation matrix is numbered (the most specific match wins; ties
+# are broken by priority, so no two rows that can match the same clause share
+# a priority):
+#    0  catch-all, no context condition
+#   10  catch-all with one context condition
+#   50  one clause family, no context condition
+#   60  one clause family, counterparty_tier condition
+#   70  one clause family, deal_value_band condition
+#   80  one clause family, data_sensitivity condition
+#   90  one clause family, two context conditions
+# Data sensitivity outranks deal size, which outranks counterparty tier,
+# because a PHI deal changes who must be consulted regardless of its value.
+#
+# A group that spans several clause families has one row per family and zone.
+# `playbook` is null on every row: the matrix applies to all playbooks. The
+# approver on a playbook position still takes precedence over this matrix,
+# which covers deviations that match no position and red lines that escalate.
+
+context_dimensions:
+  - key: deal_value_band
+    name: Deal value band
+    value_type: enum
+    source: metadata
+    values:
+      - value: standard
+        label: Standard
+        definition: Annual contract value under $100k a year.
+      - value: mid
+        label: Mid-market
+        definition: Annual contract value from $100k to $500k a year. Halcyon's median contract of $165k sits in this band.
+      - value: enterprise
+        label: Enterprise
+        definition: Annual contract value from $500k to $1.5M a year.
+      - value: strategic
+        label: Strategic
+        definition: Annual contract value over $1.5M a year. Halcyon's largest contract of $2.4M sits in this band.
+  - key: counterparty_tier
+    name: Counterparty tier
+    value_type: enum
+    source: metadata
+    values:
+      - value: tier_1
+        label: Tier 1
+        definition: Large health system or public body.
+      - value: tier_2
+        label: Tier 2
+        definition: Regional group.
+      - value: tier_3
+        label: Tier 3
+        definition: Small practice or startup.
+  - key: data_sensitivity
+    name: Data sensitivity
+    value_type: enum
+    source: upload
+    values:
+      - value: none
+        label: No personal data
+        definition: No personal data is processed under the agreement beyond business contact details of the parties' staff.
+      - value: personal_data
+        label: Personal data
+        definition: Personal data is processed, but none of it is health information or special category data.
+      - value: phi
+        label: Protected health information
+        definition: Protected health information under HIPAA is created, received, maintained or transmitted under the agreement.
+      - value: special_category
+        label: Special category data
+        definition: Special category personal data under GDPR Article 9, such as health data of people in the EU or UK, is processed under the agreement.
+  - key: region
+    name: Region
+    value_type: enum
+    source: upload
+    values:
+      - value: us
+        label: United States
+        definition: The counterparty contracts from the United States; data is hosted in AWS us-east-1 and us-west-2.
+      - value: eu
+        label: European Union
+        definition: The counterparty contracts from a member state of the European Union or European Economic Area; data is hosted in AWS eu-west-1 and the contracting entity is Halcyon Care Ireland Ltd.
+      - value: uk
+        label: United Kingdom
+        definition: The counterparty contracts from the United Kingdom.
+      - value: other
+        label: Other
+        definition: The counterparty contracts from anywhere outside the United States, the European Union and the United Kingdom.
+  - key: regimes
+    name: Regulatory regimes
+    value_type: multi_enum
+    source: derived
+    values:
+      - value: hipaa
+        label: HIPAA
+        definition: HIPAA applies. The agreement involves PHI and a business associate or subcontractor relationship; derived from data sensitivity `phi` or the presence of a business associate agreement.
+      - value: gdpr
+        label: GDPR
+        definition: The EU or UK GDPR applies. The agreement involves personal data of people in the EU or UK; derived from region `eu` or `uk` together with any personal data.
+
+roles:
+  - {key: contracts_manager, name: Contracts Manager, function: legal, level: 1, default_sla_hours: 8}
+  - {key: deal_desk, name: Deal Desk, function: finance, level: 2, default_sla_hours: 8}
+  - {key: commercial_counsel, name: Commercial Counsel, function: legal, level: 2, default_sla_hours: 24}
+  - {key: privacy_counsel, name: Privacy Counsel and Data Protection Officer, function: privacy, level: 2, default_sla_hours: 24}
+  - {key: security_lead, name: Security Lead, function: security, level: 2, default_sla_hours: 24}
+  - {key: vp_sales, name: Vice President of Sales, function: sales, level: 3, default_sla_hours: 24}
+  - {key: vp_customer_success, name: Vice President of Customer Success, function: delivery, level: 3, default_sla_hours: 24}
+  - {key: cfo, name: Chief Financial Officer, function: finance, level: 4, default_sla_hours: 48}
+  - {key: general_counsel, name: General Counsel, function: legal, level: 4, default_sla_hours: 48}
+
+global_red_lines:
+  - key: global-uncapped-liability
+    description: >
+      Uncapped aggregate liability for Halcyon. The agreement has no overall
+      monetary limit on Halcyon's liability, or removes the limit for a broad
+      category such as any breach of the agreement or any data breach.
+    condition_type: semantic
+    condition:
+      test: >
+        The agreement leaves Halcyon's total aggregate liability without any
+        monetary limit, or states that Halcyon's liability is unlimited for a
+        category of claims wider than fraud, wilful misconduct, payment
+        obligations and third-party intellectual property infringement
+        indemnity. Answer no if a monetary cap applies to Halcyon for every
+        category other than those four.
+    action: block
+    rationale: >
+      Halcyon carries $10M in aggregate of cyber and technology errors and
+      omissions cover and $2M of general liability cover. The median contract
+      is worth $165k a year, so unlimited exposure on one contract can exceed
+      the revenue from that customer many times over and cannot be insured.
+      No approver may accept it; the highest approvable cap is 24 months of
+      Fees, or 36 months on a strategic deal.
+
+  - key: global-most-favoured-customer
+    description: >
+      Most-favoured-customer or price-parity commitments. Halcyon promises
+      that the counterparty's prices or terms will be at least as good as
+      those given to any other customer, or agrees to match or refund when a
+      lower price is given elsewhere.
+    condition_type: semantic
+    condition:
+      test: >
+        The agreement obliges Halcyon to give the counterparty prices,
+        discounts or terms no less favourable than those Halcyon gives to any
+        other customer, or to reduce the counterparty's Fees or pay a refund
+        when another customer receives a lower price. Answer no if the clause
+        only fixes or caps the counterparty's own price without reference to
+        what other customers pay.
+    action: block
+    rationale: >
+      Halcyon has about 310 customers on negotiated annual subscriptions that
+      range from under $100k to $2.4M a year. A parity promise to one customer
+      would reprice the book each time a discount is given, cannot be
+      monitored across 310 contracts, and would put $72M of recurring revenue
+      at risk of clawback audits.
+
+  - key: global-exclusivity-non-compete
+    description: >
+      Exclusivity or non-compete obligations on Halcyon. Halcyon agrees not to
+      sell Halcyon Engage or similar services to other customers, in a
+      territory, to named competitors of the counterparty, or in a market
+      segment.
+    condition_type: semantic
+    condition:
+      test: >
+        The agreement restricts Halcyon from offering, selling or providing
+        its products or services to any third party, in any territory or
+        market segment, or to competitors of the counterparty, or requires
+        Halcyon to deal exclusively with the counterparty. Answer no if the
+        only restriction is a mutual promise not to solicit the other party's
+        employees.
+    action: block
+    rationale: >
+      Halcyon Engage is a multi-tenant product sold to US hospital systems,
+      physician groups and EU clinic groups that often compete with each other
+      in the same city. An exclusivity promise to one health system closes the
+      surrounding market and is worth far more than any single contract,
+      including the largest at $2.4M a year.
+
+  - key: global-ip-assignment
+    description: >
+      Assignment or exclusive licence of Halcyon's pre-existing intellectual
+      property. Ownership of Halcyon Engage, its source code, Documentation or
+      other technology that existed before or was developed independently of
+      the agreement passes to the counterparty, or is licensed to it
+      exclusively.
+    condition_type: semantic
+    condition:
+      test: >
+        The agreement assigns or transfers to the counterparty ownership of
+        any intellectual property that Halcyon owned before the agreement or
+        developed independently of it, including the Services, the underlying
+        software or the Documentation, or grants the counterparty an exclusive
+        licence to any of it. Answer no if the counterparty receives only a
+        non-exclusive right to use the Services, or ownership of its own data
+        and of deliverables created solely for it that contain no Halcyon
+        technology.
+    action: block
+    rationale: >
+      Every one of Halcyon's 310 customers runs on the same multi-tenant code
+      base. Assigning or exclusively licensing any part of it to one customer
+      would leave Halcyon unable to lawfully serve the others and would breach
+      the ownership warranties given in its other contracts.
+
+  - key: global-roadmap-commitment
+    description: >
+      Commitments to build features or meet roadmap dates not in the
+      Documentation. Halcyon promises future functionality, a custom
+      integration or a delivery date for something the Services do not do
+      today.
+    condition_type: semantic
+    condition:
+      test: >
+        The agreement obliges Halcyon to develop or deliver functionality,
+        integrations or product changes that are not described in the current
+        Documentation, or to deliver them by a stated date, or makes
+        Customer's payment, acceptance or termination rights depend on future
+        functionality. Answer no if the clause only describes the Services as
+        they exist, or records a statement of direction that is expressly
+        non-binding.
+    action: block
+    rationale: >
+      Fees are invoiced annually in advance for a product delivered as
+      documented. A binding promise of future features defers revenue
+      recognition on the whole subscription, gives the customer a refund or
+      termination claim if the date slips, and lets one contract dictate the
+      roadmap for a multi-tenant product shared by about 310 customers.
+
+  - key: global-liquidated-damages
+    description: >
+      Liquidated damages or penalties beyond capped service credits. Halcyon
+      must pay a fixed or formula-based sum for delay, downtime, a security
+      incident or any other breach, other than service credits that are capped
+      and are the sole remedy.
+    condition_type: semantic
+    condition:
+      test: >
+        The agreement requires Halcyon to pay liquidated damages, a penalty or
+        any other pre-agreed sum on a breach, delay, outage or incident, other
+        than service credits against Fees that are subject to a stated cap.
+        Answer no if the only pre-agreed remedy is capped service credits or a
+        refund of prepaid Fees for the unused part of the Subscription Term.
+    action: block
+    rationale: >
+      Halcyon's uptime remedy is service credits capped at 10% of monthly
+      Fees, with 25% the most any approver may accept. Fixed penalties are
+      paid whether or not the customer suffered loss, sit outside the
+      liability cap in most drafting, and are excluded from cover under the
+      $10M technology errors and omissions policy as contractual penalties.
+
+  - key: global-unilateral-amendment
+    description: >
+      Unilateral right for the counterparty to amend the agreement. The
+      counterparty may change the terms, its policies incorporated by
+      reference, or the scope of Halcyon's obligations by notice or by
+      updating a web page, without Halcyon's written agreement.
+    condition_type: semantic
+    condition:
+      test: >
+        The agreement allows the counterparty to change the terms of the
+        agreement, or documents and policies that bind Halcyon under it,
+        without Halcyon's written consent, including by notice, by posting an
+        updated version, or by issuing purchase order terms that override the
+        agreement. Answer no if every change requires a written amendment
+        signed or expressly accepted by both parties.
+    action: block
+    rationale: >
+      Halcyon prices and insures each contract on its signed terms. A
+      counterparty that can rewrite security requirements, service levels or
+      liability terms by notice can move a $165k contract outside the SOC 2,
+      ISO 27001 and HITRUST controls Halcyon actually operates and outside the
+      limits of its $10M cover, with no chance to reprice or refuse.
+
+  - key: global-source-code-escrow-release
+    description: >
+      Source code escrow with release on anything other than insolvency or
+      abandonment. Halcyon's source code is released to the counterparty on a
+      trigger such as a missed service level, a breach, a change of control or
+      the counterparty's request.
+    condition_type: semantic
+    condition:
+      test: >
+        The agreement requires Halcyon to deposit source code in escrow and
+        permits its release to the counterparty on any event other than
+        Halcyon's insolvency, bankruptcy, winding up or its ceasing to provide
+        or support the Services. Answer no if there is no escrow obligation,
+        or if insolvency and abandonment of the Services are the only release
+        events.
+    action: block
+    rationale: >
+      The source code of Halcyon Engage is a single multi-tenant code base and
+      Halcyon's main asset. Release on a breach or service-level trigger hands
+      that asset to one customer over a dispute worth, at the median, $165k a
+      year, and exposes the security design that protects the PHI of every
+      other customer.
+
+  - key: global-unannounced-audit
+    description: >
+      Unannounced or unlimited audit or system access. The counterparty may
+      audit or inspect Halcyon without prior notice, as often as it wishes, or
+      may have direct access to Halcyon's production systems, networks or
+      facilities.
+    condition_type: semantic
+    condition:
+      test: >
+        The agreement lets the counterparty or its auditors audit or inspect
+        Halcyon without advance notice, or without any limit on how often, or
+        gives them direct logical or physical access to Halcyon's production
+        systems, networks or hosting environment. Answer no if audits require
+        advance notice and are limited in frequency, or if the only
+        unannounced access is by a regulator acting under law.
+    action: block
+    rationale: >
+      Halcyon Engage is multi-tenant and hosted in AWS us-east-1, us-west-2
+      and eu-west-1, so access for one customer's auditor is access to an
+      environment holding the data of about 310 customers. Halcyon's
+      confidentiality duties to the others, and its SOC 2 Type II, ISO 27001
+      and HITRUST r2 access controls, do not allow it. The approved route is an
+      annual audit on 30 days' notice that starts with the SOC 2 report.
+
+  - key: global-data-training-or-sale
+    description: >
+      Use of Customer Data to train third-party models, or sale of data, by
+      any party. Any party, sub-processor or vendor may use Customer Data,
+      Halcyon Data, Personal Data or PHI to train or improve models offered to
+      others, or may sell, license or otherwise commercialise that data.
+    condition_type: semantic
+    condition:
+      test: >
+        The agreement permits any party, or any vendor or sub-processor of a
+        party, to use Customer Data, Halcyon Data, Personal Data or PHI to
+        train, fine-tune or improve machine learning models that are made
+        available to third parties, or to sell, rent, license or disclose that
+        data for payment or other commercial benefit. Answer no if the data
+        may be used only to provide the Services to the party that supplied
+        it, or if the clause prohibits these uses.
+    action: block
+    rationale: >
+      Halcyon is a business associate under HIPAA and a processor under GDPR.
+      It may use PHI and Personal Data only on the Covered Entity's or
+      Controller's instructions, and HIPAA prohibits the sale of PHI without
+      patient authorisation. Agreeing to this on either the sell side or the
+      buy side would put Halcyon in breach of its business associate
+      agreements with its US customers and would end its HITRUST r2
+      certification.
+
+  - key: global-governing-law-outside-lists
+    description: >
+      Governing law or venue in a jurisdiction outside the approved and
+      escalated lists. The agreement is governed by the law of, or disputes
+      must be heard in, a jurisdiction that is not a US state, Ireland, or
+      England and Wales.
+    condition_type: semantic
+    condition:
+      test: >
+        The agreement is governed by the law of, or gives exclusive
+        jurisdiction or the seat of arbitration to, a jurisdiction that is not
+        a state of the United States, Ireland, or England and Wales. Answer no
+        if both the governing law and the venue are in a US state, Ireland, or
+        England and Wales.
+    action: escalate
+    approver_role: general_counsel
+    rationale: >
+      Delaware is preferred; New York, Massachusetts and California are
+      approved, as are Ireland and England and Wales for EU and UK deals, and
+      other US states need commercial counsel. Halcyon has entities only in
+      Delaware and Dublin and a legal team of six, with no counsel or
+      enforcement experience elsewhere. The risk appetite table allows another
+      jurisdiction only if the General Counsel approves it, so this red line
+      escalates rather than blocks.
+
+  - key: global-indemnity-own-negligence
+    description: >
+      Indemnity for the counterparty's own negligence or breach. Halcyon must
+      indemnify, defend or hold harmless the counterparty against losses
+      caused by the counterparty's own acts, omissions, negligence or breach
+      of the agreement or of law.
+    condition_type: semantic
+    condition:
+      test: >
+        The agreement requires Halcyon to indemnify, defend or hold harmless
+        the counterparty for claims or losses to the extent they are caused by
+        the counterparty's own negligence, misconduct, breach of the agreement
+        or violation of law, or contains an indemnity by Halcyon for all
+        claims relating to the agreement with no exclusion for the
+        counterparty's fault. Answer no if Halcyon's indemnity is limited to
+        claims caused by Halcyon, or is reduced to the extent of the
+        counterparty's fault.
+    action: block
+    rationale: >
+      Hospital systems control how Halcyon Engage is configured, which staff
+      have access and what they send to patients. An indemnity that covers the
+      customer's own negligence makes Halcyon the insurer of the customer's
+      clinical and privacy operations. Assumed liability of that kind is
+      excluded from Halcyon's $10M errors and omissions policy and its $2M
+      general liability policy.
+
+escalation_policies:
+  # ---------------------------------------------------------------------
+  # Group 1: liability and indemnity
+  # Families: limitation_of_liability, indemnification, insurance, warranties
+  # ---------------------------------------------------------------------
+  - key: liability-yellow
+    description: Liability cap, carve-out or damages-exclusion deviations that match no approved position.
+    clause_type: limitation_of_liability
+    zone: yellow
+    approver_role: commercial_counsel
+    consult_roles: [contracts_manager]
+    sla_hours: 24
+    required_info:
+      - Annual Fees, Subscription Term and deal value band
+      - The cap the counterparty proposes, converted to months of Fees
+      - The full list of claims the counterparty wants outside the cap
+      - Whether the consequential damages exclusion stays mutual
+      - What Halcyon is offered in return, such as a longer initial term or prepayment
+    priority: 50
+  - key: liability-red
+    description: Liability terms in the red zone, including a cap above the approvable limit or an escalated red line.
+    clause_type: limitation_of_liability
+    zone: red
+    approver_role: general_counsel
+    consult_roles: [commercial_counsel, cfo]
+    sla_hours: 48
+    required_info:
+      - Annual Fees, Subscription Term and deal value band
+      - The proposed cap in dollars and as months of Fees, set against the $10M cyber and errors and omissions limit
+      - Each uncapped or super-capped category the counterparty requires
+      - The negotiation history, including every fallback already offered and refused
+      - The sales lead's statement of what happens to the deal if Halcyon declines
+    priority: 50
+  - key: liability-yellow-strategic
+    description: Liability deviations on strategic deals, where a cap of up to 36 months of Fees may be approved.
+    clause_type: limitation_of_liability
+    zone: yellow
+    conditions: {deal_value_band: [strategic]}
+    approver_role: general_counsel
+    consult_roles: [cfo, commercial_counsel]
+    sla_hours: 48
+    required_info:
+      - Annual Fees and total contract value over the committed term
+      - The proposed cap in dollars and as months of Fees, with the amount by which it exceeds 24 months
+      - Maximum exposure in dollars compared with the $10M cyber and errors and omissions limit
+      - Whether all indemnities sit inside the cap
+      - Concessions obtained in return, such as a 36-month initial term
+    priority: 70
+  - key: liability-red-strategic
+    description: Liability red-zone terms on strategic deals.
+    clause_type: limitation_of_liability
+    zone: red
+    conditions: {deal_value_band: [strategic]}
+    approver_role: general_counsel
+    consult_roles: [cfo, commercial_counsel, vp_sales]
+    sla_hours: 48
+    required_info:
+      - Annual Fees and total contract value over the committed term
+      - Maximum exposure in dollars compared with the $10M cyber and errors and omissions limit
+      - Whether the insurance broker has been asked about the exposure, and the answer
+      - Every fallback already offered and the counterparty's response to each
+      - The share of annual recurring revenue this customer would represent
+    priority: 70
+  - key: liability-yellow-phi
+    description: Liability deviations on deals involving PHI, where the data breach super-cap is usually the point in dispute.
+    clause_type: limitation_of_liability
+    zone: yellow
+    conditions: {data_sensitivity: [phi]}
+    approver_role: general_counsel
+    consult_roles: [privacy_counsel, commercial_counsel]
+    sla_hours: 48
+    required_info:
+      - Annual Fees and the proposed data breach super-cap as a multiple of annual Fees and in dollars
+      - Confirmation that the super-cap does not exceed three times annual Fees or $5M
+      - Estimated number of patient records Halcyon will hold for this customer
+      - Which costs the super-cap covers, such as notification, credit monitoring and regulatory penalties
+      - The general cap proposed alongside the super-cap
+    priority: 80
+  - key: liability-yellow-strategic-phi
+    description: Liability deviations on strategic deals that also involve PHI.
+    clause_type: limitation_of_liability
+    zone: yellow
+    conditions: {deal_value_band: [strategic], data_sensitivity: [phi]}
+    approver_role: general_counsel
+    consult_roles: [cfo, privacy_counsel, commercial_counsel]
+    sla_hours: 48
+    required_info:
+      - Annual Fees and total contract value over the committed term
+      - The proposed general cap in months of Fees and the proposed data breach super-cap in dollars
+      - Combined maximum exposure compared with the $10M cyber and errors and omissions limit
+      - Estimated number of patient records Halcyon will hold for this customer
+      - Concessions obtained in return for the higher limits
+    priority: 90
+  - key: indemnity-yellow
+    description: Indemnity deviations that match no approved position, such as a wider intellectual property indemnity.
+    clause_type: indemnification
+    zone: yellow
+    approver_role: commercial_counsel
+    consult_roles: [contracts_manager]
+    sla_hours: 24
+    required_info:
+      - The indemnity as drafted and the playbook position it departs from
+      - The claims covered and whether they are limited to third-party claims
+      - Whether the indemnity sits inside or outside the liability cap
+      - Whether Halcyon controls the defence and settlement of indemnified claims
+    priority: 50
+  - key: indemnity-red
+    description: Indemnity terms in the red zone, such as a first-party indemnity for any breach of the agreement.
+    clause_type: indemnification
+    zone: red
+    approver_role: general_counsel
+    consult_roles: [commercial_counsel]
+    sla_hours: 48
+    required_info:
+      - The indemnity as drafted, with the triggering events marked
+      - Whether the indemnity is capped and at what amount
+      - Whether Halcyon's insurance responds to the indemnified loss
+      - Every narrower indemnity already offered and refused
+      - Annual Fees and deal value band
+    priority: 50
+  - key: indemnity-yellow-strategic
+    description: Indemnity deviations on strategic deals.
+    clause_type: indemnification
+    zone: yellow
+    conditions: {deal_value_band: [strategic]}
+    approver_role: general_counsel
+    consult_roles: [cfo, commercial_counsel]
+    sla_hours: 48
+    required_info:
+      - The indemnity as drafted and the playbook position it departs from
+      - Whether the indemnity sits inside the liability cap, and the cap in dollars
+      - Maximum realistic exposure in dollars and whether insurance responds
+      - Annual Fees and total contract value over the committed term
+    priority: 70
+  - key: insurance-yellow
+    description: Insurance requirements beyond the limits Halcyon holds, such as a cyber limit above $10M.
+    clause_type: insurance
+    zone: yellow
+    approver_role: cfo
+    consult_roles: [commercial_counsel]
+    sla_hours: 48
+    required_info:
+      - Each policy type and limit the counterparty requires, set against the limits held ($10M cyber and errors and omissions, $2M general liability)
+      - The broker's quote for the additional cover and its annual premium
+      - Annual Fees, so the premium can be compared with the value of the deal
+      - Any additional insured, waiver of subrogation or notice-of-cancellation wording requested
+    priority: 50
+  - key: insurance-red
+    description: Insurance terms in the red zone, such as unlimited cover or cover adequate for all losses.
+    clause_type: insurance
+    zone: red
+    approver_role: general_counsel
+    consult_roles: [cfo]
+    sla_hours: 48
+    required_info:
+      - The insurance clause as drafted
+      - The broker's written view on whether the required cover can be bought at all
+      - Whether the clause can be read as widening Halcyon's liability beyond the cap
+      - The fixed limits already offered and the counterparty's response
+    priority: 50
+  - key: warranties-yellow
+    description: Warranty or disclaimer deviations that match no approved position.
+    clause_type: warranties
+    zone: yellow
+    approver_role: commercial_counsel
+    consult_roles: [vp_customer_success]
+    sla_hours: 24
+    required_info:
+      - The warranty as drafted and the playbook position it departs from
+      - The remedy for breach of the warranty and whether it is the sole remedy
+      - The warranty period
+      - Whether the Services as documented can meet the warranty today
+    priority: 50
+  - key: warranties-red
+    description: Warranty terms in the red zone, such as a warranty of uninterrupted or error-free operation or removal of the disclaimer.
+    clause_type: warranties
+    zone: red
+    approver_role: general_counsel
+    consult_roles: [commercial_counsel, vp_customer_success]
+    sla_hours: 48
+    required_info:
+      - The warranty as drafted
+      - Why the Services cannot meet it, in the delivery team's words
+      - The remedy for breach and whether it is inside the liability cap
+      - The narrower warranty already offered and the counterparty's response
+    priority: 50
+
+  # ---------------------------------------------------------------------
+  # Group 2: payment and pricing
+  # Family: payment
+  # ---------------------------------------------------------------------
+  - key: payment-yellow
+    description: Payment term, late fee or price increase deviations that match no approved position.
+    clause_type: payment
+    zone: yellow
+    approver_role: deal_desk
+    consult_roles: [contracts_manager]
+    sla_hours: 8
+    required_info:
+      - Annual Fees, billing frequency and Subscription Term
+      - The payment period the counterparty proposes, in days from invoice
+      - The late fee and renewal price increase terms proposed
+      - Discount already given on the Order Form
+      - The customer's payment history if it is an existing customer
+    priority: 50
+  - key: payment-red
+    description: Payment terms in the red zone, such as payment beyond 60 days, set-off against Fees or a price lock over three years.
+    clause_type: payment
+    zone: red
+    approver_role: cfo
+    consult_roles: [deal_desk, commercial_counsel]
+    sla_hours: 48
+    required_info:
+      - Annual Fees, billing frequency and total contract value
+      - The payment, set-off or price lock term as drafted
+      - Effect on cash collection compared with annual invoicing in advance on net 30
+      - Effective discount once the price lock and existing discounts are combined
+      - Every alternative already offered and refused
+    priority: 50
+  - key: payment-yellow-strategic
+    description: Payment and pricing deviations on strategic deals.
+    clause_type: payment
+    zone: yellow
+    conditions: {deal_value_band: [strategic]}
+    approver_role: cfo
+    consult_roles: [deal_desk, vp_sales]
+    sla_hours: 48
+    required_info:
+      - Annual Fees, billing frequency and total contract value over the committed term
+      - The payment period, late fee and price increase terms proposed
+      - Effect on cash collection in dollars for each year of the term
+      - Discount already given and the resulting gross margin on the deal
+    priority: 70
+
+  # ---------------------------------------------------------------------
+  # Group 3: term and termination
+  # Families: term, termination, suspension
+  # ---------------------------------------------------------------------
+  - key: term-yellow
+    description: Initial term or renewal deviations that match no approved position.
+    clause_type: term
+    zone: yellow
+    approver_role: vp_sales
+    consult_roles: [deal_desk]
+    sla_hours: 24
+    required_info:
+      - The initial term and renewal mechanism the counterparty proposes
+      - Annual Fees and any discount that was priced on a longer term
+      - The renewal notice period proposed, in days
+      - Implementation effort already committed to this customer
+    priority: 50
+  - key: term-red
+    description: Term provisions in the red zone, such as a month-to-month term or cancellation of a renewal after it starts with a refund.
+    clause_type: term
+    zone: red
+    approver_role: cfo
+    consult_roles: [vp_sales, deal_desk]
+    sla_hours: 48
+    required_info:
+      - The term or renewal provision as drafted
+      - Annual Fees and the amount that could be refunded or lost under the provision
+      - Whether the revenue can still be counted as annual recurring revenue
+      - Pricing uplift offered in exchange for the shorter commitment
+      - The longer-term options already offered and refused
+    priority: 50
+  - key: term-yellow-tier-1
+    description: Term deviations from tier 1 counterparties, typically public bodies whose funding rules limit multi-year commitments.
+    clause_type: term
+    zone: yellow
+    conditions: {counterparty_tier: [tier_1]}
+    approver_role: vp_sales
+    consult_roles: [deal_desk, commercial_counsel]
+    sla_hours: 24
+    required_info:
+      - The term, renewal or non-appropriation provision as drafted
+      - The statute, procurement rule or board policy the counterparty relies on
+      - Annual Fees and whether Fees for the current year stay non-refundable
+      - How much notice Halcyon receives before a funding-based exit takes effect
+    priority: 60
+  - key: termination-yellow
+    description: Termination deviations that match no approved position, such as a shorter cure period or a limited right to end for convenience.
+    clause_type: termination
+    zone: yellow
+    approver_role: commercial_counsel
+    consult_roles: [vp_sales, deal_desk]
+    sla_hours: 24
+    required_info:
+      - The termination right as drafted and the playbook position it departs from
+      - The earliest date the counterparty could end the agreement, and the notice required
+      - The cure period proposed, in days
+      - Whether prepaid Fees are refundable on that termination, and the amount
+      - Annual Fees and initial term
+    priority: 50
+  - key: termination-red
+    description: Termination terms in the red zone, such as convenience termination at any time with a refund or a cure period under 10 days.
+    clause_type: termination
+    zone: red
+    approver_role: general_counsel
+    consult_roles: [vp_sales, deal_desk, commercial_counsel]
+    sla_hours: 48
+    required_info:
+      - The termination right as drafted
+      - The largest refund of prepaid Fees the provision could require, in dollars
+      - Whether the revenue can still be counted as committed for the initial term
+      - Every narrower termination right already offered and refused
+      - Annual Fees, initial term and deal value band
+    priority: 50
+  - key: suspension-yellow
+    description: Deviations that narrow Halcyon's right to suspend the Services.
+    clause_type: suspension
+    zone: yellow
+    approver_role: commercial_counsel
+    consult_roles: [vp_customer_success, security_lead]
+    sla_hours: 24
+    required_info:
+      - The suspension clause as drafted and the playbook position it departs from
+      - Which suspension grounds are removed or made subject to prior notice
+      - The notice period required before suspension, in days
+      - Whether Halcyon may still suspend at once for a security threat
+    priority: 50
+  - key: suspension-red
+    description: Suspension terms in the red zone, such as no right to suspend for non-payment or for a security threat.
+    clause_type: suspension
+    zone: red
+    approver_role: general_counsel
+    consult_roles: [security_lead, vp_customer_success, deal_desk]
+    sla_hours: 48
+    required_info:
+      - The suspension clause as drafted
+      - Whether Halcyon keeps any right to act at once against a threat to other customers on the multi-tenant platform
+      - Annual Fees and the customer's payment history
+      - The narrower restriction already offered and refused
+    priority: 50
+
+  # ---------------------------------------------------------------------
+  # Group 4: service levels
+  # Family: service_levels
+  # ---------------------------------------------------------------------
+  - key: service-levels-yellow
+    description: Uptime or service credit deviations that match no approved position.
+    clause_type: service_levels
+    zone: yellow
+    approver_role: vp_customer_success
+    consult_roles: [contracts_manager]
+    sla_hours: 24
+    required_info:
+      - The uptime percentage proposed and the measurement period
+      - The service credit schedule and its cap as a percentage of monthly Fees
+      - Exclusions from the uptime calculation, such as scheduled maintenance
+      - Halcyon Engage's measured uptime for the last 12 months in the customer's hosting region
+      - Whether credits remain the sole remedy for missed service levels
+    priority: 50
+  - key: service-levels-red
+    description: Service level terms in the red zone, such as uptime of 99.99% or higher, credits above 25% or credits that are not the sole remedy.
+    clause_type: service_levels
+    zone: red
+    approver_role: general_counsel
+    consult_roles: [vp_customer_success, security_lead, cfo]
+    sla_hours: 48
+    required_info:
+      - The service level and remedy as drafted
+      - Halcyon Engage's measured uptime for the last 12 months and the number of months that would have missed the proposed target
+      - Expected annual cost of credits at the proposed level, in dollars
+      - Any termination right or damages claim tied to missed service levels
+      - Engineering's view on whether the target can be met on the shared platform
+    priority: 50
+  - key: service-levels-yellow-tier-1
+    description: Service level deviations from tier 1 counterparties, who often require their own service level schedule and reporting.
+    clause_type: service_levels
+    zone: yellow
+    conditions: {counterparty_tier: [tier_1]}
+    approver_role: vp_customer_success
+    consult_roles: [security_lead, vp_sales]
+    sla_hours: 24
+    required_info:
+      - The counterparty's service level schedule, compared line by line with Halcyon's standard
+      - The uptime percentage, credit cap and reporting frequency proposed
+      - Support response time targets and whether the current support plan covers them
+      - Halcyon Engage's measured uptime for the last 12 months in the customer's hosting region
+      - Number of sites and users the customer will bring onto the platform
+    priority: 60
+
+  # ---------------------------------------------------------------------
+  # Group 5: security and breach notification
+  # Families: security, breach_notification
+  # ---------------------------------------------------------------------
+  - key: security-yellow
+    description: Security requirement deviations that match no approved position.
+    clause_type: security
+    zone: yellow
+    approver_role: security_lead
+    consult_roles: [privacy_counsel]
+    sla_hours: 24
+    required_info:
+      - Each security requirement that differs from Halcyon's security programme, with the counterparty's wording
+      - Whether the requirement is already met under SOC 2 Type II, ISO 27001 or HITRUST r2 controls
+      - The counterparty's security questionnaire or policy, if one is incorporated by reference
+      - Cost and time to meet any requirement not met today
+    priority: 50
+  - key: security-red
+    description: Security terms in the red zone, such as single-tenant or on-premises deployment or compliance with a customer policy that can change without consent.
+    clause_type: security
+    zone: red
+    approver_role: general_counsel
+    consult_roles: [security_lead, privacy_counsel]
+    sla_hours: 48
+    required_info:
+      - The security term as drafted
+      - The Security Lead's written assessment of whether the multi-tenant platform can comply
+      - Effect on other customers and on SOC 2 Type II, ISO 27001 and HITRUST r2 scope
+      - Cost to comply, in dollars, compared with annual Fees
+      - The alternative controls already offered and refused
+    priority: 50
+  - key: security-yellow-phi
+    description: Security deviations on deals involving PHI.
+    clause_type: security
+    zone: yellow
+    conditions: {data_sensitivity: [phi]}
+    approver_role: security_lead
+    consult_roles: [privacy_counsel, commercial_counsel]
+    sla_hours: 24
+    required_info:
+      - Each security requirement that differs from Halcyon's security programme, with the counterparty's wording
+      - How the requirement maps to the HIPAA Security Rule safeguards and to HITRUST r2 controls
+      - Whether the requirement changes encryption, access or logging for PHI on the shared platform
+      - Whether the same requirement must flow down to Subcontractors that handle PHI
+    priority: 80
+  - key: breach-notification-yellow
+    description: Breach notification deviations that match no approved position, such as notice within 24 hours.
+    clause_type: breach_notification
+    zone: yellow
+    approver_role: security_lead
+    consult_roles: [privacy_counsel]
+    sla_hours: 24
+    required_info:
+      - The notification deadline proposed, in hours, and the event that starts the clock
+      - Whether the trigger is a confirmed incident or a suspected one
+      - The content Halcyon must include in the first notice
+      - Whether the incident response team can meet the deadline outside business hours
+    priority: 50
+  - key: breach-notification-red
+    description: Breach notification terms in the red zone, such as notice in under 24 hours or notice running from suspicion.
+    clause_type: breach_notification
+    zone: red
+    approver_role: general_counsel
+    consult_roles: [security_lead, privacy_counsel]
+    sla_hours: 48
+    required_info:
+      - The notification clause as drafted, with the deadline and trigger marked
+      - The Security Lead's assessment of whether the deadline can be met and what it would cost
+      - Any penalty, indemnity or termination right tied to late notice
+      - The 24-hour and 48-hour alternatives already offered and the counterparty's response
+    priority: 50
+  - key: breach-notification-yellow-phi
+    description: Breach notification deviations on deals involving PHI, where the business associate agreement and HIPAA timelines also apply.
+    clause_type: breach_notification
+    zone: yellow
+    conditions: {data_sensitivity: [phi]}
+    approver_role: security_lead
+    consult_roles: [privacy_counsel, commercial_counsel]
+    sla_hours: 24
+    required_info:
+      - The notification deadline proposed, in hours, and the event that starts the clock
+      - Whether the trigger is a Breach of unsecured PHI, a security incident or a suspected event
+      - The deadline in the business associate agreement, and whether the two documents agree
+      - Who notifies affected individuals and regulators, and who bears the cost
+      - Whether Subcontractors that handle PHI are bound to a deadline short enough to meet this one
+    priority: 80
+
+  # ---------------------------------------------------------------------
+  # Group 6: privacy and sub-processors
+  # Families: data_protection, subprocessors, data_transfers
+  # ---------------------------------------------------------------------
+  - key: data-protection-yellow
+    description: Data protection deviations that match no approved position.
+    clause_type: data_protection
+    zone: yellow
+    approver_role: privacy_counsel
+    consult_roles: [security_lead]
+    sla_hours: 24
+    required_info:
+      - The data protection term as drafted and the playbook position it departs from
+      - Categories of data and data subjects, and the data sensitivity value for the deal
+      - Which regimes apply and Halcyon's role under each
+      - Any deadline proposed for data subject requests, return or deletion, in days
+    priority: 50
+  - key: data-protection-red
+    description: Data protection terms in the red zone, such as Halcyon acting as controller of Customer Data or processing outside documented instructions.
+    clause_type: data_protection
+    zone: red
+    approver_role: general_counsel
+    consult_roles: [privacy_counsel, security_lead]
+    sla_hours: 48
+    required_info:
+      - The data protection term as drafted
+      - Privacy Counsel's written assessment of whether Halcyon can lawfully accept it as a processor or business associate
+      - Categories of data and estimated number of data subjects
+      - Whether the term conflicts with Halcyon's commitments to its other customers
+      - The compliant alternative already offered and refused
+    priority: 50
+  - key: data-protection-red-phi
+    description: Data protection red-zone terms on deals involving PHI.
+    clause_type: data_protection
+    zone: red
+    conditions: {data_sensitivity: [phi]}
+    approver_role: general_counsel
+    consult_roles: [privacy_counsel, security_lead, commercial_counsel]
+    sla_hours: 48
+    required_info:
+      - The term as drafted and the business associate agreement provision it affects
+      - Privacy Counsel's written assessment against 45 C.F.R. Parts 160 and 164
+      - Estimated number of patient records Halcyon will hold for this customer
+      - Whether accepting the term would put HITRUST r2 certification at risk
+      - The compliant alternative already offered and refused
+    priority: 80
+  - key: subprocessors-yellow
+    description: Sub-processor deviations that match no approved position, such as a 60-day notice period for changes.
+    clause_type: subprocessors
+    zone: yellow
+    approver_role: privacy_counsel
+    consult_roles: [security_lead]
+    sla_hours: 24
+    required_info:
+      - The notice period proposed for new Sub-processors, in days
+      - The counterparty's remedy if it objects to a new Sub-processor
+      - Whether authorisation remains general or becomes specific to each Sub-processor
+      - Sub-processor changes planned in the next 12 months that the term would delay
+    priority: 50
+  - key: subprocessors-red
+    description: Sub-processor terms in the red zone, such as prior written consent for each Sub-processor.
+    clause_type: subprocessors
+    zone: red
+    approver_role: general_counsel
+    consult_roles: [privacy_counsel, security_lead]
+    sla_hours: 48
+    required_info:
+      - The sub-processor clause as drafted
+      - Why one customer's consent right cannot be operated on a platform shared by about 310 customers
+      - Sub-processor changes planned in the next 12 months that the term would block
+      - The notice-and-objection alternatives already offered and refused
+    priority: 50
+  - key: subprocessors-yellow-phi
+    description: Sub-processor deviations on deals involving PHI, where each Subcontractor needs a business associate agreement.
+    clause_type: subprocessors
+    zone: yellow
+    conditions: {data_sensitivity: [phi]}
+    approver_role: privacy_counsel
+    consult_roles: [security_lead, commercial_counsel]
+    sla_hours: 24
+    required_info:
+      - The notice period proposed for new Subcontractors, in days
+      - The flow-down terms the counterparty requires in each Subcontractor agreement
+      - Which current Subcontractors handle PHI and whether their agreements already meet those terms
+      - The counterparty's remedy if it objects to a new Subcontractor
+    priority: 80
+  - key: data-transfers-yellow
+    description: Data transfer or residency deviations that match no approved position, such as a named single hosting region.
+    clause_type: data_transfers
+    zone: yellow
+    approver_role: privacy_counsel
+    consult_roles: [security_lead]
+    sla_hours: 24
+    required_info:
+      - The transfer or residency term as drafted
+      - The hosting region for this customer and any region the counterparty names
+      - Where support and engineering staff who may access the data are located
+      - The transfer mechanism relied on for any access from outside the customer's region
+    priority: 50
+  - key: data-transfers-red
+    description: Data transfer terms in the red zone, such as a ban on all access from outside one country or hosting outside Halcyon's AWS regions.
+    clause_type: data_transfers
+    zone: red
+    approver_role: general_counsel
+    consult_roles: [privacy_counsel, security_lead]
+    sla_hours: 48
+    required_info:
+      - The transfer or residency term as drafted
+      - The Security Lead's assessment of whether hosting in us-east-1, us-west-2 or eu-west-1 can satisfy it
+      - Effect on follow-the-sun support and on disaster recovery between regions
+      - Cost to comply, in dollars, compared with annual Fees
+      - The regional hosting commitment already offered and refused
+    priority: 50
+
+  # ---------------------------------------------------------------------
+  # Group 7: audit
+  # Family: audit
+  # ---------------------------------------------------------------------
+  - key: audit-yellow
+    description: Audit right deviations that match no approved position, such as an on-site audit at the counterparty's cost.
+    clause_type: audit
+    zone: yellow
+    approver_role: security_lead
+    consult_roles: [privacy_counsel]
+    sla_hours: 24
+    required_info:
+      - Audit frequency, notice period in days and scope proposed
+      - Whether the audit is on site, and who pays for it
+      - Whether the SOC 2 Type II report is accepted as the first step
+      - Confidentiality terms binding the auditor
+      - Who the auditor may be, and whether competitors of Halcyon are excluded
+    priority: 50
+  - key: audit-red
+    description: Audit terms in the red zone that fall short of the global block, or audit red lines that escalate.
+    clause_type: audit
+    zone: red
+    approver_role: general_counsel
+    consult_roles: [security_lead, privacy_counsel]
+    sla_hours: 48
+    required_info:
+      - The audit clause as drafted, with frequency, notice and scope marked
+      - The Security Lead's assessment of the risk to other customers' data on the shared platform
+      - Whether any regulator requires the counterparty to hold the right
+      - The annual audit on 30 days' notice already offered, and the counterparty's response
+    priority: 50
+  - key: audit-yellow-tier-1
+    description: Audit deviations from tier 1 counterparties, including public bodies with statutory audit rights.
+    clause_type: audit
+    zone: yellow
+    conditions: {counterparty_tier: [tier_1]}
+    approver_role: security_lead
+    consult_roles: [privacy_counsel, commercial_counsel, vp_customer_success]
+    sla_hours: 24
+    required_info:
+      - Audit frequency, notice period in days and scope proposed
+      - The statute or regulator requirement the counterparty cites for the audit right
+      - Whether a state auditor or inspector general may audit in the counterparty's place
+      - Staff time the audit is expected to take and who pays for it
+      - Whether the SOC 2 Type II report and HITRUST r2 letter are accepted as the first step
+    priority: 60
+
+  # ---------------------------------------------------------------------
+  # Group 8: intellectual property
+  # Families: intellectual_property, confidentiality, publicity
+  # ---------------------------------------------------------------------
+  - key: ip-yellow
+    description: Intellectual property deviations that match no approved position, such as limits on feedback or usage data rights.
+    clause_type: intellectual_property
+    zone: yellow
+    approver_role: commercial_counsel
+    consult_roles: [contracts_manager]
+    sla_hours: 24
+    required_info:
+      - The ownership or licence term as drafted and the playbook position it departs from
+      - Any deliverable, configuration or integration the counterparty claims to own
+      - Whether Halcyon keeps the right to reuse general know-how and feedback
+      - Whether any professional services work is planned under the agreement
+    priority: 50
+  - key: ip-red
+    description: Intellectual property terms in the red zone, such as customer ownership of improvements to the Services.
+    clause_type: intellectual_property
+    zone: red
+    approver_role: general_counsel
+    consult_roles: [commercial_counsel]
+    sla_hours: 48
+    required_info:
+      - The ownership or licence term as drafted
+      - Exactly which technology would pass to or be restricted in favour of the counterparty
+      - Whether that technology is part of the shared multi-tenant code base
+      - The licence-back or narrower ownership wording already offered and refused
+    priority: 50
+  - key: confidentiality-yellow
+    description: Confidentiality deviations that match no approved position, such as a residuals clause or extended survival.
+    clause_type: confidentiality
+    zone: yellow
+    approver_role: commercial_counsel
+    consult_roles: [contracts_manager]
+    sla_hours: 24
+    required_info:
+      - The confidentiality term as drafted and the playbook position it departs from
+      - The term of the obligation and the survival period, in years
+      - Whether source code, PHI or Customer Data is excluded from any residuals wording
+      - What information Halcyon expects to disclose and to receive
+    priority: 50
+  - key: confidentiality-red
+    description: Confidentiality terms in the red zone, such as a broad residuals clause or perpetual survival for all information.
+    clause_type: confidentiality
+    zone: red
+    approver_role: general_counsel
+    consult_roles: [commercial_counsel, security_lead]
+    sla_hours: 48
+    required_info:
+      - The confidentiality term as drafted
+      - What Halcyon information the counterparty will see, including any source code or security documentation
+      - Whether the counterparty or its affiliates build competing software
+      - The narrower wording already offered and refused
+    priority: 50
+  - key: publicity-yellow
+    description: Publicity deviations that match no approved position, such as no right to name the Customer.
+    clause_type: publicity
+    zone: yellow
+    approver_role: contracts_manager
+    consult_roles: [vp_sales]
+    sla_hours: 8
+    required_info:
+      - The publicity term as drafted
+      - Whether Halcyon may still name the counterparty with prior written consent
+      - Whether the sales team is relying on this customer as a reference
+    priority: 50
+  - key: publicity-red
+    description: Publicity terms in the red zone, such as the Customer publishing Halcyon performance or benchmark data.
+    clause_type: publicity
+    zone: red
+    approver_role: general_counsel
+    consult_roles: [vp_sales, vp_customer_success]
+    sla_hours: 48
+    required_info:
+      - The publicity term as drafted
+      - What performance, uptime or benchmark data the counterparty could publish
+      - Whether Halcyon has a right to review or correct the data before publication
+      - The consent-based alternative already offered and refused
+    priority: 50
+
+  # ---------------------------------------------------------------------
+  # Group 9: governing law
+  # Families: governing_law, dispute_resolution
+  # ---------------------------------------------------------------------
+  - key: governing-law-yellow
+    description: Governing law or venue in a US state outside the approved list.
+    clause_type: governing_law
+    zone: yellow
+    approver_role: commercial_counsel
+    consult_roles: [contracts_manager]
+    sla_hours: 24
+    required_info:
+      - The governing law and venue the counterparty proposes
+      - The counterparty's stated reason, including any statute that requires its home state's law
+      - Whether venue can stay neutral or in the defendant's home courts
+      - Annual Fees and counterparty tier
+    priority: 50
+  - key: governing-law-red
+    description: Governing law or venue outside the United States, Ireland, and England and Wales; owner of global red line 11.
+    clause_type: governing_law
+    zone: red
+    approver_role: general_counsel
+    consult_roles: [commercial_counsel]
+    sla_hours: 48
+    required_info:
+      - The governing law, venue and any arbitration seat the counterparty proposes
+      - Which Halcyon entity is contracting and where the counterparty is established
+      - Whether Halcyon has used outside counsel in that jurisdiction before, and an estimate of advice costs
+      - Whether a judgment or award from that venue can be enforced against the counterparty's assets
+      - The approved alternatives already offered and refused
+    priority: 50
+  - key: dispute-resolution-yellow
+    description: Dispute resolution deviations that match no approved position, such as mandatory arbitration under unfamiliar rules.
+    clause_type: dispute_resolution
+    zone: yellow
+    approver_role: commercial_counsel
+    consult_roles: [contracts_manager]
+    sla_hours: 24
+    required_info:
+      - The dispute resolution process as drafted, including forum, rules and seat
+      - Whether either party keeps the right to seek injunctive relief in court
+      - Who bears the costs of the process
+      - Whether the forum matches the governing law of the agreement
+    priority: 50
+
+  # ---------------------------------------------------------------------
+  # Group 10: catch-all
+  # clause_type null: any clause with no more specific row
+  # ---------------------------------------------------------------------
+  - key: catch-all-yellow
+    description: Any yellow deviation with no more specific policy.
+    clause_type: null
+    zone: yellow
+    approver_role: contracts_manager
+    consult_roles: []
+    sla_hours: 8
+    required_info:
+      - The clause as drafted and the playbook position it departs from
+      - Annual Fees, deal value band and counterparty tier
+      - The counterparty's stated reason for the change
+    priority: 0
+  - key: catch-all-red
+    description: Any red-zone term or escalated red line with no more specific policy.
+    clause_type: null
+    zone: red
+    approver_role: general_counsel
+    consult_roles: [commercial_counsel]
+    sla_hours: 48
+    required_info:
+      - The clause as drafted and the playbook position or red line it breaches
+      - Annual Fees, deal value band and counterparty tier
+      - The counterparty's stated reason for the term
+      - Every alternative already offered and refused
+      - The sales lead's statement of what happens to the deal if Halcyon declines
+    priority: 0
+  - key: catch-all-yellow-strategic
+    description: Any yellow deviation on a strategic deal with no more specific policy; counsel rather than a contracts manager decides.
+    clause_type: null
+    zone: yellow
+    conditions: {deal_value_band: [strategic]}
+    approver_role: commercial_counsel
+    consult_roles: [contracts_manager, vp_sales]
+    sla_hours: 24
+    required_info:
+      - The clause as drafted and the playbook position it departs from
+      - Annual Fees and total contract value over the committed term
+      - The counterparty's stated reason for the change
+      - Other open deviations on the same deal, so they can be weighed together
+    priority: 10
+  - key: catch-all-red-tier-1
+    description: Any red-zone term from a tier 1 counterparty with no more specific policy.
+    clause_type: null
+    zone: red
+    conditions: {counterparty_tier: [tier_1]}
+    approver_role: general_counsel
+    consult_roles: [commercial_counsel, vp_sales]
+    sla_hours: 48
+    required_info:
+      - The clause as drafted and the playbook position or red line it breaches
+      - Whether the term is in the counterparty's mandatory paper or required by statute or procurement rules
+      - Annual Fees, deal value band and total contract value
+      - Every alternative already offered and refused
+      - Other open deviations on the same deal, so they can be weighed together
+    priority: 10

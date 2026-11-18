@@ -1,0 +1,2064 @@
+# Halcyon Care, Inc. - Vendor MSA (Halcyon as customer) - commercial rules
+# (task 3.11).
+#
+# Halcyon is the BUYER in this playbook. Section 2.4 of the implementation
+# plan gives only two buy-side anchors (vendor liability cap and vendor
+# breach notice), and both belong to risk.yaml, not this file. Every anchor
+# below is therefore invented by mirroring the sell-side logic in section 2.4
+# and inverting it to Halcyon's position as the paying customer: longer
+# payment terms, a price-increase cap that favours Halcyon, a termination
+# right for Halcyon's own convenience, strong non-exclusive service credits,
+# and transition assistance on exit. Defined terms: "Halcyon", "Vendor",
+# "Services", "Halcyon Data", "Fees".
+rules:
+  # ------------------------------------------------------------------------
+  - rule_key: payment.payment_terms
+    title: Payment terms owed by Halcyon
+    required: true
+    risk_weight: 6
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Halcyon pays Vendor's invoices on Net 60 terms, with fallbacks down to
+      Net 30 on Deal Desk approval.
+    risk_rationale: >
+      Halcyon runs on a $72M ARR SaaS model where customers pay annually in
+      advance, while it buys most cloud, messaging and analytics services on
+      ongoing invoiced terms; the gap between when Halcyon collects and when
+      it must pay its vendors is a working-capital cost that the finance team
+      actively manages. A longer payment term on vendor paper preserves cash
+      that Halcyon would otherwise have to carry against a $165k median
+      contract book, so Deal Desk owns any term shorter than the preferred
+      sixty days.
+    detection_guidance: >
+      Look for "net 30", "within thirty days of the invoice date", "due upon
+      receipt", or a payment period stated in days from invoice date or
+      receipt. Convert the stated period to days from invoice date; "due upon
+      receipt" or a prepayment requirement converts to a very short or
+      negative number of days. Absence of any payment period in an agreement
+      with Fees is a missing clause.
+    source_ref: Halcyon Vendor Procurement Policy VP-01; risk appetite table, buy-side extension
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Net 60
+        zone: green
+        summary: Halcyon pays within sixty days of a correct invoice.
+        language: >
+          Halcyon shall pay each correct and undisputed invoice within sixty
+          (60) days after the date of that invoice. Fees are not due or
+          payable before the date on which the invoice is issued.
+      - kind: fallback
+        rung: 1
+        label: Net 45
+        zone: green
+        summary: Halcyon pays within forty-five days.
+        language: >
+          Halcyon shall pay each correct and undisputed invoice within
+          forty-five (45) days after the date of that invoice.
+      - kind: fallback
+        rung: 2
+        label: Net 30
+        zone: yellow
+        approver_role: deal_desk
+        give_get: Ask Vendor for a multi-year price lock or an early-payment discount in exchange for the shorter term.
+        summary: Halcyon pays within thirty days, with a trade for the concession.
+        language: >
+          Halcyon shall pay each correct and undisputed invoice within thirty
+          (30) days after the date of that invoice.
+      - kind: acceptable_variant
+        label: Receipt-based sixty-day term
+        zone: green
+        summary: Same sixty-day window measured from Halcyon's receipt of the invoice rather than its date.
+        language: >
+          Payment of each correct and undisputed invoice is due within sixty
+          (60) days following Halcyon's receipt of that invoice, which Halcyon
+          shall acknowledge promptly upon receipt.
+    parameters:
+      - key: payment_term_days
+        label: Days to pay an invoice
+        value_type: duration_days
+        unit: days
+        direction: higher_is_better
+        preferred_value: 60
+        green_limit: 45
+        yellow_limit: 30
+        extraction_hint: >
+          Convert the stated payment period to days from the invoice date or
+          receipt date. "Due upon receipt" converts to 0; a prepayment
+          requirement converts to a negative number of days.
+    red_lines:
+      - key: vdr-payment-advance-required
+        description: Vendor requires payment in advance of, or concurrently with, delivery of the Services, with no invoiced term at all.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause requires Halcyon to pay Vendor before or upon delivery
+            of the Services, through prepayment, a deposit, or payment due on
+            receipt, rather than within a stated number of days after an
+            invoice.
+        action: escalate
+        approver_role: cfo
+        rationale: >
+          Advance payment removes the working-capital benefit the buy-side
+          payment terms policy exists to protect and shifts Vendor's
+          non-performance risk onto Halcyon before any Services are received.
+    objections:
+      - objection: Our standard terms are due on receipt for all customers regardless of size.
+        their_rationale: Vendor's own cash flow planning assumes immediate payment and it does not customize billing terms.
+        response: >
+          We understand cash flow matters to you as well. We can move to Net
+          30 if that resolves it, and in exchange we would ask for either a
+          modest early-payment discount or a cap on renewal price increases,
+          since a shorter payment term is a real concession from our side.
+        talking_points:
+          - Net 30 is still a standard commercial term, not a special accommodation.
+          - Offer the price-increase cap or the late-fee position as the trade.
+        recommended_position: {rule_key: payment.payment_terms, rung: 2}
+        frequency: common
+        counterparty_profile: Small analytics and messaging startups
+      - objection: Net 60 is longer than we extend to any other customer our size.
+        their_rationale: Vendor's finance team benchmarks payment terms against its typical customer base.
+        response: >
+          We can settle at Net 45, which still gives us meaningful planning
+          time without being an outlier against your other customers. We are
+          not asking for anything tied to deal size, only to the standard
+          terms we request from every vendor.
+        talking_points:
+          - Point to Net 45 as the fallback, not Net 60, to move the conversation.
+          - Note that Halcyon's own customers are invoiced annually in advance, which is the comparison that matters here.
+        recommended_position: {rule_key: payment.payment_terms, rung: 1}
+        frequency: occasional
+    dependencies:
+      - related_rule_key: term.initial_term
+        relation: trade_against
+        note: Offer a longer initial commitment in exchange for holding the Net 60 payment term.
+    test_cases:
+      - name: Net 60 standard wording
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Customer shall pay all invoiced amounts within 60 days of the
+          invoice date.
+      - name: Sixty days from receipt of invoice
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Invoices are payable within sixty (60) days after Customer confirms
+          receipt of the invoice.
+      - name: Net 30 on a smaller vendor
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Customer agrees to pay each invoice within thirty (30) days of
+          issuance.
+      - name: Fifteen-day payment window
+        expected_outcome: deviation
+        expected_zone: red
+        sample_text: >
+          All invoices are payable within fifteen (15) days of the invoice
+          date.
+      - name: Prepayment required before service begins
+        expected_outcome: red_line
+        expected_red_line_key: vdr-payment-advance-required
+        expected_zone: red
+        sample_text: >
+          Customer shall prepay the annual Fees in full prior to the
+          commencement of the Services.
+      - name: Trap - due on receipt phrase used for a different clause
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Invoices are issued monthly and are payable within sixty (60) days;
+          "due on receipt" in this Section refers only to the receipt
+          referenced in Section 4 acknowledging delivery of the Services, not
+          to the timing of payment.
+
+  # ------------------------------------------------------------------------
+  - rule_key: payment.late_fees
+    title: Late payment fees owed by Halcyon
+    required: true
+    risk_weight: 4
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Late fees on amounts Halcyon owes are capped at 1.0% a month, do not
+      apply to amounts under good-faith dispute, and do not come with a
+      unilateral suspension right.
+    risk_rationale: >
+      Across roughly 310 customer relationships Halcyon itself charges late
+      fees to slow payers, so it recognizes the mechanism as legitimate. The
+      question on the buy side is keeping the rate and its triggers in line
+      with ordinary commercial terms rather than a penalty rate, and
+      preserving Halcyon's right to withhold amounts it disputes in good
+      faith without being treated as in default.
+    detection_guidance: >
+      Look for "interest at the rate of", "per month", "or the maximum rate
+      permitted by law", "late charge", and whether disputed amounts are
+      exempted. Absence of late fee wording is a concession in Halcyon's
+      favour, not a missing clause; a clause letting Vendor suspend the
+      Services for any overdue amount, including disputed ones, is a
+      deviation or a red line depending on severity.
+    source_ref: Halcyon Vendor Procurement Policy VP-01
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: 1.0% a month, dispute carve-out
+        zone: green
+        summary: Late fee capped at 1.0% a month; disputed amounts are excluded while under good-faith dispute.
+        language: >
+          Overdue, undisputed amounts accrue a late fee of one percent (1.0%)
+          per month or the maximum rate permitted by applicable law, whichever
+          is lower. No late fee accrues on any amount that Halcyon disputes in
+          good faith under the dispute procedure in this Agreement until that
+          dispute is resolved.
+      - kind: fallback
+        rung: 1
+        label: 1.5% a month, same carve-out
+        zone: green
+        summary: Late fee up to 1.5% a month, dispute carve-out retained.
+        language: >
+          Overdue, undisputed amounts accrue a late fee of one and one-half
+          percent (1.5%) per month or the maximum rate permitted by applicable
+          law, whichever is lower, excluding any amount under good-faith
+          dispute.
+      - kind: fallback
+        rung: 2
+        label: 2.0% a month
+        zone: yellow
+        approver_role: deal_desk
+        give_get: Ask for a longer cure period before any late fee begins to accrue.
+        summary: Late fee up to 2.0% a month, approved by Deal Desk.
+        language: >
+          Overdue, undisputed amounts accrue a late fee of two percent (2.0%)
+          per month or the maximum rate permitted by applicable law, whichever
+          is lower.
+      - kind: acceptable_variant
+        label: Annualized rate equivalent
+        zone: green
+        summary: The same cap expressed as an annual percentage rate.
+        language: >
+          Overdue, undisputed amounts accrue interest at an annual rate of
+          twelve percent (12%), prorated daily, excluding any amount under
+          good-faith dispute.
+    parameters:
+      - key: late_fee_monthly_rate_percent
+        label: Late fee as a monthly percentage
+        value_type: percent
+        unit: percent per month
+        direction: lower_is_better
+        preferred_value: 1.0
+        green_limit: 1.5
+        yellow_limit: 2.0
+        extraction_hint: >
+          Convert an annual rate to a monthly equivalent by dividing by
+          twelve. "The maximum rate permitted by law" alone, with no stated
+          percentage, is recorded as unknown rather than assumed compliant.
+    red_lines:
+      - key: vdr-late-fee-punitive
+        description: The late fee compounds, has no dispute carve-out, or is paired with a right to suspend the Services for any overdue amount including a disputed one.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause lets the late fee compound, applies the fee to amounts
+            Halcyon disputes in good faith, or lets Vendor suspend the
+            Services for any overdue amount without excluding amounts under
+            good-faith dispute.
+        action: block
+        rationale: >
+          A compounding or non-exempted late fee combined with a suspension
+          right turns an ordinary cash-flow term into leverage Vendor can use
+          against a legitimate billing dispute.
+    objections:
+      - objection: We cannot carve out disputed amounts because customers would dispute everything to avoid paying on time.
+        their_rationale: Vendor wants a predictable, bright-line payment obligation with no exceptions.
+        response: >
+          We are not asking to withhold at will. The carve-out only applies to
+          amounts disputed in good faith under the dispute procedure in this
+          Agreement, which requires us to state the basis and the amount in
+          writing, so it cannot be used to delay ordinary invoices.
+        talking_points:
+          - Point to the defined dispute procedure as the limiting condition.
+          - Note the carve-out only suspends the late fee, not the underlying payment obligation once the dispute is resolved against Halcyon.
+        recommended_position: {rule_key: payment.late_fees, rung: 0}
+        frequency: occasional
+      - objection: Our standard late fee is 2.5% a month, matching our cost of capital.
+        their_rationale: Vendor's finance team sets the rate off its own borrowing cost rather than market practice for commercial contracts.
+        response: >
+          We can move to 2.0% a month with Deal Desk's approval, which is
+          already above what we charge our own customers. We would ask in
+          return for a short grace period before the fee starts to accrue.
+        talking_points:
+          - 2.0% a month is 24% annualized, well above typical commercial borrowing cost.
+          - Offer the grace-period trade before discussing the rate further.
+        recommended_position: {rule_key: payment.late_fees, rung: 2}
+        frequency: occasional
+    test_cases:
+      - name: One percent monthly with dispute carve-out
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Past due amounts bear interest at 1% per month, not applicable to
+          amounts under a good faith billing dispute.
+      - name: Twelve percent annual rate
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Overdue amounts accrue interest at 12% per annum, prorated daily,
+          excluding amounts subject to a good-faith dispute.
+      - name: Two percent a month, Deal Desk approved
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Late payments are subject to a finance charge of 2% per month.
+      - name: Late fee with no dispute exception
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Overdue invoices accrue a late charge of 1.5% per month, with no
+          exception for invoices under dispute.
+      - name: Compounding fee with suspension on any overdue amount
+        expected_outcome: red_line
+        expected_red_line_key: vdr-late-fee-punitive
+        expected_zone: red
+        sample_text: >
+          Interest on overdue amounts compounds monthly at 3%, and Vendor may
+          suspend the Services immediately for any amount not paid when due,
+          whether or not disputed.
+    dependencies:
+      - related_rule_key: termination.for_cause_cure_period
+        relation: read_with
+        note: A punitive late fee is often paired with a short or absent cure period for non-payment; check both together.
+
+  # ------------------------------------------------------------------------
+  - rule_key: payment.price_increases
+    title: Renewal price increase cap
+    required: true
+    risk_weight: 6
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Renewal Fee increases are capped at 3%, or Fees are fixed for the
+      Initial Term, with fallbacks up to a 7% cap approved by Deal Desk.
+    risk_rationale: >
+      Halcyon buys cloud, messaging and analytics services as recurring
+      inputs to a $72M ARR business that invoices its own customers annually
+      in advance. An uncapped or vendor-discretionary renewal increase on a
+      vendor contract is a cost Halcyon cannot pass through to its own
+      customers mid-term, so Deal Desk owns any cap above the preferred level
+      and any move to the Vendor's then-current list price.
+    detection_guidance: >
+      Look for "increase the Fees", "upon renewal", "not more than", a
+      percentage, "Consumer Price Index", and "then-current list price".
+      Absence of any cap means renewal pricing is at Vendor's discretion,
+      which is a deviation or a red line depending on how open-ended the
+      clause is; a multi-year price lock is better than the preferred
+      position, not a deviation.
+    source_ref: Halcyon Vendor Procurement Policy VP-01; risk appetite table, buy-side extension
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Capped at 3%, or fixed
+        zone: green
+        summary: Renewal increases capped at the lesser of 3% or CPI, or Fees fixed for the Initial Term.
+        language: >
+          The Fees shall remain fixed for the Initial Term. Upon each
+          renewal, Vendor may increase the Fees by no more than the lesser of
+          three percent (3%) and the increase in the Consumer Price Index for
+          the preceding twelve (12) months, on at least sixty (60) days'
+          prior written notice.
+      - kind: fallback
+        rung: 1
+        label: Capped at 5%
+        zone: green
+        summary: Renewal increases capped at 5%.
+        language: >
+          Upon each renewal, Vendor may increase the Fees by no more than five
+          percent (5%) over the Fees in effect for the immediately preceding
+          term, on at least sixty (60) days' prior written notice.
+      - kind: fallback
+        rung: 2
+        label: Capped at 7%
+        zone: yellow
+        approver_role: deal_desk
+        give_get: Ask for a multi-year renewal term locked in at signature so the cap only applies once.
+        summary: Renewal increases capped at 7%, approved by Deal Desk.
+        language: >
+          Upon each renewal, Vendor may increase the Fees by no more than
+          seven percent (7%) over the Fees in effect for the immediately
+          preceding term, on at least sixty (60) days' prior written notice.
+      - kind: acceptable_variant
+        label: Benchmark cap tied to list price
+        zone: green
+        summary: Increase tied to Vendor's list price but capped no higher than 5% over the prior term's Fees.
+        language: >
+          Upon renewal the Fees shall not exceed the lesser of (a) Vendor's
+          then-current list price for the same scope of Services and (b) the
+          Fees in effect for the immediately preceding term increased by no
+          more than five percent (5%).
+    parameters:
+      - key: renewal_increase_cap_percent
+        label: Maximum renewal price increase
+        value_type: percent
+        unit: percent
+        direction: lower_is_better
+        preferred_value: 3
+        green_limit: 5
+        yellow_limit: 7
+        extraction_hint: >
+          Record the stated cap as a percentage. "Then-current list price"
+          with no cap and no reference point is recorded as unknown, and the
+          rule is evaluated as a deviation or red line, not a missing clause.
+    red_lines:
+      - key: vdr-price-increase-uncapped
+        description: Renewal Fees may be set at Vendor's then-current list price or sole discretion with no percentage cap.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause lets Vendor set the renewal Fees at its own
+            then-current list price, or otherwise at its discretion, with no
+            percentage or index-based cap tied to the prior term's Fees.
+        action: block
+        rationale: >
+          An uncapped renewal price is open-ended cost exposure that defeats
+          the purpose of a multi-year vendor relationship and cannot be
+          budgeted against.
+    objections:
+      - objection: Our costs rise every year and a 3% cap does not cover that.
+        their_rationale: Vendor's own hosting and staffing costs increase annually, similar to Halcyon's own rationale for its customer-facing price increases.
+        response: >
+          We recognize costs rise industry-wide; we increase our own
+          customer pricing on a similar basis. We can move to a 5% cap, and
+          with Deal Desk's approval as high as 7% in exchange for a longer
+          committed term.
+        talking_points:
+          - Acknowledge the CPI-linked structure as a fair middle ground.
+          - Offer the longer-term trade before moving past 5%.
+        recommended_position: {rule_key: payment.price_increases, rung: 1}
+        frequency: common
+      - objection: All of our customers are on our standard list price at renewal; we do not offer caps.
+        their_rationale: Vendor applies a uniform pricing policy across its customer base regardless of contract size.
+        response: >
+          We understand you prefer uniform pricing, but an uncapped renewal
+          is not something we can accept on a service we are committing budget
+          to across multiple years. A 7% cap, approved on our side by Deal
+          Desk, still lets you track your list price within a predictable
+          band.
+        talking_points:
+          - Ask whether the policy allows exceptions for multi-year commitments.
+          - Keep the conversation on the cap percentage, not whether a cap exists at all.
+        recommended_position: {rule_key: payment.price_increases, rung: 2}
+        frequency: occasional
+    dependencies:
+      - related_rule_key: term.initial_term
+        relation: trade_against
+        note: A longer initial or renewal commitment is the standard trade for a tighter price-increase cap.
+    test_cases:
+      - name: Fixed Fees for the Initial Term, CPI cap at renewal
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Fees are fixed during the Initial Term. At each renewal, Fees may
+          increase by no more than the lesser of 3% or the increase in CPI.
+      - name: Cap tied to list price
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Renewal Fees will not exceed the lower of Vendor's then-current list
+          price or the prior Fees increased by 5%.
+      - name: Seven percent cap with Deal Desk sign-off
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Vendor may increase the Fees at each renewal by up to 7% over the
+          prior term's Fees.
+      - name: Ten percent renewal increase
+        expected_outcome: deviation
+        expected_zone: red
+        sample_text: >
+          At renewal, Vendor may increase the Fees by up to 10% over the
+          immediately preceding term.
+      - name: List price at Vendor's sole discretion
+        expected_outcome: red_line
+        expected_red_line_key: vdr-price-increase-uncapped
+        expected_zone: red
+        sample_text: >
+          Renewal Fees shall be Vendor's then-current list price, as
+          determined by Vendor in its sole discretion.
+      - name: Trap - cap stated as a ceiling on Vendor's list price, not a floor
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Nothing in this Section permits an increase above list price; Fees
+          at renewal will not exceed the lesser of list price or the prior
+          Fees plus 3%.
+
+  # ------------------------------------------------------------------------
+  - rule_key: payment.taxes
+    title: Allocation of taxes on the Fees
+    required: true
+    risk_weight: 3
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Fees are exclusive of applicable sales, use and value added taxes,
+      which Halcyon pays on top where legally due, subject to its exemption
+      certificates; each party remains responsible for taxes on its own net
+      income.
+    risk_rationale: >
+      Halcyon operates across US states and, through its EU entity, Ireland,
+      so vendor invoices can carry sales, use, VAT or withholding tax
+      questions that are easy to get wrong at scale across many vendor
+      relationships. Keeping each party responsible for its own income taxes
+      and requiring Vendor to honor a valid exemption certificate avoids
+      Halcyon absorbing taxes it is not legally obligated to pay or
+      indemnifying Vendor's own tax position.
+    detection_guidance: >
+      Look for "exclusive of taxes", "sales, use, value added or withholding
+      taxes", "gross up", and "exemption certificate". Absence leaves it
+      unclear whether the stated Fees include tax, which is a missing issue
+      on an agreement with recurring Fees.
+    source_ref: Halcyon Vendor Procurement Policy VP-01
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Exclusive of taxes, exemption honored
+        zone: green
+        summary: Fees exclude applicable transaction taxes; each party bears its own income taxes; exemption certificates are honored.
+        language: >
+          The Fees are exclusive of all applicable sales, use, value added,
+          goods and services and similar transaction taxes, which Halcyon
+          shall pay in addition to the Fees where legally due, except where
+          Halcyon provides Vendor with a valid exemption certificate, which
+          Vendor shall honor. Each party is responsible for taxes imposed on
+          its own net income, property and employees.
+      - kind: fallback
+        rung: 1
+        label: Fees inclusive of transaction tax
+        zone: green
+        summary: Fees are stated as inclusive of applicable transaction taxes, which Vendor remains liable to remit.
+        language: >
+          The Fees are inclusive of applicable sales, use and value added
+          taxes, and Vendor is solely responsible for calculating, collecting
+          and remitting those taxes to the relevant authority.
+      - kind: fallback
+        rung: 2
+        label: Halcyon bears withholding gross-up
+        zone: yellow
+        approver_role: deal_desk
+        give_get: Confirm the gross-up amount is capped and ask for a corresponding reduction elsewhere in the Fees.
+        summary: Halcyon grosses up payments for withholding tax Vendor cannot otherwise recover, approved by Deal Desk.
+        language: >
+          If applicable law requires Halcyon to withhold any amount from a
+          payment to Vendor on account of tax, Halcyon shall pay Vendor such
+          additional amount as is necessary so that Vendor receives the full
+          amount it would have received had no withholding applied.
+      - kind: acceptable_variant
+        label: Duties and levies wording
+        zone: green
+        summary: The same allocation of transaction taxes using broader counterparty terminology.
+        language: >
+          All duties, levies, sales, use and value added taxes applicable to
+          the Services are additional to the Fees and payable by Halcyon
+          except to the extent Halcyon furnishes a valid exemption
+          certificate, which Vendor shall apply from the date of receipt.
+    red_lines:
+      - key: vdr-tax-indemnity-shift
+        description: Halcyon must indemnify Vendor for Vendor's own income tax liability or for penalties arising from Vendor's noncompliance.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause requires Halcyon to indemnify, reimburse or hold
+            Vendor harmless for taxes assessed on Vendor's own net income, or
+            for penalties or interest caused by Vendor's own failure to
+            collect, remit or report taxes correctly.
+        action: escalate
+        approver_role: cfo
+        rationale: >
+          Shifting Vendor's own tax compliance risk onto Halcyon is an
+          unbudgeted and open-ended liability that has nothing to do with the
+          Services purchased.
+    objections:
+      - objection: We require every customer to gross up withholding tax so our net revenue is unaffected.
+        their_rationale: Vendor prices its Services net of any withholding and treats the gross-up as standard.
+        response: >
+          We can accept a gross-up obligation with Deal Desk's sign-off,
+          provided it is capped to the withholding actually required by law
+          and does not extend to Vendor's own income tax position more
+          broadly.
+        talking_points:
+          - Confirm the gross-up only applies where withholding is legally mandated, not assumed.
+          - Ask for documentation of the applicable withholding rate.
+        recommended_position: {rule_key: payment.taxes, rung: 2}
+        frequency: rare
+      - objection: Our invoices do not state whether Fees include tax; that is handled separately in our billing system.
+        their_rationale: Vendor's billing process calculates tax at invoice time rather than stating the treatment in the contract.
+        response: >
+          We need the contract to state the tax treatment so Finance can
+          budget correctly; we are flexible on whether Fees are stated
+          inclusive or exclusive of tax, provided the clause makes that
+          choice clear and the right taxes are listed.
+        talking_points:
+          - Offer either the exclusive or inclusive fallback, whichever is easier for Vendor's billing system.
+          - Keep the exemption-certificate language regardless of which structure is used.
+        recommended_position: {rule_key: payment.taxes, rung: 1}
+        frequency: occasional
+    dependencies: []
+    test_cases:
+      - name: Exclusive of taxes with exemption certificate honored
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Fees do not include applicable sales or use tax, which Customer
+          shall pay unless it provides a valid tax exemption certificate.
+      - name: Duties and levies, counterparty wording
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          All duties and levies on the Services are payable by Customer in
+          addition to the Fees, except where Customer furnishes a valid
+          exemption certificate.
+      - name: Customer grosses up withholding tax
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          If Customer is required by law to withhold any tax from a payment
+          to Vendor, Customer shall increase the payment so that Vendor
+          receives the amount it would have received absent the withholding.
+      - name: No exemption certificate mechanism
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Fees are exclusive of all taxes, which Customer shall pay in
+          addition to the Fees, with no provision for a tax exemption
+          certificate.
+      - name: Customer indemnifies Vendor's own tax noncompliance
+        expected_outcome: red_line
+        expected_red_line_key: vdr-tax-indemnity-shift
+        expected_zone: red
+        sample_text: >
+          Customer shall indemnify and hold Vendor harmless from any
+          penalties or interest arising from Vendor's failure to timely remit
+          taxes it collects from Customer.
+
+  # ------------------------------------------------------------------------
+  - rule_key: term.initial_term
+    title: Initial term of the agreement
+    required: true
+    risk_weight: 5
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      The Initial Term is twelve months, with fallbacks up to thirty-six
+      months approved by Deal Desk where Vendor requires a longer commitment.
+    risk_rationale: >
+      Halcyon's buy side spans cloud, messaging and analytics suppliers of
+      varying maturity, and a long initial commitment to an unproven vendor
+      is hard to unwind if the Services underperform or the vendor's security
+      posture changes. A short initial term lets Halcyon re-evaluate a vendor
+      relationship on a cycle close to its own 90-day playbook review
+      cadence, while Deal Desk can accept a longer commitment where price or
+      service terms justify it.
+    detection_guidance: >
+      Look for "Initial Term", "commences on the Effective Date and continues
+      for", and a period in months or years, in the agreement or an order
+      form. "Month-to-month" wording with no committed period is better than
+      the preferred position, not a deviation. Absence of any stated term is
+      a missing clause.
+    source_ref: Halcyon Vendor Procurement Policy VP-01; risk appetite table, buy-side extension
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: 12-month Initial Term
+        zone: green
+        summary: Initial Term of twelve months.
+        language: >
+          The initial term of this Agreement (the "Initial Term") commences
+          on the Effective Date and continues for twelve (12) months, unless
+          earlier terminated as provided in this Agreement.
+      - kind: fallback
+        rung: 1
+        label: 24-month Initial Term
+        zone: green
+        summary: Initial Term of up to twenty-four months.
+        language: >
+          The Initial Term commences on the Effective Date and continues for
+          twenty-four (24) months, unless earlier terminated as provided in
+          this Agreement.
+      - kind: fallback
+        rung: 2
+        label: 36-month Initial Term
+        zone: yellow
+        approver_role: deal_desk
+        give_get: Ask for a price lock for the full term or a termination-for-convenience right exercisable after month 12.
+        summary: Initial Term of up to thirty-six months, approved by Deal Desk.
+        language: >
+          The Initial Term commences on the Effective Date and continues for
+          thirty-six (36) months, unless earlier terminated as provided in
+          this Agreement.
+      - kind: acceptable_variant
+        label: Dated Initial Term
+        zone: green
+        summary: The same twelve-month commitment stated as a fixed end date.
+        language: >
+          This Agreement commences on the Effective Date and continues
+          through [date], twelve (12) months later, unless earlier
+          terminated as provided in this Agreement.
+    parameters:
+      - key: initial_term_months
+        label: Length of the Initial Term
+        value_type: number
+        unit: months
+        direction: lower_is_better
+        preferred_value: 12
+        green_limit: 24
+        yellow_limit: 36
+        extraction_hint: >
+          Convert a stated period to months; a term expressed in years is
+          multiplied by twelve. Month-to-month wording with no fixed Initial
+          Term is recorded as 1.
+    red_lines:
+      - key: initial-term-excessive-no-exit
+        description: The Initial Term exceeds 36 months with no Halcyon termination-for-convenience right available before it ends.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause commits Halcyon to an Initial Term longer than
+            thirty-six (36) months, and the Agreement gives Halcyon no right
+            to terminate for convenience at any point before the Initial Term
+            ends.
+        action: block
+        rationale: >
+          A multi-year lock-in with no exit on an unproven vendor relationship
+          is inconsistent with Halcyon's buy-side risk appetite and leaves no
+          way to respond to vendor underperformance short of breach.
+    objections:
+      - objection: Our standard agreement requires a 36-month commitment to justify the onboarding cost.
+        their_rationale: Vendor amortizes implementation and account-management cost over a longer committed period.
+        response: >
+          We can accept thirty-six months with Deal Desk's approval if we also
+          get a price lock for that period and a termination right if the
+          Services materially underperform. For a first engagement we would
+          prefer to start at twelve months and extend once the relationship is
+          proven.
+        talking_points:
+          - Offer a shorter initial term with an option to extend instead of a long first commitment.
+          - Tie the longer term to the price-lock and termination-right trade.
+        recommended_position: {rule_key: term.initial_term, rung: 2}
+        frequency: common
+      - objection: A twelve-month term is too short for us to recover our onboarding investment.
+        their_rationale: Vendor's margin on the account depends on multiple renewal cycles.
+        response: >
+          We can move to twenty-four months, which still gives you a
+          meaningful runway without requiring us to commit three years to an
+          unproven relationship.
+        talking_points:
+          - Twenty-four months is a real concession from the preferred twelve-month position.
+          - Note that auto-renewal, once the fit is proven, extends the relationship without a new negotiation.
+        recommended_position: {rule_key: term.initial_term, rung: 1}
+        frequency: occasional
+    dependencies:
+      - related_rule_key: payment.payment_terms
+        relation: trade_against
+        note: Offer a longer Initial Term in exchange for holding the Net 60 payment term.
+      - related_rule_key: termination.for_convenience
+        relation: read_with
+        note: A longer Initial Term should be paired with a termination-for-convenience right exercisable before it ends.
+    test_cases:
+      - name: Twelve-month Initial Term
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          This Agreement begins on the Effective Date and runs for an initial
+          period of 12 months.
+      - name: Fixed end date twelve months out
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          This Agreement commences on the Effective Date and continues
+          through the date twelve months later, unless earlier terminated.
+      - name: Thirty-six month commitment with Deal Desk sign-off
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          The Initial Term is thirty-six (36) months from the Effective Date.
+      - name: Sixty-month Initial Term with a termination right at month 24
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          The Initial Term is sixty (60) months, provided Customer may
+          terminate for convenience after the first twenty-four (24) months.
+      - name: Sixty-month lock-in with no exit
+        expected_outcome: red_line
+        expected_red_line_key: initial-term-excessive-no-exit
+        expected_zone: red
+        sample_text: >
+          The Initial Term is sixty (60) months and may not be terminated by
+          Customer for convenience at any time during that period.
+      - name: Trap - month-to-month wording
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          This Agreement continues on a month-to-month basis from the
+          Effective Date until terminated by either party.
+
+  # ------------------------------------------------------------------------
+  - rule_key: term.auto_renewal
+    title: Auto-renewal and non-renewal notice
+    required: true
+    risk_weight: 4
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      The Agreement renews for successive twelve-month terms unless either
+      party gives at least ninety days' notice of non-renewal, with fallbacks
+      down to thirty days approved by Deal Desk.
+    risk_rationale: >
+      Halcyon's contracts managers track renewal dates across many vendor
+      relationships, so a long non-renewal notice window gives the team time
+      to re-bid or renegotiate a vendor before it locks in for another term.
+      A short notice window on a vendor contract risks an unwanted renewal
+      slipping past the 90-day playbook review cycle before anyone can act on
+      it.
+    detection_guidance: >
+      Look for "automatically renew", "successive renewal terms of", and
+      "unless either party gives written notice of non-renewal at least" with
+      a number of days. Wording requiring a new signed order to renew means
+      there is no auto-renewal, which is better than the preferred position.
+      Absence means the Agreement simply expires at the end of its term.
+    source_ref: Halcyon Vendor Procurement Policy VP-01; risk appetite table, buy-side extension
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: 90 days' notice
+        zone: green
+        summary: Successive 12-month renewals unless either party gives 90 days' notice of non-renewal.
+        language: >
+          This Agreement automatically renews for successive twelve (12)
+          month terms unless either party gives the other written notice of
+          non-renewal at least ninety (90) days before the end of the
+          then-current term.
+      - kind: fallback
+        rung: 1
+        label: 60 days' notice
+        zone: green
+        summary: The same renewal structure with a sixty-day notice window.
+        language: >
+          This Agreement automatically renews for successive twelve (12)
+          month terms unless either party gives the other written notice of
+          non-renewal at least sixty (60) days before the end of the
+          then-current term.
+      - kind: fallback
+        rung: 2
+        label: 30 days' notice
+        zone: yellow
+        approver_role: deal_desk
+        give_get: Ask for a right to adjust committed volume at each renewal in exchange for the shorter notice window.
+        summary: Thirty days' notice, approved by Deal Desk.
+        language: >
+          This Agreement automatically renews for successive twelve (12)
+          month terms unless either party gives the other written notice of
+          non-renewal at least thirty (30) days before the end of the
+          then-current term.
+      - kind: acceptable_variant
+        label: No auto-renewal
+        zone: green
+        summary: The Agreement expires at the end of its term unless the parties sign a new order.
+        language: >
+          This Agreement does not renew automatically. Continued provision of
+          the Services after the end of the then-current term requires a new
+          order signed by both parties.
+    parameters:
+      - key: renewal_notice_days
+        label: Days' notice required to stop auto-renewal
+        value_type: duration_days
+        unit: days
+        direction: higher_is_better
+        preferred_value: 90
+        green_limit: 60
+        yellow_limit: 30
+        extraction_hint: >
+          Record the number of days of advance notice either party must give
+          to prevent the next renewal. If there is no auto-renewal clause at
+          all, record this parameter as not applicable rather than 0.
+    red_lines:
+      - key: auto-renewal-no-notice
+        description: The Agreement auto-renews with no notice obligation on Vendor, or the renewal term is longer than the Initial Term with no matching exit right.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause lets the Agreement renew automatically with no
+            requirement that either party give advance notice to prevent it,
+            or sets the renewal term longer than the Initial Term without
+            giving Halcyon a termination-for-convenience right during that
+            renewal term.
+        action: block
+        rationale: >
+          A renewal with no notice trigger or an ever-lengthening lock-in
+          removes Halcyon's ability to re-evaluate the vendor relationship on
+          a predictable cycle.
+    objections:
+      - objection: Sixty days is as much notice as our contract system can automate.
+        their_rationale: Vendor's billing and renewal tooling is configured around a fixed sixty-day cycle.
+        response: >
+          Sixty days works for us as the first fallback. We would still ask
+          that the renewal term stay at twelve months rather than extending to
+          match a longer cycle.
+        talking_points:
+          - Confirm the renewal length is unaffected by the shorter notice window.
+          - Keep thirty days as the floor, not the opening position.
+        recommended_position: {rule_key: term.auto_renewal, rung: 1}
+        frequency: occasional
+      - objection: We only offer month-to-month renewal with no advance notice requirement at all.
+        their_rationale: Vendor wants maximum flexibility to re-price or discontinue the Services between terms.
+        response: >
+          A renewal structure with no notice period at all leaves us unable to
+          plan around the Services continuing, so this is a point we would
+          need to escalate rather than accept. We can offer the no
+          auto-renewal variant instead, which removes the need for a notice
+          period on either side.
+        talking_points:
+          - Offer the no-auto-renewal variant as the practical alternative.
+          - Note this touches a red line in Halcyon's vendor policy, not just a negotiable term.
+        recommended_position: {rule_key: term.auto_renewal, rung: 2}
+        frequency: rare
+    dependencies:
+      - related_rule_key: termination.for_convenience
+        relation: read_with
+        note: A short non-renewal notice window is less of a concern where Halcyon also holds a termination-for-convenience right.
+    test_cases:
+      - name: Ninety days' notice to stop renewal
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          This Agreement renews automatically for 12-month periods unless
+          either party gives 90 days' written notice of non-renewal.
+      - name: No auto-renewal, new order required
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          This Agreement terminates at the end of the Initial Term and will
+          not renew unless the parties execute a new order.
+      - name: Thirty days' notice, Deal Desk approved
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Renewal occurs automatically unless a party gives 30 days' notice
+          of non-renewal before the term ends.
+      - name: Fifteen days' notice window
+        expected_outcome: deviation
+        expected_zone: red
+        sample_text: >
+          This Agreement renews automatically unless either party gives 15
+          days' notice of non-renewal.
+      - name: Auto-renewal with no notice right at all
+        expected_outcome: red_line
+        expected_red_line_key: auto-renewal-no-notice
+        expected_zone: red
+        sample_text: >
+          This Agreement automatically renews for successive 12-month terms.
+          Neither party is required to give notice to prevent a renewal.
+
+  # ------------------------------------------------------------------------
+  - rule_key: termination.for_convenience
+    title: Halcyon's right to terminate for convenience
+    required: true
+    risk_weight: 7
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Halcyon may terminate this Agreement for convenience at any time on
+      thirty days' notice, with a pro-rata refund of prepaid, unused Fees.
+    risk_rationale: >
+      Halcyon buys Services from cloud, messaging and analytics vendors that
+      vary widely in maturity, and some handle PHI as subcontractors where a
+      security or compliance failure needs a fast exit rather than a wait for
+      a renewal date. A termination-for-convenience right that Halcyon itself
+      holds, paired with a refund of unused prepaid Fees, is the single most
+      important lever for managing vendor risk across its buy-side portfolio
+      and is worth more than most other concessions on this playbook.
+    detection_guidance: >
+      Look for "for any reason or no reason", "for convenience", "without
+      cause", and a notice period in the termination section; note which
+      party holds the right and what happens to prepaid Fees. Absence of any
+      termination-for-convenience right for Halcyon means neither party can
+      exit early without breach, which is a missing clause on the buy side,
+      not a neutral position.
+    source_ref: Halcyon Vendor Procurement Policy VP-01; risk appetite table, buy-side extension
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Any time, 30 days' notice, pro-rata refund
+        zone: green
+        summary: Halcyon may terminate for convenience at any time on 30 days' notice with a pro-rata refund of prepaid Fees.
+        language: >
+          Halcyon may terminate this Agreement for its convenience, at any
+          time and for any or no reason, upon thirty (30) days' prior written
+          notice to Vendor. Upon such termination, Vendor shall refund to
+          Halcyon a pro-rata portion of any Fees prepaid for the remainder of
+          the Term following the effective date of termination.
+      - kind: fallback
+        rung: 1
+        label: Any time, 60 days' notice, pro-rata refund
+        zone: green
+        summary: The same right with a sixty-day notice period.
+        language: >
+          Halcyon may terminate this Agreement for its convenience, at any
+          time and for any or no reason, upon sixty (60) days' prior written
+          notice to Vendor, with a pro-rata refund of any Fees prepaid for the
+          remainder of the Term.
+      - kind: fallback
+        rung: 2
+        label: After month 12, 90 days' notice, no refund
+        zone: yellow
+        approver_role: commercial_counsel
+        conditions: {deal_value_band: [mid, enterprise, strategic]}
+        give_get: Accept a longer Initial Term commitment or waive Halcyon's right to terminate for Vendor's convenience, in exchange for holding this right.
+        summary: Halcyon may terminate for convenience only after month 12, on 90 days' notice, with no refund.
+        language: >
+          After the first twelve (12) months of the Term, Halcyon may
+          terminate this Agreement for its convenience upon ninety (90) days'
+          prior written notice to Vendor. Fees paid before the effective date
+          of termination are non-refundable.
+      - kind: acceptable_variant
+        label: Termination for convenience stated without a fixed notice figure
+        zone: green
+        summary: The right is stated by reference to a notice period defined elsewhere, achieving the same 30-day outcome.
+        language: >
+          Halcyon may terminate this Agreement, in whole or with respect to
+          any Service, for its convenience upon written notice to Vendor in
+          accordance with the notice period specified in the Order Form,
+          which shall not be shorter than thirty (30) days.
+    parameters:
+      - key: tfc_notice_days
+        label: Notice days to exercise termination for convenience
+        value_type: duration_days
+        unit: days
+        direction: lower_is_better
+        preferred_value: 30
+        green_limit: 60
+        yellow_limit: 90
+        extraction_hint: >
+          Record the number of days' notice Halcyon must give to exercise
+          termination for convenience. If the right is not available until
+          after a minimum period has elapsed, record that separately in the
+          extracted summary rather than in this parameter.
+    red_lines:
+      - key: tfc-penalty-full-term-fees
+        description: Vendor requires Halcyon to pay the Fees for the full remainder of the Term upon Halcyon's exercise of termination for convenience.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause requires Halcyon to pay Vendor the Fees it would have
+            owed for the remainder of the Term, or another pre-agreed sum, as
+            a condition of or penalty for Halcyon exercising a termination
+            for convenience right.
+        action: block
+        rationale: >
+          Charging the full remaining Fees on exercise of the right converts
+          it into a fee for exiting rather than a real termination right, and
+          functions as a liquidated-damages clause by another name.
+    objections:
+      - objection: We cannot offer termination for convenience because our own costs are front-loaded in onboarding.
+        their_rationale: Vendor recovers implementation and integration costs over the life of the contract, not at signing.
+        response: >
+          We can agree the right only becomes available after month twelve,
+          with ninety days' notice and no refund of Fees already paid, which
+          gives you the full first year to recover onboarding cost.
+        talking_points:
+          - Offer the month-12 fallback before discussing removing the right entirely.
+          - Note the no-refund condition already protects Vendor's sunk cost.
+        recommended_position: {rule_key: termination.for_convenience, rung: 2}
+        frequency: common
+      - objection: Termination for convenience with a refund is one-sided; we get nothing if you simply change your mind.
+        their_rationale: Vendor views the right as asymmetric because it has no matching right of its own.
+        response: >
+          We are open to Vendor also holding a termination-for-convenience
+          right on reasonable notice, provided it does not shorten the
+          minimum notice period Halcyon receives in return. We can also agree
+          Vendor keeps all Fees paid for Services already delivered.
+        talking_points:
+          - Offer a mutual right rather than removing Halcyon's right.
+          - Reconfirm that Fees for Services already delivered are not refunded.
+        recommended_position: {rule_key: termination.for_convenience, rung: 1}
+        frequency: occasional
+    dependencies:
+      - related_rule_key: termination.for_cause_cure_period
+        relation: read_with
+        note: Review together with the cure period; a short cure period for Vendor's breach reduces reliance on the convenience right.
+      - related_rule_key: termination.transition_assistance
+        relation: read_with
+        note: A termination for convenience should trigger the same transition assistance as any other termination or expiry.
+    test_cases:
+      - name: Any time, thirty days' notice, pro-rata refund
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Customer may terminate this Agreement for convenience at any time
+          upon 30 days' written notice, and Vendor will refund any prepaid
+          Fees for the unused portion of the Term on a pro-rata basis.
+      - name: Notice period cross-referenced to the Order Form
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Customer may terminate for convenience upon the notice period
+          stated in the applicable Order Form, which will be no less than 30
+          days.
+      - name: Available after month 12, ninety days, no refund
+        expected_outcome: fallback
+        expected_position_rung: 2
+        context: {deal_value_band: mid}
+        expected_zone: yellow
+        sample_text: >
+          Beginning in month 13, Customer may terminate this Agreement for
+          convenience on 90 days' written notice. Amounts already paid are
+          non-refundable.
+      - name: Available only in the final 90 days of the Term
+        expected_outcome: deviation
+        expected_zone: red
+        sample_text: >
+          Customer may terminate for convenience only during the final 90
+          days of the then-current Term, upon 90 days' notice.
+      - name: Full remaining Fees due on termination for convenience
+        expected_outcome: red_line
+        expected_red_line_key: tfc-penalty-full-term-fees
+        expected_zone: red
+        sample_text: >
+          If Customer terminates this Agreement for convenience, Customer
+          shall immediately pay Vendor all Fees that would have become due for
+          the remainder of the Term.
+      - name: Trap - no refund language does not remove the right itself
+        is_trap: true
+        expected_outcome: fallback
+        expected_position_rung: 2
+        context: {deal_value_band: enterprise}
+        expected_zone: yellow
+        sample_text: >
+          Customer may terminate this Agreement for convenience beginning in
+          month 13 of the Term on 90 days' written notice; Fees paid before
+          the termination date are not refundable, but no further payment is
+          due from Customer on account of the termination.
+
+  # ------------------------------------------------------------------------
+  - rule_key: termination.for_cause_cure_period
+    title: Termination for Vendor's breach and cure period
+    required: true
+    risk_weight: 6
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Halcyon may terminate on 15 days' notice if Vendor fails to cure a
+      material breach, with insolvency as an immediate trigger with no cure;
+      fallbacks extend Vendor's cure period up to 30 days.
+    risk_rationale: >
+      Vendors on this playbook are mainly small to mid-sized cloud, messaging
+      and analytics suppliers, some handling PHI as subcontractors, where a
+      performance or security failure can affect Halcyon's delivery to its
+      own 310 customers before a long cure period runs out. A short,
+      asymmetric cure period for Vendor's own breach lets Halcyon exit a
+      failing vendor relationship quickly, while Halcyon's own cure period for
+      its breaches is addressed separately and is not shortened by this rule.
+    detection_guidance: >
+      Look for "material breach", "fails to cure", "remains uncured", and a
+      number of days after "written notice", plus insolvency wording such as
+      "becomes the subject of a petition in bankruptcy". Absence of any
+      termination-for-cause right is a missing clause; a right to terminate
+      for Vendor's breach with no stated cure period at all is better than
+      the preferred position for Halcyon, not a deviation.
+    source_ref: Halcyon Vendor Procurement Policy VP-01; risk appetite table, buy-side extension
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: 15-day cure, insolvency immediate
+        zone: green
+        summary: Halcyon may terminate on 15 days' notice if Vendor's material breach is not cured; insolvency terminates immediately.
+        language: >
+          Halcyon may terminate this Agreement immediately upon written notice
+          if Vendor becomes the subject of a petition in bankruptcy or any
+          proceeding relating to insolvency, receivership or liquidation. In
+          addition, Halcyon may terminate this Agreement if Vendor materially
+          breaches this Agreement and fails to cure that breach within
+          fifteen (15) days after written notice describing the breach in
+          reasonable detail.
+      - kind: fallback
+        rung: 1
+        label: 20-day cure for Vendor's breach
+        zone: green
+        summary: Cure period of twenty days for Vendor's material breach.
+        language: >
+          Halcyon may terminate this Agreement if Vendor materially breaches
+          this Agreement and fails to cure that breach within twenty (20)
+          days after written notice describing the breach in reasonable
+          detail.
+      - kind: fallback
+        rung: 2
+        label: 30-day cure for Vendor's breach
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: Ask for a shorter, 10-day cure period specifically for a failure to maintain the security certifications required under this Agreement.
+        summary: Cure period of thirty days, approved by Commercial Counsel.
+        language: >
+          Halcyon may terminate this Agreement if Vendor materially breaches
+          this Agreement and fails to cure that breach within thirty (30)
+          days after written notice describing the breach in reasonable
+          detail.
+      - kind: acceptable_variant
+        label: Shorter cure for failure to perform the Services
+        zone: green
+        summary: A ten-day cure period for Vendor's failure to perform the Services, fifteen days for any other material breach.
+        language: >
+          Halcyon may terminate this Agreement if Vendor fails to cure, within
+          ten (10) Business Days after written notice, a failure to perform a
+          material part of the Services, or within fifteen (15) days after
+          written notice, any other material breach of this Agreement.
+    parameters:
+      - key: vendor_cure_period_days
+        label: Vendor's cure period for a material breach
+        value_type: duration_days
+        unit: days
+        direction: lower_is_better
+        preferred_value: 15
+        green_limit: 20
+        yellow_limit: 30
+        extraction_hint: >
+          Record the number of days Vendor has to cure a material breach
+          after Halcyon's written notice. Record insolvency or similar
+          immediate-termination triggers separately in the extracted summary.
+    red_lines:
+      - key: cure-unlimited-vendor
+        description: Vendor's cure period for a material breach exceeds 45 days, repeats indefinitely, or Halcyon has no termination right for Vendor's uncured breach at all.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause gives Vendor more than forty-five (45) days to cure a
+            material breach, lets Vendor restart the cure period repeatedly
+            for the same or a related breach, or provides no right at all for
+            Halcyon to terminate for Vendor's uncured material breach.
+        action: block
+        rationale: >
+          An unlimited or repeatedly-resettable cure period leaves Halcyon
+          without a practical way to exit a vendor that is failing to perform,
+          which matters most where that vendor is handling PHI as a
+          subcontractor.
+    objections:
+      - objection: Fifteen days is not enough time to diagnose and fix a technical issue properly.
+        their_rationale: Vendor's engineering process for root-causing and remediating an incident often takes longer than two weeks.
+        response: >
+          We can extend to twenty days, which still keeps us inside a month.
+          For issues that are genuinely complex we would expect to see a
+          credible remediation plan within the cure period even if the fix
+          itself is still in progress, which we can reflect in the clause.
+        talking_points:
+          - Offer the twenty-day fallback before discussing a longer period.
+          - Suggest a "credible plan within the period" standard as a middle ground.
+        recommended_position: {rule_key: termination.for_cause_cure_period, rung: 1}
+        frequency: common
+      - objection: Our standard cure period is sixty days across all customers.
+        their_rationale: Vendor applies one uniform cure period regardless of customer size or the criticality of the Services.
+        response: >
+          With Commercial Counsel's approval we can go to thirty days, but
+          sixty is longer than we can accept given what some of these
+          Services touch. We would ask for the shorter ten-day cure on a
+          failure to perform the Services themselves in exchange for holding
+          the line at thirty days generally.
+        talking_points:
+          - Explain that some Vendors on this playbook handle PHI as subcontractors, which raises the stakes of a slow cure.
+          - Offer the acceptable variant structure splitting performance failures from other breaches.
+        recommended_position: {rule_key: termination.for_cause_cure_period, rung: 2}
+        frequency: occasional
+    dependencies:
+      - related_rule_key: termination.for_convenience
+        relation: read_with
+        note: Review together; a workable cure period for Vendor's breach reduces how often Halcyon needs to rely on the convenience right.
+    test_cases:
+      - name: Fifteen-day cure, insolvency immediate
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Customer may terminate immediately if Vendor becomes insolvent, and
+          may terminate for any other material breach not cured within 15
+          days of written notice.
+      - name: Split cure period by breach type
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Customer may terminate if Vendor fails to cure a failure to perform
+          the Services within 10 business days, or any other material breach
+          within 15 days, after written notice.
+      - name: Thirty-day cure, Commercial Counsel approved
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Customer may terminate this Agreement if Vendor fails to cure a
+          material breach within 30 days after written notice.
+      - name: Sixty-day cure period
+        expected_outcome: deviation
+        expected_zone: red
+        sample_text: >
+          Customer may terminate this Agreement if Vendor fails to cure a
+          material breach within 60 days after written notice.
+      - name: No termination right for Vendor's breach at all
+        expected_outcome: red_line
+        expected_red_line_key: cure-unlimited-vendor
+        expected_zone: red
+        sample_text: >
+          This Agreement may be terminated by either party only for
+          convenience; neither party has a right to terminate for the other
+          party's breach.
+
+  # ------------------------------------------------------------------------
+  - rule_key: termination.transition_assistance
+    title: Transition assistance on termination or expiry
+    required: true
+    risk_weight: 6
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Vendor continues the Services and cooperates with migration to a
+      successor for up to six months after termination or expiry, at the
+      Fees in effect before termination, with fallbacks down to one month
+      approved by Commercial Counsel.
+    risk_rationale: >
+      Several of Halcyon's vendors are cloud, messaging or analytics
+      suppliers that some PHI-handling workflows depend on, so an abrupt
+      cutoff on termination can disrupt Halcyon's own delivery to its 310
+      customers while a replacement is brought online. Transition assistance
+      at the pre-termination Fee rate, rather than at Vendor's discretion,
+      gives Halcyon a predictable cost and timeline for migrating Halcyon
+      Data to a successor.
+    detection_guidance: >
+      Look for "transition services", "transition period", "exit
+      assistance", "wind-down", or "orderly migration", usually with a period
+      in months and a statement on fees. Absence means the Services can stop
+      on the termination date with no migration support, which is a missing
+      clause on a Vendor relationship Halcyon depends on operationally.
+    source_ref: Halcyon Vendor Procurement Policy VP-01; risk appetite table, buy-side extension
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: 6 months, pre-termination rate
+        zone: green
+        summary: Up to six months of transition assistance at the Fees in effect immediately before termination.
+        language: >
+          Upon expiry or termination of this Agreement for any reason other
+          than Halcyon's uncured material breach, Vendor shall, at Halcyon's
+          request, continue to provide the Services and reasonably cooperate
+          in migrating Halcyon Data and related operations to a successor
+          provider, for up to six (6) months following the effective date of
+          termination, at the Fees in effect immediately before that date.
+      - kind: fallback
+        rung: 1
+        label: 3 months, pre-termination rate
+        zone: green
+        summary: Up to three months of transition assistance at the same rate.
+        language: >
+          Upon expiry or termination of this Agreement for any reason other
+          than Halcyon's uncured material breach, Vendor shall, at Halcyon's
+          request, continue to provide the Services and reasonably cooperate
+          in transition activities for up to three (3) months following the
+          effective date of termination, at the Fees in effect immediately
+          before that date.
+      - kind: fallback
+        rung: 2
+        label: 1 month, list rate
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: Agree to pay a one-time transition fee, capped at a stated amount, in exchange for the shorter guaranteed period.
+        summary: One month of transition assistance at Vendor's then-current list rate, approved by Commercial Counsel.
+        language: >
+          Upon expiry or termination of this Agreement for any reason other
+          than Halcyon's uncured material breach, Vendor shall, at Halcyon's
+          request, continue to provide the Services for up to one (1) month
+          following the effective date of termination, at Vendor's
+          then-current list rate for the Services.
+      - kind: acceptable_variant
+        label: Paid transition statement of work
+        zone: green
+        summary: Transition assistance delivered as a capped, separately priced engagement available for at least three months.
+        language: >
+          At Halcyon's request, Vendor shall provide transition assistance
+          under a separate statement of work, priced at no more than Vendor's
+          then-current professional services rate, available for a period of
+          not less than three (3) months following expiry or termination of
+          this Agreement.
+    parameters:
+      - key: transition_period_months
+        label: Length of transition assistance
+        value_type: number
+        unit: months
+        direction: higher_is_better
+        preferred_value: 6
+        green_limit: 3
+        yellow_limit: 1
+        extraction_hint: >
+          Record the number of months of transition assistance Vendor commits
+          to provide after termination or expiry. If assistance is available
+          only for a stated project rather than a period, record the stated
+          minimum duration of that project.
+    red_lines:
+      - key: transition-none-and-no-data-return
+        description: The Services stop immediately on the termination date with no transition support and no obligation to return or make Halcyon Data available in a usable format.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause states or implies that Vendor has no obligation to
+            continue the Services or cooperate with migration after
+            termination or expiry, and does not require Vendor to return or
+            make available Halcyon Data in a usable format.
+        action: block
+        rationale: >
+          Stopping a dependent service with no migration support and no data
+          return risks an operational outage for Halcyon's own customers and
+          a possible loss of Halcyon Data, including data subject to the
+          certifications Halcyon holds.
+    objections:
+      - objection: We do not offer free transition support; our standard terms end access on the termination date.
+        their_rationale: Vendor does not want to staff post-termination support for customers who are leaving.
+        response: >
+          We can accept transition assistance priced as a separate statement
+          of work rather than included at no cost, provided it is available
+          for at least three months at a capped rate so we can plan a
+          realistic migration.
+        talking_points:
+          - Offer the paid transition variant rather than insisting on free assistance.
+          - Keep the minimum three-month availability even if it is priced separately.
+        recommended_position: {rule_key: termination.transition_assistance, rung: 1}
+        frequency: common
+      - objection: Six months is too long; our infrastructure costs continue even though the customer is leaving.
+        their_rationale: Vendor bears ongoing hosting and support cost for a departing customer with no further revenue growth.
+        response: >
+          We understand the cost concern and can move to one month at your
+          then-current list rate, with Commercial Counsel's approval, in
+          exchange for agreeing a capped one-time transition fee rather than
+          an open-ended support obligation.
+        talking_points:
+          - Offer the capped one-time fee as the trade for the shorter period.
+          - Note the Fees paid during transition already compensate Vendor for its ongoing cost.
+        recommended_position: {rule_key: termination.transition_assistance, rung: 2}
+        frequency: occasional
+    dependencies:
+      - related_rule_key: termination.for_convenience
+        relation: read_with
+        note: Transition assistance should be available on a termination for convenience, not only on expiry.
+    test_cases:
+      - name: Six months of transition assistance at pre-termination Fees
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Upon termination or expiry, Vendor will continue providing the
+          Services for up to six months at the request of Customer, at the
+          Fees in effect immediately before termination, to support migration
+          to a replacement provider.
+      - name: Paid transition statement of work
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Customer may purchase a transition services statement of work, at
+          Vendor's then-current professional services rate, for a term of not
+          less than three months following termination.
+      - name: One month at list rate, approved
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Following termination, Vendor will continue the Services for one
+          month at its then-current list price, at Customer's request.
+      - name: Transition assistance available only at Vendor's sole discretion
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Vendor may, in its sole discretion, agree to continue providing the
+          Services for a period after termination on terms to be negotiated
+          at that time.
+      - name: Immediate cutoff with no data return
+        expected_outcome: red_line
+        expected_red_line_key: transition-none-and-no-data-return
+        expected_zone: red
+        sample_text: >
+          Vendor's obligation to provide the Services ends immediately on the
+          termination date. Vendor has no obligation to return or provide
+          access to Customer's data following termination.
+      - name: Trap - transition assistance is priced but not absent
+        is_trap: true
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Services continue for up to one month after termination, billed at
+          Vendor's then-current list rate, if Customer requests them in
+          writing before the termination date.
+
+  # ------------------------------------------------------------------------
+  - rule_key: service_levels.uptime_commitment
+    title: Vendor's uptime commitment
+    required: true
+    risk_weight: 6
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Vendor commits to at least 99.95% monthly availability, with fallbacks
+      down to 99.5% approved by VP Customer Success.
+    risk_rationale: >
+      Halcyon promises its own 310 customers 99.9% monthly uptime on Halcyon
+      Engage, so a hosted or cloud Vendor underneath that commitment needs a
+      buffer above what Halcyon promises downstream, not merely a matching
+      figure. A weak or absent uptime commitment from a dependency means a
+      single vendor outage can cascade into a breach of Halcyon's own
+      service-level obligations across many customer contracts at once.
+    detection_guidance: >
+      Look for "available", "uptime", "Monthly Uptime Percentage", a
+      percentage such as "99.9%", and exclusions for "Scheduled Maintenance"
+      or third-party failures, in the main agreement or a service level
+      exhibit. Absence means there is no availability commitment, which is a
+      missing clause on a hosted service Halcyon depends on.
+    source_ref: Halcyon Vendor Procurement Policy VP-01; risk appetite table, buy-side extension
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: 99.95% monthly
+        zone: green
+        summary: Vendor commits to at least 99.95% monthly availability.
+        language: >
+          Vendor shall ensure that the Services are available at least
+          ninety-nine and ninety-five hundredths percent (99.95%) of the time
+          in each calendar month, excluding Scheduled Maintenance performed
+          on at least five (5) days' prior notice.
+      - kind: fallback
+        rung: 1
+        label: 99.9% monthly
+        zone: green
+        summary: Vendor commits to at least 99.9% monthly availability.
+        language: >
+          Vendor shall ensure that the Services are available at least
+          ninety-nine and nine-tenths percent (99.9%) of the time in each
+          calendar month, excluding Scheduled Maintenance performed on at
+          least five (5) days' prior notice.
+      - kind: fallback
+        rung: 2
+        label: 99.5% monthly
+        zone: yellow
+        approver_role: vp_customer_success
+        give_get: Ask for enhanced service credits and a right to terminate after two consecutive monthly misses.
+        summary: Vendor commits to at least 99.5% monthly availability, approved by VP Customer Success.
+        language: >
+          Vendor shall ensure that the Services are available at least
+          ninety-nine and five-tenths percent (99.5%) of the time in each
+          calendar month, excluding Scheduled Maintenance performed on at
+          least five (5) days' prior notice.
+      - kind: acceptable_variant
+        label: Quarterly measurement at an equivalent or higher level
+        zone: green
+        summary: The same commitment measured quarterly at 99.95% or higher.
+        language: >
+          Vendor shall ensure that the Services are available at least
+          ninety-nine and ninety-five hundredths percent (99.95%) of the time
+          in each calendar quarter, excluding Scheduled Maintenance performed
+          on at least five (5) days' prior notice.
+    parameters:
+      - key: uptime_percent
+        label: Minimum uptime commitment
+        value_type: percent
+        unit: percent
+        direction: higher_is_better
+        preferred_value: 99.95
+        green_limit: 99.9
+        yellow_limit: 99.5
+        extraction_hint: >
+          Record the stated availability percentage and the measurement
+          period (monthly or quarterly). Convert a quarterly figure to its
+          stated value without adjustment; note the period separately in the
+          extracted summary.
+    red_lines:
+      - key: uptime-illusory-exclusions
+        description: The uptime commitment is subject to exclusions so broad, such as any failure of any third party, that the commitment is not meaningfully enforceable.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause excludes from the uptime calculation any outage caused
+            by a third party generally, including Vendor's own
+            subcontractors or infrastructure providers, or otherwise defines
+            the exclusions so broadly that Vendor bears practically no
+            downtime risk under the commitment.
+        action: block
+        rationale: >
+          An uptime commitment that excludes Vendor's own supply chain from
+          responsibility for outages is not a real commitment and leaves
+          Halcyon with no meaningful recourse for the downtime that matters
+          most.
+    objections:
+      - objection: We only commit to 99.5% because our infrastructure provider does not guarantee more.
+        their_rationale: Vendor's own SLA from its cloud provider caps what it can promise downstream.
+        response: >
+          99.5% is our fallback with VP Customer Success's approval, but we
+          would want to see your upstream provider's actual SLA and would ask
+          for enhanced service credits and a faster termination right given
+          the lower commitment.
+        talking_points:
+          - Ask for the upstream SLA as evidence rather than accepting the figure at face value.
+          - Pair the lower uptime with stronger service credits and an earlier exit right.
+        recommended_position: {rule_key: service_levels.uptime_commitment, rung: 2}
+        frequency: common
+      - objection: We measure uptime quarterly, not monthly, because short-term blips are not representative.
+        their_rationale: Vendor wants measurement over a longer window that smooths out brief incidents.
+        response: >
+          Quarterly measurement is acceptable to us as a variant, provided the
+          percentage stays at 99.95% or higher so the longer window does not
+          also mean a weaker standard.
+        talking_points:
+          - Accept the quarterly structure only if the percentage does not drop.
+          - Ask for monthly reporting even if the credit calculation is quarterly.
+        recommended_position: {rule_key: service_levels.uptime_commitment, rung: 0}
+        frequency: occasional
+    dependencies:
+      - related_rule_key: service_levels.service_credits
+        relation: read_with
+        note: Review the uptime commitment and the service credit schedule together; a lower uptime commitment should come with stronger credits.
+    test_cases:
+      - name: 99.95% monthly commitment
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Vendor will make the Services available at least 99.95% of the time
+          each calendar month, excluding scheduled maintenance.
+      - name: 99.95% measured quarterly
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Availability of 99.95% is measured on a quarterly basis, excluding
+          scheduled maintenance performed on notice.
+      - name: 99.5% monthly, VP Customer Success approved
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          The Services will be available at least 99.5% of the time each
+          month.
+      - name: 99.0% monthly commitment
+        expected_outcome: deviation
+        expected_zone: red
+        sample_text: >
+          Vendor targets 99.0% availability each month on a best-efforts
+          basis.
+      - name: Uptime commitment excludes all third-party caused outages
+        expected_outcome: red_line
+        expected_red_line_key: uptime-illusory-exclusions
+        expected_zone: red
+        sample_text: >
+          The 99.9% uptime commitment excludes any outage caused by a third
+          party, including Vendor's infrastructure providers and
+          subcontractors.
+      - name: Trap - maintenance exclusion is narrow and notice-based
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Vendor commits to 99.9% monthly availability; the only exclusion is
+          for Scheduled Maintenance performed with at least five days' notice
+          and limited to four hours per month.
+
+  # ------------------------------------------------------------------------
+  - rule_key: service_levels.service_credits
+    title: Service credits for missed uptime
+    required: true
+    risk_weight: 5
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Service credits reach up to 25% of the monthly Fees per failure and are
+      available in addition to, not in place of, Halcyon's right to terminate
+      for chronic failures and to claim losses the credits do not cover.
+    risk_rationale: >
+      On the buy side, a credit against future Fees is of limited value if
+      the Vendor relationship is the problem; Halcyon needs credits that
+      compensate for the shortfall without giving up the right to leave a
+      chronically underperforming vendor or to pursue a loss that the capped
+      credit does not make whole. A credit structure that is also the sole
+      remedy for any failure, including a security incident, would cut across
+      the separate data breach protections Halcyon negotiates on this
+      playbook.
+    detection_guidance: >
+      Look for "Service Credit", a table of availability bands against
+      percentages of monthly Fees, "sole and exclusive remedy", and "chronic
+      failure". An uptime commitment with no stated remedy leaves Halcyon to
+      claim damages directly and is a missing issue to flag alongside the
+      uptime rule.
+    source_ref: Halcyon Vendor Procurement Policy VP-01; risk appetite table, buy-side extension
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Up to 25%, not sole remedy
+        zone: green
+        summary: Credits up to 25% of monthly Fees, in addition to termination and damages rights for chronic or uncompensated failures.
+        language: >
+          For each calendar month in which Vendor fails to meet the uptime
+          commitment, Halcyon is entitled to a service credit against future
+          Fees of up to twenty-five percent (25%) of the Fees payable for that
+          month, calculated on the sliding scale set out in Exhibit A. These
+          credits are in addition to, and not in place of, Halcyon's right to
+          terminate this Agreement for a chronic failure and to recover
+          losses that the credits do not cover.
+      - kind: fallback
+        rung: 1
+        label: Up to 15%, not sole remedy
+        zone: green
+        summary: Credits up to 15% of monthly Fees, same non-exclusivity.
+        language: >
+          For each calendar month in which Vendor fails to meet the uptime
+          commitment, Halcyon is entitled to a service credit against future
+          Fees of up to fifteen percent (15%) of the Fees payable for that
+          month. These credits are in addition to, and not in place of,
+          Halcyon's right to terminate this Agreement for a chronic failure
+          and to recover losses that the credits do not cover.
+      - kind: fallback
+        rung: 2
+        label: Up to 10%, sole remedy below the chronic-failure threshold
+        zone: yellow
+        approver_role: vp_customer_success
+        give_get: Ask for a lower uptime percentage that triggers credits, so credits accrue sooner in exchange for the lower cap and the sole-remedy limitation.
+        summary: Credits up to 10% of monthly Fees as the sole remedy short of a chronic failure, approved by VP Customer Success.
+        language: >
+          For each calendar month in which Vendor fails to meet the uptime
+          commitment, Halcyon is entitled to a service credit against future
+          Fees of up to ten percent (10%) of the Fees payable for that month,
+          which is Halcyon's sole and exclusive remedy for that failure unless
+          it is part of a chronic failure giving rise to a right to terminate.
+      - kind: acceptable_variant
+        label: Sliding-scale schedule reaching 25% in the worst band
+        zone: green
+        summary: The same cap expressed as a schedule of credit percentages by downtime band.
+        language: >
+          Service credits are calculated according to the schedule in Exhibit
+          A, ranging from five percent (5%) of the monthly Fees for
+          availability between 99.0% and 99.9% up to twenty-five percent
+          (25%) of the monthly Fees for availability below 98.0%, and are in
+          addition to Halcyon's other rights and remedies under this
+          Agreement.
+    parameters:
+      - key: service_credit_cap_percent
+        label: Maximum service credit as a percentage of monthly Fees
+        value_type: percent
+        unit: percent
+        direction: higher_is_better
+        preferred_value: 25
+        green_limit: 15
+        yellow_limit: 10
+        extraction_hint: >
+          Record the highest percentage of a single month's Fees payable as a
+          service credit under the schedule. Record separately in the
+          extracted summary whether the credits are stated to be the sole and
+          exclusive remedy.
+    red_lines:
+      - key: credits-sole-remedy-includes-security
+        description: Service credits are Halcyon's sole and exclusive remedy for any failure, including a security incident or data breach.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause states that service credits are Halcyon's sole and
+            exclusive remedy for any failure of the Services, without
+            excluding a security incident, data breach, or breach of
+            Vendor's data protection obligations from that limitation.
+        action: block
+        rationale: >
+          Folding security incidents into a capped service-credit sole remedy
+          would silently override the separate, higher data breach protection
+          Halcyon negotiates for Vendors handling Halcyon Data, including PHI.
+    objections:
+      - objection: Twenty-five percent is far above what we offer any other customer for an availability miss.
+        their_rationale: Vendor benchmarks its credit schedule against its standard commercial terms.
+        response: >
+          We can move to fifteen percent, which is still meaningful, provided
+          the credits remain in addition to our right to terminate for a
+          chronic failure rather than our only recourse.
+        talking_points:
+          - Offer the fifteen-percent fallback before discussing the sole-remedy question.
+          - Keep the non-exclusivity language even at the lower cap.
+        recommended_position: {rule_key: service_levels.service_credits, rung: 1}
+        frequency: common
+      - objection: Service credits have to be the sole remedy or we cannot predict our exposure for an outage.
+        their_rationale: Vendor wants a capped, known cost for any availability failure rather than open-ended damages exposure.
+        response: >
+          We can agree credits are the sole remedy for an ordinary
+          availability miss short of a chronic failure, with VP Customer
+          Success's approval, but security incidents and data breaches need
+          to stay outside that limitation because they are covered separately
+          elsewhere in this Agreement.
+        talking_points:
+          - Separate ordinary SLA misses from security incidents explicitly.
+          - Offer the lower, sole-remedy fallback only for the ordinary case.
+        recommended_position: {rule_key: service_levels.service_credits, rung: 2}
+        frequency: occasional
+    dependencies:
+      - related_rule_key: service_levels.uptime_commitment
+        relation: read_with
+        note: Review the credit schedule against the uptime bands together.
+    test_cases:
+      - name: Twenty-five percent cap, not sole remedy
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Customer receives a service credit of up to 25% of the monthly
+          Fees for a failure to meet the uptime commitment, in addition to
+          its other rights and remedies under this Agreement.
+      - name: Sliding-scale schedule up to 25%
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Service credits range from 5% to 25% of the monthly Fees depending
+          on the availability band achieved, as set out in the attached
+          schedule, and do not limit Customer's other remedies.
+      - name: Ten percent cap, sole remedy below chronic failure
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Customer's sole remedy for an availability failure is a service
+          credit of up to 10% of the monthly Fees, unless the failure is part
+          of a chronic failure giving rise to a termination right.
+      - name: Five percent cap with no termination carve-out
+        expected_outcome: deviation
+        expected_zone: red
+        sample_text: >
+          Customer's exclusive remedy for any availability failure is a
+          service credit of up to 5% of the monthly Fees.
+      - name: Credits are sole remedy for any failure including security incidents
+        expected_outcome: red_line
+        expected_red_line_key: credits-sole-remedy-includes-security
+        expected_zone: red
+        sample_text: >
+          Service credits are Customer's sole and exclusive remedy for any
+          failure of the Services, including any security incident or breach
+          of Vendor's data protection obligations.
+
+  # ------------------------------------------------------------------------
+  - rule_key: assignment.change_of_control
+    title: Change of control of Vendor
+    required: true
+    risk_weight: 5
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Vendor must notify Halcyon within five business days of a Change of
+      Control, and Halcyon may terminate without penalty if the acquirer is a
+      competitor or does not maintain the required certifications.
+    risk_rationale: >
+      Many of Halcyon's vendors are small cloud, messaging and analytics
+      suppliers that are realistic acquisition targets, and an acquisition by
+      a competitor of Halcyon or by a company that does not maintain SOC 2,
+      ISO 27001 or HITRUST r2 can change the risk profile of a relationship
+      handling Halcyon Data overnight. Prompt notice and a termination right
+      tied to those triggers let Halcyon react before a problematic new owner
+      has operated the Services for long.
+    detection_guidance: >
+      Look for "change of control", "merger, acquisition or sale of all or
+      substantially all", "by operation of law", and "acquired by a
+      competitor"; this may sit in the assignment clause or in the
+      termination clause. Absence means a change in ownership of Vendor has
+      no contractual consequence for Halcyon.
+    source_ref: Halcyon Vendor Procurement Policy VP-01; risk appetite table, buy-side extension
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: 5 business days' notice, broad exit right
+        zone: green
+        summary: Notice within 5 business days; Halcyon may terminate without penalty if the acquirer is a competitor or lacks required certifications.
+        language: >
+          Vendor shall notify Halcyon in writing within five (5) Business Days
+          after signing a definitive agreement for a Change of Control.
+          Halcyon may terminate this Agreement without penalty, with a
+          pro-rata refund of prepaid Fees, within sixty (60) days after
+          receiving that notice, if the acquirer is a competitor of Halcyon or
+          does not maintain the certifications required of Vendor under this
+          Agreement.
+      - kind: fallback
+        rung: 1
+        label: 10 business days' notice, same exit right
+        zone: green
+        summary: Notice within 10 business days, same termination trigger.
+        language: >
+          Vendor shall notify Halcyon in writing within ten (10) Business Days
+          after signing a definitive agreement for a Change of Control.
+          Halcyon may terminate this Agreement without penalty, with a
+          pro-rata refund of prepaid Fees, within sixty (60) days after
+          receiving that notice, if the acquirer is a competitor of Halcyon or
+          does not maintain the certifications required of Vendor under this
+          Agreement.
+      - kind: fallback
+        rung: 2
+        label: 30 days' notice after closing, narrower exit right
+        zone: yellow
+        approver_role: commercial_counsel
+        give_get: Accept a narrower definition of Change of Control limited to a sale of substantially all assets, in exchange for the exit right.
+        summary: Notice within 30 days of closing, with the termination right limited to acquisition by a direct competitor.
+        language: >
+          Vendor shall notify Halcyon in writing within thirty (30) days after
+          the closing of a Change of Control. Halcyon may terminate this
+          Agreement without penalty, with a pro-rata refund of prepaid Fees,
+          within sixty (60) days after receiving that notice, if the acquirer
+          is a direct competitor of Halcyon.
+      - kind: acceptable_variant
+        label: Deemed consent with notice and exit right
+        zone: green
+        summary: Assignment on a Change of Control is deemed consented to, conditioned on advance notice and the same termination right.
+        language: >
+          A Change of Control of Vendor is deemed an assignment to which
+          Halcyon's consent is not required, provided that Vendor gives
+          Halcyon at least five (5) Business Days' advance written notice of
+          the transaction and Halcyon retains the right to terminate this
+          Agreement without penalty if the acquirer is a competitor of
+          Halcyon or does not maintain the certifications required under this
+          Agreement.
+    parameters:
+      - key: change_of_control_notice_days
+        label: Days to notify Halcyon of a Change of Control
+        value_type: duration_days
+        unit: days
+        direction: lower_is_better
+        preferred_value: 5
+        green_limit: 10
+        yellow_limit: 30
+        extraction_hint: >
+          Record the number of days Vendor must notify Halcyon of a Change of
+          Control, and whether the period runs from signing or from closing.
+          Note separately in the extracted summary whether a matching
+          termination right exists.
+    red_lines:
+      - key: coc-no-notice-no-exit
+        description: A Change of Control of Vendor requires no notice to Halcyon and gives Halcyon no termination right at all.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause allows Vendor to undergo a Change of Control with no
+            obligation to notify Halcyon and with no right for Halcyon to
+            terminate this Agreement as a result of that Change of Control.
+        action: block
+        rationale: >
+          With no notice and no exit right, Halcyon can find itself bound to
+          a Vendor now owned by a competitor or by an entity that does not
+          meet Halcyon's security and certification requirements, with no
+          contractual way to respond.
+    objections:
+      - objection: Our investors require that acquisitions proceed without customer consent rights that could delay or block a deal.
+        their_rationale: Vendor's financing or exit strategy depends on acquirers not facing customer veto rights.
+        response: >
+          We are not asking for a consent right that could block your
+          transaction, only for prompt notice and a termination right limited
+          to a competitor acquirer or one that drops required certifications.
+          That structure does not interfere with the deal itself.
+        talking_points:
+          - Clarify this is a termination right, not a consent requirement.
+          - Narrow the termination trigger to competitors and certification loss, as in the fallback.
+        recommended_position: {rule_key: assignment.change_of_control, rung: 2}
+        frequency: common
+      - objection: We cannot commit to notifying customers before a transaction signs; our confidentiality obligations to the acquirer come first.
+        their_rationale: Vendor's deal process restricts pre-signing disclosure to counterparties.
+        response: >
+          We can accept notice within thirty days after closing rather than
+          before signing, with Commercial Counsel's approval, provided the
+          termination right for a competitor acquirer survives on the same
+          terms.
+        talking_points:
+          - Offer the closing-based notice fallback rather than pre-signing notice.
+          - Keep the termination right intact even with later notice.
+        recommended_position: {rule_key: assignment.change_of_control, rung: 2}
+        frequency: occasional
+    dependencies:
+      - related_rule_key: termination.for_convenience
+        relation: read_with
+        note: A Change of Control that does not trigger the specific exit right may still be addressed by Halcyon's separate termination for convenience right.
+    test_cases:
+      - name: Five business days' notice, broad exit right
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Vendor will notify Customer in writing within five business days of
+          signing a definitive agreement for a change of control. Customer
+          may terminate without penalty within 60 days if the acquirer is a
+          competitor or does not hold the required certifications.
+      - name: Deemed consent with notice and exit right preserved
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          A change of control of Vendor is deemed assigned without requiring
+          Customer's consent, provided Vendor gives five business days'
+          advance notice and Customer may terminate if the acquirer is a
+          competitor.
+      - name: Thirty days after closing, narrower trigger, approved
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Vendor will notify Customer within 30 days after closing a change
+          of control. Customer may terminate without penalty if the acquirer
+          is a direct competitor of Customer.
+      - name: Ninety days' notice, no termination right
+        expected_outcome: deviation
+        expected_zone: red
+        sample_text: >
+          Vendor will notify Customer of a change of control within 90 days
+          after closing. This Section does not create any termination right
+          for Customer.
+      - name: No notice obligation and no exit right
+        expected_outcome: red_line
+        expected_red_line_key: coc-no-notice-no-exit
+        expected_zone: red
+        sample_text: >
+          A change of control of Vendor does not require notice to Customer
+          and does not affect Customer's obligations under this Agreement.

@@ -1,8 +1,17 @@
 """Object storage abstraction layer.
 
-Provides a common interface for storing and retrieving binary objects.
-In production, delegates to an S3-compatible backend (e.g. Cloudflare R2).
-In local development, stores files on the local filesystem.
+Provides a common interface for storing and retrieving binary objects in an
+S3-compatible cloud bucket (e.g. Cloudflare R2).
+
+Cloud storage is required. There is one backend, :class:`S3StorageBackend`,
+and no local alternative: nothing in this module reads or writes the local
+filesystem, and :func:`get_storage` raises a configuration error instead of
+falling back when a storage setting is missing.
+
+The storage account is shared with other projects. Callers pass *logical*
+keys such as ``contracts/{id}/{filename}``; the backend prepends the project
+prefix (``settings.object_storage_prefix``) on every operation, so stored
+``object_key`` values stay unprefixed.
 
 Only this module may import boto3.
 """
@@ -10,7 +19,38 @@ Only this module may import boto3.
 from __future__ import annotations
 
 import abc
-from pathlib import Path
+
+_NOT_FOUND_CODES = frozenset({"NoSuchKey", "404", "NotFound"})
+
+# Setting attribute → environment variable named in configuration errors.
+_REQUIRED_SETTINGS: tuple[tuple[str, str], ...] = (
+    ("object_storage_endpoint", "OBJECT_STORAGE_ENDPOINT"),
+    ("object_storage_bucket", "OBJECT_STORAGE_BUCKET"),
+    ("object_storage_access_key", "OBJECT_STORAGE_ACCESS_KEY"),
+    ("object_storage_secret_key", "OBJECT_STORAGE_SECRET_KEY"),
+    ("object_storage_prefix", "OBJECT_STORAGE_PREFIX (or PROJECT_NAMESPACE)"),
+)
+
+
+class StorageConfigurationError(RuntimeError):
+    """Raised when object storage is not fully configured."""
+
+
+def validate_key(key: str) -> str:
+    """Return *key* unchanged if it is a safe logical object key.
+
+    Raises:
+        ValueError: if *key* is empty, absolute (starts with ``/`` or ``\\``),
+            or has a ``..`` path segment. Such a key could address an object
+            outside the project prefix.
+    """
+    if not isinstance(key, str) or not key:
+        raise ValueError("Object key must be a non-empty string.")
+    if key.startswith(("/", "\\")):
+        raise ValueError(f"Object key must be relative, got absolute key {key!r}.")
+    if ".." in key.replace("\\", "/").split("/"):
+        raise ValueError(f"Object key must not contain '..' segments: {key!r}.")
+    return key
 
 
 class StorageBackend(abc.ABC):
@@ -18,15 +58,19 @@ class StorageBackend(abc.ABC):
 
     @abc.abstractmethod
     def put(self, key: str, data: bytes) -> None:
-        """Store *data* under *key*. Overwrites if key already exists."""
+        """Store *data* under *key*. Overwrites if key already exists.
+
+        Raises:
+            ValueError: if *key* is absolute or contains a ``..`` segment.
+        """
 
     @abc.abstractmethod
     def get(self, key: str) -> bytes:
         """Return the bytes stored under *key*.
 
         Raises:
-            KeyError: if *key* does not exist (S3 backend).
-            FileNotFoundError: if *key* does not exist (filesystem backend).
+            KeyError: if *key* does not exist.
+            ValueError: if *key* is absolute or contains a ``..`` segment.
         """
 
     @abc.abstractmethod
@@ -34,22 +78,25 @@ class StorageBackend(abc.ABC):
         """Return a pre-signed URL granting temporary read access to *key*.
 
         Args:
-            key: object key.
+            key: logical object key.
             expires_in: URL validity in seconds (default 3600).
 
         Raises:
-            NotImplementedError: on backends that do not support pre-signing.
+            ValueError: if *key* is absolute or contains a ``..`` segment.
         """
 
 
 class S3StorageBackend(StorageBackend):
     """S3-compatible storage backend backed by boto3.
 
-    Configured from four settings fields:
-        object_storage_endpoint  – base URL of the S3-compatible service
-        object_storage_bucket    – bucket name
+    Configured from five settings fields:
+        object_storage_endpoint   – base URL of the S3-compatible service
+        object_storage_bucket     – bucket name
         object_storage_access_key – access key ID
         object_storage_secret_key – secret access key
+        object_storage_prefix     – project prefix prepended to every key
+
+    Every key sent to the bucket is ``{prefix}/{logical key}``.
     """
 
     def __init__(
@@ -58,10 +105,19 @@ class S3StorageBackend(StorageBackend):
         bucket: str,
         access_key: str,
         secret_key: str,
+        prefix: str,
     ) -> None:
         import boto3  # noqa: PLC0415 — intentionally restricted to this module
 
+        prefix = prefix.strip("/")
+        if not prefix:
+            raise StorageConfigurationError(
+                "Object storage prefix is empty; set OBJECT_STORAGE_PREFIX or PROJECT_NAMESPACE."
+            )
+        validate_key(prefix)
+
         self._bucket = bucket
+        self._prefix = prefix
         self._client = boto3.client(
             "s3",
             endpoint_url=endpoint,
@@ -69,80 +125,98 @@ class S3StorageBackend(StorageBackend):
             aws_secret_access_key=secret_key,
         )
 
+    @property
+    def prefix(self) -> str:
+        """The project prefix prepended to every key."""
+        return self._prefix
+
+    def _full_key(self, key: str) -> str:
+        """Validate the logical *key* and return the prefixed bucket key."""
+        return f"{self._prefix}/{validate_key(key)}"
+
     def put(self, key: str, data: bytes) -> None:
-        self._client.put_object(Bucket=self._bucket, Key=key, Body=data)
+        self._client.put_object(Bucket=self._bucket, Key=self._full_key(key), Body=data)
 
     def get(self, key: str) -> bytes:
-        response = self._client.get_object(Bucket=self._bucket, Key=key)
+        from botocore.exceptions import ClientError  # noqa: PLC0415
+
+        full_key = self._full_key(key)
+        try:
+            response = self._client.get_object(Bucket=self._bucket, Key=full_key)
+        except ClientError as exc:
+            code = str(exc.response.get("Error", {}).get("Code", ""))
+            if code in _NOT_FOUND_CODES:
+                raise KeyError(key) from exc
+            raise
         return response["Body"].read()  # type: ignore[no-any-return]
 
     def presign(self, key: str, expires_in: int = 3600) -> str:
         return self._client.generate_presigned_url(  # type: ignore[no-any-return]
             "get_object",
-            Params={"Bucket": self._bucket, "Key": key},
+            Params={"Bucket": self._bucket, "Key": self._full_key(key)},
             ExpiresIn=expires_in,
         )
 
+    def list_top_level(self) -> list[str]:
+        """Return the names at the root of the bucket, without the prefix applied.
 
-class FilesystemStorageBackend(StorageBackend):
-    """Local filesystem storage backend for development and testing.
-
-    Files are written to *base_dir* using the object key as a relative path.
-    Nested keys (containing ``/``) create sub-directories automatically.
-    """
-
-    DEFAULT_BASE_DIR = Path("/tmp/precedent-storage")  # noqa: S108
-
-    def __init__(self, base_dir: str | Path | None = None) -> None:
-        self._base_dir = Path(base_dir) if base_dir is not None else self.DEFAULT_BASE_DIR
-        self._base_dir.mkdir(parents=True, exist_ok=True)
-
-    def _resolve(self, key: str) -> Path:
-        """Return absolute path for *key*, creating parent directories."""
-        path = self._base_dir / key
-        path.parent.mkdir(parents=True, exist_ok=True)
-        return path
-
-    def put(self, key: str, data: bytes) -> None:
-        self._resolve(key).write_bytes(data)
-
-    def get(self, key: str) -> bytes:
-        path = self._resolve(key)
-        if not path.exists():
-            raise FileNotFoundError(f"Object not found: {key!r} (looked in {path})")
-        return path.read_bytes()
-
-    def presign(self, key: str, expires_in: int = 3600) -> str:  # noqa: ARG002
-        raise NotImplementedError("FilesystemStorageBackend does not support pre-signed URLs.")
+        Root-level keys are returned as they are; each top-level "folder" is
+        returned once with a trailing ``/``. Only names at the root are
+        listed: no object is read, and other projects' folders are not
+        descended into. Used by the partition check to confirm that this
+        project has written nothing outside its prefix.
+        """
+        names: set[str] = set()
+        paginator = self._client.get_paginator("list_objects_v2")
+        for page in paginator.paginate(Bucket=self._bucket, Delimiter="/"):
+            for item in page.get("Contents") or []:
+                names.add(item["Key"])
+            for item in page.get("CommonPrefixes") or []:
+                names.add(item["Prefix"])
+        return sorted(names)
 
 
 def get_storage(settings: object) -> StorageBackend:
-    """Factory: return the appropriate StorageBackend for *settings*.
+    """Factory: return the S3 storage backend configured from *settings*.
 
-    Returns an :class:`S3StorageBackend` when ``settings.object_storage_endpoint``
-    is set, otherwise returns a :class:`FilesystemStorageBackend`.
+    There is no fallback backend.
 
     Args:
         settings: a Settings instance (or any object with the four
-            ``object_storage_*`` attributes).
+            ``object_storage_*`` connection attributes and
+            ``object_storage_prefix``).
+
+    Raises:
+        StorageConfigurationError: if any required storage setting is missing
+            or empty. The message names the environment variable(s) to set.
     """
-    endpoint: str | None = getattr(settings, "object_storage_endpoint", None)
-    if endpoint:
-        bucket: str = settings.object_storage_bucket or ""
-        access_key: str = settings.object_storage_access_key or ""
-        secret_key: str = settings.object_storage_secret_key or ""
-        return S3StorageBackend(
-            endpoint=endpoint,
-            bucket=bucket,
-            access_key=access_key,
-            secret_key=secret_key,
+    values: dict[str, str] = {}
+    missing: list[str] = []
+    for attr, env_name in _REQUIRED_SETTINGS:
+        value = getattr(settings, attr, None)
+        if isinstance(value, str) and value.strip():
+            values[attr] = value.strip()
+        else:
+            missing.append(env_name)
+    if missing:
+        raise StorageConfigurationError(
+            "Object storage is not configured: missing "
+            + ", ".join(missing)
+            + ". Cloud object storage is required; there is no local storage fallback."
         )
-    return FilesystemStorageBackend()
+    return S3StorageBackend(
+        endpoint=values["object_storage_endpoint"],
+        bucket=values["object_storage_bucket"],
+        access_key=values["object_storage_access_key"],
+        secret_key=values["object_storage_secret_key"],
+        prefix=values["object_storage_prefix"],
+    )
 
 
 __all__ = [
-    "FilesystemStorageBackend",
     "S3StorageBackend",
     "StorageBackend",
+    "StorageConfigurationError",
     "get_storage",
+    "validate_key",
 ]

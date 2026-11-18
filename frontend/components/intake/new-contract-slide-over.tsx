@@ -27,6 +27,9 @@ interface WizardState {
   runId: string | null;
   done: DoneState | null;
   errorMessage: string | null;
+  contractType: string;
+  partyRole: string;
+  contextJson: string;
 }
 
 const INITIAL: WizardState = {
@@ -37,7 +40,12 @@ const INITIAL: WizardState = {
   runId: null,
   done: null,
   errorMessage: null,
+  contractType: '',
+  partyRole: '',
+  contextJson: '',
 };
+
+const PARTY_ROLE_OPTIONS = ['vendor', 'customer', 'mutual'] as const;
 
 const MODE_OPTIONS: { value: IntakeMode; label: string; description: string }[] = [
   {
@@ -101,8 +109,27 @@ export function NewContractSlideOver({ open, onClose }: NewContractSlideOverProp
     setState((s) => ({ ...s, step: 'submitting' }));
 
     if (state.mode === 'process') {
+      let context: Record<string, unknown> | undefined;
+      if (state.contextJson.trim()) {
+        try {
+          context = JSON.parse(state.contextJson);
+        } catch {
+          setState((s) => ({
+            ...s,
+            step: 'error',
+            errorMessage: 'Context must be valid JSON.',
+          }));
+          return;
+        }
+      }
       uploadDoc.mutate(
-        { file: state.file, paper_origin: state.paperOrigin },
+        {
+          file: state.file,
+          paper_origin: state.paperOrigin,
+          contract_type: state.contractType || undefined,
+          party_role: state.partyRole || undefined,
+          context,
+        },
         {
           onSuccess: (data) => {
             setState((s) => ({
@@ -258,6 +285,62 @@ export function NewContractSlideOver({ open, onClose }: NewContractSlideOverProp
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* Contract type, party role and context (task 4.9 item 6 — wired
+                to the optional POST /documents form fields). */}
+            <div className="space-y-1.5">
+              <p className="text-sm font-medium">
+                Contract type <span className="text-xs font-normal text-muted-foreground">(optional)</span>
+              </p>
+              <input
+                value={state.contractType}
+                onChange={(e) => setState((s) => ({ ...s, contractType: e.target.value }))}
+                placeholder="e.g. nda, saas_msa, dpa"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-primary/50"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <p className="text-sm font-medium">
+                Party role <span className="text-xs font-normal text-muted-foreground">(optional)</span>
+              </p>
+              <div className="flex gap-2">
+                {PARTY_ROLE_OPTIONS.map((role) => (
+                  <button
+                    key={role}
+                    type="button"
+                    onClick={() =>
+                      setState((s) => ({ ...s, partyRole: s.partyRole === role ? '' : role }))
+                    }
+                    className={cn(
+                      'flex-1 rounded-md border px-3 py-2 text-sm font-medium capitalize transition-colors',
+                      state.partyRole === role
+                        ? 'border-primary bg-primary text-primary-foreground'
+                        : 'border-border hover:bg-muted/40'
+                    )}
+                  >
+                    {role}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <p className="text-sm font-medium">
+                Context <span className="text-xs font-normal text-muted-foreground">(optional, JSON)</span>
+              </p>
+              <input
+                value={state.contextJson}
+                onChange={(e) => setState((s) => ({ ...s, contextJson: e.target.value }))}
+                placeholder='{"deal_value_band": "mid", "regimes": ["hipaa"]}'
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-primary/50"
+              />
+              {state.mode === 'review' && (state.contractType || state.partyRole || state.contextJson) && (
+                <p className="text-xs text-amber-600">
+                  Contract type, party role and context only apply to &ldquo;Process only&rdquo; uploads.
+                </p>
+              )}
             </div>
 
             <div className="mt-auto">

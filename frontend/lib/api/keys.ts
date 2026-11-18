@@ -20,7 +20,20 @@ export const keys = {
   playbooks: () => ['playbooks'] as const,
   playbook: (id: string) => ['playbook', id] as const,
   playbookRules: (id: string) => ['playbook', id, 'rules'] as const,
-  resolvedRules: (contractType: string) => ['resolved-rules', contractType] as const,
+  playbookVersions: (playbookId: string) => ['playbook', playbookId, 'versions'] as const,
+  resolvedRules: (params: {
+    contract_type: string;
+    party_role?: string;
+    paper_origin?: string;
+    context?: Record<string, unknown>;
+  }) => ['resolve', params] as const,
+
+  // Rule children (task 4.8 / 4.9)
+  rulePositions: (ruleId: string) => ['rule', ruleId, 'positions'] as const,
+  ruleParameters: (ruleId: string) => ['rule', ruleId, 'parameters'] as const,
+  ruleRedLines: (ruleId: string) => ['rule', ruleId, 'red-lines'] as const,
+  ruleObjections: (ruleId: string) => ['rule', ruleId, 'objections'] as const,
+  ruleTestCases: (ruleId: string) => ['rule', ruleId, 'test-cases'] as const,
 
   // S2 Analysis
   analysis: (contractId: string) => ['analysis', contractId] as const,

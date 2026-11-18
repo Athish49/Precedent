@@ -1,0 +1,44 @@
+# Test fixture: a small taxonomy. The real file lists 29 families and 95 issues.
+expected_families:
+  - limitation_of_liability
+  - governing_law
+  - payment
+  - other
+
+issues:
+  - family: limitation_of_liability
+    key: cap_amount
+    name: Aggregate liability cap
+    description: >
+      The overall monetary limit on each party's liability under the agreement.
+      Negotiated on almost every deal because it sets the worst-case exposure.
+    detection_hints: >
+      Look for "aggregate liability", "shall not exceed" or "limited to". A
+      liability clause with no monetary limit is a deviation, not a missing clause.
+  - family: limitation_of_liability
+    key: data_breach_super_cap
+    name: Data breach super-cap
+    description: >
+      A separate, higher limit for liability arising from a breach of the data
+      protection or security obligations.
+    detection_hints: >
+      Look for a second cap tied to "data breach", "security incident" or
+      "breach of the data protection obligations". Absence means data claims
+      fall under the general cap.
+  - family: governing_law
+    key: choice_of_law
+    name: Choice of law
+    description: >
+      Which jurisdiction's law governs the agreement. Negotiated when the
+      parties are in different states or countries.
+    detection_hints: >
+      Look for "governed by", "construed in accordance with" or "laws of". An
+      agreement with no governing law clause is a missing clause.
+  - family: payment
+    key: payment_terms
+    name: Payment terms
+    description: >
+      How long Customer has to pay an invoice. Reserved in this fixture: no
+      rule uses it.
+    detection_hints: >
+      Look for "net 30", "within thirty days of the invoice date" or "due on receipt".

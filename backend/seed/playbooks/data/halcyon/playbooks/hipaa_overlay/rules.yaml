@@ -1,0 +1,3167 @@
+# Halcyon HIPAA overlay: business associate positions (vendor side).
+# Halcyon is the Business Associate. Applies when regimes includes hipaa.
+rules:
+  - rule_key: data_protection.permitted_uses_of_phi
+    title: Permitted uses and disclosures of PHI
+    required: true
+    risk_weight: 8
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Business Associate may use and disclose PHI to perform the Services, for
+      its own proper management and administration, to carry out its legal
+      responsibilities, as Required by Law, and to provide Data Aggregation
+      services to Covered Entity. Nothing else is permitted.
+    risk_rationale: >
+      Halcyon runs one multi-tenant platform for about 310 customers and cannot
+      operate it if a Covered Entity removes the management and administration
+      limb, because support, security monitoring, billing disputes and legal
+      holds all touch PHI. A use outside the permitted list is itself a
+      violation of the HIPAA Rules by Halcyon as a business associate and can
+      become a reportable Breach, with exposure measured against the $10M
+      cyber and technology errors and omissions aggregate rather than a median
+      contract of $165k a year.
+    detection_guidance: >
+      Look in the business associate agreement for "may use or disclose PHI
+      only", "as necessary to perform", "proper management and administration",
+      "legal responsibilities", "Required by Law" and "Data Aggregation".
+      Record which limbs are present. A clause that allows use only to perform
+      the Services is a deviation, not a missing clause. A statement that
+      Business Associate will not use PHI in a way that would violate the
+      Privacy Rule if done by Covered Entity is standard and is not a
+      restriction on the listed limbs. No permitted-use clause at all is a
+      missing mandatory term.
+    source_ref: 45 C.F.R. § 164.504(e)(2)(i) and § 164.504(e)(4); § 164.502(a)(3)
+    authored_by: Privacy Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-09
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Services, management and administration, legal duties, Data Aggregation
+        zone: green
+        summary: All four limbs that the Privacy Rule allows a business associate agreement to grant.
+        language: >
+          Business Associate may use and disclose PHI only (a) as necessary to
+          perform the Services and its other obligations under the Underlying
+          Agreement, (b) for the proper management and administration of
+          Business Associate and to carry out its legal responsibilities,
+          (c) as Required by Law, and (d) to provide Data Aggregation services
+          relating to the health care operations of Covered Entity. Business
+          Associate may disclose PHI under limb (b) only if the disclosure is
+          Required by Law, or if Business Associate obtains reasonable
+          assurances from the recipient that the PHI will be held
+          confidentially, will be used or further disclosed only as Required
+          by Law or for the purpose for which it was disclosed, and that the
+          recipient will notify Business Associate of any instance in which
+          the confidentiality of the PHI has been breached. Business Associate
+          shall not use or disclose PHI in a manner that would violate Subpart
+          E of 45 C.F.R. Part 164 if done by Covered Entity, except as
+          permitted by limbs (b) and (d).
+      - kind: fallback
+        rung: 1
+        label: Data Aggregation only on request
+        zone: green
+        summary: Keeps management and administration; Data Aggregation is performed only when Covered Entity asks for it.
+        language: >
+          Business Associate may use and disclose PHI only (a) as necessary to
+          perform the Services and its other obligations under the Underlying
+          Agreement, (b) for the proper management and administration of
+          Business Associate and to carry out its legal responsibilities, and
+          (c) as Required by Law. Business Associate shall provide Data
+          Aggregation services relating to the health care operations of
+          Covered Entity only where an Order Form or a written request from
+          Covered Entity calls for them. Any disclosure under limb (b) must be
+          Required by Law or be made to a recipient that has given the
+          reasonable assurances described in 45 C.F.R. § 164.504(e)(4)(ii).
+          Business Associate shall not use or disclose PHI in a manner that
+          would violate Subpart E of 45 C.F.R. Part 164 if done by Covered
+          Entity, except as permitted by limb (b).
+      - kind: fallback
+        rung: 2
+        label: Management and administration by use only
+        zone: yellow
+        approver_role: privacy_counsel
+        give_get: >
+          Ask Covered Entity to confirm in writing that Subcontractors engaged
+          under the Subcontractor clause are disclosures to perform the
+          Services and are not caught by the restriction.
+        summary: >
+          Business Associate may use PHI internally for management and
+          administration but may disclose it for that purpose only when
+          Required by Law.
+        language: >
+          Business Associate may use and disclose PHI only as necessary to
+          perform the Services and its other obligations under the Underlying
+          Agreement and as Required by Law. Business Associate may also use
+          PHI, within its own organisation, for its proper management and
+          administration and to carry out its legal responsibilities, but
+          shall not disclose PHI for those purposes unless the disclosure is
+          Required by Law. Business Associate shall not provide Data
+          Aggregation services unless Covered Entity requests them in writing.
+          Business Associate shall not use or disclose PHI in a manner that
+          would violate Subpart E of 45 C.F.R. Part 164 if done by Covered
+          Entity.
+        internal_note: >
+          Check with the security lead that no management or administration
+          workflow, such as outside forensic or legal advisers, depends on
+          disclosure before agreeing. Advisers who need PHI must then be
+          engaged as Subcontractors.
+      - kind: acceptable_variant
+        label: Cross-reference to the regulation
+        zone: green
+        summary: Grants the same limbs by reference to the regulation instead of listing them.
+        language: >
+          Except as otherwise limited in this BAA, Business Associate may use
+          or disclose PHI to perform functions, activities or services for, or
+          on behalf of, Covered Entity as specified in the Underlying
+          Agreement, and may make the uses and disclosures for its own
+          management, administration and legal responsibilities, and for Data
+          Aggregation, that 45 C.F.R. § 164.504(e)(2)(i) and § 164.504(e)(4)
+          permit a business associate agreement to authorise, in each case
+          subject to the conditions stated in those sections.
+      - kind: acceptable_variant
+        label: Separate specific-use paragraphs
+        zone: green
+        summary: Counterparty form that sets out each permitted use in its own paragraph.
+        language: >
+          General use. Business Associate shall use and disclose PHI solely to
+          deliver the services described in the Underlying Agreement and as
+          Required by Law. Specific uses. Business Associate may in addition
+          (i) use PHI where needed for Business Associate's proper management
+          and administration or to meet its legal responsibilities,
+          (ii) disclose PHI for those purposes where the disclosure is
+          Required by Law or the recipient has given reasonable written
+          assurances of confidentiality, limited further use and prompt
+          notice of any breach of confidentiality, and (iii) use PHI to
+          provide Data Aggregation services to Covered Entity as permitted by
+          45 C.F.R. § 164.504(e)(2)(i)(B).
+    parameters:
+      - key: permitted_use_scope
+        label: Limbs of permitted use granted to Business Associate
+        value_type: enum
+        direction: set_membership
+        preferred_value: services_management_aggregation
+        green_limit: [services_management_aggregation, services_management]
+        yellow_limit: [services_management_use_only]
+        allowed_values:
+          - services_management_aggregation
+          - services_management
+          - services_management_use_only
+          - services_only
+        extraction_hint: >
+          services_management_aggregation: Services, management and
+          administration (use and disclosure), legal duties and Data
+          Aggregation. services_management: the same without Data Aggregation
+          or with Data Aggregation only on request. services_management_use_only:
+          management and administration by internal use only, with disclosure
+          limited to Required by Law. services_only: no management and
+          administration limb at all. "Required by Law" is assumed in every
+          value.
+    red_lines:
+      - key: phi-use-no-management-administration
+        description: Business Associate has no right to use PHI for its own management and administration or legal responsibilities.
+        condition_type: parameter
+        condition: {parameter_key: permitted_use_scope, op: eq, value: services_only}
+        action: escalate
+        approver_role: general_counsel
+        rationale: >
+          Without the limb Halcyon cannot lawfully use PHI for security
+          monitoring, defence of claims or its own compliance record keeping,
+          and every such use would be a violation of the agreement and of the
+          HIPAA Rules.
+    objections:
+      - objection: Our template lets a vendor use PHI to perform the services and for nothing else.
+        their_rationale: Privacy officers treat every extra permitted use as added exposure for the Covered Entity.
+        response: >
+          The management and administration limb is the one the Privacy Rule
+          itself provides for business associates, and it is narrow. We rely
+          on it for activities you would expect of us, such as investigating
+          security events, keeping audit records and answering legal process.
+          It does not allow marketing, sale of PHI or any use for other
+          customers.
+        talking_points:
+          - Cite 45 C.F.R. § 164.504(e)(4), which sets the conditions for the limb.
+          - Give two concrete examples (security investigation, legal hold).
+          - Offer the Data Aggregation limb on request only as a first move.
+        recommended_position: {rule_key: data_protection.permitted_uses_of_phi, rung: 1}
+        frequency: common
+        counterparty_profile: Large hospital systems using their own BAA form
+      - objection: We do not want you disclosing our patients' information to third parties for your own administration.
+        their_rationale: Disclosures to a vendor's advisers are outside the Covered Entity's sight and control.
+        response: >
+          We understand the concern about onward disclosure. We can limit the
+          management and administration limb to internal use, with disclosure
+          only where Required by Law. Any outside party that needs PHI to help
+          us would then be engaged as a Subcontractor under a written
+          agreement with the same restrictions.
+        talking_points:
+          - The concession removes disclosure, not internal use.
+          - Subcontractors remain bound by the flow-down clause.
+        recommended_position: {rule_key: data_protection.permitted_uses_of_phi, rung: 2}
+        frequency: occasional
+        counterparty_profile: Academic medical centres
+      - objection: We have not asked for data aggregation, so please delete it.
+        their_rationale: The Covered Entity does not want its PHI combined with other customers' data.
+        response: >
+          Data Aggregation under the Privacy Rule is a service performed for
+          your own health care operations, such as benchmarking reports you
+          ask us to produce. We are content to make it available only when you
+          request it in an Order Form or in writing. The revised wording says
+          so expressly.
+        talking_points:
+          - Data Aggregation is defined in 45 C.F.R. § 164.501 and is for the Covered Entity's benefit.
+          - Moving it to on-request costs Halcyon nothing today.
+        recommended_position: {rule_key: data_protection.permitted_uses_of_phi, rung: 1}
+        frequency: occasional
+    dependencies:
+      - related_rule_key: data_protection.customer_data_use
+        relation: read_with
+        note: >
+          The SaaS agreement limits use of Customer Data generally. For PHI
+          the narrower list in this rule prevails.
+      - related_rule_key: data_protection.de_identification
+        relation: read_with
+        note: >
+          The right to create de-identified data is a separate permitted use
+          and must be granted expressly; it is not implied by management and
+          administration.
+    test_cases:
+      - name: All four limbs, different drafting
+        context: {regimes: [hipaa], data_sensitivity: phi}
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Vendor, acting as Business Associate, is permitted to use and to
+          disclose PHI solely for these purposes: carrying out the Services;
+          its proper management and administration and the discharge of its
+          legal responsibilities, provided that any disclosure for those ends
+          is Required by Law or is made to a person who has reasonably assured
+          Business Associate of confidentiality, restricted onward use and
+          notice of any confidentiality breach; compliance with what is
+          Required by Law; and Data Aggregation for Covered Entity's health
+          care operations.
+      - name: Limbs granted by reference to section 164.504(e)
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Business Associate may use or disclose PHI on behalf of Covered
+          Entity to deliver the contracted services and may additionally make
+          each use and disclosure that 45 C.F.R. § 164.504(e)(2)(i) and (e)(4)
+          allow the parties to authorise, on the conditions set out there.
+      - name: Management and administration by internal use only
+        context: {regimes: [hipaa], counterparty_tier: tier_1}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Business Associate may use PHI internally where needed to manage and
+          administer its business and meet its legal responsibilities. It may
+          not disclose PHI to any third party for those purposes except where
+          Required by Law. All other use and disclosure is limited to what is
+          needed to provide the Services.
+      - name: Research use added by the Covered Entity's form
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Business Associate may use PHI to provide the Services, for its
+          proper management and administration, as Required by Law, and for
+          such research and public health projects as Covered Entity may
+          direct from time to time at no additional charge.
+      - name: Services only
+        expected_outcome: red_line
+        expected_red_line_key: phi-use-no-management-administration
+        expected_zone: red
+        sample_text: >
+          Business Associate shall use and disclose PHI exclusively to provide
+          the Services to Covered Entity and for no other purpose whatsoever,
+          including any internal business purpose of Business Associate.
+      - name: Trap - "no other purpose" follows the full list
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Business Associate may use and disclose PHI to perform the Services,
+          for its proper management and administration and legal
+          responsibilities subject to 45 C.F.R. § 164.504(e)(4), as Required
+          by Law and for Data Aggregation relating to Covered Entity's health
+          care operations, and for no other purpose.
+
+  - rule_key: data_protection.minimum_necessary
+    title: Minimum necessary
+    required: true
+    risk_weight: 5
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Each party limits its uses, disclosures and requests of PHI to the
+      minimum necessary under the regulatory standard. Business Associate
+      follows its own minimum necessary procedures, not Covered Entity's.
+    risk_rationale: >
+      Halcyon Engage is a single multi-tenant service with one role-based
+      access model for all 310 customers, tested each year in the SOC 2 Type II
+      and HITRUST r2 assessments. A promise to follow each Covered Entity's
+      own minimum necessary policies would create hundreds of different access
+      rules that a 430-person company cannot implement or evidence, and every
+      mismatch would be a contract breach even where the regulatory standard
+      is met.
+    detection_guidance: >
+      Look for "minimum necessary", "reasonable efforts to limit", "limited
+      data set" and references to Covered Entity's "policies and procedures".
+      Record whose standard governs: the regulation, Covered Entity's policies
+      where compatible with the Services, or Covered Entity's policies without
+      qualification. A clause that also requires Covered Entity to send only
+      the minimum necessary PHI is favourable. Absence is a missing issue to
+      be added, in the yellow zone.
+    source_ref: 45 C.F.R. § 164.502(b) and § 164.514(d)
+    authored_by: Privacy Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-09
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Regulatory standard, mutual
+        zone: green
+        summary: Both parties apply the minimum necessary standard of the Privacy Rule.
+        language: >
+          Business Associate shall make reasonable efforts to limit its uses
+          and disclosures of, and requests for, PHI to the minimum necessary
+          to accomplish the intended purpose, in accordance with 45 C.F.R.
+          § 164.502(b) and § 164.514(d) and Business Associate's own minimum
+          necessary policies and procedures. Covered Entity shall disclose to
+          Business Associate, and shall configure the Services to transmit,
+          only the PHI that is the minimum necessary for Business Associate to
+          perform the Services. Covered Entity is responsible for deciding
+          which of its users and connected systems may place PHI in the
+          Services.
+      - kind: fallback
+        rung: 1
+        label: Covered Entity policies where compatible
+        zone: green
+        summary: Business Associate takes Covered Entity's written policies into account where the standard Services can accommodate them.
+        language: >
+          Business Associate shall make reasonable efforts to limit its uses
+          and disclosures of, and requests for, PHI to the minimum necessary
+          to accomplish the intended purpose, in accordance with 45 C.F.R.
+          § 164.502(b). Where Covered Entity has given Business Associate a
+          written copy of its minimum necessary policies, Business Associate
+          shall follow them to the extent that they can be met through the
+          standard configuration of the Services described in the
+          Documentation and do not conflict with the HIPAA Rules. Covered
+          Entity shall disclose to Business Associate only the PHI that is the
+          minimum necessary for Business Associate to perform the Services.
+      - kind: fallback
+        rung: 2
+        label: Covered Entity policies with notice and objection
+        zone: yellow
+        approver_role: privacy_counsel
+        give_get: >
+          Require that the policies be attached to the BAA at signature so
+          they can be reviewed by the security lead before commitment.
+        summary: >
+          Business Associate commits to Covered Entity's written minimum
+          necessary policies, with advance notice of changes and a right to
+          object.
+        language: >
+          Business Associate shall limit its uses and disclosures of, and
+          requests for, PHI to the minimum necessary in accordance with 45
+          C.F.R. § 164.502(b) and with the minimum necessary policies of
+          Covered Entity attached to this BAA. Covered Entity shall give
+          Business Associate written notice of any change to those policies
+          before the change takes effect. If Business Associate cannot meet a
+          changed policy without altering the Services, it shall tell Covered
+          Entity in writing, the change shall not bind Business Associate, and
+          the parties shall discuss in good faith an alternative that meets
+          the regulatory standard.
+        internal_note: >
+          Agree only after the security lead confirms that the attached
+          policies map onto existing roles in Halcyon Engage.
+      - kind: acceptable_variant
+        label: Short-form regulatory commitment
+        zone: green
+        summary: A one-sentence commitment to the regulatory standard.
+        language: >
+          Business Associate agrees to request, use and disclose only the
+          minimum amount of PHI necessary to accomplish the purpose of the
+          request, use or disclosure, consistent with the minimum necessary
+          requirements of the Privacy Rule, and Covered Entity agrees to
+          provide Business Associate with no more PHI than the Services
+          require.
+    parameters:
+      - key: minimum_necessary_standard
+        label: Whose minimum necessary standard binds Business Associate
+        value_type: enum
+        direction: set_membership
+        preferred_value: regulatory_standard
+        green_limit: [regulatory_standard, covered_entity_policies_where_compatible]
+        yellow_limit: [covered_entity_policies_with_notice]
+        allowed_values:
+          - regulatory_standard
+          - covered_entity_policies_where_compatible
+          - covered_entity_policies_with_notice
+          - covered_entity_policies_unqualified
+        extraction_hint: >
+          regulatory_standard: the Privacy Rule standard or Business
+          Associate's own procedures. covered_entity_policies_where_compatible:
+          Covered Entity's policies apply only so far as the standard Services
+          can meet them. covered_entity_policies_with_notice: attached policies
+          bind, changes need notice and Business Associate may object.
+          covered_entity_policies_unqualified: Covered Entity's policies "as
+          amended from time to time" bind without notice or objection.
+    red_lines:
+      - key: min-nec-limited-data-set-only
+        description: Business Associate is restricted to a Limited Data Set or de-identified data for all uses.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause requires Business Associate to receive, use or disclose
+            only a Limited Data Set or de-identified information in every
+            case, with no exception for the PHI needed to perform the
+            Services.
+        action: block
+        rationale: >
+          Appointment reminders, secure messaging and intake forms need direct
+          identifiers such as names and telephone numbers, so the Services
+          cannot be delivered on a Limited Data Set.
+    objections:
+      - objection: Our compliance department requires every vendor to follow our minimum necessary policy.
+        their_rationale: The Covered Entity is accountable for its vendors and wants one standard across them.
+        response: >
+          We apply the same regulatory standard you do and our access controls
+          are examined each year under SOC 2 Type II and HITRUST r2. Because
+          the service is shared across customers, we cannot run a different
+          access model for each one. If you send us your policy we will follow
+          it wherever the standard configuration allows, and the revised
+          clause says that.
+        talking_points:
+          - Offer the HITRUST r2 letter and the access control section of the SOC 2 report.
+          - Role-based access in Halcyon Engage is configured by the Covered Entity's own administrators.
+        recommended_position: {rule_key: data_protection.minimum_necessary, rung: 1}
+        frequency: common
+        counterparty_profile: Hospital systems with a central compliance office
+      - objection: A promise to follow our policy only "where compatible" gives us nothing we can enforce.
+        their_rationale: The qualifier lets the vendor decide what it will follow.
+        response: >
+          We can commit to the policy you attach to the BAA once our security
+          team has reviewed it against the product. What we need in return is
+          written notice before the policy changes, and the ability to tell
+          you if a change cannot be met without altering the service for
+          everyone. The regulatory standard continues to apply throughout.
+        talking_points:
+          - The attached policy is fixed at signature, so both sides know the commitment.
+          - Changes are discussed, not refused outright.
+        recommended_position: {rule_key: data_protection.minimum_necessary, rung: 2}
+        frequency: occasional
+      - objection: Your support staff see far more of our patients' records than they need to answer a ticket.
+        their_rationale: The Covered Entity worries that broad internal access for troubleshooting defeats the minimum necessary promise.
+        response: >
+          Support access to PHI is role-based and scoped to the tenant and
+          ticket at hand, logged, and reviewed as part of our SOC 2 Type II
+          and HITRUST r2 assessments. We are glad to walk your security team
+          through the access model so you can see how it limits what any one
+          engineer or support agent can reach.
+        talking_points:
+          - Offer a walkthrough of role-based access controls with the security lead.
+          - Point to the annual SOC 2 Type II and HITRUST r2 evidence covering access reviews.
+        frequency: rare
+        counterparty_profile: Security-focused tier 1 accounts
+    dependencies:
+      - related_rule_key: data_protection.permitted_uses_of_phi
+        relation: read_with
+        note: Minimum necessary limits the amount of PHI within each permitted use; it does not add or remove a permitted use.
+    test_cases:
+      - name: Regulatory standard on both sides
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          In using, disclosing or asking for PHI, Business Associate will take
+          reasonable steps to confine itself to the least PHI needed for the
+          task, as 45 C.F.R. § 164.502(b) requires and as its own procedures
+          provide. Covered Entity will not send Business Associate more PHI
+          than the Services need.
+      - name: One-line minimum necessary undertaking
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Business Associate shall only request, use and disclose the minimum
+          amount of PHI necessary for the purpose, in keeping with the Privacy
+          Rule's minimum necessary requirements, and Covered Entity shall
+          supply no more PHI than is needed for the Services.
+      - name: Attached policy with notice of changes
+        context: {regimes: [hipaa], counterparty_tier: tier_1}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Business Associate shall comply with the Minimum Necessary Policy of
+          Covered Entity set out in Attachment 2. Covered Entity will notify
+          Business Associate in writing ahead of any revision. Where a
+          revision would require a change to the Services, Business Associate
+          may object in writing, the revision will not apply to it, and the
+          parties will confer on an alternative that satisfies 45 C.F.R.
+          § 164.502(b).
+      - name: Policies as amended from time to time
+        expected_outcome: deviation
+        expected_zone: red
+        sample_text: >
+          Business Associate shall at all times comply with Covered Entity's
+          minimum necessary policies and procedures, as Covered Entity may
+          amend them from time to time in its discretion, whether or not
+          communicated to Business Associate.
+      - name: Limited Data Set in every case
+        expected_outcome: red_line
+        expected_red_line_key: min-nec-limited-data-set-only
+        expected_zone: red
+        sample_text: >
+          Business Associate shall receive and use only a Limited Data Set, as
+          defined at 45 C.F.R. § 164.514(e), for all purposes under the
+          Underlying Agreement without exception.
+
+  - rule_key: data_protection.individual_rights_support
+    title: Support for Individuals' rights of access, amendment and accounting
+    required: true
+    risk_weight: 6
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Business Associate gives Covered Entity what it needs to answer
+      Individuals' requests: access and amendment within 15 days, accounting
+      information within 30 days, and requests received directly forwarded
+      within 5 business days. Covered Entity answers the Individual.
+    risk_rationale: >
+      The regulation gives the Covered Entity 30 days to act on an access
+      request and 60 days on amendment and accounting, yet customer forms
+      often ask Halcyon for 2 to 5 days. With two contracts managers, one
+      privacy counsel and a shared support team serving about 310 customers,
+      very short periods would be missed in ordinary operation and each miss
+      would be a breach of a HIPAA-mandated term. Covered Entity
+      administrators can already retrieve most records themselves through
+      Halcyon Engage, so the periods matter mainly for records only Halcyon
+      can reach.
+    detection_guidance: >
+      Look for "Designated Record Set", "access", "amendment", "accounting of
+      disclosures", "forward any request from an Individual" and a number of
+      days for each. Record four values: days to provide access, days to make
+      amendments, days to supply accounting information, and business days to
+      forward a request received directly. Where one period covers all three
+      rights, record it for each. Check who responds to the Individual.
+      Absence in a business associate agreement is a missing mandatory term.
+    source_ref: 45 C.F.R. § 164.504(e)(2)(ii)(E) to (G); § 164.524, § 164.526 and § 164.528
+    authored_by: Privacy Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-11
+    positions:
+      - kind: preferred
+        rung: 0
+        label: 15 days for access and amendment, 30 for accounting, 5 business days to forward
+        zone: green
+        summary: Half the regulatory period for access; Covered Entity deals with the Individual.
+        language: >
+          To the extent Business Associate maintains PHI in a Designated
+          Record Set, Business Associate shall, within fifteen (15) days after
+          Covered Entity's written request, make that PHI available to Covered
+          Entity as necessary for Covered Entity to meet its obligations under
+          45 C.F.R. § 164.524, and shall, within fifteen (15) days after
+          Covered Entity's written request, make the PHI available for
+          amendment and incorporate any amendment that Covered Entity directs
+          under 45 C.F.R. § 164.526. Business Associate shall document the
+          disclosures of PHI that are subject to accounting and, within thirty
+          (30) days after Covered Entity's written request, give Covered
+          Entity the information needed to provide an accounting of
+          disclosures under 45 C.F.R. § 164.528. If an Individual makes a
+          request for access, amendment or an accounting directly to Business
+          Associate, Business Associate shall forward the request to Covered
+          Entity within five (5) business days and shall not respond to the
+          Individual except to say that the request has been forwarded.
+          Covered Entity is responsible for deciding and responding to each
+          request. Where Covered Entity can retrieve or amend the PHI itself
+          through the Services, Business Associate satisfies this section by
+          keeping that functionality available.
+      - kind: fallback
+        rung: 1
+        label: 10 days for access and amendment, 20 for accounting, 3 business days to forward
+        zone: green
+        summary: Shorter periods that support and privacy operations can still meet.
+        language: >
+          To the extent Business Associate maintains PHI in a Designated
+          Record Set, Business Associate shall, within ten (10) days after
+          Covered Entity's written request, make that PHI available to Covered
+          Entity as necessary for Covered Entity to meet its obligations under
+          45 C.F.R. § 164.524 and make the PHI available for amendment and
+          incorporate any amendment that Covered Entity directs under 45
+          C.F.R. § 164.526. Business Associate shall document the disclosures
+          of PHI that are subject to accounting and, within twenty (20) days
+          after Covered Entity's written request, give Covered Entity the
+          information needed to provide an accounting of disclosures under 45
+          C.F.R. § 164.528. Business Associate shall forward to Covered Entity
+          within three (3) business days any request for access, amendment or
+          an accounting that it receives directly from an Individual, and
+          Covered Entity shall be responsible for deciding and responding to
+          the request.
+      - kind: fallback
+        rung: 2
+        label: 5 days for access and amendment, 10 for accounting, 2 business days to forward
+        zone: yellow
+        approver_role: privacy_counsel
+        conditions: {counterparty_tier: [tier_1, tier_2]}
+        give_get: >
+          Require requests to be sent to the privacy mailbox named in the BAA,
+          with the period running from receipt there, and confirm that
+          self-service retrieval through the Services counts as performance.
+        summary: The shortest periods Halcyon will accept, for larger customers only.
+        language: >
+          To the extent Business Associate maintains PHI in a Designated
+          Record Set, Business Associate shall, within five (5) days after
+          receipt of Covered Entity's written request at the privacy contact
+          address stated in this BAA, make that PHI available to Covered
+          Entity as necessary for Covered Entity to meet its obligations under
+          45 C.F.R. § 164.524 and make the PHI available for amendment and
+          incorporate any amendment that Covered Entity directs under 45
+          C.F.R. § 164.526. Business Associate shall, within ten (10) days
+          after receipt of such a request, give Covered Entity the information
+          needed to provide an accounting of disclosures under 45 C.F.R.
+          § 164.528. Business Associate shall forward to Covered Entity within
+          two (2) business days any request that it receives directly from an
+          Individual. Covered Entity shall decide and respond to each request,
+          and Business Associate satisfies this section where Covered Entity
+          can retrieve or amend the PHI itself through the Services.
+        internal_note: >
+          Tell the support operations manager when this rung is agreed so the
+          customer is flagged for priority handling of privacy requests.
+      - kind: acceptable_variant
+        label: Single period for all three rights
+        zone: green
+        summary: Counterparty wording with one period of at least ten days for every request type.
+        language: >
+          Within ten (10) days of a request by Covered Entity, Business
+          Associate shall (a) provide Covered Entity with access to PHI held
+          in a Designated Record Set so that Covered Entity may respond to an
+          Individual under 45 C.F.R. § 164.524, (b) amend such PHI as Covered
+          Entity instructs under 45 C.F.R. § 164.526, and (c) supply the
+          documentation of disclosures that Covered Entity requires for an
+          accounting under 45 C.F.R. § 164.528. Business Associate shall pass
+          to Covered Entity, within three (3) business days of receipt, any
+          such request made to it by an Individual and shall leave the
+          response to Covered Entity.
+    parameters:
+      - key: access_response_days
+        label: Days to make PHI available for an access request
+        value_type: duration_days
+        unit: days
+        direction: higher_is_better
+        preferred_value: 15
+        green_limit: 10
+        yellow_limit: 5
+        extraction_hint: >
+          Calendar days from Covered Entity's request to the date Business
+          Associate must make PHI in a Designated Record Set available.
+          Convert business days to calendar days by multiplying by 1.4 and
+          rounding down. "Promptly" with no number is not a value; leave it
+          absent.
+      - key: amendment_response_days
+        label: Days to make PHI available for amendment and incorporate amendments
+        value_type: duration_days
+        unit: days
+        direction: higher_is_better
+        preferred_value: 15
+        green_limit: 10
+        yellow_limit: 5
+        extraction_hint: >
+          Calendar days from Covered Entity's request to the date amendments
+          must be incorporated. If the clause gives one period for all request
+          types, use it here as well.
+      - key: accounting_response_days
+        label: Days to supply accounting of disclosures information
+        value_type: duration_days
+        unit: days
+        direction: higher_is_better
+        preferred_value: 30
+        green_limit: 20
+        yellow_limit: 10
+        extraction_hint: >
+          Calendar days from Covered Entity's request to the date Business
+          Associate must supply the information for an accounting of
+          disclosures. If the clause gives one period for all request types,
+          use it here as well.
+      - key: request_forwarding_business_days
+        label: Business days to forward a request received from an Individual
+        value_type: number
+        unit: business days
+        direction: higher_is_better
+        preferred_value: 5
+        green_limit: 3
+        yellow_limit: 2
+        extraction_hint: >
+          Business days for Business Associate to pass on a request that an
+          Individual sends to it directly. Treat "immediately" or "within 24
+          hours" as 1 and calendar days as the same number of business days
+          when 5 or fewer.
+    red_lines:
+      - key: ind-rights-access-under-5-days
+        description: Business Associate must make PHI available for access in fewer than 5 days.
+        condition_type: parameter
+        condition: {parameter_key: access_response_days, op: lt, value: 5}
+        action: block
+        rationale: >
+          A period under 5 days cannot be met reliably for records that need
+          engineering retrieval, and the regulation gives the Covered Entity
+          30 days, so the pressure is not regulatory.
+      - key: ind-rights-direct-response
+        description: Business Associate must decide and answer Individuals' requests itself.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause requires Business Associate to decide whether to grant
+            or deny an Individual's request for access, amendment or an
+            accounting, or to respond to the Individual on the merits, rather
+            than forwarding the request to Covered Entity.
+        action: block
+        rationale: >
+          Halcyon cannot verify a patient's identity or apply the grounds for
+          denial; those decisions belong to the Covered Entity that holds the
+          treatment relationship.
+    objections:
+      - objection: We only have 30 days to answer a patient, so we need the records from you within 5.
+        their_rationale: The Covered Entity wants most of the regulatory period for its own review.
+        response: >
+          Your administrators can retrieve and correct most records directly
+          in Halcyon Engage at any time, without waiting for us. For records
+          that need our help, ten days leaves you two thirds of the regulatory
+          period and is a period we can meet every time. We would rather
+          commit to that than to a number we might miss.
+        talking_points:
+          - Demonstrate the self-service export and audit log.
+          - Ten days for access against a 30-day regulatory period.
+          - Accounting has a 60-day regulatory period, so 20 days is generous.
+        recommended_position: {rule_key: data_protection.individual_rights_support, rung: 1}
+        frequency: common
+        counterparty_profile: Hospital systems and physician groups
+      - objection: If a patient contacts you, you should just give them their records.
+        their_rationale: The Covered Entity wants to reduce its own administrative load.
+        response: >
+          We are not able to verify a patient's identity or to judge whether
+          one of the regulatory grounds for denial applies, and a mistake
+          would be a disclosure to the wrong person. We will forward any
+          request we receive within a few business days and tell the patient
+          we have done so. The decision and the reply stay with you as the
+          Covered Entity.
+        talking_points:
+          - Misdirected access is itself an impermissible disclosure.
+          - Offer the 3 business day forwarding period.
+        recommended_position: {rule_key: data_protection.individual_rights_support, rung: 1}
+        frequency: occasional
+      - objection: Your accounting of disclosures should cover every disclosure, not just the ones HIPAA counts.
+        their_rationale: Privacy officers sometimes want a broader log than the regulatory accounting right requires.
+        response: >
+          We can give you the information needed for an accounting of
+          disclosures as the Privacy Rule defines it, which excludes
+          disclosures such as those for treatment, payment and health care
+          operations. A broader log of every internal access is not
+          something our platform tracks at that level today, and building it
+          would be a product change rather than a contract term.
+        talking_points:
+          - Point to the regulatory definition of accounting of disclosures at 45 C.F.R. § 164.528.
+          - Offer to discuss broader logging as a product request, separate from this clause.
+        recommended_position: {rule_key: data_protection.individual_rights_support, rung: 0}
+        frequency: rare
+        counterparty_profile: Academic medical centres with their own research compliance office
+    dependencies:
+      - related_rule_key: data_protection.permitted_uses_of_phi
+        relation: read_with
+        note: >
+          Halcyon can only forward or act on an individual's access or
+          amendment request to the extent it actually holds and may use the
+          PHI in question under the permitted-uses rule; read the two
+          together when scoping a request. Where a data processing addendum
+          also applies to the same deal, its data subject request clause
+          covers non-HIPAA rights; for PHI the periods in this rule prevail.
+    test_cases:
+      - name: Fifteen and thirty day periods, forwarded in five business days
+        context: {regimes: [hipaa], data_sensitivity: phi}
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Business Associate will, no later than 15 days after Covered Entity
+          asks in writing, furnish PHI kept in a Designated Record Set so that
+          Covered Entity can satisfy 45 C.F.R. § 164.524, and will within the
+          same 15 days make amendments Covered Entity directs under
+          § 164.526. Information for an accounting under § 164.528 will be
+          supplied within 30 days of request. A request sent by an Individual
+          straight to Business Associate will be passed to Covered Entity
+          within 5 business days, and Covered Entity will answer it.
+      - name: Ten days for every request type
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          On Covered Entity's request Business Associate shall, in each case
+          within ten days, give access to Designated Record Set PHI, make any
+          amendment Covered Entity instructs, and deliver its record of
+          disclosures for accounting purposes. Requests coming directly from
+          Individuals shall be sent on to Covered Entity within three business
+          days for Covered Entity to handle.
+      - name: Five day access for a large health system
+        context: {regimes: [hipaa], counterparty_tier: tier_1}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Within five (5) days of receiving Covered Entity's request at the
+          privacy address in this BAA, Business Associate shall provide the
+          requested Designated Record Set PHI and make any directed amendment.
+          Accounting information shall be provided within ten (10) days.
+          Individuals' direct requests shall be forwarded to Covered Entity
+          within two (2) business days, and Covered Entity shall respond.
+      - name: Access within eight days
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Business Associate shall make PHI in a Designated Record Set
+          available to Covered Entity within eight (8) days of request and
+          shall provide accounting information within fifteen (15) days of
+          request.
+      - name: Forty-eight hour access
+        expected_outcome: red_line
+        expected_red_line_key: ind-rights-access-under-5-days
+        expected_zone: red
+        sample_text: >
+          Business Associate shall provide Covered Entity with any PHI
+          requested for an Individual's access request within forty-eight (48)
+          hours of Covered Entity's request.
+      - name: No individual rights clause
+        expected_outcome: missing
+        expected_zone: yellow
+        sample_text: ""
+
+  - rule_key: data_protection.data_return_and_deletion
+    title: Return and destruction of PHI at termination
+    required: true
+    risk_weight: 7
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      On termination Business Associate makes PHI available for export during
+      the data retrieval window stated in the Underlying Agreement's effect
+      of termination provision, destroys it in production within 60 days
+      after that window ends and lets backups expire within 90 days after
+      that window ends. Where return or destruction is infeasible, the
+      protections of the BAA continue and further use is limited to the
+      reason for infeasibility.
+    risk_rationale: >
+      Halcyon stores PHI for about 310 customers in shared AWS infrastructure
+      in us-east-1 and us-west-2, where backups are encrypted snapshots that
+      expire on a fixed cycle and cannot be edited customer by customer. A
+      promise to destroy every copy at once, or with no infeasibility
+      exception, would be broken on the day it was made and would put Halcyon
+      in breach of a term the regulation requires. Retained PHI also remains
+      Breach exposure counted against the $10M cyber and technology errors
+      and omissions aggregate, so the periods must be short enough to honour
+      but real.
+    detection_guidance: >
+      Look in the business associate agreement for "return or destroy",
+      "retain no copies", "if return or destruction is infeasible", "extend
+      the protections", "backup", "certify" and a number of days. Record two
+      values: the days to destroy PHI in production systems after the end of
+      the data retrieval window, and the days for backups to be overwritten
+      after the end of that window. This overlay rule replaces the general
+      Customer Data deletion rule for PHI, but the export window itself stays
+      governed by the Underlying Agreement's effect of termination provision,
+      so destruction and backup purge always start their clock after that
+      window closes rather than racing it. Absence is a missing mandatory
+      term.
+    source_ref: 45 C.F.R. § 164.504(e)(2)(ii)(J)
+    authored_by: Privacy Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-11
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Destruction in 60 days, backups in 90 days, both after the retrieval window
+        zone: green
+        summary: Export during the Underlying Agreement's retrieval window, then destruction on a fixed schedule after that window ends, with the regulatory infeasibility exception.
+        language: >
+          Upon termination or expiry of the Underlying Agreement, Business
+          Associate shall make the PHI then held in the Services available to
+          Covered Entity for export in the format described in the
+          Documentation during the data retrieval window stated in the
+          Underlying Agreement's effect of termination provision. Business
+          Associate shall destroy all PHI held in its production systems
+          within sixty (60) days after the end of that retrieval window and
+          shall retain no copies, except that PHI held in backup media shall
+          be overwritten or destroyed in the ordinary course within ninety
+          (90) days after the end of that retrieval window. If return or
+          destruction of any PHI is infeasible, including where Business
+          Associate is Required by Law to retain it, Business Associate
+          shall extend the protections of this BAA to that PHI and limit
+          further uses and disclosures to the purposes that make return or
+          destruction infeasible, for as long as Business Associate holds
+          it. On Covered Entity's written request Business Associate shall
+          confirm in writing that destruction has been completed. This
+          section applies equally to PHI held by Subcontractors.
+      - kind: fallback
+        rung: 1
+        label: Destruction in 45 days with certificate
+        zone: green
+        summary: Faster destruction in production after the retrieval window ends, and a certificate delivered without request.
+        language: >
+          Upon termination or expiry of the Underlying Agreement, Business
+          Associate shall make the PHI then held in the Services available to
+          Covered Entity for export during the data retrieval window stated
+          in the Underlying Agreement's effect of termination provision.
+          Business Associate shall destroy all PHI held in its production
+          systems within forty-five (45) days after the end of that retrieval
+          window, and PHI held in backup media shall be overwritten or
+          destroyed in the ordinary course within ninety (90) days after the
+          end of that retrieval window. Within ten (10) business days after
+          destruction in production is complete, Business Associate shall
+          deliver to Covered Entity a certificate of destruction signed by an
+          officer. If return or destruction of any PHI is infeasible,
+          Business Associate shall extend the protections of this BAA to that
+          PHI and limit further uses and disclosures to the purposes that
+          make return or destruction infeasible.
+      - kind: fallback
+        rung: 2
+        label: Destruction in 30 days, backups in 60 days, both after the retrieval window
+        zone: yellow
+        approver_role: security_lead
+        give_get: >
+          Covered Entity must complete its export before the retrieval window
+          ends, and accepts that the backup period is a maximum set by the
+          snapshot cycle.
+        summary: The shortest schedule the backup cycle allows, both periods still counted from the end of the retrieval window.
+        language: >
+          Upon termination or expiry of the Underlying Agreement, Business
+          Associate shall make the PHI then held in the Services available to
+          Covered Entity for export during the data retrieval window stated
+          in the Underlying Agreement's effect of termination provision and
+          shall, within thirty (30) days after the end of that retrieval
+          window, destroy all PHI held in its production systems, whether or
+          not Covered Entity has completed its export. PHI held in backup
+          media shall be overwritten or destroyed within sixty (60) days
+          after the end of that retrieval window and shall not be restored to
+          production in the meantime except to recover from an incident.
+          Business Associate shall deliver a certificate of destruction
+          signed by an officer once destruction is complete. If return or
+          destruction of any PHI is infeasible, Business Associate shall
+          extend the protections of this BAA to that PHI and limit further
+          uses and disclosures to the purposes that make return or
+          destruction infeasible.
+        internal_note: >
+          The security lead must confirm that the customer's tenant can be
+          placed on the shortened snapshot retention schedule before this
+          rung is offered.
+      - kind: acceptable_variant
+        label: Return or destroy at Covered Entity's election
+        zone: green
+        summary: Regulatory wording with Covered Entity's election and periods no shorter than Halcyon's, sequenced after the retrieval window.
+        language: >
+          At termination of this BAA for any reason, Business Associate
+          shall, at Covered Entity's election notified before the end of the
+          data retrieval window stated in the Underlying Agreement's effect
+          of termination provision, return to Covered Entity or destroy all
+          PHI received from, or created, maintained or received on behalf of,
+          Covered Entity that Business Associate or its Subcontractors still
+          maintain in any form, and shall complete that return or destruction
+          within sixty (60) days after the end of that retrieval window, save
+          that copies on backup media may persist for up to ninety (90) days
+          after the end of that retrieval window until overwritten in the
+          normal cycle. Where return or destruction is not feasible, Business
+          Associate shall continue to extend the protections of this BAA to
+          the PHI and shall limit further use and disclosure to those
+          purposes that make return or destruction infeasible.
+    parameters:
+      - key: phi_destruction_days
+        label: Days after the end of the data retrieval window to destroy PHI in production systems
+        value_type: duration_days
+        unit: days
+        direction: higher_is_better
+        preferred_value: 60
+        green_limit: 45
+        yellow_limit: 30
+        extraction_hint: >
+          Calendar days after the end of the data retrieval window stated in
+          the Underlying Agreement's effect of termination provision by which
+          PHI in live systems must be returned or destroyed. If the clause
+          instead counts this period from the termination date rather than
+          from the end of that retrieval window, read the number as stated
+          and flag the drafting gap, since Halcyon's own template runs the
+          two periods in sequence. "Immediately" or "promptly" with no number
+          counts as 0. Ignore the separate backup period.
+      - key: phi_backup_purge_days
+        label: Days after the end of the data retrieval window for backups containing PHI to be overwritten
+        value_type: duration_days
+        unit: days
+        direction: higher_is_better
+        preferred_value: 90
+        green_limit: 90
+        yellow_limit: 60
+        extraction_hint: >
+          Calendar days after the end of the data retrieval window by which
+          backup or archive copies must be overwritten or destroyed. If the
+          clause requires all copies "in any form" to be destroyed by one
+          date and makes no separate provision for backups, use that date for
+          this value too.
+    red_lines:
+      - key: phi-return-destruction-under-30-days
+        description: PHI in production must be destroyed in fewer than 30 days after termination, or immediately.
+        condition_type: parameter
+        condition: {parameter_key: phi_destruction_days, op: lt, value: 30}
+        action: block
+        rationale: >
+          Tenant deletion is a scheduled engineering process with
+          verification; a shorter period cannot be met reliably and leaves no
+          time for the customer's own export.
+      - key: phi-return-no-infeasibility-exception
+        description: All PHI including backups must be returned or destroyed in every case, with no infeasibility exception.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause requires Business Associate to return or destroy all
+            PHI in every form, including backup copies, and either states
+            that return or destruction shall never be treated as infeasible
+            or omits any provision for PHI whose return or destruction is
+            infeasible or which must be retained by law.
+        action: block
+        rationale: >
+          The regulation itself provides the infeasibility exception;
+          without it Halcyon would breach the clause through its ordinary
+          backup cycle and legal retention duties.
+    objections:
+      - objection: We need every copy of our patients' data gone the day the contract ends.
+        their_rationale: Data held by a former vendor is risk with no benefit to the Covered Entity.
+        response: >
+          We agree that retained PHI is risk for both of us and we delete on
+          a fixed schedule for that reason. Deletion of a tenant is a
+          verified engineering process, and you will want time to complete
+          your own export first. We can shorten destruction in production to
+          45 days and send you an officer's certificate when it is done.
+        talking_points:
+          - PHI stays encrypted and under the BAA until destroyed.
+          - Backups are encrypted snapshots that expire on a cycle and cannot be edited.
+          - Offer the certificate without request as the first concession.
+        recommended_position: {rule_key: data_protection.data_return_and_deletion, rung: 1}
+        frequency: common
+        counterparty_profile: Hospital systems
+      - objection: Ninety days for backups is too long; our policy says 60.
+        their_rationale: The Covered Entity's vendor management policy sets a maximum retention after exit.
+        response: >
+          Our standard snapshot cycle is what produces the 90-day figure.
+          With our security lead's agreement we can move your tenant to a
+          shorter cycle so that backups are gone within 60 days and
+          production data within 30. Because the timetable is tight, we
+          would ask that you complete your export within the same 30 days.
+        talking_points:
+          - The shorter cycle is a per-tenant operational change that needs security approval.
+          - Backups are not restored to production except for incident recovery.
+        recommended_position: {rule_key: data_protection.data_return_and_deletion, rung: 2}
+        frequency: occasional
+        counterparty_profile: Tier 1 health systems with vendor exit policies
+      - objection: Give us a certificate of destruction automatically; we should not have to ask for one.
+        their_rationale: Some compliance programmes require documentary proof of destruction on file without a separate request.
+        response: >
+          We can commit to sending an officer's certificate of destruction
+          once production deletion is complete, without waiting for you to
+          ask. Our 45-day fallback already builds this in, and we can add it
+          to the 60-day preferred position for your account as well.
+        talking_points:
+          - Offer the certificate without request as a low-cost concession.
+          - Confirm the certificate covers production systems; backup purge follows on its own schedule.
+        recommended_position: {rule_key: data_protection.data_return_and_deletion, rung: 1}
+        frequency: occasional
+        counterparty_profile: Hospital systems with formal vendor offboarding checklists
+    dependencies:
+      - related_rule_key: termination.effect_of_termination
+        relation: read_with
+        note: >
+          The SaaS agreement's effect of termination clause sets the general
+          export window; for PHI this rule's periods and infeasibility
+          wording prevail.
+    test_cases:
+      - name: Export for 30 days, deletion in 60, backups in 90
+        context: {regimes: [hipaa], data_sensitivity: phi}
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          When the Underlying Agreement ends, Covered Entity may ask in
+          writing during the following 30 days for an export of the PHI in
+          the Services. Business Associate will delete PHI from its live
+          systems no later than 60 days after the end date, and backup copies
+          will be overwritten in the usual cycle no later than 90 days after
+          the end date. PHI that cannot feasibly be returned or destroyed,
+          or that must be kept by law, stays protected by this BAA and may be
+          used only for the purpose that prevents its return or destruction.
+      - name: Election to return or destroy, same periods
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          On termination Business Associate shall return or destroy, as
+          Covered Entity elects within 30 days, all PHI that it or its
+          Subcontractors maintain, completing the task within 60 days of
+          termination; backup media may hold copies for up to 90 days of
+          termination pending routine overwriting. If return or destruction
+          is infeasible the protections of this BAA continue to apply and
+          further use is limited to the purposes making it infeasible.
+      - name: Thirty day destruction and sixty day backups
+        context: {regimes: [hipaa], counterparty_tier: tier_1}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Business Associate shall destroy all PHI in its production
+          environment within thirty (30) days after termination and all PHI
+          on backup media within sixty (60) days after termination, and
+          shall provide an officer's certificate of destruction. Where
+          return or destruction is infeasible, Business Associate shall
+          continue to protect the PHI under this BAA and restrict its use to
+          the purposes that make return or destruction infeasible.
+      - name: Sixty day export window
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          For sixty (60) days after termination Business Associate shall
+          keep the PHI available for retrieval by Covered Entity, and shall
+          destroy it within sixty (60) days after that retrieval period
+          ends, subject to the continued protection of any PHI whose
+          destruction is infeasible.
+      - name: Destruction of every copy within five days
+        expected_outcome: red_line
+        expected_red_line_key: phi-return-destruction-under-30-days
+        expected_zone: red
+        sample_text: >
+          Within five (5) days of termination Business Associate shall
+          destroy all PHI in its possession and certify the destruction in
+          writing.
+      - name: Trap - "retain no copies" with the infeasibility carve-out
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Business Associate shall retain no copies of PHI after the sixtieth
+          day following termination, other than backup copies overwritten
+          within ninety days of termination and PHI whose return or
+          destruction is infeasible, to which the protections of this BAA
+          shall continue to apply and whose use shall be limited to the
+          purposes that make return or destruction infeasible. Covered
+          Entity may request an export during the first thirty days.
+
+  - rule_key: security.safeguards
+    title: Administrative, physical and technical safeguards
+    required: true
+    risk_weight: 8
+    negotiable: false
+    default_zone: red
+    needs_human_judgment: false
+    position_summary: >
+      Business Associate uses appropriate administrative, physical and
+      technical safeguards, including the Security Rule's required
+      safeguards for electronic PHI, to prevent use or disclosure of PHI
+      other than as permitted by this BAA.
+    risk_rationale: >
+      The Security Rule's safeguards requirement is mandatory for every
+      business associate agreement and is not a point either side negotiates
+      away; Halcyon's own SOC 2 Type II, ISO 27001 and HITRUST r2 programmes
+      already implement the administrative, physical and technical controls
+      the Rule requires. A business associate agreement with no safeguards
+      clause, or one that disclaims the Security Rule, leaves Covered Entity
+      unable to show it obtained the satisfactory assurances HIPAA requires
+      before disclosing PHI to Halcyon.
+    detection_guidance: >
+      Look for "appropriate safeguards", "administrative, physical and
+      technical", "Subpart C of 45 C.F.R. Part 164", "Security Rule" and
+      "electronic PHI". A clause naming only "reasonable security measures"
+      without reference to the Security Rule is a deviation. Absence in a
+      business associate agreement that covers electronic PHI is a missing
+      mandatory term.
+    source_ref: 45 C.F.R. § 164.504(e)(2)(ii)(B); Subpart C of 45 C.F.R. Part 164 (§§ 164.308, 164.310, 164.312)
+    authored_by: Privacy Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-12
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Security Rule safeguards, referenced by subpart
+        zone: green
+        summary: Business Associate implements the administrative, physical and technical safeguards the Security Rule requires.
+        language: >
+          Business Associate shall implement administrative, physical and
+          technical safeguards that reasonably and appropriately protect the
+          confidentiality, integrity and availability of electronic PHI that
+          it creates, receives, maintains or transmits on behalf of Covered
+          Entity, in compliance with Subpart C of 45 C.F.R. Part 164 (the
+          "Security Rule"). Business Associate shall not use or disclose PHI
+          other than as permitted or required by this BAA or as Required by
+          Law, and shall use appropriate safeguards, and comply with the
+          Security Rule with respect to electronic PHI, to prevent such
+          impermissible use or disclosure.
+      - kind: acceptable_variant
+        label: Safeguards by cross-reference to the parties' security exhibit
+        zone: green
+        summary: Same commitment, pointing to a separate security exhibit that implements the Security Rule.
+        language: >
+          Business Associate shall maintain the administrative, physical and
+          technical safeguards described in Exhibit [X] (Security Measures),
+          which are designed to meet Subpart C of 45 C.F.R. Part 164, and
+          shall use those safeguards to prevent any use or disclosure of PHI
+          not permitted by this BAA.
+      - kind: acceptable_variant
+        label: Named control families with Security Rule reference
+        zone: green
+        summary: Counterparty wording that lists control families and still ties back to the Security Rule.
+        language: >
+          Business Associate represents that it maintains administrative
+          safeguards (including a security management process and workforce
+          security), physical safeguards (including facility access controls)
+          and technical safeguards (including access control and audit
+          controls) consistent with 45 C.F.R. §§ 164.308, 164.310 and 164.312,
+          and shall use those safeguards to prevent use or disclosure of PHI
+          other than as permitted by this BAA.
+      - kind: acceptable_variant
+        label: Safeguards tied to HITRUST certification rather than named Security Rule sections
+        zone: green
+        summary: Counterparty wording that anchors the commitment to Business Associate's HITRUST r2 certification, which maps to the Security Rule.
+        language: >
+          Business Associate shall maintain a security programme certified to
+          HITRUST CSF r2 or a successor framework that incorporates the
+          administrative, physical and technical safeguards required by
+          Subpart C of 45 C.F.R. Part 164, and shall use that programme to
+          prevent use or disclosure of PHI other than as permitted by this
+          BAA.
+    red_lines:
+      - key: safeguards-disclaimed
+        description: The business associate agreement disclaims or excludes the HIPAA Security Rule for electronic PHI.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause states that Business Associate's security obligations
+            are limited to its general commercial security practices and
+            expressly excludes or disclaims the requirements of the HIPAA
+            Security Rule for electronic PHI.
+        action: block
+        rationale: >
+          A disclaimer of the Security Rule removes the satisfactory
+          assurance HIPAA requires Covered Entity to obtain before disclosing
+          PHI and would put Halcyon's HITRUST r2 and SOC 2 Type II
+          certifications at odds with its contractual commitments.
+    test_cases:
+      - name: Safeguards referencing the Security Rule subpart
+        context: {regimes: [hipaa], data_sensitivity: phi}
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Business Associate will apply administrative, physical and
+          technical safeguards appropriate to protect the confidentiality,
+          integrity and availability of electronic PHI it handles for
+          Covered Entity, consistent with Subpart C of 45 C.F.R. Part 164, and
+          will not use or disclose PHI beyond what this BAA permits.
+      - name: Safeguards by reference to a security exhibit
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          The safeguards set out in the attached Security Exhibit, built to
+          satisfy Subpart C of 45 C.F.R. Part 164, govern Business
+          Associate's handling of electronic PHI and are intended to prevent
+          any use or disclosure this BAA does not permit.
+      - name: Safeguards plus Covered Entity's own control catalogue
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Business Associate shall comply with the Security Rule and, in
+          addition, shall implement every control listed in Covered Entity's
+          internal security control catalogue, as updated by Covered Entity
+          from time to time, regardless of whether the control applies to
+          electronic PHI.
+      - name: General commercial security practices only
+        expected_outcome: red_line
+        expected_red_line_key: safeguards-disclaimed
+        expected_zone: red
+        sample_text: >
+          Business Associate's obligations with respect to PHI are limited to
+          its standard commercial information security practices, and the
+          HIPAA Security Rule does not apply to Business Associate's handling
+          of electronic PHI under this Agreement.
+      - name: No safeguards clause
+        expected_outcome: missing
+        expected_zone: red
+        sample_text: ""
+
+  - rule_key: security.phi_encryption
+    title: Encryption of PHI in transit and at rest
+    required: false
+    risk_weight: 6
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      PHI is encrypted in transit using TLS 1.2 or higher and at rest using
+      AES-256, placed outside the definition of unsecured PHI under the
+      Breach Notification Rule's guidance.
+    risk_rationale: >
+      Encrypting PHI to the standard in HHS guidance means an incident
+      involving encrypted PHI with the key intact is not a Breach requiring
+      notification, which matters given 310 customers on a shared AWS
+      platform across us-east-1, us-west-2 and eu-west-1. Naming a specific
+      algorithm or key length, or giving a customer its own managed key,
+      is an operational commitment the security team must sign off on tenant
+      by tenant, so it is negotiated rather than offered by default.
+    detection_guidance: >
+      Look for "encrypt", "in transit and at rest", "AES-256", "TLS 1.2",
+      "NIST", "unsecured PHI" and "customer-managed keys". Record the
+      algorithm or key length named, if any, and whether key management is
+      Halcyon's or the customer's. Absence where PHI is stored is a missing
+      issue to raise, not a deviation, since the Security Rule treats
+      encryption as addressable rather than naming a mandatory algorithm.
+    source_ref: 45 C.F.R. § 164.312(a)(2)(iv) and § 164.312(e)(2)(ii) (encryption, addressable implementation specifications)
+    authored_by: Security Lead
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-12
+    positions:
+      - kind: preferred
+        rung: 0
+        label: TLS 1.2+ in transit, AES-256 at rest
+        zone: green
+        summary: Named algorithms meeting HHS guidance for unsecured PHI.
+        language: >
+          Business Associate shall encrypt PHI in transit using Transport
+          Layer Security version 1.2 or higher and PHI at rest using the
+          Advanced Encryption Standard with a key length of at least 256 bits
+          (AES-256), consistent with the guidance specifying the technologies
+          that render PHI unusable, unreadable or indecipherable for purposes
+          of the Breach Notification Rule. Business Associate shall maintain
+          encryption keys separately from the encrypted PHI and shall not
+          disable encryption for any PHI without Covered Entity's prior
+          written consent.
+      - kind: fallback
+        rung: 1
+        label: Encryption meeting NIST guidance, algorithm not named
+        zone: green
+        summary: Commitment to NIST-consistent encryption without naming the specific algorithm.
+        language: >
+          Business Associate shall encrypt PHI in transit and at rest using
+          methods consistent with guidance issued by the National Institute
+          of Standards and Technology, sufficient to render the PHI unusable,
+          unreadable or indecipherable to unauthorised persons for purposes
+          of the Breach Notification Rule.
+      - kind: fallback
+        rung: 2
+        label: Customer-managed key option
+        zone: yellow
+        approver_role: security_lead
+        conditions: {deal_value_band: [enterprise, strategic]}
+        give_get: Ask for a longer initial term or a key-management services fee in return for the engineering work.
+        summary: Customer may supply or manage its own encryption key for data at rest.
+        language: >
+          Business Associate shall encrypt PHI at rest using AES-256 and in
+          transit using TLS 1.2 or higher. Where the Services support
+          customer-managed keys and Covered Entity has configured one,
+          Business Associate shall encrypt Covered Entity's PHI at rest using
+          that key, subject to Covered Entity's obligation to safeguard the
+          key and the consequences of its loss as described in the
+          Documentation.
+        internal_note: Confirm with engineering that customer-managed keys are enabled for the target region before offering this rung.
+      - kind: acceptable_variant
+        label: Encryption standard defined by cross-reference to the security exhibit
+        zone: green
+        summary: Same algorithms, stated in the parties' security exhibit rather than the BAA body.
+        language: >
+          PHI shall be encrypted in transit and at rest to the standards set
+          out in Exhibit [X] (Security Measures), which specifies Transport
+          Layer Security 1.2 or higher and AES-256 and is designed to meet
+          the encryption guidance referenced in the Breach Notification Rule.
+    parameters:
+      - key: encryption_key_length_bits
+        label: Minimum encryption key length for PHI at rest
+        value_type: number
+        unit: bits
+        direction: higher_is_better
+        preferred_value: 256
+        green_limit: 256
+        yellow_limit: 128
+        extraction_hint: >
+          The key length in bits named for data at rest, most often AES-128
+          or AES-256. If only "industry-standard encryption" is stated with
+          no key length, leave this parameter absent rather than guessing.
+    red_lines:
+      - key: phi-encryption-disabled-at-will
+        description: Business Associate may disable or downgrade encryption of PHI without Covered Entity's consent.
+        condition_type: phrase
+        condition:
+          any:
+            - may disable encryption at its discretion
+            - encryption is not required for
+          negation_guard: true
+        action: escalate
+        approver_role: security_lead
+        rationale: >
+          Disabling encryption without consent removes the safe harbor from
+          Breach notification and must be reviewed by the security lead
+          before any such term is accepted.
+    objections:
+      - objection: We require AES-256 and a customer-managed key for every deployment, not just enterprise deals.
+        their_rationale: The Covered Entity's own security policy sets one encryption standard regardless of deal size.
+        response: >
+          AES-256 at rest and TLS 1.2 or higher in transit are already our
+          default for every customer. Customer-managed keys involve
+          additional engineering and support, so we offer them on larger
+          deployments where we can resource that work; for a standard
+          contract we can revisit this once the account grows.
+        talking_points:
+          - Confirm AES-256 and TLS 1.2+ are already included at no extra cost.
+          - Customer-managed keys are a scoped, resourced feature, not a default.
+        recommended_position: {rule_key: security.phi_encryption, rung: 2}
+        frequency: occasional
+        counterparty_profile: Tier 1 health systems with strict key management policies
+      - objection: Naming TLS 1.2 locks us into an old standard; just promise "industry-standard encryption."
+        their_rationale: Some counsel prefer flexible language that ages with the technology.
+        response: >
+          We are glad to use TLS 1.3 where supported and treat 1.2 as the
+          floor, not the ceiling, so naming the minimum does not lock in an
+          old standard. A stated minimum is also what lets both sides confirm
+          the encryption guidance is met for Breach Notification Rule
+          purposes.
+        talking_points:
+          - A floor is not a ceiling; TLS 1.3 is used where available.
+          - A named standard is auditable; "industry-standard" is not.
+        recommended_position: {rule_key: security.phi_encryption, rung: 1}
+        frequency: rare
+    dependencies:
+      - related_rule_key: breach_notification.notification_timeline
+        relation: read_with
+        note: Encryption meeting HHS guidance can take an incident outside the definition of a Breach requiring notification.
+    test_cases:
+      - name: TLS 1.2 and AES-256 named
+        context: {regimes: [hipaa], data_sensitivity: phi}
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          All PHI is protected in transit with Transport Layer Security
+          version 1.2 or above and at rest with 256-bit Advanced Encryption
+          Standard, and the encryption keys are kept apart from the
+          encrypted data.
+      - name: NIST-consistent encryption, no algorithm named
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          PHI is encrypted in transit and at rest using methods that follow
+          current guidance from the National Institute of Standards and
+          Technology, rendering it unreadable to anyone without authorised
+          access.
+      - name: Encryption standard set in a referenced security exhibit
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          The parties' Security Exhibit specifies that PHI is encrypted in
+          transit with TLS 1.2 or higher and at rest with AES-256, meeting
+          the encryption guidance referenced in the Breach Notification
+          Rule, and that standard governs Business Associate's handling of
+          PHI under this BAA.
+      - name: Customer-managed key for a strategic deployment
+        context: {deal_value_band: strategic}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          PHI at rest is encrypted with AES-256 using an encryption key
+          generated and held by Covered Entity in its own key management
+          system, which Business Associate integrates with the Services.
+      - name: Encryption "where reasonably feasible"
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Business Associate will encrypt PHI in transit and at rest where
+          reasonably feasible, using whatever method Business Associate
+          considers adequate at the time.
+      - name: Encryption disabled at Business Associate's discretion
+        expected_outcome: red_line
+        expected_red_line_key: phi-encryption-disabled-at-will
+        expected_zone: red
+        sample_text: >
+          Business Associate may disable encryption at its discretion for any
+          PHI it determines does not require it.
+      - name: Trap - encryption may not be disabled without consent
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Business Associate shall not disable or weaken encryption of any
+          PHI except with Covered Entity's prior written consent; absent
+          such consent, PHI remains encrypted in transit with TLS 1.2 or
+          higher and at rest with AES-256 at all times.
+
+  - rule_key: breach_notification.notification_timeline
+    title: Breach notification timeline
+    required: true
+    risk_weight: 10
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Business Associate notifies Covered Entity without unreasonable delay
+      and in no event later than 72 hours after confirming a Breach of
+      unsecured PHI. This overlay rule overrides the general breach
+      notification position in the SaaS agreement and the data processing
+      addendum wherever PHI is involved, and its limits are the same as or
+      stricter than Halcyon's standard breach appetite.
+    risk_rationale: >
+      The Breach Notification Rule gives a business associate up to 60 days
+      after discovery to notify the covered entity, under 45 C.F.R.
+      § 164.410, but Halcyon's own risk appetite commits to a much faster 72
+      hours after confirmation so that Covered Entity can meet its own
+      60-day duty to individuals and regulators with time to spare. Starting
+      the clock on mere suspicion, before Halcyon's incident response team
+      has had a chance to confirm what happened across a platform serving
+      about 310 customers, would force premature and often wrong notices,
+      which is why the clock runs from confirmation and never below 24
+      hours even with the security lead's and privacy counsel's sign-off.
+    detection_guidance: >
+      Look for "without unreasonable delay", "without undue delay", "no later
+      than", a number of hours, and the triggering event: "discovery",
+      "becoming aware", "suspected", or "confirmed". Record the number of
+      hours and the trigger separately; a clause that starts the clock on
+      suspicion is materially different from one that starts it on
+      confirmation even at the same number of hours. This rule overrides
+      breach_notification.notification_timeline in the SaaS agreement and in
+      the data processing addendum whenever PHI is involved. Absence in an
+      agreement covering PHI is a missing mandatory term.
+    source_ref: 45 C.F.R. § 164.410 (business associate notice to covered entity); § 164.402 (definition of Breach)
+    authored_by: Privacy Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-15
+    positions:
+      - kind: preferred
+        rung: 0
+        label: 72 hours after confirmation
+        zone: green
+        summary: Notice without unreasonable delay, no later than 72 hours after Business Associate confirms a Breach.
+        language: >
+          Business Associate shall notify Covered Entity of a Breach of
+          unsecured PHI without unreasonable delay and in no event later than
+          seventy-two (72) hours after Business Associate confirms that a
+          Breach has occurred. For purposes of this BAA, a Breach is
+          confirmed when Business Associate's incident response process has
+          determined, following a reasonable investigation, that unsecured
+          PHI has been acquired, accessed, used or disclosed in a manner not
+          permitted by the Privacy Rule, and that no exception in the
+          definition of Breach at 45 C.F.R. § 164.402 applies. This section
+          does not shorten the period Business Associate has to investigate a
+          security incident before confirming whether it is a Breach.
+      - kind: fallback
+        rung: 1
+        label: 48 hours after confirmation
+        zone: green
+        summary: Notice no later than 48 hours after confirmation.
+        language: >
+          Business Associate shall notify Covered Entity of a Breach of
+          unsecured PHI without unreasonable delay and in no event later than
+          forty-eight (48) hours after Business Associate confirms that a
+          Breach has occurred, applying the same confirmation standard as the
+          72-hour position.
+      - kind: fallback
+        rung: 2
+        label: 24 hours after confirmation
+        zone: yellow
+        approver_role: security_lead
+        conditions: {counterparty_tier: [tier_1, tier_2]}
+        give_get: >
+          Ask that the 24-hour clock run only from confirmation, never from
+          suspicion, and that initial notice may be given in stages under the
+          notification content rule. Obtain privacy counsel's sign-off before
+          offering.
+        summary: Notice no later than 24 hours after confirmation, the shortest period Halcyon will accept.
+        language: >
+          Business Associate shall notify Covered Entity of a Breach of
+          unsecured PHI without unreasonable delay and in no event later than
+          twenty-four (24) hours after Business Associate confirms that a
+          Breach has occurred. Initial notice may be given with the
+          information then available and supplemented as the investigation
+          continues, in accordance with breach_notification.notification_content.
+        internal_note: Requires sign-off from both the security lead and privacy counsel before being offered.
+      - kind: acceptable_variant
+        label: Without undue delay wording, 72-hour outer limit
+        zone: green
+        summary: Different phrasing for the same 72-hour-after-confirmation commitment.
+        language: >
+          Promptly upon confirming that unsecured PHI has been subject to a
+          Breach, and in any case not later than seventy-two (72) hours
+          following that confirmation, Business Associate shall give Covered
+          Entity notice of the Breach.
+      - kind: acceptable_variant
+        label: Business-day equivalent of 72 hours
+        zone: green
+        summary: Counterparty wording expressed in business days that does not exceed 72 hours in practice.
+        language: >
+          Business Associate shall notify Covered Entity within three (3)
+          business days of confirming a Breach of unsecured PHI, provided
+          that in no case shall notice be given later than seventy-two (72)
+          hours after such confirmation.
+    parameters:
+      - key: breach_notification_hours
+        label: Hours after confirmation to notify Covered Entity
+        value_type: number
+        unit: hours
+        direction: higher_is_better
+        preferred_value: 72
+        green_limit: 48
+        yellow_limit: 24
+        extraction_hint: >
+          Convert any stated period to hours: days times 24, business days
+          times roughly 8 unless the clause says the period runs
+          continuously. More hours is better for Business Associate, since it
+          allows more time to investigate before the formal notice is due.
+          Record the number only where the trigger is confirmation of a
+          Breach; where the trigger is suspicion, record the hours here and
+          let the trigger parameter carry the red determination.
+      - key: breach_notification_trigger
+        label: Event that starts the notification clock
+        value_type: enum
+        direction: set_membership
+        preferred_value: confirmed
+        green_limit: [confirmed]
+        yellow_limit: []
+        allowed_values: [confirmed, discovered, suspected]
+        extraction_hint: >
+          confirmed: the clock runs from Business Associate's determination
+          that a Breach occurred. discovered: runs from when Business
+          Associate knew or should have known of the incident, before
+          confirmation. suspected: runs from a mere suspicion or report,
+          before any investigation. Map "becomes aware" to discovered.
+    red_lines:
+      - key: breach-notice-under-24-hours-or-suspicion
+        description: Notice is required in under 24 hours, or the clock starts from suspicion rather than confirmation or discovery.
+        condition_type: parameter
+        condition: {parameter_key: breach_notification_trigger, op: eq, value: suspected}
+        action: block
+        rationale: >
+          Notifying on suspicion forces notices before Halcyon's incident
+          response team can determine whether unsecured PHI was actually
+          involved, producing false alarms across a 310-customer platform;
+          section 2.4 places this, and any period under 24 hours, in the red
+          zone regardless of approver.
+      - key: breach-notice-under-24-hours
+        description: The stated notification period is under 24 hours even though the trigger is confirmation or discovery.
+        condition_type: parameter
+        condition: {parameter_key: breach_notification_hours, op: lt, value: 24}
+        action: block
+        rationale: >
+          Section 2.4 fixes 24 hours, with both the security lead and privacy
+          counsel, as the floor Halcyon will accept; nothing shorter is
+          operationally achievable for a confirmed-incident investigation.
+    objections:
+      - objection: Our patients are owed notice fast; 72 hours after you confirm could be weeks after the incident started.
+        their_rationale: The Covered Entity wants the clock tied to the incident, not to Halcyon's internal process.
+        response: >
+          We investigate every suspected incident immediately regardless of
+          this clause; the 72-hour period measures the time from when we have
+          actually confirmed unsecured PHI was involved, not from when we
+          started looking. That distinction protects you too, because a
+          notice sent on suspicion is often wrong and has to be withdrawn or
+          corrected. We can move to 48 or, with sign-off, 24 hours after
+          confirmation.
+        talking_points:
+          - 45 C.F.R. § 164.410 gives a business associate up to 60 days; 72 hours is already far inside that.
+          - A false notice damages trust and may itself need correcting.
+          - Offer 48 hours as the next position.
+        recommended_position: {rule_key: breach_notification.notification_timeline, rung: 1}
+        frequency: common
+        counterparty_profile: Hospital systems and physician groups
+      - objection: Notify us the moment you suspect a breach, not once you have confirmed one.
+        their_rationale: Earlier warning lets the Covered Entity start its own preparations sooner.
+        response: >
+          We can keep you informed informally once an incident is under
+          active investigation, but a formal Breach notice tied to mere
+          suspicion is not something we can commit to contractually, because
+          most suspected incidents turn out not to involve PHI. What we can
+          commit to is a fast, fixed period measured from confirmation, which
+          is the version our security and privacy teams can actually meet
+          every time.
+        talking_points:
+          - Distinguish an informal heads-up from the formal Breach notice.
+          - Offer 24 hours after confirmation with security lead and privacy counsel sign-off as the floor.
+        recommended_position: {rule_key: breach_notification.notification_timeline, rung: 2}
+        frequency: occasional
+        counterparty_profile: Tier 1 health systems
+      - objection: Twenty-four hours is not fast enough for a breach affecting thousands of patients.
+        their_rationale: Large-scale incidents are seen as needing faster escalation regardless of Halcyon's standard floor.
+        response: >
+          Twenty-four hours after confirmation is the fastest period our
+          incident response process can meet reliably, and it already
+          requires sign-off from both our security lead and our privacy
+          counsel. For a large-scale incident we will also keep you updated
+          informally as the investigation proceeds, ahead of the formal
+          notice deadline.
+        talking_points:
+          - 24 hours after confirmation is Halcyon's floor across all customers, not specific to this deal.
+          - Informal interim updates are offered without changing the contractual deadline.
+        recommended_position: {rule_key: breach_notification.notification_timeline, rung: 2}
+        frequency: rare
+        counterparty_profile: Large academic medical centres
+    dependencies:
+      - related_rule_key: breach_notification.notification_content
+        relation: read_with
+        note: The timeline rule fixes when notice is due; the content rule fixes what the notice must say and whether it may be phased.
+      - related_rule_key: security.phi_encryption
+        relation: trade_against
+        note: Encryption of PHI meeting HHS guidance can take an incident outside the definition of a reportable Breach entirely.
+    test_cases:
+      - name: 72 hours after confirmation
+        context: {regimes: [hipaa], data_sensitivity: phi}
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          If Business Associate confirms that a Breach of unsecured PHI has
+          taken place, it will tell Covered Entity without unreasonable
+          delay and in any event within 72 hours of that confirmation.
+      - name: Three business days, capped at 72 hours
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Business Associate shall give notice within three business days of
+          confirming a Breach of unsecured PHI, and in no event later than
+          seventy-two hours after confirmation.
+      - name: 24 hours after confirmation for a large health system
+        context: {regimes: [hipaa], counterparty_tier: tier_1}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Upon confirming a Breach of unsecured PHI, Business Associate shall
+          notify Covered Entity within twenty-four (24) hours of that
+          confirmation, with initial notice supplemented as more facts become
+          known.
+      - name: 36 hours from discovery rather than confirmation
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Business Associate shall notify Covered Entity within thirty-six
+          (36) hours after it discovers facts indicating a possible Breach of
+          unsecured PHI, whether or not an investigation has confirmed one.
+      - name: Notice from the moment of suspicion
+        expected_outcome: red_line
+        expected_red_line_key: breach-notice-under-24-hours-or-suspicion
+        expected_zone: red
+        sample_text: >
+          Business Associate shall notify Covered Entity within twelve (12)
+          hours of any suspected Breach of unsecured PHI, whether or not
+          Business Associate has confirmed that one occurred.
+      - name: Trap - fast internal escalation, notice still at 72 hours
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Business Associate shall escalate any suspected security incident
+          to its incident response team immediately upon suspicion; once that
+          team confirms a Breach of unsecured PHI has occurred, Business
+          Associate shall notify Covered Entity within seventy-two (72) hours
+          of the confirmation.
+
+  - rule_key: breach_notification.notification_content
+    title: Breach notification content
+    required: true
+    risk_weight: 7
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      The notice identifies, to the extent known, the Individuals whose
+      unsecured PHI was involved, a description of the Breach, the types of
+      PHI involved, steps Individuals should take, Business Associate's
+      investigation and mitigation steps, and a contact point. Information
+      not yet available may be supplied in later notices as it becomes
+      known.
+    risk_rationale: >
+      HIPAA requires a business associate's notice to the covered entity to
+      include, to the extent possible, the identification of each affected
+      Individual, consistent with 45 C.F.R. § 164.410(c), but an incident
+      often unfolds over days as Halcyon's security team completes forensic
+      work across shared AWS infrastructure. Allowing later notices to add
+      facts as they are confirmed lets Halcyon give an honest first notice
+      within the 72-hour commitment instead of delaying it until every
+      detail is known.
+    detection_guidance: >
+      Look for "the notification shall include", "identification of each
+      Individual", "nature of the breach", "types of PHI involved",
+      "steps individuals should take", "mitigation" and "in phases" or
+      "supplemented". Record whether phased or supplemental notice is
+      allowed and who bears the cost of notifying individuals and
+      regulators. Absence leaves the content of the notice undefined and is
+      a missing issue to raise in a business associate agreement.
+    source_ref: 45 C.F.R. § 164.410(c) (content of the notification by a business associate)
+    authored_by: Privacy Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-15
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Standard content list, phased notice permitted
+        zone: green
+        summary: The regulatory content list, with supplemental notices as facts become known.
+        language: >
+          Each notice of a Breach of unsecured PHI shall include, to the
+          extent then known to Business Associate: (a) a brief description of
+          what happened, including the date of the Breach and the date of
+          discovery, if known; (b) the identification of each Individual
+          whose unsecured PHI was, or is reasonably believed to have been,
+          acquired, accessed, used or disclosed; (c) the types of unsecured
+          PHI involved; (d) steps Individuals should take to protect
+          themselves from potential harm; (e) a brief description of what
+          Business Associate is doing to investigate the Breach, mitigate
+          harm and prevent further Breaches; and (f) contact information for
+          an individual or office at Business Associate who can answer
+          questions. Where information required by this section is not
+          available at the time of the initial notice, Business Associate
+          shall provide it in one or more supplemental notices as it becomes
+          available, without unreasonable delay.
+      - kind: fallback
+        rung: 1
+        label: Standard content list, no phasing beyond a single follow-up
+        zone: green
+        summary: The same content list, with at most one supplemental notice rather than open-ended phasing.
+        language: >
+          Each notice of a Breach of unsecured PHI shall include, to the
+          extent then known, the information described in 45 C.F.R.
+          § 164.410(c): what happened, the Individuals affected, the types
+          of PHI involved, recommended protective steps, Business
+          Associate's investigation and mitigation measures, and a contact
+          point. If any of that information is not known at the time of the
+          initial notice, Business Associate shall provide it in a single
+          supplemental notice within thirty (30) days after the initial
+          notice.
+      - kind: fallback
+        rung: 2
+        label: Content list plus Halcyon's root-cause summary
+        zone: yellow
+        approver_role: privacy_counsel
+        give_get: Ask that the root-cause summary be provided on a reasonable timeline rather than with the initial notice.
+        summary: Adds a root-cause analysis to the standard content list.
+        language: >
+          Each notice shall include the content described in 45 C.F.R.
+          § 164.410(c), and Business Associate shall, within a reasonable
+          time after completing its investigation, also provide a summary of
+          the root cause of the Breach and the corrective action taken, to
+          the extent that disclosure would not itself compromise security or
+          waive privilege.
+        internal_note: Confirm with the security lead that the root-cause summary can be shared without exposing details that would help a future attacker.
+      - kind: acceptable_variant
+        label: Content list restated in the counterparty's own order
+        zone: green
+        summary: The same six elements, reordered and reworded by the counterparty.
+        language: >
+          Business Associate's notice of a Breach shall, so far as then
+          known, state: the categories and approximate number of affected
+          Individuals and the types of unsecured PHI involved; a description
+          of the incident, including when it occurred and when it was
+          discovered; the measures Business Associate has taken or proposes
+          to mitigate harm and prevent recurrence; recommended steps for
+          affected Individuals; and a point of contact for further
+          information. Facts unavailable at first notice shall be supplied
+          as soon as reasonably practicable thereafter.
+    parameters:
+      - key: phased_notification_permitted
+        label: Whether a notice may supply missing facts in later, supplemental notices
+        value_type: boolean
+        direction: exact
+        preferred_value: true
+        extraction_hint: >
+          True where the clause allows information unknown at first notice to
+          be supplied later, by any wording such as "to the extent known",
+          "supplemented", or "in phases". False where the clause requires the
+          complete content list in a single notice with no allowance for
+          facts not yet known.
+      - key: supplemental_notice_days
+        label: Days allowed for a supplemental notice once the initial notice is phased
+        value_type: duration_days
+        unit: days
+        direction: higher_is_better
+        preferred_value: 999
+        green_limit: 30
+        yellow_limit: 10
+        extraction_hint: >
+          Where the clause caps the time to supply missing information in a
+          follow-up notice, record the number of days. Where supplemental
+          notice is open-ended ("as it becomes available"), treat as having
+          no cap and record 999 to indicate no numeric limit was stated.
+    red_lines:
+      - key: breach-content-single-complete-notice
+        description: The clause requires the complete content list in a single notice with no allowance for facts unknown at the time.
+        condition_type: parameter
+        condition: {parameter_key: phased_notification_permitted, op: eq, value: false}
+        action: escalate
+        approver_role: privacy_counsel
+        rationale: >
+          Forensic investigations of a security incident often take longer
+          than the 72-hour notice commitment to fully resolve, so a rule
+          against phasing would put Business Associate in breach of either
+          the timeline or the content requirement in every non-trivial
+          incident.
+    objections:
+      - objection: Give us everything the regulation requires in the first notice; we cannot act on partial information.
+        their_rationale: The Covered Entity wants a complete picture immediately to start its own 60-day clock with confidence.
+        response: >
+          We include everything we know at the time of the first notice and
+          commit to following up without unreasonable delay as the
+          investigation develops. Requiring every element up front would
+          either slow the first notice well past 72 hours or force us to
+          guess at facts we have not yet confirmed, which is worse for your
+          planning than an honest, timely update.
+        talking_points:
+          - 45 C.F.R. § 164.410(c) itself qualifies the content list with "to the extent possible".
+          - A guessed fact that later changes is harder to act on than a flagged unknown.
+        recommended_position: {rule_key: breach_notification.notification_content, rung: 1}
+        frequency: common
+        counterparty_profile: Hospital systems
+      - objection: Tell us exactly what caused the breach and what you changed so it does not happen again.
+        their_rationale: The Covered Entity's own regulators and auditors will ask it the same question.
+        response: >
+          We can share a root-cause summary and the corrective action once
+          our investigation is complete, consistent with keeping details that
+          could help a future attacker, or that are privileged, out of the
+          written notice. We will agree a reasonable timeline for that
+          summary rather than attaching it to the initial notice.
+        talking_points:
+          - Offer the root-cause summary as a follow-up document, not part of the formal notice.
+          - Note any limits from an active law enforcement request.
+        recommended_position: {rule_key: breach_notification.notification_content, rung: 2}
+        frequency: occasional
+        counterparty_profile: Tier 1 health systems with their own regulatory reporting duties
+    dependencies:
+      - related_rule_key: breach_notification.notification_timeline
+        relation: read_with
+        note: The content rule describes what each notice required by the timeline rule must contain.
+      - related_rule_key: indemnification.regulatory_penalties_indemnity
+        relation: read_with
+        note: A complete, accurate notice record supports Business Associate's position if a regulatory penalty is later alleged to flow from its conduct.
+    test_cases:
+      - name: Full content list with open-ended phasing
+        context: {regimes: [hipaa], data_sensitivity: phi}
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Notice of a Breach will cover, as far as then known: what happened
+          and when; which individuals' unsecured PHI was involved; the types
+          of PHI; protective steps individuals should take; what Business
+          Associate is doing to investigate and contain the incident; and a
+          contact point. Anything not yet known will be added in later
+          notices without unreasonable delay.
+      - name: Same six elements, counterparty's own wording
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          The breach notice will set out the categories and approximate
+          count of affected individuals and the PHI types involved, how and
+          when the incident happened and was found, the containment and
+          mitigation steps taken, suggested protective steps for
+          individuals, and a contact for follow-up, with later facts added
+          as they are confirmed.
+      - name: Content list plus root-cause summary
+        context: {regimes: [hipaa], counterparty_tier: tier_1}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          The notice shall contain the elements described in 45 C.F.R.
+          § 164.410(c), and within a reasonable time after the investigation
+          closes Business Associate shall also provide a root-cause summary
+          and the corrective action taken, consistent with not compromising
+          security or privilege.
+      - name: Content list with a single thirty-day follow-up cap
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          The initial notice shall contain the content described above to
+          the extent known, and any missing element shall be supplied no
+          later than thirty (30) days later in one consolidated follow-up
+          notice, after which no further supplementation is required.
+      - name: Complete notice required in a single communication
+        expected_outcome: red_line
+        expected_red_line_key: breach-content-single-complete-notice
+        expected_zone: red
+        sample_text: >
+          Business Associate's notice of a Breach must include every element
+          described above in full in a single written communication; no
+          supplemental or follow-up notice will be accepted.
+      - name: Trap - phasing described as "completing the record" rather than "supplementing"
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Business Associate's initial notice will state what is known at
+          that time, and Business Associate will complete the record with
+          any outstanding element of the content described above as soon as
+          it is confirmed, without unreasonable delay.
+
+  - rule_key: subprocessors.subcontractor_baa_flow_down
+    title: Subcontractor flow-down of BAA restrictions
+    required: true
+    risk_weight: 8
+    negotiable: false
+    default_zone: red
+    needs_human_judgment: false
+    position_summary: >
+      Business Associate obtains a written agreement from each Subcontractor
+      that creates, receives, maintains or transmits PHI on its behalf,
+      binding the Subcontractor to restrictions and conditions at least as
+      protective as those in this BAA.
+    risk_rationale: >
+      HIPAA requires a business associate to bind its subcontractors to the
+      same restrictions before any PHI reaches them, and Halcyon relies on a
+      small number of cloud, messaging and analytics vendors as
+      Subcontractors to run Halcyon Engage across AWS us-east-1, us-west-2
+      and eu-west-1. Because this flow-down is itself mandated by the
+      regulation rather than a point of commercial leverage, Halcyon
+      accepts it as drafted and does not trade it away for other terms.
+    detection_guidance: >
+      Look for "Subcontractors that create, receive, maintain or transmit
+      PHI", "agree in writing to the same restrictions, conditions and
+      requirements", "45 C.F.R. § 164.502(e)(1)(ii)" and "flow down". Record
+      whether the obligation is limited to Subcontractors handling PHI, as
+      it should be, or extends to every vendor Business Associate uses.
+      Absence in a business associate agreement is a missing mandatory term.
+    source_ref: 45 C.F.R. § 164.502(e)(1)(ii); § 164.504(e)(2)(ii)(D)
+    authored_by: Privacy Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-16
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Written flow-down to Subcontractors handling PHI
+        zone: green
+        summary: Business Associate binds each Subcontractor that touches PHI to equivalent restrictions in writing.
+        language: >
+          Before allowing a Subcontractor to create, receive, maintain or
+          transmit PHI on its behalf, Business Associate shall enter into a
+          written agreement with that Subcontractor containing restrictions
+          and conditions on the Subcontractor's use and disclosure of PHI
+          that are at least as protective as the restrictions and conditions
+          that apply to Business Associate under this BAA, as required by 45
+          C.F.R. § 164.502(e)(1)(ii). Business Associate remains responsible
+          for compliance with this BAA notwithstanding any act or omission of
+          a Subcontractor.
+      - kind: acceptable_variant
+        label: Flow-down with a defined Subcontractor BAA term
+        zone: green
+        summary: Same obligation, using a defined term for the Subcontractor's agreement.
+        language: >
+          Business Associate shall ensure that any Subcontractor to which it
+          delegates a function, activity or service involving PHI first
+          signs a "Subcontractor BAA" containing terms no less protective of
+          PHI than the terms of this BAA, consistent with 45 C.F.R.
+          § 164.502(e)(1)(ii), before the Subcontractor creates, receives,
+          maintains or transmits any PHI.
+      - kind: acceptable_variant
+        label: Flow-down stated as a warranty with a short grace period for new Subcontractors
+        zone: green
+        summary: Counterparty-style wording that frames the obligation as a continuing warranty, with a short window to paper a newly engaged Subcontractor.
+        language: >
+          Business Associate represents and warrants that each of its
+          Subcontractors that creates, receives, maintains or transmits PHI
+          is, or within fifteen (15) days of being engaged will be, bound by
+          a written agreement imposing restrictions on the use and
+          disclosure of PHI at least as protective as those in this BAA, and
+          that no such Subcontractor will be given access to PHI before that
+          agreement is in place.
+      - kind: acceptable_variant
+        label: Flow-down with Covered Entity's right to a summary of key terms
+        zone: green
+        summary: Same written-agreement obligation, adding a right for Covered Entity to see a summary of the restrictions imposed on each Subcontractor.
+        language: >
+          Business Associate shall bind each Subcontractor that creates,
+          receives, maintains or transmits PHI to a written agreement
+          imposing restrictions on the use and disclosure of PHI at least as
+          protective as those in this BAA, consistent with 45 C.F.R.
+          § 164.502(e)(1)(ii), and shall, on Covered Entity's written
+          request, provide a summary of the key restrictions imposed on a
+          named Subcontractor without disclosing commercially sensitive
+          contract terms.
+    red_lines:
+      - key: subcontractor-flow-down-absent
+        description: Subcontractors that handle PHI are not bound in writing to restrictions at least as protective as this BAA.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause allows Business Associate to engage Subcontractors
+            that create, receive, maintain or transmit PHI without first
+            obtaining a written agreement binding them to restrictions at
+            least as protective as this BAA, or states that Business
+            Associate need not flow down such restrictions.
+        action: block
+        rationale: >
+          Engaging a Subcontractor without the required written
+          restrictions is itself a HIPAA violation by Business Associate and
+          would expose Halcyon to liability for the Subcontractor's conduct
+          with no contractual protection in place.
+    test_cases:
+      - name: Written agreement at least as protective, before PHI access
+        context: {regimes: [hipaa], data_sensitivity: phi}
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Prior to permitting any Subcontractor to create, receive, maintain
+          or transmit PHI on Business Associate's behalf, Business Associate
+          will sign a written agreement with that Subcontractor imposing
+          restrictions on PHI no less protective than those found in this
+          BAA, as 45 C.F.R. § 164.502(e)(1)(ii) requires.
+      - name: Warranty with a fifteen-day grace period
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Business Associate warrants that every Subcontractor handling PHI
+          is bound, or will within fifteen days of engagement be bound, by a
+          written agreement at least as protective of PHI as this BAA, and
+          that PHI access will not be granted before that agreement is
+          signed.
+      - name: Flow-down limited to Subcontractors Covered Entity pre-approves
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Business Associate shall enter into a written agreement with each
+          Subcontractor that handles PHI containing restrictions at least as
+          protective as this BAA, provided that Business Associate shall
+          first obtain Covered Entity's written approval of the identity of
+          each such Subcontractor.
+      - name: Oral assurance from a cloud Subcontractor
+        expected_outcome: deviation
+        expected_zone: red
+        sample_text: >
+          Business Associate has received oral assurances from its hosting
+          Subcontractor that PHI will be handled appropriately and considers
+          that sufficient in place of a signed Subcontractor agreement.
+      - name: No obligation to flow down restrictions
+        expected_outcome: red_line
+        expected_red_line_key: subcontractor-flow-down-absent
+        expected_zone: red
+        sample_text: >
+          Business Associate may engage Subcontractors to assist in
+          performing the Services, including Subcontractors that will handle
+          PHI, without any requirement to obtain a written data protection
+          agreement from them.
+      - name: No subcontractor flow-down clause
+        expected_outcome: missing
+        expected_zone: red
+        sample_text: ""
+
+  - rule_key: audit.hhs_access
+    title: Access to books and records by the Secretary of HHS
+    required: true
+    risk_weight: 4
+    negotiable: false
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Business Associate makes its internal practices, books and records
+      relating to PHI available to the Secretary of Health and Human
+      Services for determining compliance with the HIPAA Rules.
+    risk_rationale: >
+      This obligation runs to a federal regulator rather than to Covered
+      Entity, so it carries little commercial risk for Halcyon beyond the
+      administrative cost of a government inquiry, which the company's
+      existing SOC 2 Type II and HITRUST r2 evidence packages are already
+      built to support. Because the regulation requires this term, Halcyon
+      accepts it without negotiation and treats any attempt to extend the
+      same access right to Covered Entity or a third party as a separate,
+      negotiated addition under the customer audit rights clause.
+    detection_guidance: >
+      Look for "internal practices, books and records", "available to the
+      Secretary", "Department of Health and Human Services" and "determining
+      compliance with the HIPAA Rules". Check whether the right is limited to
+      the Secretary or is extended to Covered Entity itself, which would
+      duplicate the separate customer audit rights clause. Absence in a
+      business associate agreement is a missing mandatory term.
+    source_ref: 45 C.F.R. § 164.504(e)(2)(ii)(H)
+    authored_by: Privacy Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-16
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Access limited to the Secretary of HHS
+        zone: green
+        summary: Business Associate's internal practices, books and records are made available only to the Secretary, for compliance determinations.
+        language: >
+          Business Associate shall make its internal practices, books and
+          records relating to the use and disclosure of PHI received from,
+          or created or received by Business Associate on behalf of, Covered
+          Entity available to the Secretary of the United States Department
+          of Health and Human Services, in the time and manner designated by
+          the Secretary, for purposes of determining Covered Entity's and
+          Business Associate's compliance with the HIPAA Rules.
+      - kind: acceptable_variant
+        label: Access framed as cooperation with an HHS investigation
+        zone: green
+        summary: Same scope, described as cooperation with an investigation or review rather than as a standing right of inspection.
+        language: >
+          Business Associate shall cooperate with, and make available to,
+          the Secretary of Health and Human Services such internal practices,
+          books and records concerning PHI as the Secretary requires in
+          connection with an investigation or compliance review under the
+          HIPAA Rules.
+      - kind: acceptable_variant
+        label: Access right stated by cross-reference to the regulation
+        zone: green
+        summary: Same obligation, stated by reference to the regulatory section rather than spelled out.
+        language: >
+          Business Associate shall make available to the Secretary of Health
+          and Human Services the internal practices, books and records
+          relating to PHI that 45 C.F.R. § 164.504(e)(2)(ii)(H) requires a
+          business associate to produce, for purposes of determining
+          compliance with the HIPAA Rules.
+    red_lines:
+      - key: hhs-access-extended-to-covered-entity
+        description: The right of access given to HHS is also extended to Covered Entity or another third party as a standing inspection right.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause gives Covered Entity, or a party other than the
+            Secretary of Health and Human Services, the same standing right
+            to inspect Business Associate's internal practices, books and
+            records that is given to the Secretary, without the separate
+            notice, scope and cost terms of the negotiated customer audit
+            rights clause.
+        action: escalate
+        approver_role: security_lead
+        rationale: >
+          A standing inspection right for Covered Entity belongs in the
+          negotiated audit clause, with its own notice period, scope and
+          cost allocation, not folded into the HHS-specific term the
+          regulation requires.
+    test_cases:
+      - name: Access limited to the Secretary of HHS
+        context: {regimes: [hipaa], data_sensitivity: phi}
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Business Associate will provide the Secretary of the Department of
+          Health and Human Services with the internal practices, books and
+          records about its handling of PHI that the Secretary needs to
+          determine compliance with the HIPAA Rules.
+      - name: Framed as cooperation with an HHS review
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Should the Secretary of Health and Human Services open an
+          investigation or compliance review touching PHI handled under this
+          BAA, Business Associate will cooperate fully and make the relevant
+          internal practices, books and records available as requested.
+      - name: HHS access limited to records Business Associate selects
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Business Associate will make available to the Secretary of Health
+          and Human Services such of its internal practices, books and
+          records as Business Associate determines, in its discretion, are
+          relevant to a compliance review.
+      - name: Covered Entity given the same standing inspection right as HHS
+        expected_outcome: red_line
+        expected_red_line_key: hhs-access-extended-to-covered-entity
+        expected_zone: red
+        sample_text: >
+          Business Associate shall make its internal practices, books and
+          records relating to PHI available to the Secretary of Health and
+          Human Services and, on the same terms and on request at any time,
+          to Covered Entity, without regard to the notice or scope limits in
+          the audit clause of the Underlying Agreement.
+      - name: No HHS access clause
+        expected_outcome: missing
+        expected_zone: yellow
+        sample_text: ""
+
+  - rule_key: termination.termination_for_baa_breach
+    title: Termination for breach of the business associate agreement
+    required: true
+    risk_weight: 6
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Covered Entity may terminate this BAA for Business Associate's
+      material breach only after written notice and a 30-day opportunity to
+      cure, and termination of the BAA ends the Underlying Agreement only
+      where the Services cannot lawfully continue without the BAA in place.
+    risk_rationale: >
+      HIPAA requires a business associate agreement to give the covered
+      entity a termination right for material breach, but it does not
+      dictate the cure period or whether that termination automatically
+      ends the commercial agreement, and both are negotiated. A 30-day cure
+      period matches Halcyon's general cure period position and gives its
+      two commercial counsel and one privacy counsel time to fix a
+      documented process failure before a customer worth up to $165k a year
+      on average, and $2.4M at the largest, can walk away from the whole
+      relationship over a single curable lapse.
+    detection_guidance: >
+      Look for "material breach of this BAA", "opportunity to cure",
+      "terminate this BAA", "terminate the Underlying Agreement" and "if
+      neither termination nor cure is feasible". Record the cure period in
+      days and whether BAA termination is linked to termination of the
+      underlying services agreement, and on what condition. Absence in an
+      agreement under which PHI is handled is a missing mandatory term, not
+      a commercial choice, since some termination right for breach of the
+      BAA is required.
+    source_ref: 45 C.F.R. § 164.504(e)(2)(iii) and § 164.504(e)(1)(ii)
+    authored_by: Privacy Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-17
+    positions:
+      - kind: preferred
+        rung: 0
+        label: 30-day cure; BAA termination separate from the Underlying Agreement
+        zone: green
+        summary: Thirty days to cure; termination of the BAA alone unless continuing the Services without PHI is not possible.
+        language: >
+          If Covered Entity determines that Business Associate has violated a
+          material term of this BAA, Covered Entity shall give Business
+          Associate written notice describing the violation and shall afford
+          Business Associate thirty (30) days to cure it. If Business
+          Associate does not cure the violation within that period, Covered
+          Entity may terminate this BAA upon further written notice. This
+          BAA's termination shall not terminate the Underlying Agreement
+          unless the Services cannot be provided under the Underlying
+          Agreement without creating, receiving, maintaining or transmitting
+          PHI, in which case Covered Entity may also terminate the
+          Underlying Agreement. If neither cure nor termination of this BAA
+          or the Underlying Agreement is feasible, Covered Entity shall
+          report the violation to the Secretary of Health and Human
+          Services.
+      - kind: fallback
+        rung: 1
+        label: 15-day cure; same linkage to the Underlying Agreement
+        zone: yellow
+        approver_role: commercial_counsel
+        conditions: {counterparty_tier: [tier_1, tier_2]}
+        give_get: Ask for written notice to be sent to the privacy contact named in the BAA so the cure period is not lost to a misrouted notice.
+        summary: Cure period shortened to 15 days; the linkage to the Underlying Agreement is unchanged.
+        language: >
+          If Covered Entity determines that Business Associate has violated a
+          material term of this BAA, Covered Entity shall give Business
+          Associate written notice describing the violation and shall afford
+          Business Associate fifteen (15) days to cure it. If the violation
+          is not cured within that period, Covered Entity may terminate this
+          BAA upon further written notice, and may also terminate the
+          Underlying Agreement only if the Services cannot be provided under
+          it without creating, receiving, maintaining or transmitting PHI.
+          If neither cure nor termination is feasible, Covered Entity shall
+          report the violation to the Secretary of Health and Human
+          Services.
+      - kind: fallback
+        rung: 2
+        label: 15-day cure; BAA termination automatically ends the Underlying Agreement
+        zone: yellow
+        approver_role: general_counsel
+        conditions: {counterparty_tier: [tier_1], deal_value_band: [enterprise, strategic]}
+        give_get: Require a 90-day transition assistance period before the Underlying Agreement actually ends, so patient data access is not cut off abruptly.
+        summary: The widest linkage Halcyon will accept, only for its larger and most PHI-sensitive relationships.
+        language: >
+          If Covered Entity determines that Business Associate has violated a
+          material term of this BAA, Covered Entity shall give Business
+          Associate written notice describing the violation and fifteen (15)
+          days to cure it. If the violation is not cured, Covered Entity may
+          terminate this BAA and the Underlying Agreement together upon
+          further written notice, subject to the transition assistance
+          period in the Underlying Agreement. If neither cure nor
+          termination is feasible, Covered Entity shall report the violation
+          to the Secretary of Health and Human Services.
+        internal_note: Confirm the transition assistance give-get is in the Underlying Agreement's termination clause before offering this rung.
+      - kind: acceptable_variant
+        label: Cure and linkage stated by cross-reference to the regulation
+        zone: green
+        summary: The same 30-day cure and conditional linkage, expressed by reference to the regulatory standard.
+        language: >
+          Covered Entity's rights on a material violation of this BAA by
+          Business Associate, including the opportunity to cure, the right to
+          terminate this BAA, the conditions on also terminating the
+          Underlying Agreement, and the duty to report to the Secretary where
+          neither cure nor termination is feasible, shall be as described in
+          45 C.F.R. § 164.504(e)(1)(ii) and (e)(2)(iii), and Business
+          Associate shall have no less than thirty (30) days to cure a
+          violation before termination of this BAA takes effect.
+    parameters:
+      - key: baa_cure_period_days
+        label: Days to cure a material violation before Covered Entity may terminate the BAA
+        value_type: duration_days
+        unit: days
+        direction: higher_is_better
+        preferred_value: 30
+        green_limit: 30
+        yellow_limit: 15
+        extraction_hint: >
+          Calendar days Business Associate has to cure after written notice
+          of a material violation, before Covered Entity may terminate.
+          "Immediately" or "without opportunity to cure" counts as 0.
+      - key: baa_termination_linkage
+        label: Whether BAA termination also ends the Underlying Agreement
+        value_type: enum
+        direction: set_membership
+        preferred_value: baa_only_unless_services_impossible
+        green_limit: [baa_only_unless_services_impossible]
+        yellow_limit: [baa_and_underlying_together]
+        allowed_values:
+          - baa_only_unless_services_impossible
+          - baa_and_underlying_together
+          - underlying_terminates_automatically_without_cure
+        extraction_hint: >
+          baa_only_unless_services_impossible: terminating the BAA ends only
+          the BAA unless the Services cannot continue without PHI.
+          baa_and_underlying_together: the clause terminates both
+          agreements together once cure fails. underlying_terminates_automatically_without_cure:
+          the Underlying Agreement ends immediately on an alleged violation
+          with no cure step at all.
+    red_lines:
+      - key: baa-breach-termination-no-cure-opportunity
+        description: Covered Entity may terminate the BAA or the Underlying Agreement for an alleged breach with no opportunity to cure a curable violation.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause allows Covered Entity to terminate this BAA, or the
+            Underlying Agreement, immediately on an alleged material
+            violation by Business Associate without first giving a
+            reasonable opportunity to cure the violation where cure is
+            feasible.
+        action: escalate
+        approver_role: general_counsel
+        rationale: >
+          Removing the cure step turns an ordinary compliance lapse into an
+          immediate loss of a customer worth up to $2.4M a year, with no
+          chance for Halcyon's privacy counsel to correct the issue first.
+    objections:
+      - objection: Any violation of the BAA should let us end the whole relationship immediately; patient data is too important to wait on a cure period.
+        their_rationale: Covered entities see a BAA violation as evidence the vendor cannot be trusted with PHI at all.
+        response: >
+          Most violations we have seen across our customer base are process
+          gaps, such as a misconfigured notification setting, that are fixed
+          within days once flagged, and HIPAA itself builds in a cure
+          concept for exactly that reason. We propose 30 days to cure, with
+          termination available immediately after if we do not fix it, which
+          protects you without penalising a problem we correct quickly.
+        talking_points:
+          - 30 days matches Halcyon's general cure period position across every agreement.
+          - A cure period does not weaken the underlying termination right, only delays it for a curable issue.
+        recommended_position: {rule_key: termination.termination_for_baa_breach, rung: 0}
+        frequency: common
+        counterparty_profile: Hospital systems and physician groups
+      - objection: If you breach the BAA, the whole services agreement should end with it; we cannot keep paying a vendor we cannot trust with PHI.
+        their_rationale: Continuing the Underlying Agreement without the BAA would mean losing the ability to use the Services for PHI purposes at all, so the Covered Entity sees no point in a split outcome.
+        response: >
+          We agree that if the Services genuinely cannot run without
+          handling PHI, ending the BAA should end the Underlying Agreement
+          too, and our language already says so. Where the issue is
+          confined to a part of the Services that does not touch PHI, we
+          would like the chance to keep serving you there while we resolve
+          the BAA issue, rather than losing the whole relationship over one
+          workstream.
+        talking_points:
+          - The preferred position already links termination where the Services cannot continue without PHI.
+          - Offer full linkage, with transition assistance, for larger or tier 1 accounts.
+        recommended_position: {rule_key: termination.termination_for_baa_breach, rung: 2}
+        frequency: occasional
+        counterparty_profile: Tier 1 health systems with an all-or-nothing vendor policy
+      - objection: Fifteen days is still too long when patient data is at risk; terminate on notice.
+        their_rationale: A security-sensitive counterparty wants to be able to exit fast once it loses confidence.
+        response: >
+          Where PHI is at immediate risk, our security incident process and
+          the breach notification clause already give you fast visibility and
+          our commitment to fix the problem, separate from this termination
+          right. For the contractual cure period itself, fifteen days with
+          our general counsel's sign-off is the shortest we can offer and
+          still give our team a fair chance to resolve a curable issue.
+        talking_points:
+          - Distinguish the incident response and breach notice track from the contractual cure period.
+          - Fifteen days already needs general counsel approval and is reserved for larger accounts.
+        recommended_position: {rule_key: termination.termination_for_baa_breach, rung: 1}
+        frequency: rare
+    dependencies:
+      - related_rule_key: breach_notification.notification_timeline
+        relation: read_with
+        note: A Breach that triggers the notification clock may also be the material violation that starts this termination clause's cure period.
+      - related_rule_key: termination.for_cause_cure_period
+        relation: read_with
+        note: The general cure period in the SaaS agreement and the BAA cure period here should be read together; this rule governs when the violation is of the BAA specifically.
+    test_cases:
+      - name: 30-day cure, BAA termination separate from the Underlying Agreement
+        context: {regimes: [hipaa], data_sensitivity: phi}
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          On finding that Business Associate has materially violated this
+          BAA, Covered Entity will give written notice and 30 days to put it
+          right. If it is not fixed in that time, Covered Entity may end
+          this BAA, and will end the Underlying Agreement too only if the
+          Services cannot continue without touching PHI. Where neither
+          ending the BAA nor curing the violation is realistic, Covered
+          Entity will report the matter to HHS.
+      - name: Cure and linkage described by reference to the regulation
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Business Associate's thirty-day right to cure a material
+          violation of this BAA, Covered Entity's termination rights over
+          this BAA and the Underlying Agreement, and the duty to report to
+          the Secretary where neither step is feasible, are governed by 45
+          C.F.R. § 164.504(e)(1)(ii) and (e)(2)(iii).
+      - name: 15-day cure for a tier 1 enterprise account, BAA and Underlying Agreement linked
+        context: {regimes: [hipaa], counterparty_tier: tier_1, deal_value_band: enterprise}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Covered Entity shall give Business Associate fifteen (15) days'
+          written notice to cure a material violation of this BAA. If the
+          violation is not cured, Covered Entity may terminate this BAA and
+          the Underlying Agreement together, subject to transition
+          assistance, or report the matter to the Secretary if neither cure
+          nor termination is feasible.
+      - name: Seven-day cure period
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Covered Entity shall give Business Associate seven (7) days to
+          cure a material violation of this BAA before terminating it and
+          the Underlying Agreement.
+      - name: Termination on notice with no cure opportunity
+        expected_outcome: red_line
+        expected_red_line_key: baa-breach-termination-no-cure-opportunity
+        expected_zone: red
+        sample_text: >
+          Covered Entity may terminate this BAA and the Underlying Agreement
+          immediately upon written notice of any violation by Business
+          Associate, whether or not the violation is capable of being cured.
+      - name: Trap - fast internal fix, formal cure period unchanged
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Business Associate will begin correcting any identified violation
+          of this BAA as soon as it is found; Covered Entity's right to
+          terminate this BAA for an uncured material violation remains
+          subject to the thirty (30) day cure period described above.
+
+  - rule_key: indemnification.regulatory_penalties_indemnity
+    title: Indemnity for regulatory penalties caused by Business Associate
+    required: false
+    risk_weight: 8
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: true
+    judgment_note: >
+      Whether to accept a regulatory penalties indemnity, and at what cap,
+      depends on the customer's actual enforcement exposure and on how the
+      indemnity interacts with the general liability cap and the data
+      breach super-cap; general counsel should weigh the specific deal
+      rather than apply the fallback automatically.
+    position_summary: >
+      Business Associate indemnifies Covered Entity for civil monetary
+      penalties that HHS imposes on Covered Entity to the extent directly
+      caused by Business Associate's uncured, confirmed violation of this
+      BAA, inside the data breach super-cap rather than as an uncapped,
+      separate indemnity.
+    risk_rationale: >
+      Civil monetary penalties under the HIPAA enforcement rule are set by a
+      federal agency and are not a loss Halcyon's $10M cyber and technology
+      errors and omissions cover was priced to absorb without limit, so an
+      uncapped regulatory penalties indemnity is not something a median
+      $165k contract can justify. Tying the indemnity to Halcyon's own
+      confirmed, uncured violation, and keeping it inside the existing data
+      breach super-cap, gives Covered Entity real protection against
+      Halcyon's own non-compliance without duplicating or exceeding the cap
+      structure the rest of the risk allocation relies on.
+    detection_guidance: >
+      Look for "fines", "penalties", "civil monetary penalties", "regulatory
+      assessments" or "sanctions imposed by" a named authority inside an
+      indemnity or reimbursement clause. Check for a causation limiter such
+      as "to the extent caused by" and whether the indemnity sits inside or
+      outside the liability cap and the data breach super-cap. Absence means
+      penalties are recoverable, if at all, only as ordinary damages subject
+      to the general cap, which is itself an acceptable, more Halcyon-
+      favourable position and not a missing clause.
+    source_ref: 45 C.F.R. Part 160, Subpart D (imposition of civil money penalties)
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-17
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Indemnity for confirmed, uncured violations, inside the data breach super-cap
+        zone: green
+        summary: Indemnity limited to penalties directly caused by Business Associate's own confirmed, uncured BAA violation, capped at the data breach super-cap.
+        language: >
+          Business Associate shall indemnify Covered Entity for civil
+          monetary penalties imposed by the Secretary of Health and Human
+          Services on Covered Entity to the extent directly caused by
+          Business Associate's confirmed violation of this BAA that Business
+          Associate failed to cure within the period afforded under the
+          termination for breach provision of this BAA. This indemnity is
+          part of, and not in addition to, the data breach super-cap in the
+          Underlying Agreement, and is subject to the carve-outs and
+          procedure set out in the general indemnification clause.
+      - kind: fallback
+        rung: 1
+        label: Same scope, with a dedicated cap at 3 times annual Fees
+        zone: yellow
+        approver_role: general_counsel
+        conditions: {deal_value_band: [enterprise, strategic]}
+        give_get: Require that the data breach super-cap and this indemnity share one combined ceiling rather than stacking.
+        summary: A dedicated cap for this indemnity rather than folding it into the data breach super-cap.
+        language: >
+          Business Associate shall indemnify Covered Entity for civil
+          monetary penalties imposed by the Secretary of Health and Human
+          Services on Covered Entity to the extent directly caused by
+          Business Associate's confirmed violation of this BAA that Business
+          Associate failed to cure within the applicable cure period.
+          Business Associate's total liability under this indemnity shall
+          not exceed three (3) times the annual Fees paid or payable under
+          the Underlying Agreement, and that amount shall be the sole ceiling
+          for claims under this indemnity, inclusive of any amount also
+          claimed under the data breach super-cap arising from the same
+          event.
+        internal_note: Confirm with the CFO that the 3x cap is consistent with the $10M cyber and technology errors and omissions aggregate before offering.
+      - kind: fallback
+        rung: 2
+        label: Stand-alone cap at 5 times annual Fees, never above $5M
+        zone: yellow
+        approver_role: general_counsel
+        conditions: {counterparty_tier: [tier_1], deal_value_band: [strategic]}
+        give_get: Require that any claim under this indemnity be offset against amounts already paid under the data breach super-cap for the same event, so the two caps cannot both be exhausted by one incident.
+        summary: A stand-alone, higher ceiling reserved for the largest, most PHI-sensitive accounts, aligned with the data breach super-cap's own outer limit.
+        language: >
+          Business Associate shall indemnify Covered Entity for civil
+          monetary penalties imposed by the Secretary of Health and Human
+          Services on Covered Entity to the extent directly caused by
+          Business Associate's confirmed violation of this BAA that Business
+          Associate failed to cure within the applicable cure period.
+          Business Associate's total liability under this indemnity shall
+          not exceed the greater of five (5) times the annual Fees paid or
+          payable under the Underlying Agreement or five million dollars
+          (US$5,000,000), whichever is lower, and any amount paid under this
+          indemnity for a given event shall be offset against any amount
+          payable under the data breach super-cap for that same event.
+        internal_note: Requires sign-off from both general counsel and the CFO, consistent with the data breach super-cap's own $5M outer limit.
+      - kind: acceptable_variant
+        label: Indemnity expressed as reimbursement rather than indemnification
+        zone: green
+        summary: Same causation and cap limits, drafted as a reimbursement obligation.
+        language: >
+          Where a civil monetary penalty is imposed on Covered Entity by the
+          Secretary of Health and Human Services and is shown to have
+          resulted directly from Business Associate's own confirmed and
+          uncured violation of this BAA, Business Associate shall reimburse
+          Covered Entity for that penalty, subject to the data breach
+          super-cap in the Underlying Agreement and the procedure in the
+          general indemnification clause.
+    parameters:
+      - key: regulatory_penalty_indemnity_cap_months
+        label: Dedicated cap for the regulatory penalties indemnity, as months of Fees
+        value_type: number
+        unit: months
+        direction: lower_is_better
+        preferred_value: 0
+        green_limit: 0
+        yellow_limit: 36
+        extraction_hint: >
+          0 means the indemnity sits inside the existing data breach
+          super-cap with no separate ceiling. A positive number is a
+          dedicated cap stated as months of annual Fees; convert a dollar
+          figure or multiple using the contract's annual Fees where known.
+          No stated cap at all is a missing value, not 0.
+    red_lines:
+      - key: regulatory-penalty-indemnity-uncapped
+        description: The regulatory penalties indemnity is uncapped or sits outside every liability limit in the agreement.
+        condition_type: parameter
+        condition: {parameter_key: regulatory_penalty_indemnity_cap_months, op: is_absent}
+        action: escalate
+        approver_role: general_counsel
+        rationale: >
+          Civil monetary penalties are set by a federal agency and can scale
+          with the number of records involved; an uncapped indemnity for
+          them is not insurable against the $10M cyber and technology
+          errors and omissions aggregate.
+      - key: regulatory-penalty-indemnity-no-causation-limit
+        description: The indemnity covers penalties imposed on Covered Entity regardless of whether Business Associate caused the violation.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause requires Business Associate to indemnify Covered
+            Entity for civil monetary penalties without limiting the
+            indemnity to penalties directly caused by Business Associate's
+            own violation of the BAA, so that penalties caused by Covered
+            Entity's own conduct are also covered.
+        action: block
+        rationale: >
+          Halcyon's global red line against indemnifying a counterparty's
+          own negligence or breach applies equally to regulatory penalties
+          that did not result from Halcyon's conduct.
+    objections:
+      - objection: If HHS fines us because of something you did wrong, you should cover the whole fine, uncapped.
+        their_rationale: The Covered Entity does not want its own regulatory exposure limited by a vendor's commercial cap.
+        response: >
+          We accept responsibility, through this indemnity, for penalties
+          directly caused by our own confirmed and uncured violation of the
+          BAA. An uncapped commitment for a federal penalty is not something
+          our insurance is priced to support, so we tie it to the same data
+          breach super-cap that already protects you at two times annual
+          Fees, and for larger accounts we can discuss a dedicated,
+          higher cap.
+        talking_points:
+          - The data breach super-cap is 2x annual Fees, well above the general liability cap.
+          - Offer the dedicated 3x cap for enterprise and strategic deals only.
+        recommended_position: {rule_key: indemnification.regulatory_penalties_indemnity, rung: 1}
+        frequency: common
+        counterparty_profile: Hospital systems with their own compliance exposure
+      - objection: We should not have to prove the penalty was caused by you specifically; just indemnify us for any HIPAA penalty during the contract.
+        their_rationale: Proving causation after a regulatory investigation is itself burdensome for the Covered Entity.
+        response: >
+          We can only take on a penalty that actually resulted from our own
+          conduct; a penalty caused by your own use of the Services, or by
+          facts outside our control, is not something we can underwrite. The
+          causation language is narrow and most incidents will plainly point
+          to one party or the other once the facts are known.
+        talking_points:
+          - Our global red lines do not permit indemnifying a counterparty's own negligence.
+          - Offer to cooperate fully with any investigation to help establish the facts.
+        recommended_position: {rule_key: indemnification.regulatory_penalties_indemnity, rung: 0}
+        frequency: occasional
+        counterparty_profile: Large hospital systems
+    dependencies:
+      - related_rule_key: limitation_of_liability.data_breach_super_cap
+        relation: trade_against
+        note: This indemnity is designed to sit inside the data breach super-cap rather than stack on top of it; raising the super-cap is the preferred move before carving out a separate ceiling.
+      - related_rule_key: breach_notification.notification_content
+        relation: read_with
+        note: A complete, well-documented notice record helps establish whether a penalty was directly caused by Business Associate's conduct.
+    test_cases:
+      - name: Penalty indemnity inside the data breach super-cap
+        context: {regimes: [hipaa], data_sensitivity: phi}
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          If the Secretary of Health and Human Services fines Covered Entity
+          and the fine is directly traceable to a confirmed violation of
+          this BAA by Business Associate that Business Associate did not
+          cure in time, Business Associate will cover that fine, counted
+          against the data breach super-cap set out in the Underlying
+          Agreement.
+      - name: Reimbursement wording with the same limits
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Where a civil monetary penalty against Covered Entity is shown to
+          flow directly from Business Associate's own confirmed and uncured
+          violation of this BAA, Business Associate will reimburse Covered
+          Entity for it, subject to the data breach super-cap and the
+          indemnification procedure of the Underlying Agreement.
+      - name: Dedicated three-times cap for a strategic account
+        context: {regimes: [hipaa], deal_value_band: strategic}
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: yellow
+        sample_text: >
+          Business Associate shall indemnify Covered Entity for civil
+          monetary penalties directly caused by Business Associate's
+          confirmed, uncured violation of this BAA, up to a combined ceiling
+          of three times the annual Fees, inclusive of any related claim
+          under the data breach super-cap.
+      - name: Penalty indemnity with a five-times, stand-alone cap
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Business Associate shall indemnify Covered Entity for civil
+          monetary penalties directly caused by its confirmed violation of
+          this BAA, up to five times the annual Fees, in addition to and
+          without reduction of the data breach super-cap.
+      - name: Uncapped penalty indemnity
+        expected_outcome: red_line
+        expected_red_line_key: regulatory-penalty-indemnity-uncapped
+        expected_zone: red
+        sample_text: >
+          Business Associate shall indemnify Covered Entity in full for any
+          civil monetary penalty imposed by the Secretary of Health and
+          Human Services in connection with this BAA, with no limit on the
+          amount.
+      - name: Penalty indemnity with no causation requirement
+        expected_outcome: red_line
+        expected_red_line_key: regulatory-penalty-indemnity-no-causation-limit
+        expected_zone: red
+        sample_text: >
+          Business Associate shall indemnify Covered Entity for any civil
+          monetary penalty the Secretary imposes on Covered Entity arising
+          out of or in connection with the Underlying Agreement, regardless
+          of which party's act or omission gave rise to it.
+      - name: No regulatory penalties indemnity
+        expected_outcome: missing
+        expected_zone: yellow
+        sample_text: ""
+
+  - rule_key: compliance.hipaa_compliance
+    title: General HIPAA compliance commitment
+    required: true
+    risk_weight: 5
+    negotiable: false
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Business Associate agrees to comply with the parts of the HIPAA
+      Privacy, Security and Breach Notification Rules that apply to it as a
+      business associate, and the BAA will be amended as needed to keep it
+      consistent with changes in those Rules. Business Associate does not
+      warrant Covered Entity's own compliance.
+    risk_rationale: >
+      A business associate can only promise to meet the obligations the
+      HIPAA Rules place on business associates, not the separate set of
+      duties that fall on covered entities, so Halcyon accepts this general
+      commitment as drafted but does not accept a warranty of Covered
+      Entity's own compliance or of outcomes beyond its control. Because the
+      commitment itself is required by the regulation, it is not a point
+      Halcyon's commercial counsel trades for other terms.
+    detection_guidance: >
+      Look for "comply with the HIPAA Rules", "45 CFR Parts 160 and 164",
+      "HITECH", "to the extent Business Associate carries out an obligation
+      of Covered Entity" and "amend this BAA as necessary to comply with
+      changes in law". Check whether the clause asks Business Associate to
+      warrant Covered Entity's compliance, which is a deviation. Absence
+      where PHI is handled means a business associate agreement is missing
+      or incomplete.
+    source_ref: 45 C.F.R. Parts 160 and 164
+    authored_by: Privacy Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-18
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Compliance with the Rules applicable to a business associate, amended for changes in law
+        zone: green
+        summary: Business Associate complies with its own obligations under the HIPAA Rules and HITECH, and the BAA is amended to track changes in the law.
+        language: >
+          Business Associate shall comply with the applicable requirements
+          of the Privacy, Security, and Breach Notification Rules at 45
+          C.F.R. Parts 160 and 164, as amended by the Health Information
+          Technology for Economic and Clinical Health Act ("HITECH") and its
+          implementing regulations, to the extent those requirements apply
+          to a business associate. To the extent Business Associate carries
+          out an obligation of Covered Entity under the Privacy Rule, it
+          shall comply with the requirements that apply to Covered Entity in
+          the performance of that obligation. The parties shall amend this
+          BAA as necessary from time to time to comply with changes in the
+          HIPAA Rules.
+      - kind: acceptable_variant
+        label: Compliance commitment stated as a representation
+        zone: green
+        summary: Same scope, phrased as a representation rather than a forward covenant.
+        language: >
+          Business Associate represents that it will handle PHI in
+          compliance with the requirements of 45 C.F.R. Parts 160 and 164
+          that apply to business associates, including as those Parts are
+          amended from time to time, and that the parties will negotiate in
+          good faith any amendment to this BAA needed to keep it consistent
+          with such changes.
+      - kind: acceptable_variant
+        label: Compliance commitment limited to electronic PHI processed through the Services
+        zone: green
+        summary: Counterparty wording that scopes the commitment to the PHI actually processed through the Services.
+        language: >
+          With respect to PHI that Business Associate creates, receives,
+          maintains or transmits through the Services, Business Associate
+          shall comply with the HIPAA Rules at 45 C.F.R. Parts 160 and 164
+          to the extent they apply to a business associate, and this BAA
+          shall be amended as the parties reasonably agree to reflect
+          changes in those Rules.
+    red_lines:
+      - key: hipaa-compliance-warrants-covered-entity
+        description: Business Associate is asked to warrant Covered Entity's own compliance with the HIPAA Rules.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause requires Business Associate to warrant, represent or
+            guarantee that Covered Entity itself complies with the HIPAA
+            Rules, rather than limiting Business Associate's commitment to
+            the obligations that apply to it as a business associate.
+        action: escalate
+        approver_role: general_counsel
+        rationale: >
+          Business Associate has no visibility into Covered Entity's
+          internal HIPAA programme and cannot responsibly warrant facts
+          outside its control.
+    test_cases:
+      - name: Compliance with the Rules applicable to a business associate
+        context: {regimes: [hipaa], data_sensitivity: phi}
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Business Associate agrees to meet the requirements that the
+          Privacy, Security and Breach Notification Rules in 45 C.F.R. Parts
+          160 and 164, as amended by HITECH, place on a business associate,
+          and the parties will amend this BAA as needed to stay consistent
+          with later changes to those Rules.
+      - name: Compliance stated as a representation
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Business Associate represents that its handling of PHI will meet
+          the business-associate requirements of the HIPAA Rules at 45
+          C.F.R. Parts 160 and 164, including later amendments, and the
+          parties will work in good faith on any resulting BAA amendment.
+      - name: Compliance commitment extended to Covered Entity's broader privacy programme
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Business Associate shall comply with the HIPAA Rules and with
+          Covered Entity's broader internal privacy and compliance
+          programme applicable to all of its vendors, whether or not that
+          programme reflects a requirement of the HIPAA Rules.
+      - name: Compliance commitment with no amendment mechanism for changes in law
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Business Associate shall comply with the HIPAA Rules as they exist
+          on the Effective Date, and this BAA shall not be amended to
+          reflect any later change in the Rules unless Covered Entity
+          agrees.
+      - name: Business Associate warrants Covered Entity's own compliance
+        expected_outcome: red_line
+        expected_red_line_key: hipaa-compliance-warrants-covered-entity
+        expected_zone: red
+        sample_text: >
+          Business Associate represents and warrants that Covered Entity is,
+          and throughout the term will remain, in full compliance with the
+          HIPAA Privacy, Security and Breach Notification Rules.
+      - name: No general HIPAA compliance clause
+        expected_outcome: missing
+        expected_zone: yellow
+        sample_text: ""
+
+  - rule_key: data_protection.de_identification
+    title: De-identification of PHI for Business Associate's own use
+    required: false
+    risk_weight: 6
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Business Associate may de-identify PHI in accordance with 45 C.F.R.
+      § 164.514(a) to (c) and use or disclose the resulting de-identified
+      data for its own purposes, including analytics and product
+      improvement across its customer base.
+    risk_rationale: >
+      De-identified data produced under the Safe Harbor or expert
+      determination method is no longer PHI and is valuable to Halcyon for
+      improving Halcyon Engage across roughly 310 customers, but many
+      covered entities prohibit the right outright in their own BAA forms,
+      so it is negotiated rather than assumed. Where the right is granted,
+      Halcyon still needs it tied to the regulatory de-identification
+      standard rather than an informal process, since a reversible or
+      poorly executed de-identification would itself be an impermissible
+      use of PHI.
+    detection_guidance: >
+      Look for "de-identify", "de-identified in accordance with 45 CFR
+      164.514", "expert determination", "safe harbor" and "shall not
+      de-identify PHI except". Record whether the right is granted at all,
+      whether it requires the Safe Harbor or expert determination method,
+      and whether Covered Entity's prior written approval is needed. A BAA
+      that is silent does not grant the right, so absence means
+      de-identification for Business Associate's own use is not permitted,
+      which is an acceptable, more Covered-Entity-favourable position
+      rather than a missing clause.
+    source_ref: 45 C.F.R. § 164.514(a) to (c); § 164.502(d)
+    authored_by: Privacy Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-18
+    positions:
+      - kind: preferred
+        rung: 0
+        label: De-identification under the regulatory standard, used freely by Business Associate
+        zone: green
+        summary: Business Associate may de-identify PHI using either regulatory method and use the result without further restriction.
+        language: >
+          Business Associate may de-identify PHI in accordance with the
+          standard and methods set out in 45 C.F.R. § 164.514(a) to (c),
+          using either the Safe Harbor method or expert determination, and
+          may use and disclose the resulting de-identified information for
+          any lawful purpose, including improving and developing the
+          Services, analytics and benchmarking, without further restriction
+          under this BAA, because such information is no longer PHI once
+          properly de-identified.
+      - kind: fallback
+        rung: 1
+        label: De-identification under the regulatory standard, with a use limited to Halcyon's own products
+        zone: green
+        summary: Same de-identification method; use of the result limited to improving Halcyon's own products and services.
+        language: >
+          Business Associate may de-identify PHI in accordance with 45
+          C.F.R. § 164.514(a) to (c) and may use the resulting
+          de-identified information to develop, improve, support and
+          benchmark Business Associate's own products and services,
+          including across its customer base, but shall not sell the
+          de-identified information or disclose it to an unaffiliated third
+          party for that third party's own independent use.
+      - kind: fallback
+        rung: 2
+        label: De-identification by expert determination only, with annual notice of use
+        zone: yellow
+        approver_role: privacy_counsel
+        conditions: {counterparty_tier: [tier_1], data_sensitivity: [phi, special_category]}
+        give_get: Ask for a longer initial term or a discount on analytics add-on products in exchange for the added expert-determination cost.
+        summary: The narrower de-identification method, with transparency to the more sensitive or larger accounts.
+        language: >
+          Business Associate may de-identify PHI only using the expert
+          determination method described in 45 C.F.R. § 164.514(b)(1), and
+          may use the resulting de-identified information to develop and
+          improve Business Associate's own products and services. Business
+          Associate shall give Covered Entity written notice, no less often
+          than annually, describing in general terms how it has used
+          de-identified information derived from Covered Entity's PHI.
+        internal_note: Confirm with the data science team that expert determination is available for the relevant data set before offering this rung.
+      - kind: acceptable_variant
+        label: De-identification right stated as a license back to Business Associate
+        zone: green
+        summary: Counterparty wording that frames the same right as a license rather than a standing permission.
+        language: >
+          Covered Entity grants Business Associate a right to de-identify
+          PHI in accordance with 45 C.F.R. § 164.514(a) to (c) and to use the
+          resulting de-identified information, which is not PHI, for
+          Business Associate's product development, analytics and
+          benchmarking purposes, including on an aggregated basis across
+          Business Associate's customers.
+    parameters:
+      - key: de_identification_right_granted
+        label: Whether Business Associate may de-identify PHI for its own use
+        value_type: boolean
+        direction: exact
+        preferred_value: true
+        extraction_hint: >
+          True where the BAA expressly permits Business Associate to
+          de-identify PHI and use the result for its own purposes. False, or
+          absent, where the BAA is silent or expressly prohibits
+          de-identification; silence is not an implied grant of the right.
+      - key: de_identification_method
+        label: Permitted de-identification method
+        value_type: enum
+        direction: set_membership
+        preferred_value: safe_harbor_or_expert_determination
+        green_limit: [safe_harbor_or_expert_determination]
+        yellow_limit: [expert_determination_only]
+        allowed_values:
+          - safe_harbor_or_expert_determination
+          - expert_determination_only
+          - unspecified_method
+        extraction_hint: >
+          safe_harbor_or_expert_determination: Business Associate may choose
+          either method under 45 C.F.R. § 164.514(b). expert_determination_only:
+          only the statistical expert method is permitted. unspecified_method:
+          the clause allows de-identification without tying it to either
+          regulatory method, which is a deviation regardless of the use
+          restriction.
+    red_lines:
+      - key: de-identification-not-to-regulatory-standard
+        description: PHI may be de-identified by a method not tied to the Safe Harbor or expert determination standard in 45 C.F.R. § 164.514(b).
+        condition_type: parameter
+        condition: {parameter_key: de_identification_method, op: eq, value: unspecified_method}
+        action: escalate
+        approver_role: privacy_counsel
+        rationale: >
+          Data that has not been de-identified to the regulatory standard
+          remains PHI, so using it outside the restrictions of this BAA
+          would be an impermissible use regardless of what the parties call
+          it.
+    objections:
+      - objection: You may not de-identify our patients' PHI for your own use under any circumstances.
+        their_rationale: Some covered entities treat de-identification rights as a door to uses they cannot fully oversee.
+        response: >
+          We understand the concern and can remove the right entirely if
+          that is your preference; our default position already requires
+          either the Safe Harbor or expert determination method under 45
+          C.F.R. § 164.514, and properly de-identified data is no longer PHI
+          by definition. If you would rather prohibit the right outright, we
+          can do that and will not rely on it for this account.
+        talking_points:
+          - The right is opt-out, since silence in the BAA already means no de-identification right exists.
+          - Offer to confirm the prohibition in writing at no cost to either side.
+        recommended_position: {rule_key: data_protection.de_identification, rung: 2}
+        frequency: common
+        counterparty_profile: Academic medical centres and privacy-sensitive hospital systems
+      - objection: If you de-identify our data, at least tell us what you are doing with it.
+        their_rationale: The Covered Entity wants visibility even where it cannot object to the underlying right.
+        response: >
+          That is reasonable, and we can commit to telling you in general
+          terms, at least once a year, how de-identified information derived
+          from your data has been used, without disclosing other customers'
+          information or our product roadmap in detail.
+        talking_points:
+          - Annual, general-terms notice protects other customers' confidentiality.
+          - Pair the notice commitment with the narrower expert-determination method for sensitive accounts.
+        recommended_position: {rule_key: data_protection.de_identification, rung: 2}
+        frequency: occasional
+        counterparty_profile: Tier 1 health systems
+      - objection: Do not sell or share de-identified data from our patients with other companies.
+        their_rationale: Even properly de-identified data can feel like a loss of control to a covered entity.
+        response: >
+          We do not sell de-identified data, and we can confirm in writing
+          that any use is limited to improving our own products rather than
+          disclosure to unaffiliated third parties for their own use. That
+          is our standard fallback position and costs nothing to agree.
+        talking_points:
+          - Distinguish internal product use from sale or third-party disclosure.
+          - The data_training_or_sale global red line already blocks sale of data outright.
+        recommended_position: {rule_key: data_protection.de_identification, rung: 1}
+        frequency: occasional
+    dependencies:
+      - related_rule_key: data_protection.permitted_uses_of_phi
+        relation: read_with
+        note: De-identification is a distinct, separately granted right and is not implied by the management and administration limb of permitted uses.
+      - related_rule_key: intellectual_property.usage_data
+        relation: read_with
+        note: Once PHI is properly de-identified it is no longer PHI, and further use follows the general usage data position rather than this BAA.
+    test_cases:
+      - name: De-identification under either regulatory method, used freely
+        context: {regimes: [hipaa], data_sensitivity: phi}
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Business Associate may strip PHI of identifiers using either the
+          Safe Harbor approach or expert determination described in 45
+          C.F.R. § 164.514(b), and may then use the resulting de-identified
+          information for any lawful purpose, including improving its
+          products, without further restriction under this BAA.
+      - name: De-identification right framed as a license back
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Covered Entity licenses Business Associate to de-identify PHI
+          consistent with 45 C.F.R. § 164.514(a) to (c) and to use the
+          resulting, no-longer-PHI information for product development and
+          benchmarking across Business Associate's customer base.
+      - name: Expert determination only, with annual notice, for a tier 1 PHI account
+        context: {regimes: [hipaa], counterparty_tier: tier_1, data_sensitivity: phi}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Business Associate may de-identify PHI only through the expert
+          determination method under 45 C.F.R. § 164.514(b)(1), using the
+          result solely to improve its own products, and shall give Covered
+          Entity a general annual written description of that use.
+      - name: De-identification permitted with no stated method
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Business Associate may remove identifying information from PHI
+          using its standard internal process and use the resulting data
+          for analytics, without reference to any particular regulatory
+          de-identification standard.
+      - name: De-identification tied to no regulatory method, used for sale
+        expected_outcome: red_line
+        expected_red_line_key: de-identification-not-to-regulatory-standard
+        expected_zone: red
+        sample_text: >
+          Business Associate may anonymise PHI using whatever technique it
+          considers adequate and may sell or license the resulting data to
+          third parties without restriction.
+      - name: No de-identification clause
+        expected_outcome: missing
+        expected_zone: yellow
+        sample_text: ""
+      - name: Trap - de-identification expressly prohibited
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Business Associate shall not de-identify PHI for its own use under
+          any circumstances; all PHI remains subject to the use and
+          disclosure restrictions of this BAA at all times.

@@ -1,0 +1,7 @@
+# Failing fixture: edits applied to a copy of fixtures/valid by test_playbook_models.py.
+description: 'Cross-check: a parameter condition names a parameter of the rule.'
+file: playbooks/saas_msa_vendor/risk.yaml
+edits:
+- path: [rules, 1, red_lines, 0, condition, parameter_key]
+  set: cap_months
+expect: {code: red_line.unknown_parameter, message: cap_months, rule_key: limitation_of_liability.data_breach_super_cap}

@@ -8,3 +8,7 @@ __pycache__/
 .env
 dist/
 *.egg-info/
+
+# TEMPORARY dev-only LLM bypass queue — see app/core/llm/dev_bypass.py.
+# Never commit queued requests/responses.
+.llm_bypass_queue/

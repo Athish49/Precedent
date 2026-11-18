@@ -1,12 +1,20 @@
 -- Analytics Views (S9)
 -- Human-readable reference for the 5 analytics views.
 -- Managed by migration 009_analytics_views.py
+--
+-- Every object is qualified with the project schema, because the database is
+-- shared with other projects. The schema name is not written here: it comes
+-- from the DB_SCHEMA / PROJECT_NAMESPACE setting. In this file it appears as
+-- the psql variable :"schema"; to run a statement by hand, pass the value of
+-- the setting:  psql -v schema=<db_schema> -f db/views.sql
+-- tests/unit/test_analytics_views_sql.py keeps this file in step with the
+-- migration.
 
 -- ---------------------------------------------------------------------------
 -- 1. v_contract_intelligence
 --    One row per contract: metadata + latest contract-level risk score.
 -- ---------------------------------------------------------------------------
-CREATE OR REPLACE VIEW v_contract_intelligence AS
+CREATE OR REPLACE VIEW :"schema".v_contract_intelligence AS
 SELECT
     c.id                        AS contract_id,
     c.title,
@@ -26,12 +34,12 @@ SELECT
     rs.max_clause_severity,
     c.created_at,
     c.updated_at
-FROM contract c
-LEFT JOIN contract_metadata cm ON cm.contract_id = c.id
-LEFT JOIN party p ON p.id = c.counterparty_id
+FROM :"schema".contract c
+LEFT JOIN :"schema".contract_metadata cm ON cm.contract_id = c.id
+LEFT JOIN :"schema".party p ON p.id = c.counterparty_id
 LEFT JOIN LATERAL (
     SELECT score, max_clause_severity
-    FROM risk_score
+    FROM :"schema".risk_score
     WHERE contract_id = c.id AND clause_id IS NULL
     ORDER BY created_at DESC
     LIMIT 1
@@ -43,7 +51,7 @@ LEFT JOIN LATERAL (
 --    Severity-weighted roll-up: high=3, medium=2, low=1.
 --    Portfolio score = SUM(weighted_flags) / total_contracts (via AVG).
 -- ---------------------------------------------------------------------------
-CREATE OR REPLACE VIEW v_portfolio_risk AS
+CREATE OR REPLACE VIEW :"schema".v_portfolio_risk AS
 WITH flag_weights AS (
     SELECT
         contract_id,
@@ -52,7 +60,7 @@ WITH flag_weights AS (
         COUNT(*) FILTER (WHERE severity = 'medium') AS medium_count,
         COUNT(*) FILTER (WHERE severity = 'low')    AS low_count,
         COUNT(*)                                     AS total_flags
-    FROM flag
+    FROM :"schema".flag
     GROUP BY contract_id
 ),
 contract_risk AS (
@@ -68,7 +76,7 @@ contract_risk AS (
     FROM flag_weights fw
     LEFT JOIN LATERAL (
         SELECT score, max_clause_severity
-        FROM risk_score
+        FROM :"schema".risk_score
         WHERE contract_id = fw.contract_id AND clause_id IS NULL
         ORDER BY created_at DESC
         LIMIT 1
@@ -80,8 +88,8 @@ SELECT
     SUM(medium_count)                AS total_medium_flags,
     SUM(low_count)                   AS total_low_flags,
     SUM(total_flags)                 AS total_flags,
-    ROUND(AVG(weighted_flag_score), 2) AS avg_weighted_flag_score,
-    ROUND(AVG(risk_score), 4)        AS avg_risk_score,
+    ROUND(AVG(weighted_flag_score)::numeric, 2) AS avg_weighted_flag_score,
+    ROUND(AVG(risk_score)::numeric, 4)          AS avg_risk_score,
     COUNT(*) FILTER (WHERE max_clause_severity = 'high')   AS contracts_high_severity,
     COUNT(*) FILTER (WHERE max_clause_severity = 'medium') AS contracts_medium_severity,
     COUNT(*) FILTER (WHERE max_clause_severity = 'low')    AS contracts_low_severity
@@ -92,7 +100,7 @@ FROM contract_risk;
 -- 3. v_contract_value
 --    One row per contract: financial fields extracted from jsonb.
 -- ---------------------------------------------------------------------------
-CREATE OR REPLACE VIEW v_contract_value AS
+CREATE OR REPLACE VIEW :"schema".v_contract_value AS
 SELECT
     c.id                                              AS contract_id,
     c.title,
@@ -112,9 +120,9 @@ SELECT
     END                                               AS duration_days,
     c.status,
     c.created_at
-FROM contract c
-LEFT JOIN contract_metadata cm ON cm.contract_id = c.id
-LEFT JOIN party p ON p.id = c.counterparty_id;
+FROM :"schema".contract c
+LEFT JOIN :"schema".contract_metadata cm ON cm.contract_id = c.id
+LEFT JOIN :"schema".party p ON p.id = c.counterparty_id;
 
 
 -- ---------------------------------------------------------------------------
@@ -122,7 +130,7 @@ LEFT JOIN party p ON p.id = c.counterparty_id;
 --    One row per contract: metadata + flag counts + obligation counts +
 --    redline counts.
 -- ---------------------------------------------------------------------------
-CREATE OR REPLACE VIEW v_tabular_review AS
+CREATE OR REPLACE VIEW :"schema".v_tabular_review AS
 SELECT
     c.id                           AS contract_id,
     c.title,
@@ -148,12 +156,12 @@ SELECT
     rl_counts.accepted_redlines,
     c.created_at,
     c.updated_at
-FROM contract c
-LEFT JOIN contract_metadata cm ON cm.contract_id = c.id
-LEFT JOIN party p ON p.id = c.counterparty_id
+FROM :"schema".contract c
+LEFT JOIN :"schema".contract_metadata cm ON cm.contract_id = c.id
+LEFT JOIN :"schema".party p ON p.id = c.counterparty_id
 LEFT JOIN LATERAL (
     SELECT score, max_clause_severity
-    FROM risk_score
+    FROM :"schema".risk_score
     WHERE contract_id = c.id AND clause_id IS NULL
     ORDER BY created_at DESC
     LIMIT 1
@@ -163,21 +171,21 @@ LEFT JOIN LATERAL (
         COUNT(*) FILTER (WHERE severity = 'high')   AS high_flags,
         COUNT(*) FILTER (WHERE severity = 'medium') AS medium_flags,
         COUNT(*) FILTER (WHERE severity = 'low')    AS low_flags
-    FROM flag
+    FROM :"schema".flag
     WHERE contract_id = c.id
 ) flag_counts ON true
 LEFT JOIN LATERAL (
     SELECT
         COUNT(*) FILTER (WHERE status = 'open')    AS open_obligations,
         COUNT(*) FILTER (WHERE status = 'overdue') AS overdue_obligations
-    FROM obligation
+    FROM :"schema".obligation
     WHERE contract_id = c.id
 ) ob_counts ON true
 LEFT JOIN LATERAL (
     SELECT
         COUNT(*) FILTER (WHERE status = 'proposed')  AS proposed_redlines,
         COUNT(*) FILTER (WHERE status = 'accepted')  AS accepted_redlines
-    FROM redline
+    FROM :"schema".redline
     WHERE contract_id = c.id
 ) rl_counts ON true;
 
@@ -186,7 +194,7 @@ LEFT JOIN LATERAL (
 -- 5. v_renewal_dashboard
 --    One row per contract: expiry metadata + risk score + latest renewal alert.
 -- ---------------------------------------------------------------------------
-CREATE OR REPLACE VIEW v_renewal_dashboard AS
+CREATE OR REPLACE VIEW :"schema".v_renewal_dashboard AS
 SELECT
     c.id                           AS contract_id,
     c.title,
@@ -205,19 +213,19 @@ SELECT
     al.fired_at                    AS last_alert_at,
     al.acknowledged                AS alert_acknowledged,
     c.status                       AS contract_status
-FROM contract c
-LEFT JOIN contract_metadata cm ON cm.contract_id = c.id
-LEFT JOIN party p ON p.id = c.counterparty_id
+FROM :"schema".contract c
+LEFT JOIN :"schema".contract_metadata cm ON cm.contract_id = c.id
+LEFT JOIN :"schema".party p ON p.id = c.counterparty_id
 LEFT JOIN LATERAL (
     SELECT score, max_clause_severity
-    FROM risk_score
+    FROM :"schema".risk_score
     WHERE contract_id = c.id AND clause_id IS NULL
     ORDER BY created_at DESC
     LIMIT 1
 ) rs ON true
 LEFT JOIN LATERAL (
     SELECT payload, fired_at, acknowledged
-    FROM alert
+    FROM :"schema".alert
     WHERE contract_id = c.id AND alert_type = 'renewal'
     ORDER BY fired_at DESC
     LIMIT 1

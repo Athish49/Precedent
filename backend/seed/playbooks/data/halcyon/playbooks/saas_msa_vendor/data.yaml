@@ -1,0 +1,2028 @@
+rules:
+  - rule_key: confidentiality.standard_of_care
+    title: Standard of care for Confidential Information
+    required: true
+    risk_weight: 5
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Each party protects the other's Confidential Information using the same
+      degree of care it uses for its own information of a similar kind, but
+      never less than a reasonable standard of care, and uses it only for the
+      Subscription Term and the purpose of this Agreement.
+    risk_rationale: >
+      Halcyon exchanges commercial and technical Confidential Information with
+      around 310 hospital systems, physician groups and clinic groups, so a
+      vague or one-sided standard is applied inconsistently across the book
+      of business. A floor of reasonable care that does not depend on proving
+      what a counterparty does internally keeps the obligation enforceable
+      and auditable under Halcyon's SOC 2 Type II and ISO 27001 programmes.
+    detection_guidance: >
+      Look for "the same degree of care", "no less than a reasonable degree
+      of care", "strict confidence" and "solely for the Purpose". A clause
+      stating only a reasonable-care standard, with no self-care comparator,
+      matches fallback rung 1 rather than the preferred position. A clause
+      that states only the self-care comparator with no reasonable-care
+      floor is a deviation rather than a missing clause. No confidentiality
+      clause at
+      all in the agreement is a missing clause.
+    source_ref: Halcyon Information Security Policy ISP-02
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-02
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Self-care comparator with a reasonable-care floor
+        zone: green
+        summary: Same care as own information, never less than reasonable care, mutual.
+        language: >
+          Each party shall protect the other party's Confidential Information
+          using the same degree of care that it uses to protect its own
+          confidential information of a similar nature, but in no event less
+          than a reasonable degree of care, and shall use the other party's
+          Confidential Information solely for the purpose of exercising its
+          rights and performing its obligations under this Agreement.
+      - kind: fallback
+        rung: 1
+        label: Reasonable care only, no self-care comparator
+        zone: yellow
+        approver_role: commercial_counsel
+        conditions: {counterparty_tier: [tier_1, tier_2]}
+        give_get: Ask for a mutual equitable-relief acknowledgment in return.
+        summary: Drop the self-care comparator and rely on a reasonable-care standard alone.
+        language: >
+          Each party shall use a reasonable degree of care to protect the
+          other party's Confidential Information from unauthorized use or
+          disclosure, and shall use such Confidential Information solely for
+          the purpose of exercising its rights and performing its obligations
+          under this Agreement.
+      - kind: fallback
+        rung: 2
+        label: Customer's written security policy incorporated as an exhibit
+        zone: yellow
+        approver_role: security_lead
+        conditions: {deal_value_band: [enterprise, strategic]}
+        give_get: Ask that the exhibit be attached as of the Order Form date and changed only by written amendment.
+        summary: Accept a named set of safeguards from Customer's policy, fixed as an exhibit rather than a floating reference.
+        language: >
+          Each party shall protect the other party's Confidential Information
+          using administrative, technical and physical safeguards no less
+          protective than those described in Exhibit [X] (the version in
+          effect on the Effective Date), and no less protective than a
+          reasonable degree of care, and shall use such Confidential
+          Information solely for the purpose of exercising its rights and
+          performing its obligations under this Agreement.
+        internal_note: >
+          Only agree to a fixed exhibit, never a live link to Customer's
+          policy as it changes from time to time.
+      - kind: acceptable_variant
+        label: Commercially reasonable efforts, industry-standard floor
+        zone: green
+        summary: Counterparty wording for the same outcome using an industry-standard comparator.
+        language: >
+          Each party shall use commercially reasonable efforts to protect the
+          Confidential Information of the other party in a manner no less
+          protective than the efforts it applies to its own information of a
+          similar nature, and in any event consistent with then-current
+          industry standards, using such Confidential Information solely to
+          exercise its rights and perform its obligations under this
+          Agreement.
+    red_lines:
+      - key: data-confidentiality-standard-removed
+        description: The clause removes any standard of care, letting either party use or disclose Confidential Information as it sees fit.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause states no standard of care for protecting Confidential
+            Information, or expressly allows a party to use or disclose the
+            other party's Confidential Information at its own discretion for
+            purposes beyond this Agreement.
+        action: block
+        rationale: >
+          Without an enforceable floor, Halcyon cannot discipline a
+          counterparty's mishandling of commercially sensitive terms, and
+          cannot represent to its own customers that shared information stays
+          protected.
+    objections:
+      - objection: Our policy only commits to reasonable care; we cannot promise to match whatever Halcyon does internally.
+        their_rationale: Counterparties cannot audit or certify to a standard defined by reference to another party's undisclosed internal practices.
+        response: >
+          We can drop the comparison to our own practices and rely on a
+          straightforward reasonable-care standard instead. That gives you a
+          clear, objective obligation without needing visibility into our
+          internal programme.
+        talking_points:
+          - The self-care comparator is a floor-raiser for us, not a floor-lowerer for you.
+          - A reasonable-care-only standard is still enforceable and is common in SaaS agreements.
+        recommended_position: {rule_key: confidentiality.standard_of_care, rung: 1}
+        frequency: occasional
+      - objection: Our security exhibit is sixty pages and already governs every vendor; you must follow it.
+        their_rationale: Large health systems standardize vendor obligations across their supplier base to simplify their own compliance programme.
+        response: >
+          We can incorporate a fixed version of your exhibit as an attachment
+          to this Agreement so both sides know exactly what applies, rather
+          than a reference that updates on your side without our review. Any
+          later changes to the exhibit would need our written agreement.
+        talking_points:
+          - A multi-tenant platform cannot run a different security programme for each customer.
+          - Fixing the exhibit at signature avoids a silent change of obligations mid-term.
+        recommended_position: {rule_key: confidentiality.standard_of_care, rung: 2}
+        frequency: common
+        counterparty_profile: Large hospital systems with a standard vendor security exhibit
+    dependencies:
+      - related_rule_key: security.security_program
+        relation: read_with
+        note: The standard of care here and the security programme commitment should use consistent language on safeguards.
+    test_cases:
+      - name: Self-care comparator with reasonable floor
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Each party will protect the other's confidential information with
+          the same care it gives its own similar information, and never with
+          less than a reasonable standard of care, using it only to perform
+          this Agreement.
+      - name: Industry-standard comparator, no self-care reference
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Each party will apply commercially reasonable efforts, consistent
+          with prevailing industry practice, to safeguard the other party's
+          confidential information, and will use it only to exercise its
+          rights and perform its obligations here.
+      - name: Reasonable care only, tier 1 counterparty
+        context: {counterparty_tier: tier_1}
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: yellow
+        sample_text: >
+          Each party shall take reasonable steps to protect information
+          designated confidential by the other party from unauthorized
+          disclosure, and will use that information only in connection with
+          this Agreement.
+      - name: Standard of care stated with no reasonable-care floor
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Each party shall protect the other party's confidential information
+          using whatever measures it applies to information of its own that
+          it considers comparably sensitive.
+      - name: No limit on use or disclosure
+        expected_outcome: red_line
+        expected_red_line_key: data-confidentiality-standard-removed
+        expected_zone: red
+        sample_text: >
+          Either party may use or disclose the other party's confidential
+          information as it determines appropriate in its sole discretion.
+      - name: Trap - negated "no care" wording
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Neither party may treat the other's confidential information as
+          unprotected; each party shall apply the same degree of care it
+          applies to its own confidential information, and in no case less
+          than a reasonable degree of care.
+
+  - rule_key: data_protection.customer_data_use
+    title: Permitted use of Customer Data
+    required: true
+    risk_weight: 8
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: true
+    judgment_note: >
+      Weigh how the clause describes de-identification and aggregation
+      against the sensitivity of the data involved and the deal's value;
+      language that would pass for a low-sensitivity standard account can
+      still be too loose for a tier 1 counterparty sending patient data.
+    position_summary: >
+      Halcyon uses Customer Data solely to provide the Services to Customer,
+      and may separately use Customer Data in de-identified and aggregated
+      form to operate, support and improve the Services, without identifying
+      Customer or any individual.
+    risk_rationale: >
+      Halcyon Engage is multi-tenant software serving roughly 310 customers,
+      so a credible commitment that Customer Data is used only to provide the
+      Services, with a narrow and clearly bounded carve-out for de-identified
+      analytics, is what lets Halcyon operate a shared platform and improve it
+      over time without reopening every customer's trust in the product.
+      Losing the narrow analytics carve-out would require customer-by-customer
+      engineering that the $165k median contract cannot support.
+    detection_guidance: >
+      Look for "use Customer Data solely to provide the Services", "shall not
+      sell", "shall not use for advertising", "de-identified", "aggregated"
+      and any licence back to Halcyon to "host, copy, transmit and display"
+      Customer Data. Absence of any use restriction, in an agreement under
+      which Halcyon hosts Customer Data, is a missing clause. This rule
+      governs de-identified or aggregated derivatives of Customer Data's own
+      content (patient, scheduling or clinical record content that Halcyon
+      hosts for Customer). It is distinct from the intellectual_property
+      usage_data rule, which governs telemetry and metadata about how the
+      Services are used (login frequency, feature usage, system performance)
+      rather than the content of Customer Data itself. A clause that
+      aggregates or de-identifies the substance of patient or clinical
+      records belongs to this rule even if it is labelled "usage data" or
+      "analytics"; a clause limited to configuration or usage metrics
+      belongs to the other rule. This rule's PHI fallback (rung 1) governs
+      de-identification that is not tied to the HIPAA regulatory standard, or
+      a deal with no HIPAA overlay in scope. Where the agreement is also
+      subject to a Business Associate Agreement under the HIPAA overlay, PHI
+      that has been de-identified to the Safe Harbor or expert determination
+      standard under 45 C.F.R. § 164.514 is governed by that overlay's
+      data_protection.de_identification rule, which may permit
+      cross-customer benchmarking of properly de-identified PHI that this
+      rule's PHI fallback would otherwise withhold; do not treat the two
+      rules as requiring the same answer for the same clause.
+    source_ref: Halcyon Data Governance Policy DG-01
+    authored_by: Privacy Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-02
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Service purpose plus de-identified analytics carve-out
+        zone: green
+        summary: Use limited to providing the Services, with a narrow de-identified and aggregated analytics carve-out.
+        language: >
+          Halcyon shall use Customer Data solely to provide the Services to
+          Customer and for the purposes expressly described in the
+          Documentation. Halcyon may also use Customer Data in de-identified
+          and aggregated form, from which Customer and any individual cannot
+          reasonably be identified, to operate, support, secure and improve
+          the Services and Halcyon's other products. Halcyon shall not sell
+          Customer Data, shall not use Customer Data for advertising
+          directed at Customer or its personnel, and shall not use Customer
+          Data to train or improve any model made available to a party other
+          than Customer.
+      - kind: fallback
+        rung: 1
+        label: Internal-only analytics, no cross-customer benchmarking
+        zone: yellow
+        approver_role: privacy_counsel
+        conditions: {data_sensitivity: [phi, special_category]}
+        give_get: Offer a faster security-review turnaround in return.
+        summary: Narrow the de-identified analytics use to Halcyon's own product improvement, excluding benchmarking shared across customers.
+        language: >
+          Halcyon shall use Customer Data solely to provide the Services to
+          Customer. Halcyon may also use Customer Data in de-identified and
+          aggregated form solely to maintain, secure and improve the Services
+          Halcyon provides to Customer, and shall not use such de-identified
+          data to produce benchmarking, comparative reporting or other output
+          that is shared with or made available to any other customer.
+          Halcyon shall not sell Customer Data, use it for advertising, or
+          use it to train or improve any model made available to a party
+          other than Customer.
+      - kind: fallback
+        rung: 2
+        label: Service purpose only, no analytics carve-out
+        zone: yellow
+        approver_role: commercial_counsel
+        conditions: {deal_value_band: [enterprise, strategic]}
+        give_get: Ask for a longer initial term to offset the lost cost-sharing benefit of shared analytics.
+        summary: Drop the de-identified analytics carve-out entirely; use is limited to providing the Services to this Customer.
+        language: >
+          Halcyon shall use Customer Data solely to provide the Services to
+          Customer and for no other purpose, including no use, in any form,
+          to operate, support or improve products or services provided to any
+          other customer. Halcyon shall not sell Customer Data, use it for
+          advertising, or use it to train or improve any model.
+      - kind: acceptable_variant
+        label: Processor-style purpose limitation
+        zone: green
+        summary: Counterparty wording limiting use to providing the Services, allowing the same de-identified carve-out.
+        language: >
+          Vendor shall process Customer Data solely to provide the Services
+          described in the applicable Order Form and the Documentation, and
+          for no other purpose, except that Vendor may use Customer Data in
+          de-identified and aggregated form, from which Customer cannot be
+          identified, to maintain and improve the Services generally.
+    red_lines:
+      - key: data-use-shared-across-tenants-identifiable
+        description: Customer Data, in identifiable form, is used for or disclosed to Halcyon's other customers or the public.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause permits Halcyon to use or disclose Customer Data, in a
+            form from which Customer or an individual can reasonably be
+            identified, for the benefit of or visible to any party other than
+            Customer, including Halcyon's other customers, or to make it
+            publicly available.
+        action: block
+        rationale: >
+          Cross-tenant exposure of identifiable Customer Data would be a
+          reportable incident under Halcyon's own breach programme and
+          would breach the confidentiality commitments Halcyon gives every
+          other customer on the same multi-tenant platform.
+    objections:
+      - objection: You cannot use our data for your own analytics at all, de-identified or not.
+        their_rationale: Hospital systems want a bright line against any secondary use of information collected from patients.
+        response: >
+          We can narrow the carve-out to Halcyon's own product improvement
+          only, with no cross-customer benchmarking or shared reporting built
+          from your de-identified data. That removes the use you are
+          concerned about while still letting us maintain and secure the
+          platform you depend on.
+        talking_points:
+          - De-identified, aggregated data cannot be traced back to Customer or any patient.
+          - Offer to drop benchmarking first before dropping internal analytics entirely.
+        recommended_position: {rule_key: data_protection.customer_data_use, rung: 1}
+        frequency: common
+        counterparty_profile: Hospital systems and tier 1 health systems
+      - objection: Your form contract gives Halcyon a licence to "host, copy, transmit and display" our data; that sounds broader than running the Services.
+        their_rationale: Broad licence language reads as open-ended even when the business intent is narrower.
+        response: >
+          That licence is the technical right we need to operate the
+          Services, such as storing and displaying your data back to your
+          users; it is not a separate right to use your data for other
+          purposes. We can add an express statement that the licence is
+          limited to providing the Services and the stated analytics
+          carve-out.
+        talking_points:
+          - Offer to add a sentence that the hosting licence is "solely to provide the Services".
+          - Point to the separate, narrower sentence restricting sale, advertising and model training.
+        frequency: occasional
+    dependencies:
+      - related_rule_key: intellectual_property.usage_data
+        relation: read_with
+        note: Usage and telemetry data generated by Halcyon's own systems is addressed separately and is not Customer Data.
+      - related_rule_key: limitation_of_liability.data_breach_super_cap
+        relation: trade_against
+        note: A narrower use restriction supports holding the data breach cap at its preferred level.
+    test_cases:
+      - name: Service purpose with de-identified analytics carve-out
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Halcyon will use Customer Data only to provide the Services under
+          the applicable Order Form, and may also use Customer Data in a
+          de-identified, aggregated form that does not identify Customer or
+          any person to maintain and improve the Services. Halcyon will not
+          sell Customer Data or use it for advertising.
+      - name: Processor-style purpose limitation
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Vendor shall process Customer Data solely to deliver the Services
+          ordered by Customer, except that de-identified and aggregated
+          Customer Data that does not identify Customer may be used by Vendor
+          to improve the Services generally.
+      - name: Internal-only analytics for PHI
+        context: {data_sensitivity: phi}
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: yellow
+        sample_text: >
+          Halcyon will use Customer Data to provide the Services, and may use
+          de-identified, aggregated data only to maintain and secure the
+          Services it provides to Customer, without producing any
+          cross-customer benchmarking or comparison reports.
+      - name: Analytics use described only as "business purposes"
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Halcyon may use Customer Data as reasonably necessary for its
+          business purposes, including improving its products and services.
+      - name: Identifiable data shared with other customers
+        expected_outcome: red_line
+        expected_red_line_key: data-use-shared-across-tenants-identifiable
+        expected_zone: red
+        sample_text: >
+          Halcyon may include Customer's records, in identifiable form, in
+          reports or benchmarking materials made available to Halcyon's other
+          customers.
+    # Non-trap red-line case above satisfies the rule's test-case mix; no
+    # trap is assigned to this rule (see the file-level trap distribution in
+    # the report).
+
+  - rule_key: data_protection.data_return_and_deletion
+    title: Return and deletion of Customer Data at termination
+    required: true
+    risk_weight: 7
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      On termination or expiry, Halcyon makes Customer Data available for
+      export during the data retrieval window stated in the Effect of
+      Termination provision, then destroys it from production systems
+      within 60 days after that window ends, and lets backup copies holding
+      it expire within the ordinary backup cycle, not to exceed 90 days
+      after that window ends.
+    risk_rationale: >
+      Halcyon stores Customer Data for roughly 310 customers across AWS
+      us-east-1, us-west-2 and eu-west-1, with backups as encrypted
+      snapshots that expire on a fixed, shared cycle and cannot be purged
+      customer by customer on demand. These periods give Customer a real
+      export window and a bounded production deletion commitment while
+      matching what a shared engineering process can reliably deliver
+      without putting Halcyon in breach of its own deletion clause the day
+      it is signed.
+    detection_guidance: >
+      Look for "return or delete", "make available for export", "after
+      termination", "after the retrieval window", "securely delete or
+      destroy", "backup copies" and "certification of deletion". Record
+      whether the production destruction and backup purge periods run from
+      the termination date or from the end of the data retrieval window
+      stated in the Effect of Termination provision; Halcyon's own template
+      runs them from the end of that window, in sequence, so the retrieval
+      commitment and the deletion commitment never compete for the same
+      days. Record the destruction period separately from the backup purge
+      period. No return-or-deletion commitment at all, in an agreement under
+      which Halcyon hosts Customer Data, is a missing clause.
+    source_ref: Halcyon Data Governance Policy DG-01
+    authored_by: Privacy Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-05
+    positions:
+      - kind: preferred
+        rung: 0
+        label: 60-day production deletion, 90-day backup purge, both after the retrieval window
+        zone: green
+        summary: Export during the Effect of Termination retrieval window, destruction in production within 60 days after that window ends, backups purged in the ordinary cycle within 90 days after that window ends.
+        language: >
+          Upon termination or expiry of this Agreement, Halcyon shall make
+          the Customer Data then held in the Services available to Customer
+          for export in the format described in the Documentation during the
+          data retrieval window stated in the Effect of Termination
+          provision of this Agreement. Halcyon shall thereafter delete all
+          Customer Data from its production systems within sixty (60) days
+          after the end of that retrieval window, and Customer Data held in
+          backup media shall be overwritten or destroyed in the ordinary
+          course within ninety (90) days after the end of that retrieval
+          window.
+      - kind: fallback
+        rung: 1
+        label: 45-day production deletion with certificate
+        zone: green
+        summary: Faster deletion from production after the retrieval window ends, plus written confirmation delivered without a separate request.
+        give_get: Offer a longer notice period for the export request in return for the faster commitment.
+        language: >
+          Upon termination or expiry of this Agreement, Halcyon shall make
+          the Customer Data then held in the Services available to Customer
+          for export during the data retrieval window stated in the Effect
+          of Termination provision of this Agreement. Halcyon shall delete
+          all Customer Data from its production systems within forty-five
+          (45) days after the end of that retrieval window, and Customer
+          Data held in backup media shall be overwritten or destroyed in the
+          ordinary course within ninety (90) days after the end of that
+          retrieval window. Within ten (10) business days after production
+          deletion is complete, Halcyon shall provide Customer with written
+          confirmation that deletion has occurred.
+      - kind: fallback
+        rung: 2
+        label: 30-day production deletion, 60-day backup purge, both after the retrieval window
+        zone: yellow
+        approver_role: security_lead
+        conditions: {deal_value_band: [enterprise, strategic]}
+        give_get: Customer must complete its export before the retrieval window ends and accept that the shortened backup cycle is a per-tenant operational change.
+        summary: The shortest schedule Halcyon's backup cycle can support, both periods still counted from the end of the retrieval window.
+        language: >
+          Upon termination or expiry of this Agreement, Halcyon shall make
+          the Customer Data then held in the Services available to Customer
+          for export during the data retrieval window stated in the Effect
+          of Termination provision of this Agreement, and shall, within
+          thirty (30) days after the end of that retrieval window, delete
+          all Customer Data from its production systems. Customer Data held
+          in backup media shall be overwritten or destroyed within sixty
+          (60) days after the end of that retrieval window. Halcyon shall
+          provide written confirmation once production deletion is
+          complete.
+        internal_note: >
+          Security must confirm the customer's tenant can be moved to the
+          shortened snapshot schedule before this rung is offered.
+      - kind: acceptable_variant
+        label: Return-or-destroy at Customer's election
+        zone: green
+        summary: Counterparty wording giving Customer the election, on periods no shorter than Halcyon's, sequenced after the retrieval window.
+        language: >
+          At termination of this Agreement, Halcyon shall, at Customer's
+          election notified before the end of the data retrieval window
+          stated in the Effect of Termination provision, return to Customer
+          or destroy all Customer Data that Halcyon then holds, and shall
+          complete that return or destruction within sixty (60) days after
+          the end of that retrieval window, except that copies on backup
+          media may persist for up to ninety (90) days after the end of that
+          retrieval window pending the ordinary overwrite cycle.
+    parameters:
+      - key: data_destruction_days
+        label: Days after the end of the data retrieval window to delete Customer Data from production systems
+        value_type: duration_days
+        unit: days
+        direction: higher_is_better
+        preferred_value: 60
+        green_limit: 45
+        yellow_limit: 30
+        extraction_hint: >
+          Calendar days after the end of the data retrieval window stated in
+          the Effect of Termination provision by which Customer Data in live
+          systems must be deleted. If the clause instead counts this period
+          from the termination date rather than from the end of that
+          retrieval window, read the number as stated and flag the drafting
+          gap, since Halcyon's own template runs the two periods in
+          sequence so they never compete for the same days. "Immediately" or
+          "promptly" with no stated number counts as 0. Backup media is
+          tracked separately and is not part of this value even when the
+          clause states one combined date for "all copies".
+      - key: data_backup_purge_days
+        label: Days after the end of the data retrieval window for backups containing Customer Data to be overwritten
+        value_type: duration_days
+        unit: days
+        direction: higher_is_better
+        preferred_value: 90
+        green_limit: 90
+        yellow_limit: 60
+        extraction_hint: >
+          Calendar days after the end of the data retrieval window by which
+          backup or archive copies must be overwritten or destroyed. If the
+          clause requires all copies "in any form" to be destroyed by one
+          date and makes no separate provision for backups, use that same
+          date for this value too.
+    red_lines:
+      - key: data-return-no-feasibility-limit
+        description: Every copy of Customer Data, including backups, must be destroyed by a single blanket date with no allowance for the ordinary backup cycle or for data Halcyon must retain by law.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause requires Halcyon to destroy all Customer Data in every
+            form, including backup and archive copies, by a single fixed date
+            with no separate allowance for the ordinary backup overwrite
+            cycle, and with no exception for copies Halcyon must retain to
+            comply with law.
+        action: block
+        rationale: >
+          Backups are encrypted snapshots that expire on a shared,
+          fixed cycle that cannot be edited customer by customer; a single
+          blanket destruction date with no cycle allowance and no legal
+          retention exception cannot be performed and would put Halcyon in
+          breach of its own deletion clause on the day it is signed.
+    objections:
+      - objection: We need every copy of our data gone the day the contract ends.
+        their_rationale: Data held by a former vendor is risk with no remaining benefit to the customer.
+        response: >
+          We agree that retained data is risk for both of us and delete on a
+          fixed schedule for that reason. Deletion is a verified engineering
+          process, and you will want time to complete your own export first.
+          We can shorten production deletion to forty-five days and send a
+          written confirmation once it is done.
+        talking_points:
+          - Customer Data stays encrypted and access-restricted until deleted.
+          - Backups are encrypted snapshots on a fixed cycle that cannot be edited per customer.
+        recommended_position: {rule_key: data_protection.data_return_and_deletion, rung: 1}
+        frequency: common
+        counterparty_profile: Hospital systems and tier 1 health systems
+      - objection: Ninety days for backups is too long; our vendor policy caps retention after exit at 60 days.
+        their_rationale: The customer's vendor-management policy sets a maximum retention period after a vendor relationship ends.
+        response: >
+          Our standard snapshot cycle produces the ninety-day figure. With our
+          security lead's agreement we can move your tenant to a shorter
+          cycle so backups are gone within sixty days and production data
+          within thirty, provided you complete your export within that same
+          thirty-day window.
+        talking_points:
+          - The shorter cycle is a per-tenant operational change that needs security approval.
+          - Ask whether the policy distinguishes SaaS platforms from on-premises software.
+        recommended_position: {rule_key: data_protection.data_return_and_deletion, rung: 2}
+        frequency: occasional
+        counterparty_profile: Tier 1 health systems with vendor-exit policies
+    dependencies:
+      - related_rule_key: termination.effect_of_termination
+        relation: requires
+        note: >
+          This rule is the second of two sequential stages: the
+          effect-of-termination clause fixes the data retrieval window
+          first, and this rule's production destruction and backup purge
+          periods run from the end of that window, not from the termination
+          date. Whatever retrieval window is agreed under that rule (30, 60
+          or 90 days), destruction and backup purge always follow it, so the
+          two clauses can never commit to deleting data before the agreed
+          retrieval window has closed.
+    test_cases:
+      - name: Export during the retrieval window, 60-day production deletion, 90-day backups
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          When this Agreement ends, Customer may export its data during the
+          data retrieval window described in the Effect of Termination
+          section. Halcyon will delete Customer Data from its live systems
+          within sixty days after that retrieval window ends, and backup
+          copies will be overwritten in the usual cycle within ninety days
+          after that retrieval window ends.
+      - name: Election to return or destroy, same periods
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Following the close of the data retrieval window stated in the
+          Effect of Termination section, and as Customer elects before that
+          window closes, Halcyon shall return or destroy all Customer Data
+          it then holds, completing the task within 60 days after that
+          window closes; backup media may retain copies for up to 90 days
+          after that window closes pending routine overwriting.
+      - name: 30-day deletion, 60-day backups after the retrieval window, enterprise deal
+        context: {deal_value_band: enterprise}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Halcyon shall delete all Customer Data from its production
+          environment within thirty days after the end of the data retrieval
+          window and from backup media within sixty days after the end of
+          that window, and shall confirm in writing once deletion is
+          complete.
+      - name: Production deletion measured from termination instead of from the end of the retrieval window
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Halcyon will delete Customer Data from its production systems
+          within forty (40) days after termination, regardless of whether
+          Customer has completed its export during the retrieval window.
+      - name: Blanket destruction of all copies, no cycle or legal allowance
+        expected_outcome: red_line
+        expected_red_line_key: data-return-no-feasibility-limit
+        expected_zone: red
+        sample_text: >
+          Within five days of termination Halcyon shall destroy all Customer
+          Data in its possession in every form, including any backup or
+          archival copies, with no exception of any kind.
+
+  - rule_key: security.security_program
+    title: Written information security programme
+    required: true
+    risk_weight: 6
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Halcyon maintains a written information security programme with
+      administrative, technical and physical safeguards consistent with
+      industry standards, and will not materially decrease the overall
+      security of the Services during the Subscription Term.
+    risk_rationale: >
+      Halcyon's SOC 2 Type II, ISO 27001 and HITRUST r2 programmes already
+      define the safeguards that protect all 310 customers on a shared,
+      multi-tenant platform; replacing them, customer by customer, with a
+      bespoke security exhibit is not something a team of this size can run
+      and audit for every $165k median contract. A single named programme,
+      fixed against the standard it follows, keeps the commitment
+      enforceable without fragmenting Halcyon's actual security operations.
+    detection_guidance: >
+      Look for "written information security program", "administrative,
+      technical and physical safeguards", "industry standard", "Security
+      Exhibit" and "shall not materially decrease the overall security".
+      Absence of any security commitment, in an agreement under which data is
+      hosted, is a missing clause.
+    source_ref: Halcyon Information Security Policy ISP-02
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-02
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Named programme, industry-standard comparator
+        zone: green
+        summary: Halcyon's own written programme, consistent with industry standards, with a no-material-decrease commitment.
+        language: >
+          Halcyon shall maintain a written information security program that
+          includes administrative, technical and physical safeguards
+          designed to protect the confidentiality, integrity and availability
+          of Customer Data, consistent with then-current industry standards
+          for a multi-tenant software provider. Halcyon shall not materially
+          decrease the overall security of the Services during the
+          Subscription Term.
+      - kind: fallback
+        rung: 1
+        label: Named framework alignment added
+        zone: yellow
+        approver_role: security_lead
+        conditions: {counterparty_tier: [tier_1]}
+        give_get: Ask that the framework reference track Halcyon's current certification rather than a framework Halcyon does not hold.
+        summary: Add an express reference to a named framework Customer favours, alongside Halcyon's own programme.
+        language: >
+          Halcyon shall maintain a written information security program,
+          consistent with the safeguard categories described in the National
+          Institute of Standards and Technology Cybersecurity Framework or an
+          equivalent successor framework, that includes administrative,
+          technical and physical safeguards designed to protect the
+          confidentiality, integrity and availability of Customer Data.
+          Halcyon shall not materially decrease the overall security of the
+          Services during the Subscription Term.
+      - kind: fallback
+        rung: 2
+        label: Security questionnaire incorporated as a representation
+        zone: yellow
+        approver_role: security_lead
+        conditions: {deal_value_band: [enterprise, strategic]}
+        give_get: Ask that Customer accept Halcyon's SOC 2 Type II report as satisfying any audit right in place of further questionnaires.
+        summary: Incorporate Halcyon's completed security questionnaire responses as a fixed representation, not an ongoing obligation to match future versions.
+        language: >
+          Halcyon shall maintain a written information security program as
+          described in its responses to Customer's security questionnaire
+          dated [date], which are incorporated into this Agreement as a
+          representation of Halcyon's safeguards as of that date, together
+          with administrative, technical and physical safeguards consistent
+          with then-current industry standards. Halcyon shall not materially
+          decrease the overall security of the Services during the
+          Subscription Term.
+        internal_note: >
+          Fix the questionnaire responses by date; never agree to track a
+          questionnaire Customer can update unilaterally after signature.
+      - kind: acceptable_variant
+        label: Customer-drafted industry-standard wording
+        zone: green
+        summary: Counterparty wording for the same outcome using a slightly different formulation.
+        language: >
+          Vendor shall implement and maintain commercially reasonable
+          administrative, technical and physical safeguards designed to
+          protect Customer Data, no less protective than then-current
+          industry standards, and shall not materially reduce those
+          safeguards during the term of this Agreement.
+    red_lines:
+      - key: security-program-bound-by-customer-policy
+        description: Halcyon's security obligations are replaced by Customer's own security policy, as Customer may amend it from time to time without Halcyon's agreement.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause requires Halcyon to comply with Customer's security
+            policy, standard or exhibit as it may be amended, updated or
+            replaced by Customer from time to time, without Halcyon's prior
+            written agreement to the change.
+        action: block
+        rationale: >
+          A security obligation that floats with a document only the
+          counterparty controls is not a commitment Halcyon can staff,
+          budget or audit against, and effectively lets one customer dictate
+          changes to the programme that protects every other tenant.
+    objections:
+      - objection: You must follow our security exhibit, not describe your own programme in general terms.
+        their_rationale: Large health systems standardize security requirements across their vendor base to simplify their own audits.
+        response: >
+          We can reference a fixed version of your exhibit, dated at
+          signature, alongside our own certified programme. We cannot agree
+          to track a document that changes on your side without our review,
+          since that would apply retroactively to a platform we run for
+          every customer.
+        talking_points:
+          - Offer the named-framework fallback before the fixed-questionnaire fallback.
+          - SOC 2 Type II and ISO 27001 already cover the categories most exhibits require.
+        recommended_position: {rule_key: security.security_program, rung: 1}
+        frequency: common
+        counterparty_profile: Large hospital systems with a standard vendor security exhibit
+      - objection: The phrase "industry standard" is too vague; name the framework you follow.
+        their_rationale: A vague comparator is hard for the customer's own security team to evaluate or report against.
+        response: >
+          We can add an express reference to a named framework such as the
+          NIST Cybersecurity Framework alongside our own programme, so the
+          comparator is concrete without displacing the certifications we
+          already hold.
+        talking_points:
+          - Point to the separate certifications rule for the specific attestations Halcyon holds.
+          - A named framework reference does not commit Halcyon to a framework it is not certified against.
+        recommended_position: {rule_key: security.security_program, rung: 1}
+        frequency: occasional
+    dependencies:
+      - related_rule_key: security.certifications
+        relation: requires
+        note: The security programme commitment depends on the certifications rule naming the attestations that evidence it.
+    test_cases:
+      - name: Written programme, industry-standard comparator
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Halcyon maintains a written security program with administrative,
+          technical and physical safeguards consistent with prevailing
+          industry standards for multi-tenant software, and will not
+          materially decrease the Services' overall security during the
+          term.
+      - name: Commercially reasonable safeguards, customer wording
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Vendor will maintain commercially reasonable administrative,
+          technical and physical safeguards for Customer Data, no less
+          protective than then-current industry standards, and will not
+          materially reduce them during the term.
+      - name: NIST framework reference added, tier 1 counterparty
+        context: {counterparty_tier: tier_1}
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: yellow
+        sample_text: >
+          Vendor's written security program shall be consistent with the
+          safeguard categories of the NIST Cybersecurity Framework, covering
+          administrative, technical and physical safeguards for Customer
+          Data.
+      - name: Safeguards described only as "appropriate"
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Vendor shall maintain appropriate safeguards for Customer Data as
+          Vendor determines from time to time.
+      - name: Security governed by Customer's policy as amended
+        expected_outcome: red_line
+        expected_red_line_key: security-program-bound-by-customer-policy
+        expected_zone: red
+        sample_text: >
+          Vendor shall at all times comply with Customer's information
+          security policy, including any future updates Customer makes to
+          that policy.
+      - name: Trap - negated "no safeguards" wording
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Vendor shall not leave Customer Data unprotected; Vendor will
+          maintain a written security program with administrative, technical
+          and physical safeguards consistent with industry standards, and
+          will not materially decrease that security during the term.
+
+  - rule_key: security.certifications
+    title: Independent security certifications
+    required: true
+    risk_weight: 5
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Halcyon maintains SOC 2 Type II, ISO 27001 and HITRUST r2 throughout the
+      Subscription Term and provides the current report, or a bridge letter
+      if a report has lapsed, within ten days of a written request.
+    risk_rationale: >
+      Halcyon already holds SOC 2 Type II, ISO 27001 and HITRUST r2, so
+      committing to maintain them costs nothing beyond what the compliance
+      programme already does. Turning reports around quickly on request
+      gives customers the assurance they are actually relying on when they
+      accept Halcyon's security programme in place of their own audit of a
+      platform serving 310 other customers.
+    detection_guidance: >
+      Look for "SOC 2 Type II", "ISO/IEC 27001", "HITRUST", "maintain
+      throughout the Term", "provide a copy of the most recent report upon
+      request", "bridge letter" and "or successor standard". Absence means
+      there is no contractual commitment to keep the certifications the
+      customer relied on when it signed.
+    source_ref: Halcyon Information Security Policy ISP-02
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-02
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Named certifications, 10-day report delivery
+        zone: green
+        summary: Maintain the three named certifications and deliver the current report or a bridge letter within 10 days of request.
+        language: >
+          Halcyon shall maintain SOC 2 Type II, ISO/IEC 27001 and HITRUST r2
+          certification (or a successor standard providing substantially
+          equivalent assurance) throughout the Subscription Term. Upon
+          Customer's written request, and subject to the confidentiality of
+          the report, Halcyon shall provide Customer with a copy of its then-
+          current report for each such certification, or a bridge letter if
+          the then-current report has lapsed, within ten (10) days of the
+          request.
+      - kind: fallback
+        rung: 1
+        label: 15-day report delivery
+        zone: green
+        summary: Same certifications and content, a slightly longer delivery window.
+        language: >
+          Halcyon shall maintain SOC 2 Type II, ISO/IEC 27001 and HITRUST r2
+          certification (or a successor standard providing substantially
+          equivalent assurance) throughout the Subscription Term. Upon
+          Customer's written request, Halcyon shall provide Customer with a
+          copy of its then-current report for each such certification, or a
+          bridge letter if the then-current report has lapsed, within
+          fifteen (15) days of the request.
+      - kind: fallback
+        rung: 2
+        label: 30-day report delivery
+        zone: yellow
+        approver_role: security_lead
+        conditions: {counterparty_tier: [tier_1]}
+        give_get: Ask Customer to accept these reports as satisfying its audit right in place of a separate on-site audit.
+        summary: Extend the delivery window to 30 days to match slower internal report-release cycles.
+        language: >
+          Halcyon shall maintain SOC 2 Type II, ISO/IEC 27001 and HITRUST r2
+          certification (or a successor standard providing substantially
+          equivalent assurance) throughout the Subscription Term. Upon
+          Customer's written request, Halcyon shall provide Customer with a
+          copy of its then-current report for each such certification, or a
+          bridge letter if the then-current report has lapsed, within thirty
+          (30) days of the request.
+      - kind: acceptable_variant
+        label: Customer-drafted "current report on request" wording
+        zone: green
+        summary: Counterparty wording for the same outcome, naming the same certifications.
+        language: >
+          Vendor shall maintain SOC 2 Type II, ISO 27001 and HITRUST r2
+          certifications, or successor standards giving substantially
+          equivalent assurance, during the term of this Agreement, and will
+          provide Customer with its most recent report for each upon
+          reasonable written request, within seven (7) business days.
+    parameters:
+      - key: certification_report_delivery_days
+        label: Days to deliver the current report or a bridge letter after a written request
+        value_type: duration_days
+        unit: days
+        direction: lower_is_better
+        preferred_value: 10
+        green_limit: 15
+        yellow_limit: 30
+        extraction_hint: >
+          Calendar days from Customer's written request to delivery of the
+          report or bridge letter. If the clause states business days,
+          convert using a five-day week. If no number is stated but delivery
+          "on request" is promised, leave this parameter absent rather than
+          assuming a value.
+    red_lines:
+      - key: certification-reports-may-be-disclosed-publicly
+        description: Halcyon's certification reports may be shared publicly, with Halcyon's competitors, or with any third party outside Customer's own advisors, without restriction.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause permits Customer to publish, post publicly, or share
+            with any third party other than Customer's own auditors, regulators
+            or professional advisors, the substance of Halcyon's SOC 2, ISO
+            27001 or HITRUST report.
+        action: block
+        rationale: >
+          These reports contain details of Halcyon's security controls
+          across every customer on the platform; public or third-party
+          disclosure beyond Customer's own advisors would itself create the
+          kind of security exposure the certifications are meant to guard
+          against.
+    objections:
+      - objection: Ten days is too slow; we need the report before we can even begin our own security review.
+        their_rationale: Procurement timelines are often set before the vendor security review starts, so delay here delays everything else.
+        response: >
+          We can commit to fifteen days as our standard delivery window, and
+          in practice we turn most requests around faster once the request
+          is confirmed in writing. If timing is critical for a specific deal,
+          tell us early and we will try to get the report to you ahead of
+          the committed date.
+        talking_points:
+          - The committed window is a ceiling, not a target; most requests are faster.
+          - Offer the 15-day fallback before any further concession.
+        recommended_position: {rule_key: security.certifications, rung: 1}
+        frequency: occasional
+      - objection: Your reports should satisfy our audit right entirely; we should not need a separate audit at all for a SOC 2-certified vendor.
+        their_rationale: A hospital system with its own audit resource constraints prefers to rely on independent attestations where it reasonably can.
+        response: >
+          That is exactly how we intend the reports to be used. We can agree
+          that our current SOC 2 Type II report satisfies your audit right in
+          the first instance, with a further audit right reserved only if the
+          report shows a material deficiency.
+        talking_points:
+          - Point to the audit rights rule for how the report interacts with on-site audit requests.
+          - This is a trade worth making before conceding on report delivery time.
+        recommended_position: {rule_key: audit.customer_audit_rights, rung: 0}
+        frequency: common
+        counterparty_profile: Tier 1 health systems
+    dependencies:
+      - related_rule_key: audit.customer_audit_rights
+        relation: trade_against
+        note: Offer the certification reports as satisfying the audit right before agreeing to on-site access.
+    test_cases:
+      - name: Three certifications, 10-day delivery
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Halcyon will keep its SOC 2 Type II, ISO 27001 and HITRUST r2
+          certifications in force throughout the term, and will give Customer
+          its current report, or a bridge letter if one has lapsed, within
+          ten days of a written request.
+      - name: Customer-drafted "most recent report" wording
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Vendor shall hold SOC 2 Type II, ISO 27001 and HITRUST r2 (or
+          equivalent successor certifications) during the term and will
+          share its most recent report for each upon reasonable written
+          request within seven business days.
+      - name: 15-day delivery window
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          Halcyon will maintain SOC 2 Type II, ISO 27001 and HITRUST r2
+          certification and will provide its current report for each,
+          or a bridge letter, within fifteen days of Customer's written
+          request.
+      - name: Delivery "within a reasonable time" with no number
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Halcyon will maintain its certifications and will share the
+          current report with Customer within a reasonable time after a
+          written request.
+      - name: Reports may be published or shared with any third party
+        expected_outcome: red_line
+        expected_red_line_key: certification-reports-may-be-disclosed-publicly
+        expected_zone: red
+        sample_text: >
+          Customer may publish, post, or otherwise share Halcyon's SOC 2,
+          ISO 27001 and HITRUST reports with any third party, including on
+          Customer's public website.
+
+  - rule_key: breach_notification.notification_timeline
+    title: Security incident notification timeline
+    required: true
+    risk_weight: 9
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Halcyon notifies Customer without undue delay, and in no event later
+      than 72 hours, after confirming a security incident affecting Customer
+      Data, with notice triggered by confirmation rather than mere suspicion.
+    risk_rationale: >
+      Halcyon's $10M cyber and technology errors and omissions aggregate and
+      its SOC 2 Type II incident-response programme both assume a confirmed
+      trigger: premature notice based on unconfirmed suspicion generates
+      false alarms across 310 customers and undermines the credibility of
+      notices that turn out to be genuine. Seventy-two hours after
+      confirmation gives Halcyon's team enough time to establish scope while
+      still meeting the fastest timelines customers reasonably expect from a
+      healthcare-adjacent vendor.
+    detection_guidance: >
+      Look for "without undue delay", "within seventy-two hours", "within
+      twenty-four hours", "upon confirming", "suspected or actual" and
+      "confirmed". Record both the stated number of hours and whether notice
+      is triggered by confirmation or by mere suspicion. Absence of any
+      incident notification commitment, in an agreement under which Halcyon
+      hosts Customer Data, is a missing clause.
+    source_ref: Halcyon Incident Response Policy IR-01
+    authored_by: Privacy Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-05
+    positions:
+      - kind: preferred
+        rung: 0
+        label: 72 hours after confirmation
+        zone: green
+        summary: Notice without undue delay, and in no event later than 72 hours after Halcyon confirms a security incident.
+        language: >
+          Halcyon shall notify Customer without undue delay, and in no event
+          later than seventy-two (72) hours, after Halcyon confirms a
+          security incident that has resulted in the unauthorized access to
+          or acquisition of Customer Data (a "Security Incident"). Notice
+          under this section is triggered by Halcyon's confirmation of a
+          Security Incident, not by an unconfirmed report or suspicion.
+      - kind: fallback
+        rung: 1
+        label: 48 hours after confirmation
+        zone: green
+        summary: Shorten the outer limit to 48 hours, trigger unchanged.
+        give_get: Ask for the single point of contact and notice method to be fixed in the Order Form.
+        language: >
+          Halcyon shall notify Customer without undue delay, and in no event
+          later than forty-eight (48) hours, after Halcyon confirms a
+          Security Incident. Notice under this section is triggered by
+          Halcyon's confirmation of a Security Incident, not by an
+          unconfirmed report or suspicion.
+      - kind: fallback
+        rung: 2
+        label: 24 hours after confirmation
+        zone: yellow
+        approver_role: security_lead
+        conditions: {data_sensitivity: [phi, special_category], counterparty_tier: [tier_1]}
+        give_get: Ask for a longer cure period elsewhere in the agreement to offset the compressed internal response window.
+        summary: Shorten the outer limit to 24 hours for the most sensitive accounts.
+        language: >
+          Halcyon shall notify Customer without undue delay, and in no event
+          later than twenty-four (24) hours, after Halcyon confirms a
+          Security Incident. Notice under this section is triggered by
+          Halcyon's confirmation of a Security Incident, not by an
+          unconfirmed report or suspicion.
+        internal_note: Consult privacy_counsel before offering this rung; it compresses the forensic triage window significantly.
+      - kind: acceptable_variant
+        label: Customer-drafted "promptly, in no event later than" wording
+        zone: green
+        summary: Counterparty wording for the same outcome and trigger.
+        language: >
+          Vendor shall notify Customer promptly, and in no event later than
+          seventy-two (72) hours, after Vendor confirms a security incident
+          affecting Customer Data, with notice triggered by Vendor's
+          confirmation of the incident.
+    parameters:
+      - key: notification_hours
+        label: Outer limit, in hours, to notify Customer after the trigger
+        value_type: number
+        unit: hours
+        direction: higher_is_better
+        preferred_value: 72
+        green_limit: 48
+        yellow_limit: 24
+        extraction_hint: >
+          Convert any stated day period to hours (one day equals 24 hours).
+          "Without undue delay" with no outer number is treated as the
+          stated number in the same sentence if one exists; if no number
+          exists at all, leave this parameter absent and flag as a
+          deviation.
+      - key: notification_trigger
+        label: Event that starts the notification clock
+        value_type: enum
+        direction: exact
+        allowed_values: [confirmed, reasonably_believed, suspected]
+        preferred_value: confirmed
+        green_limit: [confirmed]
+        yellow_limit: [reasonably_believed]
+        extraction_hint: >
+          "Confirmed", "verified" or "determined" maps to confirmed.
+          "Reasonably believes" or "has reason to believe" maps to
+          reasonably_believed. "Suspects", "becomes aware of a possible" or
+          "potential" maps to suspected.
+    red_lines:
+      - key: data-breach-notice-under-24h-or-on-suspicion
+        description: Notice is required in under 24 hours, or is triggered by mere suspicion rather than confirmation or a reasonable belief.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause requires Halcyon to notify Customer of a security
+            incident in fewer than twenty-four hours, or triggers the
+            notification obligation on mere suspicion of an incident rather
+            than on confirmation or a reasonable belief that one has
+            occurred.
+        action: block
+        rationale: >
+          A window under 24 hours, or a trigger on unconfirmed suspicion,
+          does not allow even an initial forensic assessment and would
+          generate repeated false-positive notices across Halcyon's customer
+          base, eroding trust in notices that matter.
+    objections:
+      - objection: Seventy-two hours is too slow; we need to know the moment you suspect something is wrong.
+        their_rationale: Hospital systems have their own regulatory notice clocks that they want to start as early as possible.
+        response: >
+          We can commit to forty-eight hours instead of seventy-two, measured
+          from the same confirmation trigger, which gives you more time
+          inside your own notice clock without forcing us to report on
+          unconfirmed suspicions that often turn out to be nothing.
+        talking_points:
+          - A suspicion-based trigger produces false alarms that are costly to chase down and to walk back.
+          - Offer 48 hours before offering 24 hours.
+        recommended_position: {rule_key: breach_notification.notification_timeline, rung: 1}
+        frequency: common
+        counterparty_profile: Hospital systems and tier 1 health systems
+      - objection: Our cyber insurer requires notice to us within 24 hours of any suspected incident involving our data.
+        their_rationale: Some customers' own insurance policies impose notice obligations on them that they then pass through to vendors.
+        response: >
+          For accounts handling the most sensitive data we can move to a
+          twenty-four hour outer limit, still triggered by our confirmation
+          of an incident rather than by suspicion, with our security lead's
+          sign-off given the compressed internal timeline that requires.
+        talking_points:
+          - Ask for the specific insurer requirement in writing to confirm the trigger it actually requires.
+          - The trigger (confirmation vs. suspicion) matters as much as the hours.
+        recommended_position: {rule_key: breach_notification.notification_timeline, rung: 2}
+        frequency: occasional
+        counterparty_profile: Tier 1 health systems with cyber insurance pass-through requirements
+    dependencies:
+      - related_rule_key: limitation_of_liability.data_breach_super_cap
+        relation: read_with
+        note: The notification trigger and the data breach super-cap both turn on the same defined Security Incident; keep the definitions aligned.
+    test_cases:
+      - name: 72 hours after confirmation
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Halcyon will tell Customer about a security incident without undue
+          delay and no later than 72 hours after Halcyon has confirmed it,
+          measured from the point of confirmation rather than any earlier
+          suspicion.
+      - name: Customer-drafted "promptly" wording
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Vendor will promptly notify Customer of a confirmed security
+          incident affecting Customer Data, in no event later than
+          seventy-two hours after Vendor's confirmation.
+      - name: 24 hours after confirmation, PHI and tier 1
+        context: {data_sensitivity: phi, counterparty_tier: tier_1}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Halcyon shall notify Customer within twenty-four hours after
+          Halcyon confirms a security incident affecting Customer Data.
+      - name: Notice within 36 hours
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Halcyon shall notify Customer of a confirmed security incident
+          within thirty-six hours after confirmation.
+      - name: Notice triggered by suspicion
+        expected_outcome: red_line
+        expected_red_line_key: data-breach-notice-under-24h-or-on-suspicion
+        expected_zone: red
+        sample_text: >
+          Halcyon shall notify Customer within twenty-four hours after it
+          first suspects that a security incident may have occurred.
+
+  - rule_key: subprocessors.subprocessor_changes
+    title: Notice and objection rights for new subprocessors
+    required: true
+    risk_weight: 6
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Halcyon gives Customer 30 days' advance notice before a new
+      subprocessor begins handling Customer Data, with a right to object on
+      reasonable grounds and a termination remedy if the objection cannot be
+      resolved in good faith.
+    risk_rationale: >
+      Halcyon's Services depend on a small set of cloud, messaging and
+      analytics subprocessors that support all 310 customers. A general
+      authorisation with advance notice and an objection right lets Halcyon
+      update that shared list on one schedule instead of seeking
+      per-customer consent for every change, while still giving each
+      customer a real say before a new vendor touches its data.
+    detection_guidance: >
+      Look for "notify Customer at least thirty days before", "updating the
+      list of subprocessors", "object on reasonable grounds", "work in good
+      faith to resolve" and "terminate the affected Services". Record the
+      number of days' notice and whether objection requires prior consent for
+      each subprocessor or only notice-and-object. Absence, in an agreement
+      under which a subprocessor may handle Customer Data, is a missing
+      clause.
+    source_ref: Halcyon Data Governance Policy DG-01
+    authored_by: Privacy Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-05
+    positions:
+      - kind: preferred
+        rung: 0
+        label: General authorisation, 30 days' notice, right to object
+        zone: green
+        summary: Halcyon maintains a current subprocessor list and gives 30 days' notice before a new one begins processing, with an objection and good-faith resolution right.
+        language: >
+          Halcyon may engage subprocessors to assist in providing the
+          Services (each, a "Subprocessor"). Halcyon shall maintain a current
+          list of its Subprocessors and shall notify Customer at least thirty
+          (30) days before a new Subprocessor begins processing Customer
+          Data. Customer may object to a new Subprocessor on reasonable
+          grounds relating to data protection within fifteen (15) days of
+          notice, in which case the parties shall work in good faith to
+          resolve the objection, failing which Customer may terminate the
+          affected Services for a pro-rata refund of prepaid Fees.
+      - kind: fallback
+        rung: 1
+        label: 45 days' notice
+        zone: yellow
+        approver_role: privacy_counsel
+        give_get: Ask for a faster resolution commitment on any objection in return for the longer lead time.
+        summary: Longer notice period, same mechanics.
+        language: >
+          Halcyon may engage Subprocessors to assist in providing the
+          Services. Halcyon shall maintain a current list of its
+          Subprocessors and shall notify Customer at least forty-five (45)
+          days before a new Subprocessor begins processing Customer Data.
+          Customer may object on reasonable grounds relating to data
+          protection within fifteen (15) days of notice, in which case the
+          parties shall work in good faith to resolve the objection, failing
+          which Customer may terminate the affected Services for a pro-rata
+          refund of prepaid Fees.
+      - kind: fallback
+        rung: 2
+        label: 60 days' notice
+        zone: yellow
+        approver_role: privacy_counsel
+        conditions: {deal_value_band: [enterprise, strategic]}
+        give_get: Ask for a longer initial term or renewal commitment in return for the extended notice period.
+        summary: Extend notice to 60 days for strategic accounts with longer internal review cycles.
+        language: >
+          Halcyon may engage Subprocessors to assist in providing the
+          Services. Halcyon shall maintain a current list of its
+          Subprocessors and shall notify Customer at least sixty (60) days
+          before a new Subprocessor begins processing Customer Data. Customer
+          may object on reasonable grounds relating to data protection within
+          fifteen (15) days of notice, in which case the parties shall work
+          in good faith to resolve the objection, failing which Customer may
+          terminate the affected Services for a pro-rata refund of prepaid
+          Fees.
+      - kind: acceptable_variant
+        label: Customer-drafted "updated list" wording
+        zone: green
+        summary: Counterparty wording for the same outcome and notice period.
+        language: >
+          Vendor shall keep an up-to-date list of its subprocessors available
+          to Customer and shall give Customer at least thirty (30) days'
+          notice before a new subprocessor is authorized to process Customer
+          Data. Customer may object on reasonable data-protection grounds
+          within fifteen (15) days of that notice, and the parties will then
+          work in good faith to resolve the objection.
+    parameters:
+      - key: subprocessor_notice_days
+        label: Days' advance notice before a new subprocessor begins processing
+        value_type: duration_days
+        unit: days
+        direction: lower_is_better
+        preferred_value: 30
+        green_limit: 30
+        yellow_limit: 60
+        extraction_hint: >
+          Calendar days between notice of a new subprocessor and when it may
+          begin processing Customer Data. If notice is "concurrent with" the
+          change (0 days) or the clause states no notice at all, record 0.
+      - key: subprocessor_objection_window_days
+        label: Days Customer has to object after notice of a new subprocessor
+        value_type: duration_days
+        unit: days
+        direction: lower_is_better
+        preferred_value: 15
+        green_limit: 15
+        yellow_limit: 30
+        extraction_hint: >
+          Calendar days from notice of a new subprocessor to the deadline for
+          Customer to raise an objection. If the clause sets no deadline at
+          all for objecting, leave this parameter absent rather than
+          assuming a value; an unlimited window is a deviation, not a value
+          for this parameter.
+    red_lines:
+      - key: subprocessor-prior-consent-required
+        description: A new subprocessor requires Customer's prior written consent, rather than notice and an objection right.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause requires Halcyon to obtain Customer's prior written
+            consent before engaging each new Subprocessor, rather than
+            giving advance notice with a right to object.
+        action: block
+        rationale: >
+          A consent-for-each-subprocessor model cannot run across a platform
+          serving 310 customers on a shared set of vendors; a single
+          customer's delay or refusal would block an infrastructure change
+          for everyone else on the same tenancy.
+    objections:
+      - objection: We must approve every subprocessor before it touches our data, not just be notified.
+        their_rationale: Health systems want the final say over who handles patient data, not a right to object after the fact.
+        response: >
+          We can give you more notice before a change takes effect so your
+          review has real time to run, and if your objection raises a
+          genuine data-protection concern we will work with you on it or let
+          you terminate the affected Services for a refund. A consent
+          requirement for each subprocessor is not something we can run
+          across a shared platform.
+        talking_points:
+          - Offer 45 days' notice before 60 days.
+          - The termination-with-refund remedy gives a real exit, not just a complaint process.
+        recommended_position: {rule_key: subprocessors.subprocessor_changes, rung: 1}
+        frequency: common
+        counterparty_profile: Hospital systems and tier 1 health systems
+      - objection: Thirty days is not enough time for our privacy office to review a new subprocessor.
+        their_rationale: A privacy office with a backlog of vendor reviews cannot complete a review in a month.
+        response: >
+          For larger accounts we can extend notice to sixty days with our
+          privacy counsel's sign-off, in exchange for a longer committed term
+          so the extra lead time is worth building into our change process.
+        talking_points:
+          - Longer notice is a real concession because it slows how quickly Halcyon can swap a vendor.
+          - Ask whether the privacy office's review could run in parallel with the good-faith resolution period instead of before it.
+        recommended_position: {rule_key: subprocessors.subprocessor_changes, rung: 2}
+        frequency: occasional
+        counterparty_profile: Tier 1 health systems with a formal privacy review process
+    dependencies:
+      - related_rule_key: audit.customer_audit_rights
+        relation: read_with
+        note: Subprocessor changes and audit scope both touch Halcyon's vendor list; keep the two clauses from imposing conflicting review cycles.
+    test_cases:
+      - name: General authorisation, 30 days' notice
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Halcyon keeps a current list of the subprocessors it uses to
+          provide the Services and will give Customer at least thirty days'
+          notice before a new one starts handling Customer Data. Customer
+          may object on reasonable data-protection grounds, and the parties
+          will work in good faith to resolve it.
+      - name: Customer-drafted "updated list" wording
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Vendor will maintain an up-to-date subprocessor list available to
+          Customer and will give at least 30 days' notice before a new
+          subprocessor is authorized to process Customer Data, with an
+          opportunity for Customer to object on data-protection grounds.
+      - name: 60 days' notice, strategic deal
+        context: {deal_value_band: strategic}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Halcyon shall give Customer at least sixty days' notice before any
+          new subprocessor begins processing Customer Data, and will work in
+          good faith to resolve any reasonable objection Customer raises.
+      - name: Notice described only as "reasonable advance notice"
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Halcyon will give Customer reasonable advance notice before a new
+          subprocessor begins handling Customer Data.
+      - name: Prior written consent required for each subprocessor
+        expected_outcome: red_line
+        expected_red_line_key: subprocessor-prior-consent-required
+        expected_zone: red
+        sample_text: >
+          Halcyon shall obtain Customer's prior written consent before
+          engaging any new subprocessor to process Customer Data.
+      - name: Trap - negated "no notice" wording
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Halcyon will not add a new subprocessor without notice; it will
+          give Customer at least thirty days' notice before a new
+          subprocessor begins processing Customer Data, with a right to
+          object on reasonable data-protection grounds.
+
+  - rule_key: audit.customer_audit_rights
+    title: Customer's right to audit Halcyon's compliance
+    required: true
+    risk_weight: 6
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Customer may verify Halcyon's compliance once every 12 months, on 30
+      days' written notice, with Halcyon's current SOC 2 Type II report
+      satisfying the right in the first instance; an on-site audit at
+      Customer's cost is available on escalation if the report shows a
+      material deficiency.
+    risk_rationale: >
+      Giving on-site access to production systems shared by around 310
+      customers risks exposing other customers' data and operations to each
+      auditor who visits, which is precisely what Halcyon's SOC 2 Type II and
+      ISO 27001 programmes are designed to avoid having to do repeatedly.
+      Letting the independent report satisfy the right in the first
+      instance, with on-site access reserved for a shown deficiency, protects
+      every tenant on the platform while still giving Customer a real,
+      enforceable audit right.
+    detection_guidance: >
+      Look for "audit", "inspect", "upon reasonable prior written notice",
+      "no more than once in any twelve-month period", "SOC 2 Type II report"
+      and "during normal business hours", as against "at any time" or
+      "without notice". Record the notice period in days and whether the
+      report satisfies the right or only supplements an on-site audit.
+      Absence of any audit right at all, in a commercial agreement, means no
+      audit right exists rather than a missing mandatory term.
+    source_ref: Halcyon Vendor and Audit Policy VA-01
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-05
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Annual, 30 days' notice, SOC 2 report first
+        zone: green
+        summary: Report-based audit right once a year on 30 days' notice; on-site access only on a shown deficiency.
+        language: >
+          No more than once in any twelve-month period, Customer may verify
+          Halcyon's compliance with its security obligations under this
+          Agreement. Halcyon's then-current SOC 2 Type II report shall
+          satisfy this right in the first instance. If that report
+          identifies a material deficiency directly relevant to the Services
+          provided to Customer, Customer may, on at least thirty (30) days'
+          written notice and during Halcyon's normal business hours, conduct
+          or engage a reputable third party to conduct an on-site audit
+          limited to that deficiency, at Customer's cost, subject to a
+          written confidentiality agreement.
+      - kind: fallback
+        rung: 1
+        label: Report plus written security questionnaire
+        zone: green
+        summary: Add a written questionnaire option alongside the report, same notice and frequency.
+        language: >
+          No more than once in any twelve-month period, Customer may verify
+          Halcyon's compliance with its security obligations under this
+          Agreement by reviewing Halcyon's then-current SOC 2 Type II report
+          and by submitting a written security questionnaire, which Halcyon
+          shall answer within thirty (30) days. If the report and
+          questionnaire together identify a material deficiency directly
+          relevant to the Services provided to Customer, Customer may, on at
+          least thirty (30) days' written notice, conduct an on-site audit
+          limited to that deficiency, at Customer's cost.
+      - kind: fallback
+        rung: 2
+        label: On-site audit permitted, Customer's cost, 15 days' notice
+        zone: yellow
+        approver_role: security_lead
+        conditions: {counterparty_tier: [tier_1], deal_value_band: [enterprise, strategic]}
+        give_get: Ask for a multi-year initial term or a higher deal_value_band commitment in return.
+        summary: Permit a standalone on-site audit once a year, without requiring a shown deficiency first, at Customer's cost on shorter notice.
+        language: >
+          No more than once in any twelve-month period, and on at least
+          fifteen (15) days' written notice, Customer may, at its own cost
+          and during Halcyon's normal business hours, conduct or engage a
+          reputable third party to conduct an on-site audit of Halcyon's
+          compliance with its security obligations under this Agreement,
+          limited to the systems and facilities used to provide the Services
+          to Customer and subject to a written confidentiality agreement.
+          This audit right is in addition to, and not conditioned on, review
+          of Halcyon's SOC 2 Type II report.
+        internal_note: >
+          Confirm with security_lead that the audit can be scheduled without
+          disrupting other tenants before this rung is offered.
+      - kind: acceptable_variant
+        label: Customer-drafted "no more than once every 12 months" wording
+        zone: green
+        summary: Counterparty wording for the same outcome and notice period.
+        language: >
+          Customer may audit Vendor's compliance with its security
+          obligations no more than once every twelve (12) months, upon at
+          least thirty (30) days' prior written notice; Vendor's then-current
+          SOC 2 Type II report shall satisfy this right unless that report
+          identifies a material deficiency.
+    parameters:
+      - key: audit_notice_days
+        label: Days' advance written notice required before an audit
+        value_type: duration_days
+        unit: days
+        direction: higher_is_better
+        preferred_value: 30
+        green_limit: 30
+        yellow_limit: 15
+        extraction_hint: >
+          Calendar days between Customer's written audit notice and the
+          earliest date the audit may begin. "Reasonable notice" with no
+          number is a deviation. Zero days or "at any time" maps to 0 and is
+          a red-line indicator in combination with the semantic red lines on
+          this rule.
+      - key: audit_frequency_per_year
+        label: Number of audits Customer may conduct per 12-month period
+        value_type: number
+        unit: audits per year
+        direction: lower_is_better
+        preferred_value: 1
+        green_limit: 1
+        yellow_limit: 2
+        extraction_hint: >
+          Count of audits (report review, questionnaire or on-site) Customer
+          may initiate in any rolling 12-month period. "No more than once"
+          maps to 1. A clause that states no limit on frequency at all is
+          left absent here; that scenario is caught by the
+          global-unannounced-audit red line instead of this parameter.
+    red_lines:
+      - key: audit-scope-other-customers-or-unrelated
+        description: Customer's audit right extends to other customers' data or systems, or to Halcyon commercial information unrelated to the Services provided to Customer.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause gives Customer audit or inspection rights reaching
+            the data, systems or facilities of Halcyon's other customers, or
+            reaching Halcyon's pricing, costs, personnel records or
+            subcontractor agreements that are not directly relevant to the
+            Services provided to Customer.
+        action: block
+        rationale: >
+          An audit right that reaches other tenants' data or Halcyon's
+          unrelated commercial information would breach the confidentiality
+          Halcyon owes every other customer and exposes competitively
+          sensitive information that has nothing to do with verifying the
+          Services Customer actually receives.
+    objections:
+      - objection: Your SOC 2 report is not enough; we need our own people inside your facility.
+        their_rationale: Some procurement and compliance teams require a first-party or regulator-style audit regardless of third-party attestations.
+        response: >
+          We can add a written questionnaire alongside the report as a first
+          step, and if either one shows a genuine deficiency relevant to
+          your Services, we will support a focused on-site audit at that
+          point. We cannot open a shared production environment to a general
+          audit with no finding behind it.
+        talking_points:
+          - A report-first model is what lets Halcyon run one audit programme for 310 customers instead of one per customer.
+          - Offer the questionnaire fallback before the standalone on-site fallback.
+        recommended_position: {rule_key: audit.customer_audit_rights, rung: 1}
+        frequency: common
+        counterparty_profile: Hospital systems and tier 1 health systems
+      - objection: We need the right to walk in and audit at any time, without waiting for a deficiency.
+        their_rationale: Large counterparties sometimes want a standing audit right as leverage, independent of whether a problem has surfaced.
+        response: >
+          For an account of this size we can agree to a standalone on-site
+          audit once every twelve months, at your cost and on fifteen days'
+          notice, without needing to show a deficiency first. We cannot agree
+          to audits with no notice or with no limit on frequency.
+        talking_points:
+          - Tie the standalone on-site option to deal size given the cost and disruption it carries.
+          - Keep the scope limited to the systems and facilities used for this Customer's Services.
+        recommended_position: {rule_key: audit.customer_audit_rights, rung: 2}
+        frequency: occasional
+        counterparty_profile: Tier 1 health systems and strategic accounts
+    dependencies:
+      - related_rule_key: security.certifications
+        relation: trade_against
+        note: Offer the SOC 2 Type II report under the certifications rule as satisfying this right before conceding a standalone on-site audit.
+    test_cases:
+      - name: Annual, 30 days' notice, SOC 2 report first
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          No more than once a year, and on thirty days' written notice,
+          Customer may verify Halcyon's security compliance; Halcyon's
+          current SOC 2 Type II report satisfies this right unless it shows a
+          deficiency relevant to Customer's Services.
+      - name: Customer-drafted "no more than once every 12 months" wording
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Customer may audit Vendor's security compliance no more than once
+          every 12 months on 30 days' prior written notice, and Vendor's
+          then-current SOC 2 Type II report will satisfy the right absent a
+          shown deficiency.
+      - name: Standalone on-site audit, tier 1 and strategic deal
+        context: {counterparty_tier: tier_1, deal_value_band: strategic}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Once every twelve months, on fifteen days' written notice and at
+          its own cost, Customer may conduct an on-site audit of Halcyon's
+          security compliance for the systems used to provide Customer's
+          Services, independent of Halcyon's SOC 2 Type II report.
+      - name: Audit right described only as "upon reasonable notice"
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Customer may audit Halcyon's compliance with its security
+          obligations upon reasonable notice.
+      - name: Audit reaching other customers' environments
+        expected_outcome: red_line
+        expected_red_line_key: audit-scope-other-customers-or-unrelated
+        expected_zone: red
+        sample_text: >
+          Customer's audit may extend to any system or facility operated by
+          Halcyon, including those used to provide services to Halcyon's
+          other customers, and to Halcyon's supplier contracts generally.
+      - name: Unannounced audit at any time
+        expected_outcome: red_line
+        expected_red_line_key: global-unannounced-audit
+        expected_zone: red
+        sample_text: >
+          Customer or its representatives may enter Halcyon's facilities and
+          access its systems to conduct an audit at any time, without prior
+          notice and without limit on frequency.
+
+  - rule_key: compliance.compliance_with_laws
+    title: Compliance with applicable laws
+    required: true
+    risk_weight: 4
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Halcyon complies with the laws applicable to it as a provider of the
+      Services; Halcyon is not responsible for Customer's compliance with
+      laws applicable to Customer's own business or Customer's use of the
+      Services.
+    risk_rationale: >
+      Halcyon can represent and warrant to compliance with the laws that
+      govern how it builds and operates Halcyon Engage, because that scope
+      is within its own control and is already covered by its SOC 2 Type II
+      and HITRUST r2 programmes. Halcyon cannot warrant compliance with the
+      laws governing each of its roughly 310 customers' own businesses,
+      which vary by state, specialty and line of business and are outside
+      anything Halcyon can audit or control.
+    detection_guidance: >
+      Look for "shall comply with all applicable laws and regulations",
+      "applicable to its performance", "applicable to Customer's business"
+      and "export control". Wording that makes Halcyon responsible for
+      Customer's regulatory compliance, or for Customer's own use of the
+      Services in violation of law, is a deviation. Absence of a general
+      compliance clause is a low-severity missing issue.
+    source_ref: Halcyon Compliance Policy CP-01
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Compliance scoped to Halcyon's own performance
+        zone: green
+        summary: Halcyon complies with laws applicable to its performance; Customer is responsible for laws applicable to its own business and use.
+        language: >
+          Halcyon shall comply with all laws and regulations applicable to
+          Halcyon in its performance of this Agreement and its provision of
+          the Services. Customer is solely responsible for compliance with
+          all laws and regulations applicable to Customer's business and to
+          Customer's use of the Services, including any laws specific to
+          Customer's industry.
+      - kind: fallback
+        rung: 1
+        label: Mutual compliance clause
+        zone: green
+        summary: State the same obligation for both parties rather than naming Halcyon alone.
+        give_get: Ask Customer to confirm its own export-control and sanctions status in return.
+        language: >
+          Each party shall comply with all laws and regulations applicable
+          to it in connection with its performance of this Agreement. Each
+          party is solely responsible for compliance with laws applicable to
+          its own business that are not specific to its performance under
+          this Agreement.
+      - kind: fallback
+        rung: 2
+        label: Broader undertaking including export control and anti-corruption, scope unchanged
+        zone: yellow
+        approver_role: commercial_counsel
+        conditions: {deal_value_band: [enterprise, strategic]}
+        give_get: Ask for mutual language confirming Customer remains responsible for its own regulatory compliance.
+        summary: Name export control and anti-corruption laws expressly as part of the laws Halcyon complies with, without extending scope to Customer's business.
+        language: >
+          Halcyon shall comply with all laws and regulations applicable to
+          Halcyon in its performance of this Agreement, including applicable
+          export control, trade sanctions and anti-corruption laws. Customer
+          is solely responsible for compliance with all laws and regulations
+          applicable to Customer's business and to Customer's use of the
+          Services.
+      - kind: acceptable_variant
+        label: Customer-drafted, Vendor-scoped wording
+        zone: green
+        summary: Counterparty wording naming Halcyon specifically, for the same one-sided outcome as the preferred position.
+        language: >
+          Vendor shall comply with all laws and regulations applicable to it
+          in providing the Services under this Agreement. Vendor is not
+          responsible for Customer's compliance with laws applicable to
+          Customer's own business or to Customer's use of the Services.
+    red_lines:
+      - key: compliance-scope-extends-to-customer-use
+        description: Halcyon warrants or is made responsible for Customer's own compliance with laws applicable to Customer's business or Customer's use of the Services.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause makes Halcyon responsible for, or requires Halcyon to
+            warrant, Customer's compliance with laws applicable to
+            Customer's business, Customer's industry, or Customer's use of
+            the Services, rather than limiting Halcyon's compliance
+            obligation to laws applicable to Halcyon's own performance.
+        action: block
+        rationale: >
+          Halcyon cannot audit or control how each of its roughly 310
+          customers uses the Services within their own regulatory
+          environment, and a warranty extending that far is both
+          unverifiable and uninsurable under Halcyon's general liability
+          coverage.
+    objections:
+      - objection: You must comply with all laws applicable to our business, not just your own performance.
+        their_rationale: Some customers draft compliance clauses broadly as a matter of standard form, without considering scope.
+        response: >
+          We are glad to commit to the laws that govern how we build and run
+          the Services, and we can make the clause mutual so each party
+          answers for the laws that apply to it. We cannot warrant compliance
+          with laws specific to your business or industry, since we have no
+          visibility into or control over how you use the Services.
+        talking_points:
+          - Offer the mutual wording as the first move; it resolves most versions of this objection.
+          - Point to the separate warranties rule for what Halcyon does warrant about the Services themselves.
+        recommended_position: {rule_key: compliance.compliance_with_laws, rung: 1}
+        frequency: occasional
+      - objection: Add export control and anti-corruption compliance by name; our procurement policy requires it to be explicit.
+        their_rationale: Procurement checklists sometimes require named categories of law rather than a general reference to "applicable laws".
+        response: >
+          We can name export control, trade sanctions and anti-corruption
+          laws expressly within the scope of laws applicable to our own
+          performance, which satisfies the explicit reference your policy
+          requires without broadening what we are responsible for.
+        talking_points:
+          - Naming categories does not change scope; it only makes the existing scope explicit.
+          - Pair this with the separate anti-corruption rule, which already covers bribery-specific representations.
+        recommended_position: {rule_key: compliance.compliance_with_laws, rung: 2}
+        frequency: rare
+    dependencies:
+      - related_rule_key: compliance.anti_corruption
+        relation: read_with
+        note: The general compliance clause and the anti-corruption clause should not be drafted to overlap or conflict on scope.
+    test_cases:
+      - name: Compliance scoped to Halcyon's own performance
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Halcyon will comply with the laws that apply to it in providing
+          the Services. Customer is responsible for complying with the laws
+          that apply to Customer's own business and its use of the
+          Services.
+      - name: Customer-drafted, Vendor-scoped wording
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Vendor will comply with the laws applicable to it in providing the
+          Services, and Vendor is not responsible for Customer's compliance
+          with laws applicable to Customer's own business or its use of the
+          Services.
+      - name: Mutual compliance clause
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          Each party shall comply with all laws applicable to it in
+          connection with this Agreement, and each party remains solely
+          responsible for laws applicable to its own business that fall
+          outside its performance here.
+      - name: Compliance obligation stated with no scope at all
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          The parties shall comply with applicable law.
+      - name: Halcyon responsible for Customer's industry-specific compliance
+        expected_outcome: red_line
+        expected_red_line_key: compliance-scope-extends-to-customer-use
+        expected_zone: red
+        sample_text: >
+          Halcyon shall ensure that the Services, and Customer's use of
+          them, comply with all laws and regulations applicable to
+          Customer's industry and business, regardless of what is described
+          in the Documentation.
+
+  - rule_key: compliance.anti_corruption
+    title: Anti-corruption and program-exclusion representations
+    required: true
+    risk_weight: 4
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Each party represents it will comply with applicable anti-corruption
+      and anti-bribery laws and that neither it nor its personnel performing
+      this Agreement is excluded from participation in any federal health
+      care program, with prompt notice if that changes.
+    risk_rationale: >
+      Many of Halcyon's customers are hospital systems and physician groups
+      that bill federal health care programs, so a counterparty's exclusion
+      exposure can become Halcyon's exposure if it is not addressed
+      directly. A mutual, named representation covering the FCPA, the UK
+      Bribery Act and program exclusion is a one-time commitment that costs
+      Halcyon nothing operationally and matches what Halcyon already
+      requires of its own personnel and subcontractors.
+    detection_guidance: >
+      Look for "anti-bribery", "Foreign Corrupt Practices Act", "Bribery
+      Act", "anything of value", "excluded from participation in any
+      federal health care program" and "Supplier Code of Conduct". Record
+      whether the representation is mutual or one-sided and whether it
+      includes the program-exclusion representation. Absence is a
+      low-severity missing issue.
+    source_ref: Halcyon Compliance Policy CP-01
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Mutual anti-corruption and exclusion representation
+        zone: green
+        summary: Each party represents compliance with named anti-corruption laws and that it is not an excluded party, with notice if that changes.
+        language: >
+          Each party represents and warrants that it shall comply with
+          applicable anti-corruption and anti-bribery laws, including the
+          U.S. Foreign Corrupt Practices Act and the UK Bribery Act 2010, and
+          shall not offer, give, request or accept any bribe or improper
+          payment in connection with this Agreement. Each party further
+          represents that neither it nor, to its knowledge, any of its
+          personnel performing this Agreement is excluded, debarred or
+          otherwise ineligible to participate in any federal health care
+          program, and shall promptly notify the other party in writing if
+          this representation ceases to be true.
+      - kind: fallback
+        rung: 1
+        label: Exclusion representation extended to subcontractors
+        zone: green
+        summary: Same representation, expressly extended to Halcyon's subcontractors performing the Services.
+        language: >
+          Each party represents and warrants that it shall comply with
+          applicable anti-corruption and anti-bribery laws, including the
+          U.S. Foreign Corrupt Practices Act and the UK Bribery Act 2010.
+          Halcyon further represents that neither it, nor to its knowledge
+          any of its personnel or subcontractors performing the Services, is
+          excluded, debarred or otherwise ineligible to participate in any
+          federal health care program, and shall promptly notify Customer in
+          writing if this representation ceases to be true.
+      - kind: fallback
+        rung: 2
+        label: Supplier code of conduct referenced as an additional, fixed commitment
+        zone: yellow
+        approver_role: commercial_counsel
+        conditions: {counterparty_tier: [tier_1]}
+        give_get: Ask for a longer initial term in return for accepting the additional reference.
+        summary: Reference Customer's supplier code of conduct as an additional representation, fixed at signature, without displacing Halcyon's own anti-corruption compliance obligation.
+        language: >
+          In addition to its compliance with applicable anti-corruption and
+          anti-bribery laws, Halcyon represents that it has reviewed
+          Customer's Supplier Code of Conduct as in effect on the Effective
+          Date and will perform this Agreement consistently with its
+          anti-corruption provisions. Any change to that code after the
+          Effective Date applies to Halcyon only on the parties' written
+          agreement. Each party represents that neither it nor, to its
+          knowledge, its personnel performing this Agreement is excluded
+          from any federal health care program.
+        internal_note: >
+          Only agree to a version of the code fixed as of signature; never to
+          the code as it may change unilaterally.
+      - kind: acceptable_variant
+        label: Customer-drafted mutual representation
+        zone: green
+        summary: Counterparty wording for the same mutual outcome.
+        language: >
+          Each party represents that it will comply with all applicable
+          anti-corruption and anti-bribery laws, including the FCPA and the
+          UK Bribery Act, and will promptly notify the other party if it or
+          its personnel performing this Agreement becomes excluded from
+          participation in any government health care program.
+    red_lines:
+      - key: anti-corruption-absolute-warranty-strict-liability
+        description: Halcyon warrants, as an absolute and strict-liability condition regardless of knowledge or fault, that no past, present or future personnel, agent or subcontractor has ever been or will ever be excluded or investigated, with automatic termination and full refund for any violation however minor.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause requires Halcyon to warrant, as an absolute condition
+            without any knowledge or materiality qualifier, that no
+            personnel, agent or subcontractor of Halcyon has ever been or
+            will ever be excluded, debarred or investigated under any
+            anti-corruption or program-exclusion law anywhere, and ties any
+            violation, however minor or inadvertent, to automatic
+            termination and a full refund of all fees ever paid.
+        action: block
+        rationale: >
+          A strict-liability warranty with no knowledge qualifier makes
+          Halcyon an insurer of facts it cannot verify about every current
+          and former person who ever touched the account, and an automatic
+          full-history refund on any violation functions as an
+          uninsurable penalty untethered to actual harm.
+    objections:
+      - objection: We need your representation to cover anyone who has ever worked on our account, including past employees and former subcontractors.
+        their_rationale: Health systems want assurance that extends beyond the people currently assigned to the account.
+        response: >
+          We can extend the representation to cover subcontractors
+          performing the Services alongside our own personnel, which is
+          where most of the real exposure sits. We cannot warrant facts
+          about every person who has ever touched the account without any
+          knowledge qualifier, since that is not something we can verify.
+        talking_points:
+          - Offer the subcontractor-extension fallback first.
+          - A knowledge qualifier is standard in representations of this kind and does not weaken the practical protection.
+        recommended_position: {rule_key: compliance.anti_corruption, rung: 1}
+        frequency: occasional
+      - objection: You must also follow our supplier code of conduct in full.
+        their_rationale: Large health systems attach their own code of conduct to every vendor contract as a standard requirement.
+        response: >
+          We can reference your code of conduct as an additional
+          commitment, fixed to the version in effect when we sign, alongside
+          our own anti-corruption compliance. We cannot agree to follow a
+          version of the code that changes on your side without our review.
+        talking_points:
+          - Fixing the code at signature avoids a silent change of obligations mid-term.
+          - This fallback is reserved for larger counterparties given the added review it requires.
+        recommended_position: {rule_key: compliance.anti_corruption, rung: 2}
+        frequency: rare
+        counterparty_profile: Large hospital systems with a standard supplier code of conduct
+    dependencies:
+      - related_rule_key: compliance.compliance_with_laws
+        relation: read_with
+        note: The general compliance clause and the anti-corruption clause should not be drafted to overlap or conflict on scope.
+    test_cases:
+      - name: Mutual anti-corruption and exclusion representation
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Each party represents that it complies with applicable
+          anti-bribery laws, including the FCPA and the UK Bribery Act, and
+          that neither it nor its personnel working on this Agreement is
+          excluded from any federal health care program, with prompt notice
+          if that changes.
+      - name: Customer-drafted mutual representation
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Each party represents it will comply with all applicable
+          anti-corruption and anti-bribery laws and will promptly tell the
+          other party if it or its personnel performing this Agreement
+          becomes excluded from a government health care program.
+      - name: Exclusion representation extended to subcontractors
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          Halcyon represents that it complies with the FCPA and the UK
+          Bribery Act, and that neither it nor, to its knowledge, its
+          personnel or subcontractors performing the Services is excluded
+          from any federal health care program.
+      - name: Representation stated with no named laws or exclusion coverage
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Each party shall comply with anti-corruption laws.
+      - name: Absolute strict-liability exclusion warranty with full refund
+        expected_outcome: red_line
+        expected_red_line_key: anti-corruption-absolute-warranty-strict-liability
+        expected_zone: red
+        sample_text: >
+          Halcyon absolutely warrants, regardless of knowledge or fault,
+          that no person who has ever performed any part of this Agreement
+          has ever been excluded from any government program, and any
+          violation of this warranty, however minor, entitles Customer to
+          immediate termination and a full refund of all fees ever paid.
+      - name: Trap - negated "no compliance" wording
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Neither party shall disregard anti-corruption law; each party
+          represents it complies with the FCPA and the UK Bribery Act and
+          will promptly notify the other if it or its personnel performing
+          this Agreement becomes excluded from a federal health care
+          program.

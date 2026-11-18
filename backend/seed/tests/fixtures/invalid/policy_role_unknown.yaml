@@ -1,0 +1,7 @@
+# Failing fixture: edits applied to a copy of fixtures/valid by test_playbook_models.py.
+description: 'Cross-check: escalation policy roles exist.'
+file: authority.yaml
+edits:
+- path: [escalation_policies, 0, approver_role]
+  set: nobody
+expect: {code: role.unknown, message: 'escalation_policies[0]'}

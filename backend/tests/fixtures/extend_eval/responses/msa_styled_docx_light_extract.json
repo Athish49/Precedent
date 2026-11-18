@@ -1,0 +1,3803 @@
+{
+ "object": "extract_run",
+ "id": "exr_Jj6Qpc6maZ2qPHDLU1rdf",
+ "extractor": null,
+ "extractorVersion": null,
+ "status": "PROCESSED",
+ "output": {
+  "value": {
+   "title": "MASTER SERVICES AGREEMENT",
+   "clauses": [
+    {
+     "title": "Definitions",
+     "family": "definitions",
+     "section_number": "1"
+    },
+    {
+     "title": "Services",
+     "family": "scope_of_services",
+     "section_number": "2"
+    },
+    {
+     "title": "Term and Renewal",
+     "family": "term",
+     "section_number": "3"
+    },
+    {
+     "title": "Fees and Payment",
+     "family": "payment",
+     "section_number": "4"
+    },
+    {
+     "title": "Service Levels",
+     "family": "service_levels",
+     "section_number": "5"
+    },
+    {
+     "title": "Confidentiality",
+     "family": "confidentiality",
+     "section_number": "6"
+    },
+    {
+     "title": "Data Protection and Security",
+     "family": "data_protection",
+     "section_number": "7"
+    },
+    {
+     "title": "Intellectual Property",
+     "family": "intellectual_property",
+     "section_number": "8"
+    },
+    {
+     "title": "Warranties and Disclaimer",
+     "family": "warranties",
+     "section_number": "9"
+    },
+    {
+     "title": "Indemnification",
+     "family": "indemnification",
+     "section_number": "10"
+    },
+    {
+     "title": "Limitation of Liability",
+     "family": "limitation_of_liability",
+     "section_number": "11"
+    },
+    {
+     "title": "Termination",
+     "family": "termination",
+     "section_number": "12"
+    },
+    {
+     "title": "Governing Law and Disputes",
+     "family": "governing_law",
+     "section_number": "13"
+    },
+    {
+     "title": "General",
+     "family": "miscellaneous",
+     "section_number": "14"
+    }
+   ],
+   "parties": [
+    {
+     "name": "Halcyon Systems, Inc.",
+     "address": "400 Harbor Street, Boston, Massachusetts 02110",
+     "role_label": "Supplier",
+     "entity_type": "corporation",
+     "jurisdiction": "Delaware"
+    },
+    {
+     "name": "Northwind Retail Group LLC",
+     "address": "1200 Lakeshore Avenue, Cleveland, Ohio 44114",
+     "role_label": "Customer",
+     "entity_type": "limited liability company",
+     "jurisdiction": "Ohio"
+    }
+   ],
+   "currency": "USD",
+   "expiry_date": null,
+   "signatories": [
+    {
+     "title": "Chief Revenue Officer",
+     "is_signed": true,
+     "party_name": "Halcyon Systems, Inc.",
+     "signed_date": "2025-03-01",
+     "printed_name": "Dana Whitfield"
+    },
+    {
+     "title": "General Counsel",
+     "is_signed": true,
+     "party_name": "NORTHWIND RETAIL GROUP LLC",
+     "signed_date": "2025-03-03",
+     "printed_name": "Priya Raman"
+    }
+   ],
+   "auto_renewal": true,
+   "contract_type": "MSA",
+   "dispute_venue": "state and federal courts located in New York County, New York",
+   "governing_law": "New York",
+   "effective_date": "2025-03-03",
+   "gdpr_applicable": true,
+   "cure_period_days": 30,
+   "dispute_resolution": "litigation",
+   "payment_terms_days": 45,
+   "sla_uptime_percent": 99.9,
+   "initial_term_months": 36,
+   "liability_cap_basis": "Greater of Fees paid or payable in the preceding 12 months and $500,000",
+   "renewal_notice_days": 90,
+   "renewal_term_months": 12,
+   "liability_cap_amount": 500000,
+   "liability_exclusions": [
+    "fraud",
+    "gross negligence",
+    "wilful misconduct",
+    "breach of Section 6 (Confidentiality)"
+   ],
+   "total_contract_value": 250000,
+   "warranty_period_days": 90,
+   "sla_response_time_hours": 2,
+   "termination_notice_days": 60,
+   "breach_notification_hours": 72,
+   "data_processing_agreement": true,
+   "termination_for_convenience": true,
+   "confidentiality_period_years": 5,
+   "termination_for_convenience_party": "Customer",
+   "assignment_allowed_without_consent": true
+  },
+  "metadata": {
+   "title": {
+    "ocrConfidence": 0.992,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 1,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "MASTER SERVICES AGREEMENT",
+      "polygon": [
+       {
+        "x": 90.4248,
+        "y": 77.688
+       },
+       {
+        "x": 429.7752,
+        "y": 77.688
+       },
+       {
+        "x": 429.7752,
+        "y": 97.62480000000001
+       },
+       {
+        "x": 90.4248,
+        "y": 97.9704
+       }
+      ]
+     }
+    ]
+   },
+   "clauses": {
+    "ocrConfidence": 0.932,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": []
+   },
+   "parties": {
+    "ocrConfidence": 0.989,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": []
+   },
+   "currency": {
+    "ocrConfidence": 0.995,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 2,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "$250,000",
+      "polygon": [
+       {
+        "x": 305.3088,
+        "y": 86.6232
+       },
+       {
+        "x": 346.9176,
+        "y": 86.6232
+       },
+       {
+        "x": 346.9176,
+        "y": 96.94080000000001
+       },
+       {
+        "x": 305.3088,
+        "y": 96.94080000000001
+       }
+      ]
+     }
+    ]
+   },
+   "clauses[0]": {
+    "ocrConfidence": 0.984,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 1,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "1 Definitions",
+      "polygon": [
+       {
+        "x": 250.99200000000002,
+        "y": 743.184
+       },
+       {
+        "x": 360.324,
+        "y": 743.8752
+       },
+       {
+        "x": 359.97839999999997,
+        "y": 755.9064
+       },
+       {
+        "x": 250.99200000000002,
+        "y": 754.8768
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 1,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "1 Definitions",
+      "polygon": [
+       {
+        "x": 90.07920000000001,
+        "y": 222.408
+       },
+       {
+        "x": 167.44320000000002,
+        "y": 222.408
+       },
+       {
+        "x": 167.44320000000002,
+        "y": 234.7848
+       },
+       {
+        "x": 90.07920000000001,
+        "y": 234.7848
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 1,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "1 Definitions",
+      "polygon": [
+       {
+        "x": 90.07920000000001,
+        "y": 222.408
+       },
+       {
+        "x": 167.44320000000002,
+        "y": 222.408
+       },
+       {
+        "x": 167.44320000000002,
+        "y": 234.7848
+       },
+       {
+        "x": 90.07920000000001,
+        "y": 234.7848
+       }
+      ]
+     }
+    ]
+   },
+   "clauses[1]": {
+    "ocrConfidence": 0.984,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 1,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "2. Services",
+      "polygon": [
+       {
+        "x": 88.704,
+        "y": 358.8768
+       },
+       {
+        "x": 151.6248,
+        "y": 358.8768
+       },
+       {
+        "x": 151.6248,
+        "y": 370.908
+       },
+       {
+        "x": 88.704,
+        "y": 370.908
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 1,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "2. Services",
+      "polygon": [
+       {
+        "x": 88.704,
+        "y": 358.8768
+       },
+       {
+        "x": 151.6248,
+        "y": 358.8768
+       },
+       {
+        "x": 151.6248,
+        "y": 370.908
+       },
+       {
+        "x": 88.704,
+        "y": 370.908
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 1,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "2. Services",
+      "polygon": [
+       {
+        "x": 88.704,
+        "y": 358.8768
+       },
+       {
+        "x": 151.6248,
+        "y": 358.8768
+       },
+       {
+        "x": 151.6248,
+        "y": 370.908
+       },
+       {
+        "x": 88.704,
+        "y": 370.908
+       }
+      ]
+     }
+    ]
+   },
+   "clauses[2]": {
+    "ocrConfidence": 0.984,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 1,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "3. Term and Renewal Term and Renewal",
+      "polygon": [
+       {
+        "x": 88.704,
+        "y": 494.65439999999995
+       },
+       {
+        "x": 213.1704,
+        "y": 494.316
+       },
+       {
+        "x": 213.1704,
+        "y": 507.3768
+       },
+       {
+        "x": 88.704,
+        "y": 507.7224
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 1,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "3. Term and Renewal Term and Renewal",
+      "polygon": [
+       {
+        "x": 88.704,
+        "y": 494.65439999999995
+       },
+       {
+        "x": 213.1704,
+        "y": 494.316
+       },
+       {
+        "x": 213.1704,
+        "y": 507.3768
+       },
+       {
+        "x": 88.704,
+        "y": 507.7224
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 1,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "3. Term and Renewal Term and Renewal",
+      "polygon": [
+       {
+        "x": 88.704,
+        "y": 494.65439999999995
+       },
+       {
+        "x": 213.1704,
+        "y": 494.316
+       },
+       {
+        "x": 213.1704,
+        "y": 507.3768
+       },
+       {
+        "x": 88.704,
+        "y": 507.7224
+       }
+      ]
+     }
+    ]
+   },
+   "clauses[3]": {
+    "ocrConfidence": 0.984,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 1,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "4. Fees and Payment Fees and Payment",
+      "polygon": [
+       {
+        "x": 89.0496,
+        "y": 630.7847999999999
+       },
+       {
+        "x": 211.10399999999998,
+        "y": 631.1232
+       },
+       {
+        "x": 211.10399999999998,
+        "y": 644.5296000000001
+       },
+       {
+        "x": 89.0496,
+        "y": 644.184
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 1,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "4. Fees and Payment Fees and Payment",
+      "polygon": [
+       {
+        "x": 89.0496,
+        "y": 630.7847999999999
+       },
+       {
+        "x": 211.10399999999998,
+        "y": 631.1232
+       },
+       {
+        "x": 211.10399999999998,
+        "y": 644.5296000000001
+       },
+       {
+        "x": 89.0496,
+        "y": 644.184
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 1,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "4. Fees and Payment Fees and Payment",
+      "polygon": [
+       {
+        "x": 89.0496,
+        "y": 630.7847999999999
+       },
+       {
+        "x": 211.10399999999998,
+        "y": 631.1232
+       },
+       {
+        "x": 211.10399999999998,
+        "y": 644.5296000000001
+       },
+       {
+        "x": 89.0496,
+        "y": 644.184
+       }
+      ]
+     }
+    ]
+   },
+   "clauses[4]": {
+    "ocrConfidence": 0.932,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 2,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "5. Service Levels Service Levels",
+      "polygon": [
+       {
+        "x": 88.704,
+        "y": 153.30960000000002
+       },
+       {
+        "x": 184.62959999999998,
+        "y": 153.30960000000002
+       },
+       {
+        "x": 184.62959999999998,
+        "y": 166.3776
+       },
+       {
+        "x": 88.704,
+        "y": 166.3776
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 2,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "5. Service Levels Service Levels",
+      "polygon": [
+       {
+        "x": 88.704,
+        "y": 153.30960000000002
+       },
+       {
+        "x": 184.62959999999998,
+        "y": 153.30960000000002
+       },
+       {
+        "x": 184.62959999999998,
+        "y": 166.3776
+       },
+       {
+        "x": 88.704,
+        "y": 166.3776
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 2,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "5. Service Levels Service Levels",
+      "polygon": [
+       {
+        "x": 88.704,
+        "y": 153.30960000000002
+       },
+       {
+        "x": 184.62959999999998,
+        "y": 153.30960000000002
+       },
+       {
+        "x": 184.62959999999998,
+        "y": 166.3776
+       },
+       {
+        "x": 88.704,
+        "y": 166.3776
+       }
+      ]
+     }
+    ]
+   },
+   "clauses[5]": {
+    "ocrConfidence": 0.932,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 2,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "6. Confidentiality Confidentiality",
+      "polygon": [
+       {
+        "x": 89.0496,
+        "y": 226.18800000000002
+       },
+       {
+        "x": 190.476,
+        "y": 226.5336
+       },
+       {
+        "x": 190.13039999999998,
+        "y": 240.2784
+       },
+       {
+        "x": 89.0496,
+        "y": 239.5944
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 2,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "6. Confidentiality Confidentiality",
+      "polygon": [
+       {
+        "x": 89.0496,
+        "y": 226.18800000000002
+       },
+       {
+        "x": 190.476,
+        "y": 226.5336
+       },
+       {
+        "x": 190.13039999999998,
+        "y": 240.2784
+       },
+       {
+        "x": 89.0496,
+        "y": 239.5944
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 2,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "6. Confidentiality Confidentiality",
+      "polygon": [
+       {
+        "x": 89.0496,
+        "y": 226.18800000000002
+       },
+       {
+        "x": 190.476,
+        "y": 226.5336
+       },
+       {
+        "x": 190.13039999999998,
+        "y": 240.2784
+       },
+       {
+        "x": 89.0496,
+        "y": 239.5944
+       }
+      ]
+     }
+    ]
+   },
+   "clauses[6]": {
+    "ocrConfidence": 0.932,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 2,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "7. Data Protection and Security Data Protection and Security",
+      "polygon": [
+       {
+        "x": 89.0496,
+        "y": 352.6848
+       },
+       {
+        "x": 271.62,
+        "y": 352.6848
+       },
+       {
+        "x": 271.2744,
+        "y": 366.7824
+       },
+       {
+        "x": 88.704,
+        "y": 366.0912
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 2,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "7. Data Protection and Security Data Protection and Security",
+      "polygon": [
+       {
+        "x": 89.0496,
+        "y": 352.6848
+       },
+       {
+        "x": 271.62,
+        "y": 352.6848
+       },
+       {
+        "x": 271.2744,
+        "y": 366.7824
+       },
+       {
+        "x": 88.704,
+        "y": 366.0912
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 2,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "7. Data Protection and Security Data Protection and Security",
+      "polygon": [
+       {
+        "x": 89.0496,
+        "y": 352.6848
+       },
+       {
+        "x": 271.62,
+        "y": 352.6848
+       },
+       {
+        "x": 271.2744,
+        "y": 366.7824
+       },
+       {
+        "x": 88.704,
+        "y": 366.0912
+       }
+      ]
+     }
+    ]
+   },
+   "clauses[7]": {
+    "ocrConfidence": 0.932,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 2,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "8. Intellectual Property",
+      "polygon": [
+       {
+        "x": 89.3952,
+        "y": 464.4072
+       },
+       {
+        "x": 224.17200000000003,
+        "y": 465.0912
+       },
+       {
+        "x": 224.17200000000003,
+        "y": 478.49760000000003
+       },
+       {
+        "x": 89.3952,
+        "y": 477.12239999999997
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 2,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "8. Intellectual Property",
+      "polygon": [
+       {
+        "x": 89.3952,
+        "y": 464.4072
+       },
+       {
+        "x": 224.17200000000003,
+        "y": 465.0912
+       },
+       {
+        "x": 224.17200000000003,
+        "y": 478.49760000000003
+       },
+       {
+        "x": 89.3952,
+        "y": 477.12239999999997
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 2,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "8. Intellectual Property",
+      "polygon": [
+       {
+        "x": 89.3952,
+        "y": 464.4072
+       },
+       {
+        "x": 224.17200000000003,
+        "y": 465.0912
+       },
+       {
+        "x": 224.17200000000003,
+        "y": 478.49760000000003
+       },
+       {
+        "x": 89.3952,
+        "y": 477.12239999999997
+       }
+      ]
+     }
+    ]
+   },
+   "clauses[8]": {
+    "ocrConfidence": 0.932,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 2,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "9. Warranties and Disclaimer Warranties and Disclaimer",
+      "polygon": [
+       {
+        "x": 89.3952,
+        "y": 536.9399999999999
+       },
+       {
+        "x": 258.8976,
+        "y": 536.9399999999999
+       },
+       {
+        "x": 258.8976,
+        "y": 550.0008
+       },
+       {
+        "x": 89.3952,
+        "y": 550.3464
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 2,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "9. Warranties and Disclaimer Warranties and Disclaimer",
+      "polygon": [
+       {
+        "x": 89.3952,
+        "y": 536.9399999999999
+       },
+       {
+        "x": 258.8976,
+        "y": 536.9399999999999
+       },
+       {
+        "x": 258.8976,
+        "y": 550.0008
+       },
+       {
+        "x": 89.3952,
+        "y": 550.3464
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 2,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "9. Warranties and Disclaimer Warranties and Disclaimer",
+      "polygon": [
+       {
+        "x": 89.3952,
+        "y": 536.9399999999999
+       },
+       {
+        "x": 258.8976,
+        "y": 536.9399999999999
+       },
+       {
+        "x": 258.8976,
+        "y": 550.0008
+       },
+       {
+        "x": 89.3952,
+        "y": 550.3464
+       }
+      ]
+     }
+    ]
+   },
+   "clauses[9]": {
+    "ocrConfidence": 0.932,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 2,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "10. Indemnification Indemnification",
+      "polygon": [
+       {
+        "x": 90.07920000000001,
+        "y": 663.0912
+       },
+       {
+        "x": 203.1984,
+        "y": 663.0912
+       },
+       {
+        "x": 203.1984,
+        "y": 675.8136000000001
+       },
+       {
+        "x": 90.07920000000001,
+        "y": 675.8136000000001
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 2,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "10. Indemnification Indemnification",
+      "polygon": [
+       {
+        "x": 90.07920000000001,
+        "y": 663.0912
+       },
+       {
+        "x": 203.1984,
+        "y": 663.0912
+       },
+       {
+        "x": 203.1984,
+        "y": 675.8136000000001
+       },
+       {
+        "x": 90.07920000000001,
+        "y": 675.8136000000001
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 2,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "10. Indemnification Indemnification",
+      "polygon": [
+       {
+        "x": 90.07920000000001,
+        "y": 663.0912
+       },
+       {
+        "x": 203.1984,
+        "y": 663.0912
+       },
+       {
+        "x": 203.1984,
+        "y": 675.8136000000001
+       },
+       {
+        "x": 90.07920000000001,
+        "y": 675.8136000000001
+       }
+      ]
+     }
+    ]
+   },
+   "parties[0]": {
+    "ocrConfidence": 0.989,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 1,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "Halcyon Systems, Inc. 400 Harbor Street, Boston, Massachusetts 02110 (\"Supplier\"), and Northwind Retail Group LLC, corporation Delaware 400 Harbor Street, Boston, Massachusetts 02110",
+      "polygon": [
+       {
+        "x": 89.3952,
+        "y": 36.784800000000004
+       },
+       {
+        "x": 251.3304,
+        "y": 36.4392
+       },
+       {
+        "x": 251.3304,
+        "y": 48.1248
+       },
+       {
+        "x": 89.3952,
+        "y": 48.816
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 1,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "Halcyon Systems, Inc. 400 Harbor Street, Boston, Massachusetts 02110 (\"Supplier\"), and Northwind Retail Group LLC, corporation Delaware 400 Harbor Street, Boston, Massachusetts 02110",
+      "polygon": [
+       {
+        "x": 89.0496,
+        "y": 152.9712
+       },
+       {
+        "x": 514.3536,
+        "y": 152.9712
+       },
+       {
+        "x": 514.3536,
+        "y": 165.3408
+       },
+       {
+        "x": 89.0496,
+        "y": 165.3408
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 1,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "Halcyon Systems, Inc. 400 Harbor Street, Boston, Massachusetts 02110 (\"Supplier\"), and Northwind Retail Group LLC, corporation Delaware 400 Harbor Street, Boston, Massachusetts 02110",
+      "polygon": [
+       {
+        "x": 90.07920000000001,
+        "y": 138.8736
+       },
+       {
+        "x": 513.3240000000001,
+        "y": 138.8736
+       },
+       {
+        "x": 513.3240000000001,
+        "y": 150.9048
+       },
+       {
+        "x": 90.07920000000001,
+        "y": 150.9048
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 1,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "Halcyon Systems, Inc. 400 Harbor Street, Boston, Massachusetts 02110 (\"Supplier\"), and Northwind Retail Group LLC, corporation Delaware 400 Harbor Street, Boston, Massachusetts 02110",
+      "polygon": [
+       {
+        "x": 90.07920000000001,
+        "y": 138.8736
+       },
+       {
+        "x": 513.3240000000001,
+        "y": 138.8736
+       },
+       {
+        "x": 513.3240000000001,
+        "y": 150.9048
+       },
+       {
+        "x": 90.07920000000001,
+        "y": 150.9048
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 1,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "Halcyon Systems, Inc. 400 Harbor Street, Boston, Massachusetts 02110 (\"Supplier\"), and Northwind Retail Group LLC, corporation Delaware 400 Harbor Street, Boston, Massachusetts 02110",
+      "polygon": [
+       {
+        "x": 89.0496,
+        "y": 152.9712
+       },
+       {
+        "x": 514.3536,
+        "y": 152.9712
+       },
+       {
+        "x": 514.3536,
+        "y": 165.3408
+       },
+       {
+        "x": 89.0496,
+        "y": 165.3408
+       }
+      ]
+     }
+    ]
+   },
+   "parties[1]": {
+    "ocrConfidence": 0.989,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 1,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "Northwind Retail Group LLC (\"Customer\"). limited liability company Ohio 1200 Lakeshore Avenue, Cleveland, Ohio 44114",
+      "polygon": [
+       {
+        "x": 89.0496,
+        "y": 152.9712
+       },
+       {
+        "x": 514.3536,
+        "y": 152.9712
+       },
+       {
+        "x": 514.3536,
+        "y": 165.3408
+       },
+       {
+        "x": 89.0496,
+        "y": 165.3408
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 1,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "Northwind Retail Group LLC (\"Customer\"). limited liability company Ohio 1200 Lakeshore Avenue, Cleveland, Ohio 44114",
+      "polygon": [
+       {
+        "x": 89.3952,
+        "y": 182.18880000000001
+       },
+       {
+        "x": 153.3456,
+        "y": 182.18880000000001
+       },
+       {
+        "x": 153.3456,
+        "y": 193.87439999999998
+       },
+       {
+        "x": 89.3952,
+        "y": 193.87439999999998
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 1,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "Northwind Retail Group LLC (\"Customer\"). limited liability company Ohio 1200 Lakeshore Avenue, Cleveland, Ohio 44114",
+      "polygon": [
+       {
+        "x": 88.704,
+        "y": 167.75279999999998
+       },
+       {
+        "x": 514.6992,
+        "y": 167.4072
+       },
+       {
+        "x": 514.6992,
+        "y": 179.0928
+       },
+       {
+        "x": 88.704,
+        "y": 179.784
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 1,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "Northwind Retail Group LLC (\"Customer\"). limited liability company Ohio 1200 Lakeshore Avenue, Cleveland, Ohio 44114",
+      "polygon": [
+       {
+        "x": 88.704,
+        "y": 167.75279999999998
+       },
+       {
+        "x": 514.6992,
+        "y": 167.4072
+       },
+       {
+        "x": 514.6992,
+        "y": 179.0928
+       },
+       {
+        "x": 88.704,
+        "y": 179.784
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 1,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "Northwind Retail Group LLC (\"Customer\"). limited liability company Ohio 1200 Lakeshore Avenue, Cleveland, Ohio 44114",
+      "polygon": [
+       {
+        "x": 88.704,
+        "y": 167.75279999999998
+       },
+       {
+        "x": 514.6992,
+        "y": 167.4072
+       },
+       {
+        "x": 514.6992,
+        "y": 179.0928
+       },
+       {
+        "x": 88.704,
+        "y": 179.784
+       }
+      ]
+     }
+    ]
+   },
+   "clauses[10]": {
+    "ocrConfidence": 0.986,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 3,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "11. Limitation of Liability Limitation of Liability",
+      "polygon": [
+       {
+        "x": 89.3952,
+        "y": 161.2152
+       },
+       {
+        "x": 234.82799999999997,
+        "y": 161.5608
+       },
+       {
+        "x": 234.48239999999998,
+        "y": 175.31279999999998
+       },
+       {
+        "x": 89.3952,
+        "y": 174.6216
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 3,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "11. Limitation of Liability Limitation of Liability",
+      "polygon": [
+       {
+        "x": 89.3952,
+        "y": 161.2152
+       },
+       {
+        "x": 234.82799999999997,
+        "y": 161.5608
+       },
+       {
+        "x": 234.48239999999998,
+        "y": 175.31279999999998
+       },
+       {
+        "x": 89.3952,
+        "y": 174.6216
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 3,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "11. Limitation of Liability Limitation of Liability",
+      "polygon": [
+       {
+        "x": 89.3952,
+        "y": 161.2152
+       },
+       {
+        "x": 234.82799999999997,
+        "y": 161.5608
+       },
+       {
+        "x": 234.48239999999998,
+        "y": 175.31279999999998
+       },
+       {
+        "x": 89.3952,
+        "y": 174.6216
+       }
+      ]
+     }
+    ]
+   },
+   "clauses[11]": {
+    "ocrConfidence": 0.993,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 3,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "12. Termination Termination",
+      "polygon": [
+       {
+        "x": 90.07920000000001,
+        "y": 312.4656
+       },
+       {
+        "x": 182.57039999999998,
+        "y": 312.12719999999996
+       },
+       {
+        "x": 182.57039999999998,
+        "y": 324.8424
+       },
+       {
+        "x": 90.07920000000001,
+        "y": 325.188
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 3,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "12. Termination Termination",
+      "polygon": [
+       {
+        "x": 90.07920000000001,
+        "y": 312.4656
+       },
+       {
+        "x": 182.57039999999998,
+        "y": 312.12719999999996
+       },
+       {
+        "x": 182.57039999999998,
+        "y": 324.8424
+       },
+       {
+        "x": 90.07920000000001,
+        "y": 325.188
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 3,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "12. Termination Termination",
+      "polygon": [
+       {
+        "x": 90.07920000000001,
+        "y": 312.4656
+       },
+       {
+        "x": 182.57039999999998,
+        "y": 312.12719999999996
+       },
+       {
+        "x": 182.57039999999998,
+        "y": 324.8424
+       },
+       {
+        "x": 90.07920000000001,
+        "y": 325.188
+       }
+      ]
+     }
+    ]
+   },
+   "clauses[12]": {
+    "ocrConfidence": 0.977,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 3,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "13. Governing Law and Disputes Governing Law and Disputes",
+      "polygon": [
+       {
+        "x": 90.4248,
+        "y": 423.8424
+       },
+       {
+        "x": 276.4296,
+        "y": 423.4968
+       },
+       {
+        "x": 276.4296,
+        "y": 437.93999999999994
+       },
+       {
+        "x": 90.4248,
+        "y": 438.27840000000003
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 3,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "13. Governing Law and Disputes Governing Law and Disputes",
+      "polygon": [
+       {
+        "x": 90.4248,
+        "y": 423.8424
+       },
+       {
+        "x": 276.4296,
+        "y": 423.4968
+       },
+       {
+        "x": 276.4296,
+        "y": 437.93999999999994
+       },
+       {
+        "x": 90.4248,
+        "y": 438.27840000000003
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 3,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "13. Governing Law and Disputes Governing Law and Disputes",
+      "polygon": [
+       {
+        "x": 90.4248,
+        "y": 423.8424
+       },
+       {
+        "x": 276.4296,
+        "y": 423.4968
+       },
+       {
+        "x": 276.4296,
+        "y": 437.93999999999994
+       },
+       {
+        "x": 90.4248,
+        "y": 438.27840000000003
+       }
+      ]
+     }
+    ]
+   },
+   "clauses[13]": {
+    "ocrConfidence": 0.995,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 3,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "14. General General",
+      "polygon": [
+       {
+        "x": 89.7336,
+        "y": 550.6848
+       },
+       {
+        "x": 158.1552,
+        "y": 550.0008
+       },
+       {
+        "x": 158.1552,
+        "y": 562.3776
+       },
+       {
+        "x": 89.7336,
+        "y": 562.716
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 3,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "14. General General",
+      "polygon": [
+       {
+        "x": 89.7336,
+        "y": 550.6848
+       },
+       {
+        "x": 158.1552,
+        "y": 550.0008
+       },
+       {
+        "x": 158.1552,
+        "y": 562.3776
+       },
+       {
+        "x": 89.7336,
+        "y": 562.716
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 3,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "14. General General",
+      "polygon": [
+       {
+        "x": 89.7336,
+        "y": 550.6848
+       },
+       {
+        "x": 158.1552,
+        "y": 550.0008
+       },
+       {
+        "x": 158.1552,
+        "y": 562.3776
+       },
+       {
+        "x": 89.7336,
+        "y": 562.716
+       }
+      ]
+     }
+    ]
+   },
+   "expiry_date": {
+    "ocrConfidence": null,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": []
+   },
+   "signatories": {
+    "ocrConfidence": 0.988,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": []
+   },
+   "auto_renewal": {
+    "ocrConfidence": 0.989,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 1,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "Thereafter, this Agreement shall automatically renew for successive renewal terms of twelve",
+      "polygon": [
+       {
+        "x": 88.704,
+        "y": 551.7216
+       },
+       {
+        "x": 504.3816,
+        "y": 551.376
+       },
+       {
+        "x": 504.3816,
+        "y": 563.4072
+       },
+       {
+        "x": 88.704,
+        "y": 563.7528
+       }
+      ]
+     }
+    ]
+   },
+   "contract_type": {
+    "ocrConfidence": 0.992,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 1,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "MASTER SERVICES AGREEMENT",
+      "polygon": [
+       {
+        "x": 90.4248,
+        "y": 77.688
+       },
+       {
+        "x": 429.7752,
+        "y": 77.688
+       },
+       {
+        "x": 429.7752,
+        "y": 97.62480000000001
+       },
+       {
+        "x": 90.4248,
+        "y": 97.9704
+       }
+      ]
+     }
+    ]
+   },
+   "dispute_venue": {
+    "ocrConfidence": 0.989,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 3,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "Any dispute arising out of this Agreement shall be resolved exclusively by the state and federal",
+      "polygon": [
+       {
+        "x": 88.704,
+        "y": 480.90959999999995
+       },
+       {
+        "x": 513.6696,
+        "y": 480.564
+       },
+       {
+        "x": 513.6696,
+        "y": 492.5952
+       },
+       {
+        "x": 88.704,
+        "y": 493.2792
+       }
+      ]
+     }
+    ]
+   },
+   "governing_law": {
+    "ocrConfidence": 0.986,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 3,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "State of New York",
+      "polygon": [
+       {
+        "x": 89.7336,
+        "y": 442.0656
+       },
+       {
+        "x": 511.6032,
+        "y": 442.0656
+       },
+       {
+        "x": 511.6032,
+        "y": 453.75120000000004
+       },
+       {
+        "x": 89.7336,
+        "y": 454.0968
+       }
+      ]
+     }
+    ]
+   },
+   "effective_date": {
+    "ocrConfidence": 0.989,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 1,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "March 3, 2025",
+      "polygon": [
+       {
+        "x": 89.7336,
+        "y": 124.4376
+       },
+       {
+        "x": 497.1672,
+        "y": 124.4376
+       },
+       {
+        "x": 497.1672,
+        "y": 136.1232
+       },
+       {
+        "x": 89.7336,
+        "y": 136.4688
+       }
+      ]
+     }
+    ]
+   },
+   "signatories[0]": {
+    "ocrConfidence": 0.988,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 4,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "Name: Dana Whitfield Chief Revenue Officer HALCYON SYSTEMS, INC. /s/ Dana Whitfield March 1, 2025",
+      "polygon": [
+       {
+        "x": 88.704,
+        "y": 121.68719999999999
+       },
+       {
+        "x": 190.82160000000002,
+        "y": 121.3416
+       },
+       {
+        "x": 190.82160000000002,
+        "y": 132.3432
+       },
+       {
+        "x": 88.704,
+        "y": 132.6888
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 4,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "Name: Dana Whitfield Chief Revenue Officer HALCYON SYSTEMS, INC. /s/ Dana Whitfield March 1, 2025",
+      "polygon": [
+       {
+        "x": 89.0496,
+        "y": 146.0952
+       },
+       {
+        "x": 213.1704,
+        "y": 146.4408
+       },
+       {
+        "x": 213.1704,
+        "y": 157.0968
+       },
+       {
+        "x": 89.0496,
+        "y": 156.75119999999998
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 4,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "Name: Dana Whitfield Chief Revenue Officer HALCYON SYSTEMS, INC. /s/ Dana Whitfield March 1, 2025",
+      "polygon": [
+       {
+        "x": 88.704,
+        "y": 72.18719999999999
+       },
+       {
+        "x": 205.2576,
+        "y": 72.18719999999999
+       },
+       {
+        "x": 205.2576,
+        "y": 83.1888
+       },
+       {
+        "x": 88.704,
+        "y": 83.53439999999999
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 4,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "Name: Dana Whitfield Chief Revenue Officer HALCYON SYSTEMS, INC. /s/ Dana Whitfield March 1, 2025",
+      "polygon": [
+       {
+        "x": 88.704,
+        "y": 97.62480000000001
+       },
+       {
+        "x": 193.2264,
+        "y": 96.9408
+       },
+       {
+        "x": 193.2264,
+        "y": 108.2808
+       },
+       {
+        "x": 88.704,
+        "y": 109.3104
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 4,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "Name: Dana Whitfield Chief Revenue Officer HALCYON SYSTEMS, INC. /s/ Dana Whitfield March 1, 2025",
+      "polygon": [
+       {
+        "x": 89.3952,
+        "y": 170.5032
+       },
+       {
+        "x": 178.44480000000001,
+        "y": 170.5032
+       },
+       {
+        "x": 178.44480000000001,
+        "y": 181.4976
+       },
+       {
+        "x": 89.3952,
+        "y": 181.8432
+       }
+      ]
+     }
+    ]
+   },
+   "signatories[1]": {
+    "ocrConfidence": 0.989,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 4,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "Name: Priya Raman General Counsel NORTHWIND RETAIL GROUP LLC /s/ Priya Raman March 3, 2025",
+      "polygon": [
+       {
+        "x": 88.704,
+        "y": 268.4664
+       },
+       {
+        "x": 180.8496,
+        "y": 268.4664
+       },
+       {
+        "x": 180.8496,
+        "y": 280.4976
+       },
+       {
+        "x": 88.704,
+        "y": 280.1592
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 4,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "Name: Priya Raman General Counsel NORTHWIND RETAIL GROUP LLC /s/ Priya Raman March 3, 2025",
+      "polygon": [
+       {
+        "x": 88.704,
+        "y": 292.87440000000004
+       },
+       {
+        "x": 188.4168,
+        "y": 292.87440000000004
+       },
+       {
+        "x": 188.4168,
+        "y": 304.22159999999997
+       },
+       {
+        "x": 88.704,
+        "y": 304.56000000000006
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 4,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "Name: Priya Raman General Counsel NORTHWIND RETAIL GROUP LLC /s/ Priya Raman March 3, 2025",
+      "polygon": [
+       {
+        "x": 88.704,
+        "y": 218.9664
+       },
+       {
+        "x": 244.4544,
+        "y": 218.9664
+       },
+       {
+        "x": 244.4544,
+        "y": 230.31359999999998
+       },
+       {
+        "x": 88.704,
+        "y": 230.31359999999998
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 4,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "Name: Priya Raman General Counsel NORTHWIND RETAIL GROUP LLC /s/ Priya Raman March 3, 2025",
+      "polygon": [
+       {
+        "x": 88.704,
+        "y": 244.06560000000002
+       },
+       {
+        "x": 183.2544,
+        "y": 244.06560000000002
+       },
+       {
+        "x": 183.2544,
+        "y": 255.75119999999998
+       },
+       {
+        "x": 88.704,
+        "y": 256.09680000000003
+       }
+      ]
+     },
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 4,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "Name: Priya Raman General Counsel NORTHWIND RETAIL GROUP LLC /s/ Priya Raman March 3, 2025",
+      "polygon": [
+       {
+        "x": 88.3584,
+        "y": 317.2824
+       },
+       {
+        "x": 179.82,
+        "y": 317.2824
+       },
+       {
+        "x": 179.82,
+        "y": 328.62239999999997
+       },
+       {
+        "x": 88.3584,
+        "y": 328.968
+       }
+      ]
+     }
+    ]
+   },
+   "gdpr_applicable": {
+    "ocrConfidence": 0.987,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 2,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "including the GDPR where it applies",
+      "polygon": [
+       {
+        "x": 88.704,
+        "y": 384.9984
+       },
+       {
+        "x": 439.40160000000003,
+        "y": 385.34400000000005
+       },
+       {
+        "x": 439.40160000000003,
+        "y": 397.3752
+       },
+       {
+        "x": 88.704,
+        "y": 397.0296
+       }
+      ]
+     }
+    ]
+   },
+   "parties[0].name": {
+    "ocrConfidence": 0.989,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "parties[1].name": {
+    "ocrConfidence": 0.992,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[0].title": {
+    "ocrConfidence": 0.992,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[1].title": {
+    "ocrConfidence": 0.992,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[2].title": {
+    "ocrConfidence": 0.992,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[3].title": {
+    "ocrConfidence": 0.992,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[4].title": {
+    "ocrConfidence": 0.995,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[5].title": {
+    "ocrConfidence": 0.992,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[6].title": {
+    "ocrConfidence": 0.991,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[7].title": {
+    "ocrConfidence": 0.992,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[8].title": {
+    "ocrConfidence": 0.994,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[9].title": {
+    "ocrConfidence": 0.975,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "cure_period_days": {
+    "ocrConfidence": 0.989,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 3,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "thirty (30) days after written notice.",
+      "polygon": [
+       {
+        "x": 89.3952,
+        "y": 344.7792
+       },
+       {
+        "x": 253.05120000000002,
+        "y": 344.4408
+       },
+       {
+        "x": 253.3968,
+        "y": 356.472
+       },
+       {
+        "x": 89.3952,
+        "y": 356.8104
+       }
+      ]
+     }
+    ]
+   },
+   "clauses[0].family": {
+    "ocrConfidence": 0.992,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[10].title": {
+    "ocrConfidence": 0.986,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[11].title": {
+    "ocrConfidence": 0.993,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[12].title": {
+    "ocrConfidence": 0.993,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[13].title": {
+    "ocrConfidence": 0.995,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[1].family": {
+    "ocrConfidence": 0.994,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[2].family": {
+    "ocrConfidence": 0.992,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[3].family": {
+    "ocrConfidence": 0.992,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[4].family": {
+    "ocrConfidence": 0.995,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[5].family": {
+    "ocrConfidence": 0.992,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[6].family": {
+    "ocrConfidence": 0.992,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[7].family": {
+    "ocrConfidence": 0.992,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[8].family": {
+    "ocrConfidence": 0.994,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[9].family": {
+    "ocrConfidence": 0.975,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[10].family": {
+    "ocrConfidence": 0.986,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[11].family": {
+    "ocrConfidence": 0.993,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[12].family": {
+    "ocrConfidence": 0.993,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[13].family": {
+    "ocrConfidence": 0.995,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "dispute_resolution": {
+    "ocrConfidence": 0.986,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 3,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "Any dispute arising out of this Agreement shall be resolved exclusively by the state and federal",
+      "polygon": [
+       {
+        "x": 88.704,
+        "y": 480.90959999999995
+       },
+       {
+        "x": 513.6696,
+        "y": 480.564
+       },
+       {
+        "x": 513.6696,
+        "y": 492.5952
+       },
+       {
+        "x": 88.704,
+        "y": 493.2792
+       }
+      ]
+     }
+    ]
+   },
+   "parties[0].address": {
+    "ocrConfidence": 0.992,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "parties[1].address": {
+    "ocrConfidence": 0.989,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "payment_terms_days": {
+    "ocrConfidence": 0.984,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 2,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "All invoices are due and payable within forty-five (45) days after the invoice date. Late amounts",
+      "polygon": [
+       {
+        "x": 89.0496,
+        "y": 99
+       },
+       {
+        "x": 518.4792,
+        "y": 99
+       },
+       {
+        "x": 518.4792,
+        "y": 111.0312
+       },
+       {
+        "x": 89.0496,
+        "y": 111.3768
+       }
+      ]
+     }
+    ]
+   },
+   "sla_uptime_percent": {
+    "ocrConfidence": 0.993,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 2,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "Supplier shall make the Services available with a monthly uptime of at least 99.9%. Supplier",
+      "polygon": [
+       {
+        "x": 88.704,
+        "y": 171.8784
+       },
+       {
+        "x": 501.63120000000004,
+        "y": 171.8784
+       },
+       {
+        "x": 501.63120000000004,
+        "y": 184.5936
+       },
+       {
+        "x": 88.704,
+        "y": 184.5936
+       }
+      ]
+     }
+    ]
+   },
+   "initial_term_months": {
+    "ocrConfidence": 0.958,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 1,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "This Agreement commences on the Effective Date and continues for an initial term of three (3)",
+      "polygon": [
+       {
+        "x": 89.0496,
+        "y": 513.216
+       },
+       {
+        "x": 512.6328,
+        "y": 512.532
+       },
+       {
+        "x": 512.6328,
+        "y": 524.5631999999999
+       },
+       {
+        "x": 89.0496,
+        "y": 524.9088
+       }
+      ]
+     }
+    ]
+   },
+   "liability_cap_basis": {
+    "ocrConfidence": 0.977,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 3,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "Each party's total aggregate liability arising out of this Agreement shall not exceed the greater of",
+      "polygon": [
+       {
+        "x": 89.3952,
+        "y": 218.62800000000001
+       },
+       {
+        "x": 522.6048,
+        "y": 218.2824
+       },
+       {
+        "x": 522.6048,
+        "y": 230.31359999999998
+       },
+       {
+        "x": 89.3952,
+        "y": 230.6592
+       }
+      ]
+     }
+    ]
+   },
+   "renewal_notice_days": {
+    "ocrConfidence": 0.989,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 1,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "90 days before the end of the then-current term.",
+      "polygon": [
+       {
+        "x": 88.704,
+        "y": 590.904
+       },
+       {
+        "x": 306.34560000000005,
+        "y": 590.5655999999999
+       },
+       {
+        "x": 306.34560000000005,
+        "y": 602.2511999999999
+       },
+       {
+        "x": 88.704,
+        "y": 602.5968
+       }
+      ]
+     }
+    ]
+   },
+   "renewal_term_months": {
+    "ocrConfidence": 0.989,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 1,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "Thereafter, this Agreement shall automatically renew for successive renewal terms of twelve",
+      "polygon": [
+       {
+        "x": 88.704,
+        "y": 551.7216
+       },
+       {
+        "x": 504.3816,
+        "y": 551.376
+       },
+       {
+        "x": 504.3816,
+        "y": 563.4072
+       },
+       {
+        "x": 88.704,
+        "y": 563.7528
+       }
+      ]
+     }
+    ]
+   },
+   "liability_cap_amount": {
+    "ocrConfidence": 0.977,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 3,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "(i) the Fees paid or payable in the twelve (12) months preceding the claim and (ii) $500,000.",
+      "polygon": [
+       {
+        "x": 90.07920000000001,
+        "y": 233.4096
+       },
+       {
+        "x": 501.97679999999997,
+        "y": 233.06400000000002
+       },
+       {
+        "x": 501.97679999999997,
+        "y": 245.0952
+       },
+       {
+        "x": 90.07920000000001,
+        "y": 245.4408
+       }
+      ]
+     }
+    ]
+   },
+   "liability_exclusions": {
+    "ocrConfidence": null,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": []
+   },
+   "signatories[0].title": {
+    "ocrConfidence": 0.996,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "signatories[1].title": {
+    "ocrConfidence": 0.995,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "total_contract_value": {
+    "ocrConfidence": 0.995,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 2,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "$250,000",
+      "polygon": [
+       {
+        "x": 305.3088,
+        "y": 86.6232
+       },
+       {
+        "x": 346.9176,
+        "y": 86.6232
+       },
+       {
+        "x": 346.9176,
+        "y": 96.94080000000001
+       },
+       {
+        "x": 305.3088,
+        "y": 96.94080000000001
+       }
+      ]
+     }
+    ]
+   },
+   "warranty_period_days": {
+    "ocrConfidence": 0.984,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 2,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "for a period of ninety (90) days from delivery.",
+      "polygon": [
+       {
+        "x": 89.0496,
+        "y": 569.592
+       },
+       {
+        "x": 295.34400000000005,
+        "y": 569.592
+       },
+       {
+        "x": 295.34400000000005,
+        "y": 581.6232
+       },
+       {
+        "x": 89.0496,
+        "y": 581.6232
+       }
+      ]
+     }
+    ]
+   },
+   "parties[0].role_label": {
+    "ocrConfidence": 0.994,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "parties[1].role_label": {
+    "ocrConfidence": 0.994,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "parties[0].entity_type": {
+    "ocrConfidence": 0.995,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "parties[1].entity_type": {
+    "ocrConfidence": 0.995,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "liability_exclusions[0]": {
+    "ocrConfidence": 0.995,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 3,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "fraud"
+     }
+    ]
+   },
+   "liability_exclusions[1]": {
+    "ocrConfidence": 0.994,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 3,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "gross negligence",
+      "polygon": [
+       {
+        "x": 89.3952,
+        "y": 257.472
+       },
+       {
+        "x": 481.6944,
+        "y": 257.472
+       },
+       {
+        "x": 481.6944,
+        "y": 270.5328
+       },
+       {
+        "x": 89.3952,
+        "y": 269.84159999999997
+       }
+      ]
+     }
+    ]
+   },
+   "liability_exclusions[2]": {
+    "ocrConfidence": 0.995,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 3,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "wilful misconduct"
+     }
+    ]
+   },
+   "liability_exclusions[3]": {
+    "ocrConfidence": 0.986,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 3,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "a breach of Section 6 (Confidentiality)",
+      "polygon": [
+       {
+        "x": 88.704,
+        "y": 271.908
+       },
+       {
+        "x": 342.4464,
+        "y": 272.2536
+       },
+       {
+        "x": 342.4464,
+        "y": 283.9392
+       },
+       {
+        "x": 88.704,
+        "y": 283.9392
+       }
+      ]
+     }
+    ]
+   },
+   "parties[0].jurisdiction": {
+    "ocrConfidence": 0.996,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "parties[1].jurisdiction": {
+    "ocrConfidence": 0.989,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "sla_response_time_hours": {
+    "ocrConfidence": 0.996,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 2,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "2 hours",
+      "polygon": [
+       {
+        "x": 89.0496,
+        "y": 186.6528
+       },
+       {
+        "x": 322.15680000000003,
+        "y": 186.6528
+       },
+       {
+        "x": 322.15680000000003,
+        "y": 198
+       },
+       {
+        "x": 89.0496,
+        "y": 198.684
+       }
+      ]
+     }
+    ]
+   },
+   "termination_notice_days": {
+    "ocrConfidence": 0.992,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 3,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "Customer may terminate this Agreement for convenience upon sixty (60) days' written notice to",
+      "polygon": [
+       {
+        "x": 88.704,
+        "y": 369.53279999999995
+       },
+       {
+        "x": 520.8912,
+        "y": 369.1872
+       },
+       {
+        "x": 520.8912,
+        "y": 381.564
+       },
+       {
+        "x": 88.704,
+        "y": 381.90959999999995
+       }
+      ]
+     }
+    ]
+   },
+   "signatories[0].is_signed": {
+    "ocrConfidence": 0.989,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "signatories[1].is_signed": {
+    "ocrConfidence": 0.989,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "breach_notification_hours": {
+    "ocrConfidence": 0.992,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 2,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "shall respond to Severity 1 incidents within 2 hours.",
+      "polygon": [
+       {
+        "x": 89.0496,
+        "y": 186.6528
+       },
+       {
+        "x": 322.15680000000003,
+        "y": 186.6528
+       },
+       {
+        "x": 322.15680000000003,
+        "y": 198
+       },
+       {
+        "x": 89.0496,
+        "y": 198.684
+       }
+      ]
+     }
+    ]
+   },
+   "clauses[0].section_number": {
+    "ocrConfidence": 0.984,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[1].section_number": {
+    "ocrConfidence": 0.984,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[2].section_number": {
+    "ocrConfidence": 0.984,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[3].section_number": {
+    "ocrConfidence": 0.984,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[4].section_number": {
+    "ocrConfidence": 0.932,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[5].section_number": {
+    "ocrConfidence": 0.932,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[6].section_number": {
+    "ocrConfidence": 0.932,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[7].section_number": {
+    "ocrConfidence": 0.932,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[8].section_number": {
+    "ocrConfidence": 0.932,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[9].section_number": {
+    "ocrConfidence": 0.932,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "data_processing_agreement": {
+    "ocrConfidence": 0.992,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 2,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "Supplier shall process personal data only in accordance with the Data Processing Agreement",
+      "polygon": [
+       {
+        "x": 89.0496,
+        "y": 370.908
+       },
+       {
+        "x": 503.352,
+        "y": 370.908
+       },
+       {
+        "x": 503.352,
+        "y": 382.9392
+       },
+       {
+        "x": 89.0496,
+        "y": 382.9392
+       }
+      ]
+     }
+    ]
+   },
+   "signatories[0].party_name": {
+    "ocrConfidence": 0.988,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "signatories[1].party_name": {
+    "ocrConfidence": 0.992,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[10].section_number": {
+    "ocrConfidence": 0.995,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[11].section_number": {
+    "ocrConfidence": 0.997,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[12].section_number": {
+    "ocrConfidence": 0.977,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "clauses[13].section_number": {
+    "ocrConfidence": 0.996,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "signatories[0].signed_date": {
+    "ocrConfidence": 0.99,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "signatories[1].signed_date": {
+    "ocrConfidence": 0.99,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "signatories[0].printed_name": {
+    "ocrConfidence": 0.989,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "signatories[1].printed_name": {
+    "ocrConfidence": 0.995,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null
+   },
+   "termination_for_convenience": {
+    "ocrConfidence": 0.989,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 3,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "Customer may terminate this Agreement for convenience upon sixty (60) days' written notice to",
+      "polygon": [
+       {
+        "x": 88.704,
+        "y": 369.53279999999995
+       },
+       {
+        "x": 520.8912,
+        "y": 369.1872
+       },
+       {
+        "x": 520.8912,
+        "y": 381.564
+       },
+       {
+        "x": 88.704,
+        "y": 381.90959999999995
+       }
+      ]
+     }
+    ]
+   },
+   "confidentiality_period_years": {
+    "ocrConfidence": 0.987,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 2,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "The obligations in this Section survive for five (5) years after termination or expiration of this",
+      "polygon": [
+       {
+        "x": 88.3584,
+        "y": 298.0296
+       },
+       {
+        "x": 509.88239999999996,
+        "y": 298.0296
+       },
+       {
+        "x": 509.88239999999996,
+        "y": 310.0608
+       },
+       {
+        "x": 88.3584,
+        "y": 310.0608
+       }
+      ]
+     }
+    ]
+   },
+   "termination_for_convenience_party": {
+    "ocrConfidence": 0.989,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 3,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "Customer may terminate this Agreement for convenience",
+      "polygon": [
+       {
+        "x": 88.704,
+        "y": 369.53279999999995
+       },
+       {
+        "x": 520.8912,
+        "y": 369.1872
+       },
+       {
+        "x": 520.8912,
+        "y": 381.564
+       },
+       {
+        "x": 88.704,
+        "y": 381.90959999999995
+       }
+      ]
+     }
+    ]
+   },
+   "assignment_allowed_without_consent": {
+    "ocrConfidence": 0.986,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": [
+     {
+      "fileId": "file_lYH8OdYmmAokEQAZueDXU",
+      "page": {
+       "number": 3,
+       "width": 612,
+       "height": 792
+      },
+      "referenceText": "Neither party may assign this Agreement without the prior written consent of the other party, except to a successor in a merger or sale of substantially all of its assets.",
+      "polygon": [
+       {
+        "x": 88.704,
+        "y": 568.5624
+       },
+       {
+        "x": 511.6032,
+        "y": 568.2167999999999
+       },
+       {
+        "x": 511.6032,
+        "y": 580.2479999999999
+       },
+       {
+        "x": 88.704,
+        "y": 580.2479999999999
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "initialOutput": null,
+ "reviewedOutput": null,
+ "failureReason": null,
+ "failureMessage": null,
+ "metadata": null,
+ "variables": null,
+ "dataRetention": {
+  "mode": "workspace_default",
+  "status": "available"
+ },
+ "reviewed": false,
+ "edited": false,
+ "edits": null,
+ "config": {
+  "baseProcessor": "extraction_light",
+  "baseVersion": "3.8.0",
+  "schema": {
+   "type": "object",
+   "required": [
+    "contract_type",
+    "title",
+    "parties",
+    "signatories",
+    "effective_date",
+    "expiry_date",
+    "initial_term_months",
+    "auto_renewal",
+    "renewal_term_months",
+    "renewal_notice_days",
+    "governing_law",
+    "dispute_resolution",
+    "dispute_venue",
+    "liability_cap_amount",
+    "liability_cap_basis",
+    "liability_exclusions",
+    "total_contract_value",
+    "currency",
+    "payment_terms_days",
+    "termination_for_convenience",
+    "termination_for_convenience_party",
+    "termination_notice_days",
+    "cure_period_days",
+    "assignment_allowed_without_consent",
+    "confidentiality_period_years",
+    "warranty_period_days",
+    "sla_uptime_percent",
+    "sla_response_time_hours",
+    "breach_notification_hours",
+    "data_processing_agreement",
+    "gdpr_applicable",
+    "clauses"
+   ],
+   "properties": {
+    "title": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "description": "Title of the agreement as written at the top of the document"
+    },
+    "clauses": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "section_number",
+       "title",
+       "family"
+      ],
+      "properties": {
+       "title": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "family": {
+        "enum": [
+         "definitions",
+         "scope_of_services",
+         "term",
+         "payment",
+         "service_levels",
+         "confidentiality",
+         "data_protection",
+         "intellectual_property",
+         "warranties",
+         "indemnification",
+         "limitation_of_liability",
+         "termination",
+         "governing_law",
+         "dispute_resolution",
+         "assignment",
+         "notices",
+         "force_majeure",
+         "insurance",
+         "miscellaneous",
+         "other",
+         null
+        ],
+        "extend:descriptions": [
+         "",
+         "",
+         "",
+         "",
+         "",
+         "",
+         "",
+         "",
+         "",
+         "",
+         "",
+         "",
+         "",
+         "",
+         "",
+         "",
+         "",
+         "",
+         "",
+         "",
+         ""
+        ]
+       },
+       "section_number": {
+        "type": [
+         "string",
+         "null"
+        ]
+       }
+      },
+      "additionalProperties": false
+     },
+     "description": "Every top-level numbered section of the agreement, in order. Do not include sub-clauses."
+    },
+    "parties": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "name",
+       "role_label",
+       "entity_type",
+       "jurisdiction",
+       "address"
+      ],
+      "properties": {
+       "name": {
+        "type": [
+         "string",
+         "null"
+        ],
+        "description": "Full legal name"
+       },
+       "address": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "role_label": {
+        "type": [
+         "string",
+         "null"
+        ],
+        "description": "Defined term used for this party, e.g. Supplier, Customer"
+       },
+       "entity_type": {
+        "type": [
+         "string",
+         "null"
+        ],
+        "description": "e.g. corporation, limited liability company"
+       },
+       "jurisdiction": {
+        "type": [
+         "string",
+         "null"
+        ],
+        "description": "State or country of organisation"
+       }
+      },
+      "additionalProperties": false
+     },
+     "description": "The legal entities that are parties to the agreement. Not individuals, not courts, not states."
+    },
+    "currency": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "description": "ISO 4217 code"
+    },
+    "expiry_date": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "description": "Only if an explicit end date is stated. Do not compute.",
+     "extend:type": "date"
+    },
+    "signatories": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "printed_name",
+       "title",
+       "party_name",
+       "is_signed",
+       "signed_date"
+      ],
+      "properties": {
+       "title": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "is_signed": {
+        "type": [
+         "boolean",
+         "null"
+        ]
+       },
+       "party_name": {
+        "type": [
+         "string",
+         "null"
+        ],
+        "description": "Legal entity the person signed for"
+       },
+       "signed_date": {
+        "type": [
+         "string",
+         "null"
+        ],
+        "extend:type": "date"
+       },
+       "printed_name": {
+        "type": [
+         "string",
+         "null"
+        ]
+       }
+      },
+      "additionalProperties": false
+     },
+     "description": "People who signed, from the signature block"
+    },
+    "auto_renewal": {
+     "type": [
+      "boolean",
+      "null"
+     ]
+    },
+    "contract_type": {
+     "enum": [
+      "MSA",
+      "NDA",
+      "SOW",
+      "DPA",
+      "SaaS",
+      "other",
+      null
+     ],
+     "extend:descriptions": [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+     ]
+    },
+    "dispute_venue": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "governing_law": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "description": "Jurisdiction only, e.g. New York"
+    },
+    "effective_date": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "extend:type": "date"
+    },
+    "gdpr_applicable": {
+     "type": [
+      "boolean",
+      "null"
+     ]
+    },
+    "cure_period_days": {
+     "type": [
+      "integer",
+      "null"
+     ]
+    },
+    "dispute_resolution": {
+     "enum": [
+      "litigation",
+      "arbitration",
+      "mediation",
+      null
+     ],
+     "description": "The mechanism that actually applies. If arbitration is excluded, do not answer arbitration.",
+     "extend:descriptions": [
+      "",
+      "",
+      "",
+      ""
+     ]
+    },
+    "payment_terms_days": {
+     "type": [
+      "integer",
+      "null"
+     ],
+     "description": "Days after invoice by which payment is due"
+    },
+    "sla_uptime_percent": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "initial_term_months": {
+     "type": [
+      "integer",
+      "null"
+     ]
+    },
+    "liability_cap_basis": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "description": "How the cap is defined, in a short phrase"
+    },
+    "renewal_notice_days": {
+     "type": [
+      "integer",
+      "null"
+     ],
+     "description": "Days of notice required to prevent renewal"
+    },
+    "renewal_term_months": {
+     "type": [
+      "integer",
+      "null"
+     ]
+    },
+    "liability_cap_amount": {
+     "type": [
+      "number",
+      "null"
+     ],
+     "description": "Fixed monetary cap, if any number is stated"
+    },
+    "liability_exclusions": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     },
+     "description": "Carve-outs to which the liability cap does not apply"
+    },
+    "total_contract_value": {
+     "type": [
+      "number",
+      "null"
+     ],
+     "description": "Total annual fees"
+    },
+    "warranty_period_days": {
+     "type": [
+      "integer",
+      "null"
+     ]
+    },
+    "sla_response_time_hours": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "termination_notice_days": {
+     "type": [
+      "integer",
+      "null"
+     ],
+     "description": "Notice for termination for convenience"
+    },
+    "breach_notification_hours": {
+     "type": [
+      "integer",
+      "null"
+     ]
+    },
+    "data_processing_agreement": {
+     "type": [
+      "boolean",
+      "null"
+     ]
+    },
+    "termination_for_convenience": {
+     "type": [
+      "boolean",
+      "null"
+     ]
+    },
+    "confidentiality_period_years": {
+     "type": [
+      "integer",
+      "null"
+     ]
+    },
+    "termination_for_convenience_party": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "description": "Which party or parties may terminate for convenience"
+    },
+    "assignment_allowed_without_consent": {
+     "type": [
+      "boolean",
+      "null"
+     ]
+    }
+   },
+   "additionalProperties": false
+  },
+  "advancedOptions": {
+   "citationsEnabled": true,
+   "arrayCitationStrategy": "item",
+   "arrayStrategy": {
+    "type": "large_array_heuristics"
+   }
+  },
+  "parseConfig": {
+   "engine": "parse_light",
+   "engineVersion": "latest"
+  }
+ },
+ "file": {
+  "object": "file",
+  "id": "file_lYH8OdYmmAokEQAZueDXU",
+  "name": "msa_styled.docx",
+  "type": "PDF",
+  "parentFileId": null,
+  "metadata": {
+   "pageCount": 4
+  },
+  "dataRetention": {
+   "mode": "workspace_default",
+   "status": "available"
+  },
+  "createdAt": "2026-11-17T03:44:47.474Z",
+  "updatedAt": "2026-11-17T03:44:54.394Z"
+ },
+ "files": null,
+ "parseRunId": "pr_tzHJxRMWCHetvbAVG3AmE",
+ "dashboardUrl": "https://dashboard.extend.ai/runs/exr_Jj6Qpc6maZ2qPHDLU1rdf",
+ "usage": {
+  "credits": 2.8,
+  "totalCredits": 2.8,
+  "breakdown": [
+   {
+    "object": "extract_run",
+    "id": "exr_Jj6Qpc6maZ2qPHDLU1rdf",
+    "credits": 2.8,
+    "charges": [
+     {
+      "product": "extraction_light",
+      "unit": "page",
+      "quantity": 4,
+      "credits": 2.8
+     }
+    ]
+   }
+  ]
+ },
+ "createdAt": "2026-11-17T03:44:54.257Z",
+ "updatedAt": "2026-11-17T03:45:11.659Z"
+}

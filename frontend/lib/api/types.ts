@@ -88,6 +88,9 @@ export interface ProcessedContract {
   metadata: ContractMetadata;
   paper_origin: PaperOrigin;
   counterparty_id?: string;
+  contract_type?: string | null;
+  party_role?: string | null;
+  context?: Record<string, unknown> | null;
 }
 
 export interface Clause {
@@ -181,24 +184,314 @@ export interface Playbook {
   name: string;
   practice_area: PracticeArea;
   precedence: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
+// A rule's negotiating language is not a flat field — it lives in child rows
+// (see RuleCreate/RuleUpdate below). `positions` carries preferred (kind
+// "preferred", rung 0), fallback (kind "fallback", rung 1+) and
+// acceptable-variant (kind "acceptable_variant", rung null) language.
+// `red_lines` carries rule-scoped red lines, including prohibited phrasing.
 export interface PlaybookRule {
   id: string;
   playbook_id: string;
+  playbook_version_id?: string | null;
   clause_type: string;
-  preferred_language: string;
-  acceptable_variations: string[];
-  prohibited_terms: string[];
-  fallback_language?: string;
+  issue_id?: string | null;
+  rule_key?: string | null;
+  title?: string | null;
+  position_summary?: string | null;
+  risk_rationale?: string | null;
   required: boolean;
+  negotiable?: boolean | null;
   risk_weight: number;
-  escalation_threshold?: number;
+  default_zone?: Zone | string | null;
+  needs_human_judgment?: boolean | null;
+  judgment_note?: string | null;
+  applies_when?: Record<string, unknown> | null;
+  detection_guidance?: string | null;
+  source_ref?: string | null;
+  authored_by?: string | null;
+  approved_by?: string | null;
+  last_reviewed_at?: string | null;
+
+  // Children
+  positions: RulePosition[];
+  parameters: RuleParameter[];
+  red_lines: RedLine[];
+  objections: RuleObjection[];
+  dependencies: RuleDependency[];
+  test_cases: RuleTestCase[];
 }
 
+// ─── Playbook versions (task 4.8 / 4.9) ───────────────────────────────────────
+
+export type PlaybookVersionStatus = 'draft' | 'published' | 'superseded';
+
+export interface PlaybookVersion {
+  id: string;
+  playbook_id: string;
+  version: string;
+  status: PlaybookVersionStatus | string;
+  effective_from?: string | null;
+  effective_to?: string | null;
+  change_summary?: string | null;
+  created_by?: string | null;
+  approved_by?: string | null;
+  published_at?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateDraftVersionBody {
+  version: string;
+  created_by?: string;
+}
+
+export interface PublishVersionBody {
+  change_summary?: string;
+  approved_by?: string;
+}
+
+// ─── Rule children: positions, parameters, red lines, objections,
+// dependencies, test cases (playbook_plan.md sections 3.5–3.10) ──────────────
+
+export type PositionKind = 'preferred' | 'fallback' | 'acceptable_variant';
+export type Zone = 'green' | 'yellow' | 'red';
+
+export interface RulePosition {
+  id: string;
+  rule_id: string;
+  kind: PositionKind | string;
+  rung?: number | null;
+  label: string;
+  language: string;
+  summary?: string | null;
+  zone: Zone | string;
+  approver_role_id?: string | null;
+  conditions?: Record<string, unknown> | null;
+  give_get?: string | null;
+  internal_note?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateRulePositionBody {
+  kind: PositionKind | string;
+  label: string;
+  language: string;
+  zone: Zone | string;
+  rung?: number;
+  summary?: string;
+  approver_role_id?: string;
+  give_get?: string;
+  internal_note?: string;
+}
+
+// A position written inline with a rule create/update (RuleCreate.positions /
+// RuleUpdate.positions). On update, the full `positions` list on the rule is
+// a full id-sync: entries with an `id` of an existing position of this rule
+// update it in place, entries without an `id` create a new row, and existing
+// positions not included in the list are deleted.
+export interface RulePositionInput {
+  id?: string;
+  kind: PositionKind | string;
+  rung?: number | null;
+  label: string;
+  language: string;
+  zone: Zone | string;
+  summary?: string | null;
+  approver_role_id?: string | null;
+  conditions?: Record<string, unknown> | null;
+  give_get?: string | null;
+  internal_note?: string | null;
+}
+
+export type ParameterValueType =
+  | 'number'
+  | 'duration_days'
+  | 'percent'
+  | 'currency_usd'
+  | 'enum'
+  | 'boolean';
+export type ParameterDirection =
+  | 'higher_is_better'
+  | 'lower_is_better'
+  | 'exact'
+  | 'set_membership';
+
+export interface RuleParameter {
+  id: string;
+  rule_id: string;
+  key: string;
+  label: string;
+  value_type: ParameterValueType | string;
+  unit?: string | null;
+  direction: ParameterDirection | string;
+  preferred_value?: unknown;
+  green_limit?: unknown;
+  yellow_limit?: unknown;
+  allowed_values?: unknown[] | null;
+  extraction_hint?: string | null;
+  context_overrides?: unknown;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateRuleParameterBody {
+  key: string;
+  label: string;
+  value_type: ParameterValueType | string;
+  direction: ParameterDirection | string;
+  unit?: string;
+  preferred_value?: unknown;
+  green_limit?: unknown;
+  yellow_limit?: unknown;
+  allowed_values?: unknown[];
+  extraction_hint?: string;
+}
+
+export type RedLineScope = 'rule' | 'playbook' | 'global';
+export type RedLineAction = 'block' | 'escalate';
+
+export interface RedLine {
+  id: string;
+  scope: RedLineScope | string;
+  rule_id?: string | null;
+  playbook_id?: string | null;
+  key: string;
+  description: string;
+  condition_type: string;
+  condition: Record<string, unknown>;
+  action: RedLineAction | string;
+  approver_role_id?: string | null;
+  rationale?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateRedLineBody {
+  key: string;
+  description: string;
+  condition_type: string;
+  condition: Record<string, unknown>;
+  action: RedLineAction | string;
+  approver_role_id?: string;
+  rationale?: string;
+}
+
+// A rule-scoped red line written inline with a rule create/update
+// (RuleCreate.red_lines / RuleUpdate.red_lines). `scope` is always "rule" and
+// is not accepted here. Same id-sync rules as RulePositionInput on update.
+export interface RuleRedLineInput {
+  id?: string;
+  key: string;
+  description: string;
+  condition_type: string;
+  condition: Record<string, unknown>;
+  action: RedLineAction | string;
+  approver_role_id?: string | null;
+  rationale?: string | null;
+}
+
+export interface RuleObjection {
+  id: string;
+  rule_id: string;
+  objection: string;
+  their_rationale?: string | null;
+  response: string;
+  talking_points?: string[] | null;
+  recommended_position_id?: string | null;
+  frequency?: string | null;
+  counterparty_profile?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateRuleObjectionBody {
+  objection: string;
+  response: string;
+  their_rationale?: string;
+  talking_points?: string[];
+  recommended_position_id?: string;
+  frequency?: string;
+  counterparty_profile?: string;
+}
+
+export interface RuleDependency {
+  id: string;
+  rule_id: string;
+  related_rule_key: string;
+  relation: string;
+  note?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateRuleDependencyBody {
+  related_rule_key: string;
+  relation: string;
+  note?: string;
+}
+
+export type TestCaseExpectedOutcome =
+  | 'compliant'
+  | 'acceptable_variant'
+  | 'fallback'
+  | 'deviation'
+  | 'red_line'
+  | 'missing';
+
+export interface RuleTestCase {
+  id: string;
+  rule_id: string;
+  name: string;
+  sample_text?: string | null;
+  context?: Record<string, unknown> | null;
+  expected_outcome: TestCaseExpectedOutcome | string;
+  expected_zone?: Zone | string | null;
+  expected_position_rung?: number | null;
+  expected_red_line_key?: string | null;
+  is_trap: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateRuleTestCaseBody {
+  name: string;
+  expected_outcome: TestCaseExpectedOutcome | string;
+  sample_text?: string;
+  context?: Record<string, unknown>;
+  expected_zone?: Zone | string;
+  expected_position_rung?: number;
+  expected_red_line_key?: string;
+  is_trap?: boolean;
+}
+
+// ─── Resolve (task 4.2 / 4.9): GET /playbooks/resolve ────────────────────────
+
 export interface ResolvedRule extends PlaybookRule {
+  // Provenance
   source_playbook_id: string;
   source_playbook_name: string;
+  source_version: string;
+}
+
+export interface ResolveParams {
+  contract_type: string;
+  party_role?: string;
+  paper_origin?: string;
+  context?: Record<string, unknown>;
+}
+
+export interface ResolveResponse {
+  contract_type: string;
+  party_role: string;
+  paper_origin: string;
+  rules: ResolvedRule[];
+  pinned_version_ids: string[];
+  applied_playbook_keys: string[];
 }
 
 export interface DraftResult {
@@ -314,6 +607,27 @@ export interface ComplianceCheckResult {
 
 // ─── Request / filter types ───────────────────────────────────────────────────
 
+export interface UploadDocumentBody {
+  file: File;
+  paper_origin: PaperOrigin;
+  contract_type?: string;
+  party_role?: string;
+  context?: Record<string, unknown>;
+}
+
+export interface ContractContextUpdateBody {
+  contract_type?: string | null;
+  party_role?: string | null;
+  context?: Record<string, unknown> | null;
+}
+
+export interface ContractContextResponse {
+  id: string;
+  contract_type?: string | null;
+  party_role?: string | null;
+  context?: Record<string, unknown> | null;
+}
+
 export interface ContractFilters {
   contract_type?: string;
   counterparty_id?: string;
@@ -352,28 +666,136 @@ export interface UpdatePlaybookBody {
   precedence?: number;
 }
 
+// Body for POST /playbooks/{playbook_id}/rules. Unknown fields, including the
+// five removed legacy fields (preferred_language, acceptable_variations,
+// prohibited_terms, fallback_language, escalation_threshold), are rejected by
+// the API with 422. A rule's negotiating language and red lines are carried
+// inline via `positions` / `red_lines` instead (see RulePositionInput /
+// RuleRedLineInput).
 export interface CreateRuleBody {
   clause_type: string;
-  preferred_language: string;
-  acceptable_variations: string[];
-  prohibited_terms: string[];
-  fallback_language?: string;
-  required: boolean;
-  risk_weight: number;
-  escalation_threshold?: number;
+  playbook_version_id?: string;
+  issue_id?: string;
+  rule_key?: string;
+  title?: string;
+  position_summary?: string;
+  risk_rationale?: string;
+  required?: boolean;
+  negotiable?: boolean;
+  risk_weight?: number;
+  default_zone?: Zone | string;
+  needs_human_judgment?: boolean;
+  judgment_note?: string;
+  applies_when?: Record<string, unknown>;
+  detection_guidance?: string;
+  source_ref?: string;
+  authored_by?: string;
+  approved_by?: string;
+  last_reviewed_at?: string;
+  positions?: RulePositionInput[];
+  red_lines?: RuleRedLineInput[];
 }
 
-export type UpdateRuleBody = Partial<CreateRuleBody>;
+// Body for PATCH /playbooks/rules/{rule_id}. An omitted field is left
+// unchanged; a nullable scalar sent as `null` is cleared. `positions` /
+// `red_lines`, when present (even as []), fully replace that child set by
+// id-sync; omitted (or null), they are left untouched.
+export interface UpdateRuleBody {
+  clause_type?: string;
+  issue_id?: string | null;
+  rule_key?: string | null;
+  title?: string | null;
+  position_summary?: string | null;
+  risk_rationale?: string | null;
+  required?: boolean;
+  negotiable?: boolean | null;
+  risk_weight?: number;
+  default_zone?: Zone | string | null;
+  needs_human_judgment?: boolean | null;
+  judgment_note?: string | null;
+  applies_when?: Record<string, unknown> | null;
+  detection_guidance?: string | null;
+  source_ref?: string | null;
+  authored_by?: string | null;
+  approved_by?: string | null;
+  last_reviewed_at?: string | null;
+  positions?: RulePositionInput[] | null;
+  red_lines?: RuleRedLineInput[] | null;
+}
+
+// ─── Playbook rule version diff (task 5.5 child-row diff) ────────────────────
+// Nothing in the frontend renders this yet (no playbook version diff/change
+// log UI exists), but the types are kept current with the API contract.
+
+export interface RuleFieldChange {
+  field: string;
+  old_value: unknown;
+  new_value: unknown;
+}
+
+export interface ChildCountDiff {
+  count_a: number;
+  count_b: number;
+}
+
+export interface ChildRowChange {
+  child_type: 'positions' | 'parameters' | 'red_lines' | 'objections' | 'dependencies' | 'test_cases' | string;
+  key: string;
+  change_type: 'added' | 'removed' | 'modified';
+  changed_fields: string[];
+  old_value: Record<string, unknown> | null;
+  new_value: Record<string, unknown> | null;
+}
+
+export interface RuleDiffEntry {
+  rule_key: string;
+  change_type: string;
+  field_changes: RuleFieldChange[];
+  child_counts: Record<string, ChildCountDiff>;
+  child_changes: ChildRowChange[];
+}
+
+export interface PlaybookVersionDiffResponse {
+  version_a_id: string;
+  version_b_id: string;
+  rules_added: string[];
+  rules_removed: string[];
+  rules_modified: RuleDiffEntry[];
+}
+
+// ─── Bootstrap (task 4.1 / 4.9): POST /playbooks/bootstrap ───────────────────
+
+export interface BootstrapBody {
+  playbook_id: string;
+  contract_ids?: string[];
+  contract_type?: string;
+}
+
+export interface BootstrapResponse {
+  created_rule_count: number;
+}
 
 export interface RedlineDecisionBody {
   outcome: 'accepted' | 'rejected';
   final_text?: string;
 }
 
+/** Where the backend's draft_clause cascade starts (override → playbook → frequency → LLM). */
+export type DraftClauseMode = 'playbook' | 'frequency' | 'llm';
+
 export interface DraftClauseBody {
   clause_type: string;
-  context: string;
-  mode?: string;
+  /** Free-text description of what the clause should cover (LLM prompt only). */
+  context?: string;
+  /** Extra LLM instruction, e.g. an NL rewrite request. */
+  instruction?: string;
+  mode?: DraftClauseMode;
+  /** Playbook resolution facts — all optional; backend falls back to ''/'vendor'/'own'. */
+  contract_type?: string;
+  party_role?: string;
+  paper_origin?: PaperOrigin;
+  /** Structured resolution context matched against overlay/rule `applies_when`. */
+  deal_context?: Record<string, unknown>;
 }
 
 export interface DraftDocumentBody {

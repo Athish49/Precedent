@@ -1,0 +1,1609 @@
+# Halcyon Care taxonomy (task 3.1).
+#
+# expected_families lists family keys only. Clause families are application
+# reference data created by a migration; they are named here so the validator
+# can check that every issue and every rule_key points at a known family.
+#
+# issues: the 90 issues used by the rule allocation table in
+# playbook_implementation.md section 3.1, followed by reserved issues that no
+# rule uses yet (marked "Reserved" in a comment above each one).
+
+expected_families:
+  # The 20 existing canonical clause types, plus other.
+  - indemnification
+  - limitation_of_liability
+  - termination
+  - confidentiality
+  - intellectual_property
+  - governing_law
+  - dispute_resolution
+  - payment
+  - warranties
+  - force_majeure
+  - assignment
+  - notices
+  - entire_agreement
+  - amendment
+  - data_protection
+  - compliance
+  - term
+  - definitions
+  - audit
+  - insurance
+  - other
+  # The 8 families added by migration 010.
+  - service_levels
+  - security
+  - subprocessors
+  - breach_notification
+  - data_transfers
+  - publicity
+  - non_solicitation
+  - suspension
+
+issues:
+  # ------------------------------------------------------------------------
+  # indemnification
+  # ------------------------------------------------------------------------
+  - family: indemnification
+    key: ip_infringement_indemnity
+    name: IP infringement indemnity
+    description: >
+      The supplier's promise to defend and pay for third-party claims that the
+      services infringe a patent, copyright, trade mark or trade secret. It is
+      negotiated over which rights and territories are covered, whether
+      combinations and customer-supplied materials are excluded, and whether
+      the indemnity sits inside or outside the liability cap.
+    detection_hints: >
+      Look for "defend, indemnify and hold harmless" paired with "infringes" or
+      "misappropriates" and "intellectual property rights of a third party",
+      often followed by a list of exclusions and a "procure, modify or refund"
+      remedy. If the agreement has an indemnity section with no infringement
+      limb, the customer has no contractual protection against infringement
+      claims; treat that as a missing issue rather than a deviation.
+  - family: indemnification
+    key: customer_indemnity
+    name: Customer indemnity
+    description: >
+      The customer's promise to defend the supplier against third-party claims
+      arising from the customer's own data, its instructions, or its use of the
+      services in breach of the agreement or of law. It is negotiated because
+      customers resist any indemnity flowing from them, and public bodies and
+      large health systems are often barred from giving one at all.
+    detection_hints: >
+      Look for an indemnity given by "Customer" covering "Customer Data",
+      "Customer's use of the Services in violation of" or "content submitted by
+      Customer". It usually sits directly after the supplier's infringement
+      indemnity under a heading such as "Indemnification by Customer". Absence
+      means the supplier relies on ordinary breach of contract claims only.
+  - family: indemnification
+    key: indemnity_procedure
+    name: Indemnity procedure
+    description: >
+      The conditions attached to any indemnity: prompt notice of the claim,
+      control of the defence and settlement, and cooperation from the
+      indemnified party. It is negotiated over whether late notice forfeits the
+      indemnity, and whether the indemnifying party may settle without consent
+      where the settlement admits fault or imposes obligations.
+    detection_hints: >
+      Look for "promptly notify", "sole control of the defence and settlement",
+      "reasonable assistance" and "shall not settle without the prior written
+      consent". The text is usually a sub-clause headed "Procedure" or
+      "Conditions" inside the indemnification section. An indemnity with no
+      procedure wording is a deviation: the indemnifying party has no right to
+      run the defence.
+  - family: indemnification
+    key: data_breach_indemnity
+    name: Data breach indemnity
+    description: >
+      An indemnity for losses caused by a security incident or unauthorised
+      disclosure of the other party's data, typically covering notification
+      costs, credit monitoring, forensic investigation and third-party claims.
+      It is heavily negotiated because it converts breach exposure from capped
+      damages into an indemnity that the buyer will try to place outside the
+      cap.
+    detection_hints: >
+      Look for an indemnity triggered by "Security Incident", "data breach",
+      "unauthorised access to or disclosure of" data, or "breach of the data
+      protection obligations", often with a list of recoverable costs such as
+      "notification", "credit monitoring" and "call centre". Check whether the
+      liability clause carves it out of the cap. Absence means breach losses
+      are recoverable only as damages under the cap or super-cap.
+  - family: indemnification
+    key: regulatory_penalties_indemnity
+    name: Regulatory penalties indemnity
+    description: >
+      An indemnity for fines, civil monetary penalties and settlement amounts
+      imposed on one party by a regulator because of the other party's
+      non-compliance, for example penalties assessed under HIPAA against a
+      covered entity for its business associate's failure. It is negotiated
+      because the amounts are unpredictable, may be uninsurable, and may arise
+      partly from the indemnified party's own conduct.
+    detection_hints: >
+      Look for "fines", "penalties", "civil monetary penalties", "regulatory
+      assessments" or "sanctions imposed by" a named authority inside an
+      indemnity or reimbursement clause, commonly in a business associate
+      agreement or data processing addendum. Check for an "to the extent caused
+      by" limiter. Absence means penalties are recoverable, if at all, only as
+      ordinary damages.
+
+  # ------------------------------------------------------------------------
+  # limitation_of_liability
+  # ------------------------------------------------------------------------
+  - family: limitation_of_liability
+    key: cap_amount
+    name: Aggregate liability cap
+    description: >
+      The overall monetary limit on each party's liability under the agreement,
+      usually expressed as a period or multiple of fees or as a fixed sum. It is
+      negotiated on almost every deal because it sets the worst-case exposure
+      and must stay within what the supplier's insurance and revenue from the
+      contract can support.
+    detection_hints: >
+      Look for "aggregate liability", "total liability", "shall not exceed" or
+      "limited to", followed by an amount, a multiple such as "two times", or a
+      look-back period such as "the twelve months preceding the claim". A
+      liability clause with no monetary limit is a deviation, not a missing
+      clause; an agreement with no liability clause at all is a missing clause.
+  - family: limitation_of_liability
+    key: cap_carve_outs
+    name: Cap carve-outs
+    description: >
+      The categories of liability that are excluded from the cap and are
+      therefore unlimited, such as fraud, wilful misconduct, payment
+      obligations, indemnities or breach of confidentiality. It is negotiated
+      because each added carve-out reopens uncapped exposure, and a carve-out
+      for "any breach" of data or confidentiality terms can make the cap
+      meaningless.
+    detection_hints: >
+      Look for "the limitations in this section shall not apply to", "except
+      for", "Excluded Claims" or "nothing in this Agreement limits liability
+      for", followed by a list. Read each listed item separately and note
+      whether it applies to one party or both. A cap with no stated exceptions
+      has no carve-outs, which is acceptable for the supplier and should not be
+      flagged as missing.
+  - family: limitation_of_liability
+    key: consequential_damages_exclusion
+    name: Consequential damages exclusion
+    description: >
+      The exclusion of indirect, special, incidental, consequential and
+      punitive damages, and often of lost profits, revenue, goodwill and data.
+      It is negotiated over whether it is mutual, whether its exceptions match
+      the cap carve-outs, and whether data loss and regulatory costs are
+      recoverable despite it.
+    detection_hints: >
+      Look for "in no event shall either party be liable for any indirect,
+      incidental, special, consequential or punitive damages" or "loss of
+      profits, revenue, data or goodwill", frequently in capital letters.
+      Check whether it says "neither party" or names only one. Absence means
+      consequential losses are recoverable up to the cap, which is a deviation
+      for the supplier.
+  - family: limitation_of_liability
+    key: data_breach_super_cap
+    name: Data breach super-cap
+    description: >
+      A separate, higher limit for liability arising from a breach of the data
+      protection, security or confidentiality obligations. It is the usual
+      compromise between a customer asking for uncapped data liability and a
+      supplier that cannot insure unlimited exposure, so its multiple and any
+      absolute ceiling are closely negotiated.
+    detection_hints: >
+      Look for a second cap tied to "data breach", "Security Incident", "breach
+      of the data protection obligations" or "Data Protection Claims", often
+      called a "super cap", "enhanced cap" or "separate cap", and check
+      whether it is in addition to or instead of the general cap. Absence means
+      data claims fall under the general cap, unless a carve-out makes them
+      uncapped.
+  - family: limitation_of_liability
+    key: dpa_liability_alignment
+    name: DPA liability alignment
+    description: >
+      Whether liability under the data processing addendum is subject to the
+      limits and exclusions in the main agreement or stands alone. It is
+      negotiated because a DPA that is silent, or that states its own
+      unlimited liability, can bypass the cap that the parties agreed in the
+      master agreement.
+    detection_hints: >
+      Look in the DPA for "subject to the limitations of liability set out in
+      the Agreement", "taken together in the aggregate" or, conversely,
+      "nothing in the Agreement shall limit liability under this DPA". Also
+      check the order-of-precedence wording between the DPA and the main
+      agreement. Absence means the position is ambiguous and should be raised,
+      because a DPA that prevails on conflict may be read as uncapped.
+
+  # ------------------------------------------------------------------------
+  # termination
+  # ------------------------------------------------------------------------
+  - family: termination
+    key: for_convenience
+    name: Termination for convenience
+    description: >
+      A right to end the agreement without cause, on notice, before the term
+      expires. It is negotiated because it undermines committed subscription
+      revenue for the supplier and gives the buyer flexibility, and the
+      related question of whether prepaid fees are refunded often matters more
+      than the right itself.
+    detection_hints: >
+      Look for "for any reason or no reason", "for convenience", "without
+      cause" or "upon ninety days' written notice" in the termination section,
+      and note which party holds the right and what happens to prepaid fees.
+      Absence means neither party can exit early without a breach, which is
+      the supplier's preferred position and is not a missing clause.
+  - family: termination
+    key: for_cause_cure_period
+    name: Termination for cause and cure period
+    description: >
+      The right to terminate for the other party's material breach, and the
+      period the breaching party has to remedy it after notice. It is
+      negotiated over the length of the cure period, whether some breaches such
+      as non-payment or confidentiality breaches have a shorter period or none,
+      and whether insolvency is a separate trigger.
+    detection_hints: >
+      Look for "material breach", "fails to cure", "remains uncured" and a
+      number of days after "written notice", plus insolvency wording such as
+      "becomes the subject of a petition in bankruptcy". Absence of any
+      termination-for-cause right is a missing clause; a right to terminate for
+      breach with no cure period is a deviation.
+  - family: termination
+    key: effect_of_termination
+    name: Effect of termination
+    description: >
+      What happens when the agreement ends: access stops, accrued fees fall
+      due, prepaid fees are or are not refunded, data is made available for a
+      period, and listed clauses survive. It is negotiated mainly over refunds
+      on each type of termination and the length of the post-termination data
+      retrieval window.
+    detection_hints: >
+      Look for headings such as "Effect of Termination" or "Consequences of
+      Termination" and for "upon termination or expiration", "all rights
+      granted shall cease", "refund any prepaid Fees" and "the following
+      sections shall survive". Absence leaves refunds, data access and
+      survival to general law and is a missing clause.
+  - family: termination
+    key: return_or_destruction
+    name: Return or destruction of confidential information
+    description: >
+      The obligation, on termination or on request, to return or destroy the
+      other party's confidential information and to confirm that this has been
+      done. It is negotiated over the permitted exceptions, typically copies
+      held in routine backups and copies kept to meet legal or compliance
+      record-keeping duties.
+    detection_hints: >
+      Look for "return or destroy", "promptly upon request", "certify in
+      writing" and exceptions such as "archival copies", "automated backup
+      systems" or "as required by applicable law". This issue concerns
+      confidential information generally, most often in an NDA; return and
+      deletion of personal data or PHI is a separate issue under data
+      protection. Absence is a missing clause.
+  - family: termination
+    key: termination_for_baa_breach
+    name: Termination for breach of the business associate agreement
+    description: >
+      The covered entity's right to terminate where the business associate has
+      violated a material term of the business associate agreement, a right
+      that HIPAA requires the agreement to permit. It is negotiated over
+      whether a cure opportunity applies first and whether termination of the
+      business associate agreement also ends the underlying services
+      agreement.
+    detection_hints: >
+      Look in the business associate agreement for "material term", "violation
+      of this BAA", "opportunity to cure" and "terminate this BAA and the
+      Underlying Agreement", sometimes with "if neither termination nor cure
+      is feasible". Absence in an agreement under which PHI is handled is a
+      missing mandatory term, not a commercial choice.
+  - family: termination
+    key: transition_assistance
+    name: Transition assistance
+    description: >
+      The supplier's obligation to keep providing the services and to help
+      migrate data and operations to a replacement for a period after
+      termination or expiry. It is negotiated over the length of the period,
+      whether assistance is charged at existing rates, and whether it is
+      available after termination for the customer's own breach.
+    detection_hints: >
+      Look for "transition services", "transition period", "exit assistance",
+      "wind-down" or "orderly migration", usually with a period in days or
+      months and a statement on fees. It appears most often in agreements
+      where the customer is buying a critical service. Absence means the
+      service can stop on the termination date with no migration support.
+
+  # ------------------------------------------------------------------------
+  # confidentiality
+  # ------------------------------------------------------------------------
+  - family: confidentiality
+    key: standard_of_care
+    name: Standard of care
+    description: >
+      The level of protection the receiving party must give to confidential
+      information, and the restriction on using it other than for the agreed
+      purpose. It is negotiated between a "reasonable care" standard measured
+      against the recipient's own practice and stricter absolute or
+      prescriptive standards that are harder to prove compliance with.
+    detection_hints: >
+      Look for "the same degree of care that it uses to protect its own
+      confidential information, but no less than reasonable care", "strict
+      confidence", "solely for the Purpose" and "shall not disclose to any
+      third party". Absence of any stated standard in a confidentiality clause
+      is a deviation; absence of a confidentiality clause altogether is a
+      missing clause.
+  - family: confidentiality
+    key: permitted_disclosures
+    name: Permitted disclosures
+    description: >
+      The people to whom the receiving party may pass confidential information
+      without consent, such as employees, affiliates, contractors, professional
+      advisers and financing sources with a need to know. It is negotiated over
+      how wide that group is and whether the recipient is liable for breaches
+      by those it discloses to.
+    detection_hints: >
+      Look for "Representatives", "need to know", "employees, agents,
+      contractors and professional advisers", "bound by obligations no less
+      protective" and "shall be responsible for any breach by". Absence means
+      any onward disclosure, even to an affiliate or adviser, is technically a
+      breach, which is usually unworkable and should be flagged.
+  - family: confidentiality
+    key: exclusions
+    name: Exclusions from confidential information
+    description: >
+      The standard categories of information that are not treated as
+      confidential: information that is public, already known, independently
+      developed or lawfully received from a third party. It is negotiated when
+      a party removes an exclusion, adds a burden of proof, or states that the
+      exclusions do not apply to personal data.
+    detection_hints: >
+      Look for "Confidential Information does not include" or "the obligations
+      in this section shall not apply to information that", followed by limbs
+      mentioning "publicly available", "already known", "independently
+      developed" and "rightfully received from a third party". Count the limbs;
+      fewer than the usual four is a deviation, and no exclusions at all is a
+      missing issue.
+  - family: confidentiality
+    key: compelled_disclosure
+    name: Compelled disclosure
+    description: >
+      The right to disclose confidential information when required by law,
+      court order, subpoena or regulator, and the conditions attached. It is
+      negotiated over prior notice to the disclosing party, cooperation in
+      seeking a protective order, and limiting disclosure to the minimum
+      legally required.
+    detection_hints: >
+      Look for "required by law", "court order", "subpoena", "governmental or
+      regulatory authority", "prompt prior notice where legally permitted" and
+      "protective order". It may be drafted as an exclusion or as a separate
+      sub-clause. Absence means a legally compelled disclosure would breach
+      the clause, which is a missing issue.
+  - family: confidentiality
+    key: residuals
+    name: Residuals
+    description: >
+      A clause allowing the receiving party to use ideas, concepts and know-how
+      retained in the unaided memory of its personnel after they have seen
+      confidential information. It is negotiated because it can operate as a
+      broad licence that hollows out the confidentiality obligation,
+      particularly for product designs, source code and patient data.
+    detection_hints: >
+      Look for "residuals", "retained in the unaided memory", "general
+      knowledge, skills and experience" or "without reference to the
+      Confidential Information". The clause is commonly proposed by large
+      technology counterparties in NDAs. Absence is the preferred position and
+      should not be flagged as missing.
+  - family: confidentiality
+    key: equitable_relief
+    name: Equitable relief
+    description: >
+      An acknowledgement that a breach of confidentiality may cause harm that
+      damages cannot remedy, so the disclosing party may seek an injunction or
+      specific performance. It is negotiated over whether the wording concedes
+      irreparable harm in advance and whether the requirement to post a bond
+      or prove actual damage is waived.
+    detection_hints: >
+      Look for "irreparable harm", "injunctive relief", "specific
+      performance", "without the necessity of posting a bond" and "in addition
+      to any other remedies". It often appears under "Remedies". Absence does
+      not remove the right to seek an injunction under general law, so treat
+      it as a low-severity missing issue.
+
+  # ------------------------------------------------------------------------
+  # intellectual_property
+  # ------------------------------------------------------------------------
+  - family: intellectual_property
+    key: ownership
+    name: Ownership of intellectual property
+    description: >
+      Who owns the services, software, documentation and anything developed
+      under the agreement, and who owns the data the customer puts in. It is
+      negotiated when a customer asks to own configurations, deliverables or
+      improvements, which for a multi-tenant product would mean assigning
+      parts of the shared platform.
+    detection_hints: >
+      Look for "retains all right, title and interest", "no rights are granted
+      except as expressly set out", "work made for hire", "hereby assigns" and
+      "Deliverables". Pay attention to any assignment wording in favour of the
+      customer. Absence of an ownership clause in a software or services
+      agreement is a missing clause.
+  - family: intellectual_property
+    key: feedback_license
+    name: Feedback licence
+    description: >
+      The supplier's right to use suggestions, ideas and enhancement requests
+      that the customer provides about the services. It is negotiated over
+      whether the right is a licence or an assignment, whether it is perpetual
+      and royalty-free, and whether feedback must exclude the customer's
+      confidential information.
+    detection_hints: >
+      Look for "Feedback", "suggestions, enhancement requests or
+      recommendations", "perpetual, irrevocable, royalty-free licence" and
+      "without restriction or obligation". It is usually a short sub-clause in
+      the intellectual property section. Absence leaves the supplier's right
+      to act on customer suggestions unclear and is a missing issue.
+  - family: intellectual_property
+    key: usage_data
+    name: Usage data
+    description: >
+      The supplier's right to collect and use data about how the services are
+      used, in aggregated or de-identified form, to operate, secure and improve
+      the product. It is negotiated because healthcare customers want
+      assurance that the right does not reach patient data, cannot identify
+      the customer, and is not used to train third-party models or sold.
+    detection_hints: >
+      Look for "Usage Data", "aggregated and anonymised", "de-identified",
+      "statistical data", "system performance data" and "to improve the
+      Services". Check for limits on identification and on disclosure to
+      third parties. Absence means the supplier has no express right to use
+      operational data, which is a missing issue on vendor paper.
+  - family: intellectual_property
+    key: no_license
+    name: No licence granted
+    description: >
+      A statement that disclosing information or entering into the agreement
+      grants no licence or other right in either party's intellectual property
+      beyond what is expressly stated. In an NDA it prevents the recipient
+      arguing that access to information implies a right to use it
+      commercially.
+    detection_hints: >
+      Look for "nothing in this Agreement shall be construed as granting",
+      "no licence, express or implied", "by estoppel or otherwise" and "all
+      Confidential Information remains the property of the Disclosing Party".
+      Absence in an NDA is a missing issue; the opposite wording, an express
+      licence to use disclosed information, is a deviation.
+
+  # ------------------------------------------------------------------------
+  # governing_law
+  # ------------------------------------------------------------------------
+  - family: governing_law
+    key: choice_of_law
+    name: Choice of law
+    description: >
+      Which jurisdiction's law governs the agreement and its interpretation.
+      It is negotiated when the parties are in different states or countries,
+      and public bodies and EU customers often require their own law, which
+      changes how liability limits, warranties and data terms are enforced.
+    detection_hints: >
+      Look for "governed by and construed in accordance with the laws of",
+      "without regard to its conflict of laws principles" and a named state or
+      country, usually near the end of the agreement under "Governing Law" or
+      "General". An agreement with no governing law clause is a missing
+      clause.
+  - family: governing_law
+    key: venue
+    name: Venue and jurisdiction
+    description: >
+      Which courts may hear disputes and whether their jurisdiction is
+      exclusive. It is negotiated separately from the governing law because
+      litigating far from home adds cost and uncertainty, and because a
+      non-exclusive clause allows claims to be brought in several places.
+    detection_hints: >
+      Look for "exclusive jurisdiction", "submits to the jurisdiction of the
+      courts of", "state and federal courts located in", "venue" and "waives
+      any objection". Note whether the wording is exclusive or non-exclusive.
+      A governing law clause with no court named means venue is missing and
+      falls to general jurisdictional rules.
+
+  # ------------------------------------------------------------------------
+  # dispute_resolution
+  # ------------------------------------------------------------------------
+  - family: dispute_resolution
+    key: escalation_process
+    name: Escalation process
+    description: >
+      A requirement that the parties try to resolve a dispute through
+      discussion between named levels of management, sometimes followed by
+      mediation, before starting formal proceedings. It is negotiated over the
+      time allowed at each step and whether urgent injunctive relief and
+      collection of unpaid fees are exempt.
+    detection_hints: >
+      Look for "good faith negotiations", "escalate to senior executives",
+      "within thirty days of written notice of the dispute", "mediation" and
+      "before commencing any proceedings". Absence means a party can sue
+      without warning, which is a low-severity missing issue.
+  - family: dispute_resolution
+    key: forum
+    name: Dispute forum
+    description: >
+      Whether disputes are decided by the courts or by arbitration, and if by
+      arbitration, the rules, seat, number of arbitrators and language. It is
+      negotiated because arbitration changes cost, confidentiality, appeal
+      rights and the availability of class or jury proceedings.
+    detection_hints: >
+      Look for "binding arbitration", "administered by", "seat of arbitration",
+      "one arbitrator", "waives the right to a jury trial" and "class action
+      waiver". Read it together with the venue clause, since the two can
+      conflict. Absence of arbitration wording means the courts named in the
+      venue clause decide disputes.
+
+  # ------------------------------------------------------------------------
+  # payment
+  # ------------------------------------------------------------------------
+  - family: payment
+    key: payment_terms
+    name: Payment terms
+    description: >
+      How long the paying party has to pay an invoice and when invoices are
+      issued. It is negotiated on most deals because longer terms delay cash
+      collection for the supplier, and large health systems often have fixed
+      accounts payable cycles of 45 or 60 days or more.
+    detection_hints: >
+      Look for "net 30", "within thirty days of the invoice date", "due upon
+      receipt", "annually in advance" and "payable in arrears". Convert the
+      period to days from the invoice date. Absence of any payment period in
+      an agreement with fees is a missing clause.
+  - family: payment
+    key: late_fees
+    name: Late fees
+    description: >
+      The interest or charge that applies to overdue amounts, and related
+      remedies such as recovery of collection costs. It is negotiated over the
+      rate, whether disputed amounts are exempt, and whether the customer
+      gains a right to set off or withhold amounts it claims are owed.
+    detection_hints: >
+      Look for "interest at the rate of", "per month", "or the maximum rate
+      permitted by law", "late charge", "costs of collection" and "set off" or
+      "withhold". Absence of late fee wording is a concession rather than a
+      missing clause; a set-off right in the customer's favour is a deviation.
+  - family: payment
+    key: price_increases
+    name: Price increases
+    description: >
+      Whether and by how much fees may rise at renewal or during the term, and
+      the notice required. It is negotiated because customers want predictable
+      costs and suppliers need to recover rising hosting and staffing costs,
+      so the result is usually a percentage cap, an index link or a price lock
+      for a fixed number of years.
+    detection_hints: >
+      Look for "increase the Fees", "upon renewal", "not more than", a
+      percentage, "Consumer Price Index", "then-current list price" and
+      "Fees shall remain fixed for". Absence of a cap means renewal pricing is
+      at the supplier's discretion, which favours the supplier; a multi-year
+      price lock is a deviation.
+  - family: payment
+    key: taxes
+    name: Taxes
+    description: >
+      Which party bears sales, use, value added and withholding taxes on the
+      fees. It is negotiated over withholding gross-up for cross-border deals
+      and over tax-exempt customers such as non-profit hospital systems, which
+      expect the supplier to honour an exemption certificate.
+    detection_hints: >
+      Look for "exclusive of taxes", "sales, use, value added or withholding
+      taxes", "gross up", "exemption certificate" and "taxes based on net
+      income". Absence leaves it unclear whether the stated fees include tax
+      and is a missing issue.
+
+  # ------------------------------------------------------------------------
+  # warranties
+  # ------------------------------------------------------------------------
+  - family: warranties
+    key: performance_warranty
+    name: Performance warranty
+    description: >
+      The supplier's promise that the services will perform materially as
+      described in the documentation and will be provided with reasonable
+      skill and care. It is negotiated over the standard, such as "materially
+      in accordance with" against "error-free", the warranty period, and
+      whether promises extend to fitness for the customer's clinical or
+      regulatory purposes.
+    detection_hints: >
+      Look for "warrants that the Services will perform materially in
+      accordance with the Documentation", "professional and workmanlike
+      manner", "free from material defects" and "will not materially decrease
+      the functionality". Absence of any performance warranty in a services
+      agreement is a missing clause.
+  - family: warranties
+    key: disclaimer
+    name: Warranty disclaimer
+    description: >
+      The statement that the express warranties are the only ones given and
+      that implied warranties, such as merchantability and fitness for a
+      particular purpose, are excluded. For clinical software it usually also
+      states that the product does not give medical advice. It is negotiated
+      when a customer deletes it or adds broad express warranties that
+      undercut it.
+    detection_hints: >
+      Look for "except as expressly provided", "disclaims all warranties",
+      "merchantability", "fitness for a particular purpose",
+      "non-infringement" and "as is", often in capital letters, and for
+      "not a substitute for professional medical judgment". Absence means
+      implied warranties apply, which is a deviation on vendor paper.
+
+  # ------------------------------------------------------------------------
+  # force_majeure
+  # ------------------------------------------------------------------------
+  - family: force_majeure
+    key: scope
+    name: Force majeure scope
+    description: >
+      Which events beyond a party's reasonable control excuse delay or failure
+      to perform, and which obligations are never excused. It is negotiated
+      over whether cyber attacks, cloud provider outages, pandemics and labour
+      disputes count, and whether payment and data security obligations are
+      carved out.
+    detection_hints: >
+      Look for "beyond its reasonable control", "acts of God", "natural
+      disaster", "failure of third-party hosting or telecommunications",
+      "pandemic", "governmental action" and "other than payment obligations".
+      Absence means non-performance is judged under general law doctrines such
+      as impossibility, and is a missing clause.
+  - family: force_majeure
+    key: termination_right
+    name: Force majeure termination right
+    description: >
+      The right of either party to terminate if a force majeure event prevents
+      performance for longer than a stated period. It is negotiated over the
+      length of that period and whether the customer receives a refund of
+      prepaid fees for the unused part of the term.
+    detection_hints: >
+      Look inside the force majeure clause for "continues for more than",
+      a number of days, "either party may terminate" and "refund of prepaid
+      Fees". A force majeure clause with no end point means the affected party
+      can be excused indefinitely, which is a missing issue.
+
+  # ------------------------------------------------------------------------
+  # assignment
+  # ------------------------------------------------------------------------
+  - family: assignment
+    key: consent_requirement
+    name: Consent to assignment
+    description: >
+      Whether a party may transfer the agreement to someone else and whether
+      the other party's consent is needed. It is negotiated over whether
+      consent may be unreasonably withheld and over exceptions for transfers
+      to affiliates or to a successor in a merger or sale of the business.
+    detection_hints: >
+      Look for "may not assign", "without the prior written consent", "not to
+      be unreasonably withheld, conditioned or delayed", "to an Affiliate" and
+      "successor to all or substantially all of its business or assets".
+      Absence means assignment is governed by the default rules of the
+      governing law and is a missing clause.
+  - family: assignment
+    key: change_of_control
+    name: Change of control
+    description: >
+      Whether a merger, acquisition or change in ownership of a party is
+      treated as an assignment needing consent, or gives the other party a
+      right to terminate. It is negotiated because such a clause can obstruct
+      a future sale or financing of the supplier, while a buyer wants an exit
+      if its supplier is acquired by a competitor.
+    detection_hints: >
+      Look for "change of control", "merger, acquisition or sale of all or
+      substantially all", "by operation of law", "deemed an assignment" and
+      "acquired by a competitor". It may sit in the assignment clause or in
+      the termination clause. Absence means a change in ownership has no
+      contractual consequence.
+
+  # ------------------------------------------------------------------------
+  # notices
+  # ------------------------------------------------------------------------
+  - family: notices
+    key: method
+    name: Notice method
+    description: >
+      How formal notices under the agreement must be sent and when they are
+      treated as received. It is negotiated over whether email is valid for
+      legal notices such as breach and termination, and over which address and
+      which function, usually the legal department, must receive them.
+    detection_hints: >
+      Look for "notices shall be in writing", "delivered by hand", "nationally
+      recognised overnight courier", "certified mail", "by email to", "deemed
+      received" and "Attention: Legal Department". Absence means there is no
+      agreed way to give effective notice and is a missing clause.
+
+  # ------------------------------------------------------------------------
+  # entire_agreement
+  # ------------------------------------------------------------------------
+  - family: entire_agreement
+    key: integration
+    name: Integration
+    description: >
+      The statement that the written agreement is the complete agreement and
+      replaces earlier proposals, discussions and representations. It is
+      negotiated when a customer wants its request for proposal responses,
+      sales materials or purchase order terms to form part of the contract,
+      which would import commitments beyond the documentation.
+    detection_hints: >
+      Look for "entire agreement", "supersedes all prior and contemporaneous",
+      "proposals, negotiations and representations" and "terms on any purchase
+      order shall have no effect". Wording that incorporates "Vendor's
+      response to the RFP" is a deviation. Absence of an integration clause is
+      a missing clause.
+  - family: entire_agreement
+    key: order_of_precedence
+    name: Order of precedence
+    description: >
+      Which document prevails when the main agreement, order forms, data
+      processing addendum, business associate agreement and other exhibits
+      conflict. It is negotiated because the ranking decides whether a
+      negotiated order form can override the master terms and whether privacy
+      documents override the liability cap.
+    detection_hints: >
+      Look for "in the event of a conflict", "order of precedence", "shall
+      prevail", "shall control" and a ranked list of documents. Check every
+      attached addendum for its own competing precedence statement. Absence
+      leaves conflicts between documents unresolved and is a missing issue.
+
+  # ------------------------------------------------------------------------
+  # amendment
+  # ------------------------------------------------------------------------
+  - family: amendment
+    key: written_amendment
+    name: Written amendment
+    description: >
+      The requirement that changes to the agreement be made in writing and
+      signed by both parties, usually paired with a statement that a failure
+      to enforce a right is not a waiver. It is negotiated when one party
+      reserves a right to change terms unilaterally, for example by posting
+      updated terms online.
+    detection_hints: >
+      Look for "may be amended only by a written instrument signed by
+      authorised representatives of both parties", "no waiver shall be
+      effective unless in writing" and, as a deviation, "may modify these
+      terms from time to time by posting". Absence is a missing clause.
+
+  # ------------------------------------------------------------------------
+  # data_protection
+  # ------------------------------------------------------------------------
+  - family: data_protection
+    key: customer_data_use
+    name: Use of Customer Data
+    description: >
+      The purposes for which the supplier may access and use the data the
+      customer puts into the services. It is negotiated because customers
+      holding patient data want use limited to providing the services, with
+      express bars on selling data, advertising use and training models for
+      others.
+    detection_hints: >
+      Look for "use Customer Data solely to provide the Services", "shall not
+      sell", "shall not use for advertising", "machine learning" or "train",
+      and any licence from the customer to "host, copy, transmit and display"
+      its data. Absence of a use restriction in an agreement where the
+      supplier hosts customer data is a missing clause.
+  - family: data_protection
+    key: data_return_and_deletion
+    name: Data return and deletion
+    description: >
+      The supplier's obligation at the end of the agreement to return the
+      customer's data or make it available for export, and then to delete it
+      within a stated period. It is negotiated over the export format, the
+      length of the retrieval window, deletion from backups, and written
+      confirmation of deletion.
+    detection_hints: >
+      Look for "return or delete", "make available for export", "within
+      thirty days of termination", "securely delete or destroy", "backup
+      copies", "certification of deletion" and, for PHI, "if return or
+      destruction is infeasible". Absence is a missing mandatory term under
+      both HIPAA and GDPR.
+  - family: data_protection
+    key: processing_instructions
+    name: Processing instructions
+    description: >
+      The requirement that the processor handles personal data only on the
+      controller's documented instructions, and tells the controller if an
+      instruction appears unlawful. It is negotiated over what counts as an
+      instruction, whether the agreement itself is the complete set, and who
+      pays for instructions that go beyond the standard service.
+    detection_hints: >
+      Look for "only on documented instructions from the Controller",
+      "including with regard to transfers", "the Agreement and this DPA
+      constitute the complete instructions" and "shall inform the Controller
+      if an instruction infringes". Absence in a data processing agreement is
+      a missing mandatory term under GDPR Article 28.
+  - family: data_protection
+    key: purpose_limitation
+    name: Purpose limitation
+    description: >
+      The limit on processing personal data to the specific subject matter,
+      duration, nature and purpose set out in the agreement, usually in an
+      annex describing the processing. It is negotiated when the processor
+      seeks room for product improvement, analytics or its own business
+      purposes.
+    detection_hints: >
+      Look for "for the purposes described in Annex", "subject matter and
+      duration of the processing", "nature and purpose", "shall not process
+      for its own purposes" and a schedule listing categories of data and
+      data subjects. A data processing agreement with no description of the
+      processing is missing this issue.
+  - family: data_protection
+    key: data_subject_requests
+    name: Data subject requests
+    description: >
+      The processor's duty to help the controller respond to individuals
+      exercising rights of access, correction, erasure, restriction,
+      portability and objection. It is negotiated over how quickly the
+      processor must forward requests it receives, whether it may reply
+      directly, and whether assistance beyond self-service tools is charged.
+    detection_hints: >
+      Look for "Data Subject", "requests to exercise rights", "promptly
+      notify the Controller", "shall not respond except on instructions",
+      "appropriate technical and organisational measures to assist" and a
+      number of days. Absence in a data processing agreement is a missing
+      mandatory term.
+  - family: data_protection
+    key: personnel_confidentiality
+    name: Personnel confidentiality
+    description: >
+      The requirement that everyone the processor authorises to handle
+      personal data is bound by a duty of confidentiality and has access only
+      as needed for their role. It is rarely contested in principle, but
+      customers add requirements for background checks, training frequency and
+      named-individual approval.
+    detection_hints: >
+      Look for "persons authorised to process", "committed themselves to
+      confidentiality", "statutory obligation of confidentiality", "need to
+      know", "background checks" and "privacy and security training".
+      Absence in a data processing agreement is a missing mandatory term.
+  - family: data_protection
+    key: dpia_assistance
+    name: DPIA assistance
+    description: >
+      The processor's duty to give the controller information and reasonable
+      help with data protection impact assessments and with prior
+      consultation of a supervisory authority. It is negotiated over the
+      scope of help, reliance on existing documentation and audit reports, and
+      charges for bespoke assessment work.
+    detection_hints: >
+      Look for "data protection impact assessment", "prior consultation",
+      "taking into account the nature of the processing and the information
+      available to the Processor" and "reasonable assistance". Absence in a
+      data processing agreement governed by GDPR is a missing mandatory term.
+  - family: data_protection
+    key: records_of_processing
+    name: Records of processing
+    description: >
+      The processor's obligation to keep written records of the processing it
+      carries out for each controller and to make them available to the
+      controller or a supervisory authority. It is negotiated over the level
+      of detail, the format, and how quickly records must be produced on
+      request.
+    detection_hints: >
+      Look for "records of processing activities", "Article 30", "maintain a
+      written record", "categories of processing carried out on behalf of the
+      Controller" and "make available on request". Absence does not remove the
+      statutory duty but leaves the controller with no contractual right to
+      see the records.
+  - family: data_protection
+    key: permitted_uses_of_phi
+    name: Permitted uses and disclosures of PHI
+    description: >
+      The uses and disclosures of protected health information that the
+      business associate is allowed to make: to perform the services, for its
+      own proper management and administration, to meet legal duties, and if
+      agreed for data aggregation. It is negotiated because covered entities
+      narrow the list and business associates need the management and
+      administration limb to run their business.
+    detection_hints: >
+      Look for "may use or disclose PHI only as necessary to perform",
+      "proper management and administration", "as Required by Law", "Data
+      Aggregation services" and "shall not use or disclose PHI in a manner
+      that would violate" the Privacy Rule. Absence in a business associate
+      agreement is a missing mandatory term.
+  - family: data_protection
+    key: minimum_necessary
+    name: Minimum necessary
+    description: >
+      The commitment to limit each use, disclosure and request of protected
+      health information to the minimum needed for the purpose. It is
+      negotiated when a covered entity adds prescriptive access rules or
+      asks the business associate to follow the covered entity's own minimum
+      necessary policies, which may not fit a shared platform.
+    detection_hints: >
+      Look for "minimum necessary", "limited data set where practicable",
+      "reasonable efforts to limit" and references to the covered entity's
+      "minimum necessary policies and procedures". Absence in a business
+      associate agreement is a missing issue that should be added.
+  - family: data_protection
+    key: individual_rights_support
+    name: Individual rights support
+    description: >
+      The business associate's duty to help the covered entity meet
+      individuals' rights under HIPAA: access to records in a designated
+      record set, amendment, and an accounting of disclosures. It is
+      negotiated over the response period, since covered entities often ask
+      for far less time than the regulation gives them.
+    detection_hints: >
+      Look for "Designated Record Set", "access to PHI", "amendment",
+      "accounting of disclosures", "forward any request from an Individual"
+      and a number of days for each. Absence in a business associate
+      agreement is a missing mandatory term.
+  - family: data_protection
+    key: de_identification
+    name: De-identification
+    description: >
+      Whether the business associate may de-identify protected health
+      information and use the resulting data for its own purposes such as
+      analytics and product improvement. It is negotiated because many covered
+      entities prohibit it outright or require their written approval, and
+      because the right is valuable to the supplier.
+    detection_hints: >
+      Look for "de-identify", "de-identified in accordance with 45 CFR
+      164.514", "expert determination", "safe harbor" and "shall not
+      de-identify PHI except". A business associate agreement that is silent
+      does not grant the right, so absence means de-identification for the
+      supplier's own use is not permitted.
+
+  # ------------------------------------------------------------------------
+  # compliance
+  # ------------------------------------------------------------------------
+  - family: compliance
+    key: compliance_with_laws
+    name: Compliance with laws
+    description: >
+      Each party's general promise to comply with the laws that apply to it in
+      performing the agreement. It is negotiated over scope: a supplier will
+      commit to laws applicable to it as a provider of the services, but not
+      to every law applicable to the customer's business or to the customer's
+      use of the product.
+    detection_hints: >
+      Look for "shall comply with all applicable laws and regulations",
+      "applicable to its performance", "applicable to Customer's business"
+      and "export control". Wording that makes the supplier responsible for
+      the customer's regulatory compliance is a deviation. Absence is a
+      low-severity missing issue.
+  - family: compliance
+    key: anti_corruption
+    name: Anti-corruption
+    description: >
+      Promises not to offer or accept bribes or improper payments and to
+      comply with anti-bribery laws, and in healthcare with rules on
+      inducements and on persons excluded from federal programmes. It is
+      negotiated when a customer attaches its own code of conduct, audit
+      rights or certification requirements.
+    detection_hints: >
+      Look for "anti-bribery", "Foreign Corrupt Practices Act", "Bribery
+      Act", "anything of value", "Anti-Kickback Statute", "excluded from
+      participation in any federal health care program" and "Supplier Code of
+      Conduct". Absence is a low-severity missing issue.
+  - family: compliance
+    key: hipaa_compliance
+    name: HIPAA compliance
+    description: >
+      The business associate's general commitment to comply with the parts of
+      the HIPAA Privacy, Security and Breach Notification Rules that apply to
+      it, and the handling of future changes in the law. It is negotiated when
+      a covered entity asks the business associate to comply with rules that
+      apply only to covered entities or to warrant the customer's own
+      compliance.
+    detection_hints: >
+      Look for "comply with the HIPAA Rules", "45 CFR Parts 160 and 164",
+      "HITECH", "to the extent Business Associate carries out an obligation
+      of Covered Entity" and "amend this BAA as necessary to comply with
+      changes in law". Absence where PHI is handled means a business associate
+      agreement is missing or incomplete.
+  - family: compliance
+    key: gdpr_compliance
+    name: GDPR compliance
+    description: >
+      Each party's commitment to meet its own obligations under GDPR and
+      related European and UK data protection law in its role as controller
+      or processor. It is negotiated when a controller tries to shift its own
+      duties, such as establishing a lawful basis and giving notice to
+      individuals, onto the processor.
+    detection_hints: >
+      Look for "Data Protection Laws", "Regulation (EU) 2016/679", "UK GDPR",
+      "each party shall comply with its obligations", "lawful basis" and
+      "Controller is solely responsible for". Absence in a deal involving
+      personal data from the EU or UK is a missing issue.
+
+  # ------------------------------------------------------------------------
+  # term
+  # ------------------------------------------------------------------------
+  - family: term
+    key: initial_term
+    name: Initial term
+    description: >
+      The length of the first committed period of the agreement or
+      subscription. It is negotiated because a longer commitment gives the
+      supplier predictable revenue and justifies discounts, while customers
+      want shorter terms or the freedom to leave if the product does not meet
+      their needs.
+    detection_hints: >
+      Look for "Initial Term", "Subscription Term", "commences on the
+      Effective Date and continues for" and a period in months or years, in
+      the agreement or the order form. "Month-to-month" wording is a
+      deviation. Absence of any stated term is a missing clause.
+  - family: term
+    key: auto_renewal
+    name: Auto-renewal
+    description: >
+      Whether the agreement renews automatically at the end of each term, for
+      how long, and how much notice is needed to stop it. It is negotiated
+      over the notice window and the renewal length, and many public sector
+      and hospital customers have procurement rules against automatic
+      renewal.
+    detection_hints: >
+      Look for "automatically renew", "successive renewal terms of", "unless
+      either party gives written notice of non-renewal at least" and a number
+      of days. Wording requiring a new signed order to renew means there is no
+      auto-renewal. Absence means the agreement simply expires.
+  - family: term
+    key: agreement_term
+    name: Agreement term
+    description: >
+      How long the agreement itself remains in force, as distinct from a
+      subscription period. In an NDA this is the period during which
+      information may be exchanged under its protection, and it is negotiated
+      between a fixed term and an open-ended term ending on notice.
+    detection_hints: >
+      Look for "this Agreement shall remain in effect for", "from the
+      Effective Date", "until terminated by either party on thirty days'
+      written notice" and "information disclosed during the term". Absence of
+      a term in an NDA means it runs indefinitely until terminated, which is a
+      deviation.
+  - family: term
+    key: survival_period
+    name: Survival period
+    description: >
+      How long confidentiality and other continuing obligations last after the
+      agreement ends. It is negotiated between a fixed number of years,
+      indefinite protection for trade secrets only, and perpetual protection
+      for everything, which is hard to administer and is resisted.
+    detection_hints: >
+      Look for "shall survive termination or expiration for a period of",
+      "for so long as the information remains a trade secret", "in
+      perpetuity" and "indefinitely". Note any different period for personal
+      data. Absence means it is unclear whether obligations outlast the
+      agreement, which is a missing issue.
+
+  # ------------------------------------------------------------------------
+  # definitions
+  # ------------------------------------------------------------------------
+  - family: definitions
+    key: confidential_information_scope
+    name: Scope of Confidential Information
+    description: >
+      How "Confidential Information" is defined: everything disclosed, only
+      what is marked or identified as confidential, or anything a reasonable
+      person would understand to be confidential. It is negotiated because a
+      marking requirement is easily missed in practice, while an unlimited
+      definition is hard for the recipient to comply with.
+    detection_hints: >
+      Look for the definition of "Confidential Information" and for "marked
+      or designated as confidential", "confirmed in writing within thirty
+      days of oral disclosure", "reasonably understood to be confidential" and
+      "whether disclosed before or after the Effective Date". Absence of a
+      definition in a confidentiality agreement is a missing clause.
+  - family: definitions
+    key: roles_of_parties
+    name: Roles of the parties
+    description: >
+      The statement of each party's legal role for the personal data
+      concerned: controller, processor, sub-processor or independent
+      controller. It is negotiated because the role decides which statutory
+      duties apply, and customers sometimes mislabel the supplier as a joint
+      controller or the supplier needs controller status for account and
+      billing data.
+    detection_hints: >
+      Look for "Customer is the Controller and Supplier is the Processor",
+      "acts as a Processor on behalf of", "independent Controller", "joint
+      controllers" and "Business Associate" and "Covered Entity" designations.
+      Absence in a data processing agreement is a missing clause, because
+      every other obligation depends on the roles.
+
+  # ------------------------------------------------------------------------
+  # audit
+  # ------------------------------------------------------------------------
+  - family: audit
+    key: customer_audit_rights
+    name: Customer audit rights
+    description: >
+      The customer's right to verify the supplier's compliance, through
+      independent audit reports, written questionnaires or an inspection. It
+      is negotiated over frequency, notice, scope and whether third-party
+      reports such as SOC 2 satisfy the right, since on-site access to a
+      multi-tenant environment puts other customers' data at risk.
+    detection_hints: >
+      Look for "audit", "inspect", "upon reasonable prior written notice",
+      "no more than once in any twelve-month period", "SOC 2 Type II report",
+      "during normal business hours" and "at any time" or "without notice".
+      Absence in a data processing agreement is a missing mandatory term;
+      absence in a commercial agreement means no audit right exists.
+  - family: audit
+    key: audit_cost
+    name: Audit cost
+    description: >
+      Who pays for an audit, including the supplier's staff time in supporting
+      it and the cost of any follow-up. It is negotiated over whether the
+      customer bears its own costs and reimburses the supplier, and whether
+      costs shift to the supplier when the audit finds material
+      non-compliance.
+    detection_hints: >
+      Look near the audit right for "at Customer's sole expense", "reimburse
+      Processor for time expended at its then-current rates", "bear its own
+      costs" and "unless the audit reveals a material breach". An audit right
+      with no cost wording leaves the question open and is a missing issue.
+  - family: audit
+    key: hhs_access
+    name: HHS access to books and records
+    description: >
+      The business associate's obligation to make its internal practices,
+      books and records about protected health information available to the
+      Secretary of Health and Human Services for determining compliance. It
+      is required by HIPAA and is negotiated only where a covered entity
+      extends the access right to itself or to other bodies.
+    detection_hints: >
+      Look for "internal practices, books and records", "available to the
+      Secretary", "Department of Health and Human Services" and "for purposes
+      of determining compliance with the HIPAA Rules". Absence in a business
+      associate agreement is a missing mandatory term.
+  - family: audit
+    key: supervisory_authority_cooperation
+    name: Supervisory authority cooperation
+    description: >
+      The processor's commitment to cooperate with data protection supervisory
+      authorities, to tell the controller about regulatory enquiries
+      concerning the controller's data, and to submit to an authority's
+      audits. It is negotiated over notice periods and whether the processor
+      may respond before the controller has been consulted.
+    detection_hints: >
+      Look for "supervisory authority", "cooperate on request", "notify the
+      Controller of any enquiry, investigation or request from a regulator"
+      and "unless prohibited by law". Absence leaves the controller without a
+      contractual right to be told about regulatory contact with its
+      processor.
+
+  # ------------------------------------------------------------------------
+  # insurance
+  # ------------------------------------------------------------------------
+  - family: insurance
+    key: coverage_requirements
+    name: Insurance coverage requirements
+    description: >
+      The types and minimum limits of insurance a party must carry during the
+      term, such as cyber, technology errors and omissions and general
+      liability. It is negotiated over the limits, additional insured status,
+      and open-ended wording that would require cover beyond what the supplier
+      holds or can buy.
+    detection_hints: >
+      Look for "shall maintain", "commercial general liability", "cyber
+      liability", "errors and omissions", "limits of not less than",
+      "additional insured", "waiver of subrogation" and "rated A- or better".
+      Absence means there is no contractual insurance obligation, which is
+      acceptable when selling and a missing issue when buying.
+
+  # ------------------------------------------------------------------------
+  # service_levels
+  # ------------------------------------------------------------------------
+  - family: service_levels
+    key: uptime_commitment
+    name: Uptime commitment
+    description: >
+      The percentage of time the service is promised to be available in a
+      measurement period, and what is excluded from the calculation. It is
+      negotiated over the percentage, the measurement period, and exclusions
+      for scheduled maintenance and third-party failures, because each
+      additional "nine" sharply reduces permitted downtime.
+    detection_hints: >
+      Look for "available", "Uptime", "Monthly Uptime Percentage", "99.9%",
+      "excluding Scheduled Maintenance" and "measured monthly", in the main
+      agreement or a service level exhibit. Absence means there is no
+      availability commitment, which is a missing clause on a hosted service.
+  - family: service_levels
+    key: service_credits
+    name: Service credits
+    description: >
+      The remedy for missing a service level, usually a credit against future
+      fees calculated on a sliding scale. It is negotiated over the size of
+      the credits, the cap, whether they are the customer's sole remedy, and
+      whether repeated failures give a right to terminate.
+    detection_hints: >
+      Look for "Service Credit", a table of availability bands against
+      percentages of monthly fees, "shall not exceed", "sole and exclusive
+      remedy", "must be requested within" and "chronic failure". An uptime
+      commitment with no stated remedy leaves the customer to claim damages
+      and is a missing issue.
+
+  # ------------------------------------------------------------------------
+  # security
+  # ------------------------------------------------------------------------
+  - family: security
+    key: security_program
+    name: Security programme
+    description: >
+      The supplier's commitment to maintain a written information security
+      programme with administrative, technical and physical safeguards for
+      the customer's data. It is negotiated when a customer replaces the
+      supplier's own standards with its lengthy security exhibit, which a
+      multi-tenant provider cannot follow customer by customer.
+    detection_hints: >
+      Look for "written information security program", "administrative,
+      technical and physical safeguards", "industry standard", "Security
+      Exhibit", "Customer's security policies" and "shall not materially
+      decrease the overall security". Absence in an agreement under which data
+      is hosted is a missing clause.
+  - family: security
+    key: certifications
+    name: Security certifications
+    description: >
+      The commitment to hold and renew independent attestations such as SOC 2
+      Type II, ISO 27001 or HITRUST, and to share the reports. It is
+      negotiated over which certifications are named, what happens if one
+      lapses, and how quickly reports and bridge letters must be provided.
+    detection_hints: >
+      Look for "SOC 2 Type II", "ISO/IEC 27001", "HITRUST", "maintain
+      throughout the Term", "provide a copy of the most recent report upon
+      request" and "or successor standard". Absence means there is no
+      contractual commitment to keep the certifications the customer relied
+      on.
+  - family: security
+    key: technical_organisational_measures
+    name: Technical and organisational measures
+    description: >
+      The security measures a processor must apply to personal data, usually
+      set out in an annex covering encryption, access control, resilience,
+      testing and incident handling. It is negotiated over how specific the
+      annex is and whether the processor may update measures without consent
+      provided protection is not reduced.
+    detection_hints: >
+      Look for "appropriate technical and organisational measures", "Article
+      32", "Annex II", "pseudonymisation and encryption", "ability to restore
+      availability" and "may update the measures provided that". A data
+      processing agreement with no description of measures is missing a
+      mandatory term.
+  - family: security
+    key: safeguards
+    name: HIPAA safeguards
+    description: >
+      The business associate's obligation to use appropriate administrative,
+      physical and technical safeguards, and to comply with the HIPAA Security
+      Rule for electronic protected health information. It is a required term
+      and is negotiated only when a covered entity adds specific controls or
+      its own security policies on top.
+    detection_hints: >
+      Look for "appropriate safeguards", "Subpart C of 45 CFR Part 164",
+      "Security Rule", "electronic PHI", "prevent use or disclosure other than
+      as provided" and "risk analysis". Absence in a business associate
+      agreement is a missing mandatory term.
+  - family: security
+    key: phi_encryption
+    name: PHI encryption
+    description: >
+      A specific commitment to encrypt protected health information in transit
+      and at rest to a stated standard. It is negotiated because encryption
+      meeting federal guidance takes data outside the breach notification
+      duty, and customers ask for named algorithms, key lengths or
+      customer-managed keys.
+    detection_hints: >
+      Look for "encrypt", "in transit and at rest", "AES-256", "TLS 1.2 or
+      higher", "NIST", "unsecured PHI", "rendered unusable, unreadable or
+      indecipherable" and "customer-managed keys". Absence means encryption is
+      left to the general safeguards wording and is a missing issue where PHI
+      is stored.
+
+  # ------------------------------------------------------------------------
+  # subprocessors
+  # ------------------------------------------------------------------------
+  - family: subprocessors
+    key: authorisation_model
+    name: Sub-processor authorisation model
+    description: >
+      Whether the processor has the controller's general authorisation to
+      engage sub-processors from a published list, or needs specific prior
+      consent for each one. It is negotiated because specific consent gives
+      one customer a veto over the infrastructure that serves every customer
+      on a shared platform.
+    detection_hints: >
+      Look for "general written authorisation", "specific prior written
+      authorisation", "the Sub-processors listed at", "Controller consents to
+      the engagement of" and "shall not engage any Sub-processor without". A
+      data processing agreement with no authorisation wording is missing a
+      mandatory term.
+  - family: subprocessors
+    key: subprocessor_changes
+    name: Sub-processor changes
+    description: >
+      The process for adding or replacing a sub-processor: advance notice, the
+      customer's right to object, and what happens if the objection cannot be
+      resolved. It is negotiated over the length of the notice period, the
+      grounds for objection, and whether the remedy is termination of the
+      affected service with a refund.
+    detection_hints: >
+      Look for "notify Controller at least thirty days before", "updating the
+      list", "object on reasonable grounds relating to data protection",
+      "work in good faith" and "terminate the affected Services". Absence
+      means the customer has no notice of, or say in, changes to who handles
+      its data.
+  - family: subprocessors
+    key: subprocessor_liability
+    name: Sub-processor liability
+    description: >
+      The processor's obligation to bind sub-processors to equivalent data
+      protection terms and to remain responsible for their acts and
+      omissions. It is negotiated over whether "equivalent" means identical
+      terms and whether liability for sub-processors falls within the agreed
+      cap.
+    detection_hints: >
+      Look for "the same data protection obligations", "no less protective",
+      "written agreement with each Sub-processor", "remain fully liable for
+      the performance of" and "as if they were its own acts or omissions".
+      Absence in a data processing agreement is a missing mandatory term.
+  - family: subprocessors
+    key: subcontractor_baa_flow_down
+    name: Subcontractor BAA flow-down
+    description: >
+      The business associate's obligation to obtain written agreements from
+      subcontractors that create, receive, maintain or transmit protected
+      health information, binding them to the same restrictions. It is a
+      required term and is negotiated when a covered entity also demands
+      approval of each subcontractor or copies of the agreements.
+    detection_hints: >
+      Look for "Subcontractors that create, receive, maintain or transmit
+      PHI", "agree in writing to the same restrictions, conditions and
+      requirements", "45 CFR 164.502(e)(1)(ii)" and "prior approval of
+      Covered Entity". Absence in a business associate agreement is a missing
+      mandatory term.
+
+  # ------------------------------------------------------------------------
+  # breach_notification
+  # ------------------------------------------------------------------------
+  - family: breach_notification
+    key: notification_timeline
+    name: Breach notification timeline
+    description: >
+      How quickly a party must tell the other about a security incident
+      affecting its data, and what starts the clock: suspicion, discovery or
+      confirmation. It is among the most negotiated data terms because
+      customers want hours and a trigger on suspicion, while a supplier needs
+      time to establish what actually happened.
+    detection_hints: >
+      Look for "without undue delay", "within seventy-two hours", "within
+      twenty-four hours", "after becoming aware", "upon discovery",
+      "suspected or actual" and "confirmed". Record both the period in hours
+      and the trigger. Absence in an agreement covering personal data or PHI
+      is a missing mandatory term.
+  - family: breach_notification
+    key: notification_content
+    name: Breach notification content
+    description: >
+      What information the notice must contain, such as the nature of the
+      incident, the data and individuals affected, likely consequences and
+      remedial steps, and whether it may be given in stages. It is negotiated
+      over the level of detail owed at first notice and who drafts and pays
+      for notices to individuals and regulators.
+    detection_hints: >
+      Look for "the notification shall include", "nature of the breach",
+      "categories and approximate number of Data Subjects", "identification of
+      each Individual", "measures taken or proposed", "in phases as
+      information becomes available" and "costs of notification". Absence
+      leaves the content of a notice undefined and is a missing issue.
+
+  # ------------------------------------------------------------------------
+  # data_transfers
+  # ------------------------------------------------------------------------
+  - family: data_transfers
+    key: transfer_mechanism
+    name: Transfer mechanism
+    description: >
+      The legal basis for sending personal data out of the EU, UK or
+      Switzerland to a country without an adequacy decision, typically the
+      Standard Contractual Clauses, the UK addendum or a recognised framework
+      certification. It is negotiated over which module applies, which
+      entity signs, and what happens if the mechanism is invalidated.
+    detection_hints: >
+      Look for "Standard Contractual Clauses", "Module Two", "UK Addendum",
+      "International Data Transfer Agreement", "Data Privacy Framework",
+      "adequacy decision" and "Restricted Transfer". Absence in a deal where
+      EU or UK personal data can be accessed from outside those territories
+      is a missing mandatory term.
+  - family: data_transfers
+    key: transfer_impact_assessment
+    name: Transfer impact assessment
+    description: >
+      The commitment to assess whether the laws of the destination country
+      undermine the protection given by the transfer mechanism, and to apply
+      supplementary measures and resist government access requests. It is
+      negotiated over who performs the assessment, how much documentation is
+      shared, and notification of access requests.
+    detection_hints: >
+      Look for "transfer impact assessment", "laws and practices of the third
+      country", "supplementary measures", "request from a public authority",
+      "challenge the request" and "transparency report". Absence where
+      Standard Contractual Clauses are relied on is a missing issue.
+  - family: data_transfers
+    key: data_residency
+    name: Data residency
+    description: >
+      Where the customer's data is stored and from where it may be accessed.
+      It is negotiated because customers ask for a named country or region,
+      limits on remote access by support staff elsewhere, and sometimes
+      dedicated or on-premises hosting that a multi-tenant service cannot
+      provide.
+    detection_hints: >
+      Look for "hosted in", "stored exclusively within", "data centres located
+      in", "shall not transfer or access from outside", "region" and
+      "single-tenant" or "on-premises". Absence means the supplier may choose
+      and change hosting locations freely, which a regulated customer will
+      treat as a missing issue.
+
+  # ------------------------------------------------------------------------
+  # publicity
+  # ------------------------------------------------------------------------
+  - family: publicity
+    key: name_and_logo_use
+    name: Name and logo use
+    description: >
+      Whether a party may identify the other as a customer or supplier and
+      use its name and logo in marketing, press releases and case studies. It
+      is negotiated because suppliers value reference customers, while
+      hospitals and large organisations usually require prior written consent
+      for every use.
+    detection_hints: >
+      Look for "may use Customer's name and logo", "customer list", "press
+      release", "case study", "without the prior written consent" and "in
+      accordance with trademark usage guidelines". Absence means neither
+      party has a contractual right to use the other's name or marks.
+
+  # ------------------------------------------------------------------------
+  # non_solicitation
+  # ------------------------------------------------------------------------
+  - family: non_solicitation
+    key: employee_non_solicit
+    name: Employee non-solicitation
+    description: >
+      A restriction on recruiting the other party's employees for a period
+      during and after the relationship. It is negotiated over duration,
+      which employees are covered, and exceptions for general advertising,
+      and it raises enforceability concerns in some states.
+    detection_hints: >
+      Look for "shall not solicit for employment", "directly or indirectly",
+      "for a period of twelve months", "employees with whom it had contact"
+      and "general solicitations not targeted at". Absence is the preferred
+      position in an NDA and should not be flagged as missing.
+
+  # ------------------------------------------------------------------------
+  # suspension
+  # ------------------------------------------------------------------------
+  - family: suspension
+    key: suspension_rights
+    name: Suspension rights
+    description: >
+      The supplier's right to suspend access to the services, typically for
+      overdue fees, a security threat or unlawful use. It is negotiated
+      because suspension of a system used in patient care has operational
+      consequences, so customers ask for advance notice, narrow triggers and
+      prompt restoration.
+    detection_hints: >
+      Look for "may suspend", "access to the Services", "overdue by more than
+      thirty days", "threat to the security or integrity", "prior written
+      notice where practicable" and "restore access promptly". Absence means
+      the supplier's only remedy for non-payment or misuse is termination,
+      which is a missing clause on vendor paper.
+
+  # ========================================================================
+  # Reserved issues: defined for future rules; no rule uses them yet.
+  # ========================================================================
+
+  # Reserved
+  - family: payment
+    key: invoice_disputes
+    name: Invoice disputes
+    description: >
+      The process for challenging an invoice: the time allowed to raise a
+      dispute, the duty to pay the undisputed part, and how the dispute is
+      resolved. It is negotiated because an open-ended dispute right lets a
+      customer delay payment indefinitely without being in breach.
+    detection_hints: >
+      Look for "disputes in good faith", "written notice of the dispute
+      within", "undisputed amounts", "shall not be deemed in breach" and
+      "resolve the dispute within". Absence means any withholding of a
+      disputed amount is treated as late payment.
+  # Reserved
+  - family: payment
+    key: non_appropriation
+    name: Non-appropriation of funds
+    description: >
+      A clause, common with public hospitals and government bodies, allowing
+      the customer to end the agreement without penalty if funding for it is
+      not approved in a later budget year. It is negotiated over notice, proof
+      of non-appropriation and a bar on buying a replacement service in the
+      same period.
+    detection_hints: >
+      Look for "non-appropriation", "subject to the availability of funds",
+      "fiscal year", "funds are not appropriated" and "without penalty".
+      Absence is normal for private customers and should not be flagged as
+      missing.
+  # Reserved
+  - family: warranties
+    key: warranty_remedy
+    name: Warranty remedy
+    description: >
+      What the supplier must do if the performance warranty is breached,
+      usually repair or re-performance and, failing that, termination with a
+      refund of prepaid fees for the remaining term. It is negotiated over
+      whether this is the customer's exclusive remedy and over the time
+      allowed to fix the defect.
+    detection_hints: >
+      Look for "sole and exclusive remedy", "correct the non-conformity",
+      "re-perform", "if unable to do so within", "terminate the affected
+      Services" and "pro-rata refund". A warranty with no stated remedy
+      leaves the customer to claim damages and is a missing issue.
+  # Reserved
+  - family: insurance
+    key: evidence_of_coverage
+    name: Evidence of coverage
+    description: >
+      The obligation to prove that the required insurance is in place, by
+      certificate of insurance, and to give notice if a policy is cancelled or
+      materially changed. It is negotiated over how often certificates are
+      due, requests for full policy copies, and notice periods the insurer
+      will not agree to.
+    detection_hints: >
+      Look for "certificate of insurance", "upon request", "prior to the
+      Effective Date", "thirty days' prior written notice of cancellation"
+      and "copies of policies". Absence means the insured party has no duty to
+      show that cover exists.
+  # Reserved
+  - family: definitions
+    key: affiliates
+    name: Affiliates
+    description: >
+      How "Affiliate" is defined and whether affiliates may use the services,
+      place orders or enforce the agreement. It is negotiated because a wide
+      definition can extend one subscription across an entire health system
+      or give rights to entities the supplier has never assessed.
+    detection_hints: >
+      Look for the definition of "Affiliate", "controls, is controlled by or
+      is under common control with", "more than fifty percent", "Affiliates
+      may use the Services" and "may enter into Order Forms". Absence means
+      only the named contracting entity has rights and obligations.
+  # Reserved
+  - family: limitation_of_liability
+    key: cap_basis
+    name: Cap basis
+    description: >
+      The figure on which the cap is calculated: fees paid, fees paid and
+      payable, fees under the affected order only or under the whole
+      agreement, and the look-back period used. It is negotiated because the
+      same multiple can produce very different amounts depending on the basis
+      and on whether the cap applies per claim or in aggregate.
+    detection_hints: >
+      Look for "paid", "paid or payable", "under the Order Form giving rise
+      to the claim", "in the twelve months preceding", "per claim", "per
+      contract year" and "in the aggregate". A cap that does not say which
+      fees and which period it is measured on is ambiguous and should be
+      flagged.
+  # Reserved
+  - family: service_levels
+    key: support_response_times
+    name: Support response times
+    description: >
+      The supplier's commitments on how quickly it will respond to and work on
+      support requests, by severity level. It is negotiated over the severity
+      definitions, whether targets cover response or resolution, and support
+      hours, since clinical users may need help outside business hours.
+    detection_hints: >
+      Look for "Severity 1", "Priority 1", "initial response time", "target
+      resolution time", "24x7", "business hours" and a table of severities, in
+      a support or service level exhibit. Absence means support is provided
+      with no committed response times.
+  # Reserved
+  - family: dispute_resolution
+    key: jury_trial_waiver
+    name: Jury trial waiver
+    description: >
+      Each party's waiver of the right to have a dispute decided by a jury. It
+      is negotiated because it is unenforceable before a dispute arises in
+      some states, and because some public bodies cannot agree to it.
+    detection_hints: >
+      Look for "waives any right to a trial by jury", "to the fullest extent
+      permitted by law" and "knowingly and voluntarily", usually in capital
+      letters near the governing law clause. Absence means the default right
+      to a jury in the chosen court applies and should not be flagged as
+      missing.

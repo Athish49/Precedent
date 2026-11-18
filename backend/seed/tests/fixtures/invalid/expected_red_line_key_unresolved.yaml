@@ -1,0 +1,7 @@
+# Failing fixture: edits applied to a copy of fixtures/valid by test_playbook_models.py.
+description: 'Cross-check: expected_red_line_key resolves to a rule or global red line.'
+file: playbooks/saas_msa_vendor/risk.yaml
+edits:
+- path: [rules, 0, test_cases, 4, expected_red_line_key]
+  set: lol-nope
+expect: {code: test_case.red_line, message: lol-nope, rule_key: limitation_of_liability.cap_amount}

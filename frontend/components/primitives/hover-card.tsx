@@ -23,19 +23,30 @@ interface HoverCardProps {
 }
 
 function RuleContent({ rule }: { rule: PlaybookRule }) {
+  const positions = rule.positions ?? [];
+  const preferred = positions.find((p) => p.kind === 'preferred') ?? positions.find((p) => p.rung === 0);
+  const fallbacks = positions
+    .filter((p) => p.kind === 'fallback')
+    .sort((a, b) => (a.rung ?? 0) - (b.rung ?? 0));
+  const redLines = rule.red_lines ?? [];
+
   return (
     <div className="space-y-2">
       <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         {rule.clause_type}
       </div>
-      <p className="text-sm leading-snug">{rule.preferred_language}</p>
-      {rule.fallback_language && (
-        <p className="text-xs italic text-muted-foreground">Fallback: {rule.fallback_language}</p>
-      )}
-      {rule.prohibited_terms.length > 0 && (
+      {preferred && <p className="text-sm leading-snug">{preferred.language}</p>}
+      {fallbacks.map((f) => (
+        <p key={f.id} className="text-xs italic text-muted-foreground">
+          Fallback{f.rung != null ? ` ${f.rung}` : ''}: {f.language}
+        </p>
+      ))}
+      {redLines.length > 0 && (
         <div>
-          <span className="text-xs font-medium text-destructive">Prohibited: </span>
-          <span className="text-xs text-muted-foreground">{rule.prohibited_terms.join(', ')}</span>
+          <span className="text-xs font-medium text-destructive">Red lines: </span>
+          <span className="text-xs text-muted-foreground">
+            {redLines.map((r) => r.key).join(', ')}
+          </span>
         </div>
       )}
     </div>

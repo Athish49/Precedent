@@ -15,7 +15,13 @@ from app.api.errors import AppError
 from app.db.base import get_session_factory
 from app.db.repositories.contract_repo import get_contract as repo_get_contract
 from app.db.repositories.contract_repo import list_contracts as repo_list_contracts
+from app.db.repositories.contract_repo import update_contract as repo_update_contract
 from app.db.repositories.search_repo import faceted_search, full_text_search
+from app.services.document_processing.context_capture import (
+    validate_contract_type,
+    validate_context,
+    validate_party_role,
+)
 from app.services.repository.service import list_versions, store_version
 from app.services.repository.smart_search import SmartSearchResult, smart_search
 from app.services.repository.vector import PrecedentResult, precedent_search
@@ -68,6 +74,27 @@ class SmartSearchRequest(BaseModel):
     query: str
 
 
+class ContractContextUpdate(BaseModel):
+    """PATCH body for /repository/contracts/{id} (task 4.1, item 5).
+
+    ``exclude_unset`` semantics apply: a field the client omits is left
+    unchanged; one sent explicitly as ``null`` clears it.
+    """
+
+    contract_type: str | None = None
+    party_role: str | None = None
+    context: dict | None = None
+
+
+class ContractContextResponse(BaseModel):
+    id: uuid.UUID
+    contract_type: str | None
+    party_role: str | None
+    context: dict | None
+
+    model_config = {"from_attributes": True}
+
+
 class ContractVersionResponse(BaseModel):
     id: uuid.UUID
     contract_id: uuid.UUID
@@ -91,6 +118,31 @@ async def get_contract(contract_id: uuid.UUID, session: SessionDep) -> ContractS
     if contract is None:
         raise AppError(404, "contract_not_found", f"Contract {contract_id} not found")
     return ContractSummary.model_validate(contract)
+
+
+@router.patch("/repository/contracts/{contract_id}", response_model=ContractContextResponse)
+async def update_contract_context(
+    contract_id: uuid.UUID, body: ContractContextUpdate, session: SessionDep
+) -> ContractContextResponse:
+    """Update contract_type, party_role and/or context for a contract
+    (task 4.1, item 5). Invalid values return 400; unknown contract returns
+    404. Fields omitted from the body are left unchanged.
+    """
+    kwargs = body.model_dump(exclude_unset=True)
+
+    if kwargs.get("party_role") is not None:
+        validate_party_role(kwargs["party_role"])
+    if kwargs.get("contract_type") is not None:
+        await validate_contract_type(session, kwargs["contract_type"])
+    if kwargs.get("context"):
+        await validate_context(session, kwargs["context"])
+
+    contract = await repo_update_contract(session, contract_id, **kwargs)
+    if contract is None:
+        raise AppError(404, "contract_not_found", f"Contract {contract_id} not found")
+    await session.commit()
+    await session.refresh(contract)
+    return ContractContextResponse.model_validate(contract)
 
 
 @router.get(

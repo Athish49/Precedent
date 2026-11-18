@@ -1,7 +1,7 @@
 """analytics SQL views (S9)
 
-Revision ID: c3d4e5f6a7b8
-Revises: b2c3d4e5f6a7
+Revision ID: i9j0k1l2m3n4
+Revises: h8i9j0k1l2m3
 Create Date: 2026-08-26
 """
 
@@ -11,16 +11,30 @@ from collections.abc import Sequence
 
 from alembic import op
 
+from app.core.config import get_settings
+
 revision: str = "i9j0k1l2m3n4"
 down_revision: str | None = "h8i9j0k1l2m3"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
+# Hand-written SQL names the project schema explicitly (taken from settings)
+# instead of relying on the migration's search path. ``s`` in the statements
+# below is that schema.
+VIEW_NAMES: tuple[str, ...] = (
+    "v_contract_intelligence",
+    "v_portfolio_risk",
+    "v_contract_value",
+    "v_tabular_review",
+    "v_renewal_dashboard",
+)
+
 
 def upgrade() -> None:
+    s = get_settings().db_schema
     op.execute(
-        """
-        CREATE OR REPLACE VIEW v_contract_intelligence AS
+        f"""
+        CREATE OR REPLACE VIEW {s}.v_contract_intelligence AS
         SELECT
             c.id                        AS contract_id,
             c.title,
@@ -40,12 +54,12 @@ def upgrade() -> None:
             rs.max_clause_severity,
             c.created_at,
             c.updated_at
-        FROM contract c
-        LEFT JOIN contract_metadata cm ON cm.contract_id = c.id
-        LEFT JOIN party p ON p.id = c.counterparty_id
+        FROM {s}.contract c
+        LEFT JOIN {s}.contract_metadata cm ON cm.contract_id = c.id
+        LEFT JOIN {s}.party p ON p.id = c.counterparty_id
         LEFT JOIN LATERAL (
             SELECT score, max_clause_severity
-            FROM risk_score
+            FROM {s}.risk_score
             WHERE contract_id = c.id AND clause_id IS NULL
             ORDER BY created_at DESC
             LIMIT 1
@@ -54,8 +68,8 @@ def upgrade() -> None:
     )
 
     op.execute(
-        """
-        CREATE OR REPLACE VIEW v_portfolio_risk AS
+        f"""
+        CREATE OR REPLACE VIEW {s}.v_portfolio_risk AS
         WITH flag_weights AS (
             SELECT
                 contract_id,
@@ -66,7 +80,7 @@ def upgrade() -> None:
                 COUNT(*) FILTER (WHERE severity = 'medium') AS medium_count,
                 COUNT(*) FILTER (WHERE severity = 'low')    AS low_count,
                 COUNT(*)                                     AS total_flags
-            FROM flag
+            FROM {s}.flag
             GROUP BY contract_id
         ),
         contract_risk AS (
@@ -82,7 +96,7 @@ def upgrade() -> None:
             FROM flag_weights fw
             LEFT JOIN LATERAL (
                 SELECT score, max_clause_severity
-                FROM risk_score
+                FROM {s}.risk_score
                 WHERE contract_id = fw.contract_id AND clause_id IS NULL
                 ORDER BY created_at DESC
                 LIMIT 1
@@ -104,8 +118,8 @@ def upgrade() -> None:
     )
 
     op.execute(
-        """
-        CREATE OR REPLACE VIEW v_contract_value AS
+        f"""
+        CREATE OR REPLACE VIEW {s}.v_contract_value AS
         SELECT
             c.id                                              AS contract_id,
             c.title,
@@ -125,15 +139,15 @@ def upgrade() -> None:
             END                                               AS duration_days,
             c.status,
             c.created_at
-        FROM contract c
-        LEFT JOIN contract_metadata cm ON cm.contract_id = c.id
-        LEFT JOIN party p ON p.id = c.counterparty_id
+        FROM {s}.contract c
+        LEFT JOIN {s}.contract_metadata cm ON cm.contract_id = c.id
+        LEFT JOIN {s}.party p ON p.id = c.counterparty_id
         """
     )
 
     op.execute(
-        """
-        CREATE OR REPLACE VIEW v_tabular_review AS
+        f"""
+        CREATE OR REPLACE VIEW {s}.v_tabular_review AS
         SELECT
             c.id                           AS contract_id,
             c.title,
@@ -159,12 +173,12 @@ def upgrade() -> None:
             rl_counts.accepted_redlines,
             c.created_at,
             c.updated_at
-        FROM contract c
-        LEFT JOIN contract_metadata cm ON cm.contract_id = c.id
-        LEFT JOIN party p ON p.id = c.counterparty_id
+        FROM {s}.contract c
+        LEFT JOIN {s}.contract_metadata cm ON cm.contract_id = c.id
+        LEFT JOIN {s}.party p ON p.id = c.counterparty_id
         LEFT JOIN LATERAL (
             SELECT score, max_clause_severity
-            FROM risk_score
+            FROM {s}.risk_score
             WHERE contract_id = c.id AND clause_id IS NULL
             ORDER BY created_at DESC
             LIMIT 1
@@ -174,29 +188,29 @@ def upgrade() -> None:
                 COUNT(*) FILTER (WHERE severity = 'high')   AS high_flags,
                 COUNT(*) FILTER (WHERE severity = 'medium') AS medium_flags,
                 COUNT(*) FILTER (WHERE severity = 'low')    AS low_flags
-            FROM flag
+            FROM {s}.flag
             WHERE contract_id = c.id
         ) flag_counts ON true
         LEFT JOIN LATERAL (
             SELECT
                 COUNT(*) FILTER (WHERE status = 'open')    AS open_obligations,
                 COUNT(*) FILTER (WHERE status = 'overdue') AS overdue_obligations
-            FROM obligation
+            FROM {s}.obligation
             WHERE contract_id = c.id
         ) ob_counts ON true
         LEFT JOIN LATERAL (
             SELECT
                 COUNT(*) FILTER (WHERE status = 'proposed')  AS proposed_redlines,
                 COUNT(*) FILTER (WHERE status = 'accepted')  AS accepted_redlines
-            FROM redline
+            FROM {s}.redline
             WHERE contract_id = c.id
         ) rl_counts ON true
         """
     )
 
     op.execute(
-        """
-        CREATE OR REPLACE VIEW v_renewal_dashboard AS
+        f"""
+        CREATE OR REPLACE VIEW {s}.v_renewal_dashboard AS
         SELECT
             c.id                           AS contract_id,
             c.title,
@@ -215,19 +229,19 @@ def upgrade() -> None:
             al.fired_at                    AS last_alert_at,
             al.acknowledged                AS alert_acknowledged,
             c.status                       AS contract_status
-        FROM contract c
-        LEFT JOIN contract_metadata cm ON cm.contract_id = c.id
-        LEFT JOIN party p ON p.id = c.counterparty_id
+        FROM {s}.contract c
+        LEFT JOIN {s}.contract_metadata cm ON cm.contract_id = c.id
+        LEFT JOIN {s}.party p ON p.id = c.counterparty_id
         LEFT JOIN LATERAL (
             SELECT score, max_clause_severity
-            FROM risk_score
+            FROM {s}.risk_score
             WHERE contract_id = c.id AND clause_id IS NULL
             ORDER BY created_at DESC
             LIMIT 1
         ) rs ON true
         LEFT JOIN LATERAL (
             SELECT payload, fired_at, acknowledged
-            FROM alert
+            FROM {s}.alert
             WHERE contract_id = c.id AND alert_type = 'renewal'
             ORDER BY fired_at DESC
             LIMIT 1
@@ -237,8 +251,9 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.execute("DROP VIEW IF EXISTS v_renewal_dashboard")
-    op.execute("DROP VIEW IF EXISTS v_tabular_review")
-    op.execute("DROP VIEW IF EXISTS v_contract_value")
-    op.execute("DROP VIEW IF EXISTS v_portfolio_risk")
-    op.execute("DROP VIEW IF EXISTS v_contract_intelligence")
+    s = get_settings().db_schema
+    op.execute(f"DROP VIEW IF EXISTS {s}.v_renewal_dashboard")
+    op.execute(f"DROP VIEW IF EXISTS {s}.v_tabular_review")
+    op.execute(f"DROP VIEW IF EXISTS {s}.v_contract_value")
+    op.execute(f"DROP VIEW IF EXISTS {s}.v_portfolio_risk")
+    op.execute(f"DROP VIEW IF EXISTS {s}.v_contract_intelligence")

@@ -1,0 +1,2436 @@
+# Synthetic negotiation history for Halcyon Care (task 5.3).
+# Generated content — see backend/seed/history/models.py for field semantics,
+# in particular the `count` field on decision_events and the `category` tag.
+counterparties:
+- key: meridian-health-partners
+  display_name: Meridian Health Partners
+  tier: tier_1
+  deal_value_band: enterprise
+  region: us
+  data_sensitivity: phi
+  regimes:
+  - hipaa
+  description: Large US hospital system; six-facility system in the Mountain West.
+- key: great-lakes-regional-health
+  display_name: Great Lakes Regional Health
+  tier: tier_1
+  deal_value_band: enterprise
+  region: us
+  data_sensitivity: phi
+  regimes:
+  - hipaa
+  description: Large US hospital system across three states around the Great Lakes.
+- key: dublin-city-clinics-group
+  display_name: Dublin City Clinics Group
+  tier: tier_1
+  deal_value_band: strategic
+  region: eu
+  data_sensitivity: special_category
+  regimes:
+  - gdpr
+  description: Large private clinic group headquartered in Dublin, Ireland.
+- key: albion-public-health-trust
+  display_name: Albion Public Health Trust
+  tier: tier_1
+  deal_value_band: strategic
+  region: uk
+  data_sensitivity: special_category
+  regimes:
+  - gdpr
+  description: Large UK public-sector health trust operating several hospitals.
+- key: cascade-health-alliance
+  display_name: Cascade Health Alliance
+  tier: tier_1
+  deal_value_band: enterprise
+  region: us
+  data_sensitivity: phi
+  regimes:
+  - hipaa
+  description: Large US hospital system in the Pacific Northwest.
+- key: bluecrest-physician-group
+  display_name: Bluecrest Physician Group
+  tier: tier_2
+  deal_value_band: mid
+  region: us
+  data_sensitivity: phi
+  regimes:
+  - hipaa
+  description: Regional multi-specialty physician group, US Midwest.
+- key: harborview-regional-clinics
+  display_name: Harborview Regional Clinics
+  tier: tier_2
+  deal_value_band: mid
+  region: us
+  data_sensitivity: phi
+  regimes:
+  - hipaa
+  description: Regional outpatient clinic network on the US East Coast.
+- key: north-sea-health-cooperative
+  display_name: North Sea Health Cooperative
+  tier: tier_2
+  deal_value_band: mid
+  region: eu
+  data_sensitivity: personal_data
+  regimes:
+  - gdpr
+  description: Regional clinic cooperative in northern continental Europe.
+- key: prairie-wind-medical-group
+  display_name: Prairie Wind Medical Group
+  tier: tier_2
+  deal_value_band: standard
+  region: us
+  data_sensitivity: phi
+  regimes:
+  - hipaa
+  description: Regional medical group across the US Great Plains.
+- key: lakeshore-family-care-network
+  display_name: Lakeshore Family Care Network
+  tier: tier_2
+  deal_value_band: mid
+  region: us
+  data_sensitivity: phi
+  regimes:
+  - hipaa
+  description: Regional family-care network of outpatient practices.
+- key: summit-pediatrics-group
+  display_name: Summit Pediatrics Group
+  tier: tier_3
+  deal_value_band: standard
+  region: us
+  data_sensitivity: phi
+  regimes:
+  - hipaa
+  description: Small independent pediatrics practice group.
+- key: riverside-urgent-care
+  display_name: Riverside Urgent Care
+  tier: tier_3
+  deal_value_band: standard
+  region: us
+  data_sensitivity: phi
+  regimes:
+  - hipaa
+  description: Small urgent-care chain, four locations.
+- key: clearwater-telehealth-startup
+  display_name: Clearwater Telehealth
+  tier: tier_3
+  deal_value_band: standard
+  region: us
+  data_sensitivity: phi
+  regimes:
+  - hipaa
+  description: Early-stage telehealth startup serving rural clinics.
+- key: oakhill-family-practice
+  display_name: Oakhill Family Practice
+  tier: tier_3
+  deal_value_band: standard
+  region: us
+  data_sensitivity: phi
+  regimes:
+  - hipaa
+  description: Small independent family-medicine practice.
+- key: west-dublin-private-clinic
+  display_name: West Dublin Private Clinic
+  tier: tier_3
+  deal_value_band: standard
+  region: eu
+  data_sensitivity: special_category
+  regimes:
+  - gdpr
+  description: Small private clinic on the west side of Dublin.
+decision_events:
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: payment.late_fees
+  counterparty_key: harborview-regional-clinics
+  event_date: 2026-03-10
+  outcome: accepted
+  position_offered: fallback_1
+  recommended_stance: balanced
+  category: late_fee_fallback1_accepted
+  count: 44
+  final_text: Settled at 1.0% per month late fee (fallback rung 1).
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: payment.late_fees
+  counterparty_key: bluecrest-physician-group
+  event_date: 2026-02-14
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: firm
+  category: late_fee_preferred_held
+  count: 20
+  final_text: Held at the preferred 1.5% per month late fee.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: payment.late_fees
+  counterparty_key: prairie-wind-medical-group
+  event_date: 2026-04-02
+  outcome: countered
+  position_offered: fallback_1
+  recommended_stance: light
+  category: late_fee_other
+  count: 8
+  final_text: Still negotiating a late-fee rate below 1.0% per month; unresolved at period end.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: term.initial_term
+  counterparty_key: cascade-health-alliance
+  event_date: 2026-02-20
+  outcome: countered
+  position_offered: fallback_1
+  recommended_stance: balanced
+  category: initial_term_opened_below_preferred
+  count: 33
+  final_text: Opened below the 36-month preferred initial term before settling.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: term.initial_term
+  counterparty_key: lakeshore-family-care-network
+  event_date: 2026-01-30
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: firm
+  category: initial_term_at_or_above_preferred
+  count: 28
+  final_text: Accepted the 36-month preferred initial term without a counter.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: term.auto_renewal
+  counterparty_key: meridian-health-partners
+  event_date: 2026-03-05
+  outcome: accepted
+  position_offered: fallback_1
+  recommended_stance: balanced
+  category: auto_renewal_tier1_short_notice_accepted
+  count: 9
+  final_text: Tier-1 account accepted a 5-business-day non-renewal notice window, VP Sales sign-off.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: term.auto_renewal
+  counterparty_key: great-lakes-regional-health
+  event_date: 2026-04-18
+  outcome: countered
+  position_offered: fallback_1
+  recommended_stance: balanced
+  category: auto_renewal_tier1_other
+  count: 5
+  final_text: Tier-1 account countered on notice window; settled elsewhere on the ladder.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: termination.for_convenience
+  counterparty_key: dublin-city-clinics-group
+  event_date: 2026-05-12
+  outcome: accepted
+  position_offered: fallback_1
+  recommended_stance: balanced
+  category: tfc_settled_75_days
+  count: 5
+  final_text: Strategic account settled termination-for-convenience notice at 75 days.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: termination.for_convenience
+  counterparty_key: meridian-health-partners
+  event_date: 2026-03-28
+  outcome: accepted
+  position_offered: fallback_1
+  recommended_stance: firm
+  category: tfc_other
+  count: 14
+  final_text: Enterprise account settled termination-for-convenience notice at the standard 90 days.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: termination.for_cause_cure_period
+  counterparty_key: harborview-regional-clinics
+  event_date: 2026-02-09
+  outcome: accepted
+  position_offered: fallback_1
+  recommended_stance: balanced
+  category: cure_period_below_10_days
+  count: 3
+  final_text: Commercial Counsel cleared a 7-business-day cure period.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: termination.for_cause_cure_period
+  counterparty_key: bluecrest-physician-group
+  event_date: 2026-01-22
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: firm
+  category: cure_period_standard
+  count: 45
+  final_text: Held the standard 30-day cure period.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: service_levels.uptime_commitment
+  counterparty_key: great-lakes-regional-health
+  event_date: 2026-04-03
+  outcome: accepted
+  position_offered: fallback_1
+  recommended_stance: balanced
+  category: uptime_72hr_notice_accepted
+  count: 9
+  final_text: VP Customer Success agreed a 72-hour scheduled-maintenance notice window.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: service_levels.uptime_commitment
+  counterparty_key: prairie-wind-medical-group
+  event_date: 2026-02-25
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: firm
+  category: uptime_48hr_standard
+  count: 13
+  final_text: Held the standard 48-hour scheduled-maintenance notice window.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: audit.customer_audit_rights
+  counterparty_key: lakeshore-family-care-network
+  event_date: 2026-03-15
+  outcome: accepted
+  position_offered: fallback_1
+  recommended_stance: balanced
+  category: saas_audit_10day_notice_accepted
+  count: 7
+  final_text: Security Lead approved a 10-business-day audit-notice window.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: audit.customer_audit_rights
+  counterparty_key: meridian-health-partners
+  event_date: 2026-05-01
+  outcome: accepted
+  position_offered: fallback_3
+  recommended_stance: balanced
+  category: saas_audit_tier1_two_onsite
+  count: 6
+  final_text: Tier-1 account granted two on-site audits per year, Security Lead approval.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: audit.customer_audit_rights
+  counterparty_key: harborview-regional-clinics
+  event_date: 2026-01-19
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: firm
+  category: saas_audit_standard
+  count: 11
+  final_text: Held the standard 15-business-day audit-notice window, one on-site audit per year.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: warranties.performance_warranty
+  counterparty_key: cascade-health-alliance
+  event_date: 2026-04-09
+  outcome: accepted
+  position_offered: fallback_1
+  recommended_stance: balanced
+  category: warranty_10day_cure_accepted
+  count: 4
+  final_text: Commercial Counsel and VP Customer Success cleared a 10-day warranty cure period with a
+    service-credit remedy.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: warranties.performance_warranty
+  counterparty_key: oakhill-family-practice
+  event_date: 2026-02-06
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: firm
+  category: warranty_standard_cure
+  count: 14
+  final_text: Held the standard 15-day warranty cure period.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: insurance.coverage_requirements
+  counterparty_key: meridian-health-partners
+  event_date: 2026-05-20
+  outcome: accepted
+  position_offered: fallback_1
+  recommended_stance: balanced
+  category: insurance_25m_accepted
+  count: 3
+  final_text: CFO approved a $25M cyber coverage-evidence ask.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: insurance.coverage_requirements
+  counterparty_key: dublin-city-clinics-group
+  event_date: 2026-03-02
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: firm
+  category: insurance_20m_standard
+  count: 6
+  final_text: Held the standard $20M cyber coverage-evidence ceiling.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: payment.payment_terms
+  counterparty_key: dublin-city-clinics-group
+  event_date: 2026-06-04
+  outcome: accepted
+  position_offered: fallback_3
+  recommended_stance: balanced
+  category: payment_terms_net75_strategic
+  count: 4
+  final_text: Strategic account agreed Net 75 against annual prepayment, CFO sign-off.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: payment.payment_terms
+  counterparty_key: riverside-urgent-care
+  event_date: 2026-01-14
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: firm
+  category: payment_terms_standard
+  count: 46
+  final_text: Held Net 30 or the Net 45 fallback.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: limitation_of_liability.cap_amount
+  counterparty_key: albion-public-health-trust
+  event_date: 2026-02-11
+  outcome: countered
+  position_offered: fallback_3
+  recommended_stance: firm
+  category: cap_36month_reached
+  count: 2
+  final_text: Reached the 36-month strategic fallback rung before renegotiating back to 24 months.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: limitation_of_liability.cap_amount
+  counterparty_key: dublin-city-clinics-group
+  event_date: 2026-04-25
+  outcome: accepted
+  position_offered: fallback_2
+  recommended_stance: balanced
+  category: cap_24month_settled
+  count: 29
+  final_text: Settled at a 24-month liability cap.
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: data_protection.data_subject_requests
+  counterparty_key: dublin-city-clinics-group
+  event_date: 2026-03-19
+  outcome: accepted
+  position_offered: fallback_2
+  recommended_stance: balanced
+  category: dsr_1day_forwarding_accepted
+  count: 2
+  final_text: EU public-health-style body with its own intake tooling accepted 1-business-day forwarding.
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: data_protection.data_subject_requests
+  counterparty_key: north-sea-health-cooperative
+  event_date: 2026-02-08
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: firm
+  category: dsr_standard_forwarding
+  count: 32
+  final_text: Held the standard ten-business-day forwarding window.
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: data_protection.data_return_and_deletion
+  counterparty_key: albion-public-health-trust
+  event_date: 2026-05-07
+  outcome: accepted
+  position_offered: fallback_1
+  recommended_stance: balanced
+  category: deletion_44day_export_accepted
+  count: 6
+  final_text: 'Longest export window Privacy Counsel approved: 44 days.'
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: data_protection.data_return_and_deletion
+  counterparty_key: meridian-health-partners
+  event_date: 2026-04-14
+  outcome: accepted
+  position_offered: fallback_2
+  recommended_stance: balanced
+  category: deletion_enterprise_transition_rung2
+  count: 9
+  final_text: Enterprise-transition extended retrieval window; deletion completed in no fewer than 25
+    days.
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: data_protection.data_return_and_deletion
+  counterparty_key: bluecrest-physician-group
+  event_date: 2026-01-27
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: firm
+  category: deletion_standard_export
+  count: 25
+  final_text: Held the standard 30-day export window.
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: security.technical_organisational_measures
+  counterparty_key: north-sea-health-cooperative
+  event_date: 2026-03-30
+  outcome: accepted
+  position_offered: fallback_1
+  recommended_stance: balanced
+  category: toms_45day_notice_accepted
+  count: 3
+  final_text: Security Lead approved a 45-day material-update notice window.
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: security.technical_organisational_measures
+  counterparty_key: harborview-regional-clinics
+  event_date: 2026-02-17
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: firm
+  category: toms_30day_standard
+  count: 8
+  final_text: Held the standard 30-day material-update notice window.
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: audit.customer_audit_rights
+  counterparty_key: west-dublin-private-clinic
+  event_date: 2026-04-21
+  outcome: accepted
+  position_offered: fallback_1
+  recommended_stance: balanced
+  category: dpa_audit_8day_notice_accepted
+  count: 3
+  final_text: Security Lead approved an 8-business-day DPA audit-notice window, SOC 2 report already on
+    file.
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: audit.customer_audit_rights
+  counterparty_key: great-lakes-regional-health
+  event_date: 2026-01-09
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: firm
+  category: dpa_audit_standard
+  count: 24
+  final_text: Held the standard 10-business-day DPA audit-notice window.
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: audit.audit_cost
+  counterparty_key: dublin-city-clinics-group
+  event_date: 2026-05-29
+  outcome: accepted
+  position_offered: fallback_3
+  recommended_stance: balanced
+  category: audit_cost_absorb_second_accepted
+  count: 4
+  final_text: General Counsel approved absorbing Halcyon's own time on a second strategic on-site audit.
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: audit.audit_cost
+  counterparty_key: albion-public-health-trust
+  event_date: 2026-02-03
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: firm
+  category: audit_cost_standard
+  count: 9
+  final_text: Held the standard customer-bears-its-own-cost position.
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: subprocessors.subprocessor_liability
+  counterparty_key: north-sea-health-cooperative
+  event_date: 2026-03-24
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: balanced
+  category: subproc_liability_joint_several_variant
+  count: 5
+  final_text: Counterparty drafted joint-and-several wording limited to each sub-processor's own fee share;
+    recognised as an acceptable variant.
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: subprocessors.subprocessor_liability
+  counterparty_key: west-dublin-private-clinic
+  event_date: 2026-01-16
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: firm
+  category: subproc_liability_standard_flow_down
+  count: 17
+  final_text: Held the standard flow-down liability position.
+- playbook_key: halcyon-baseline
+  playbook_version: '1.0'
+  rule_key: governing_law.choice_of_law
+  counterparty_key: meridian-health-partners
+  event_date: 2026-01-05
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine choice of law negotiation, accepted.
+- playbook_key: halcyon-baseline
+  playbook_version: '1.0'
+  rule_key: dispute_resolution.forum
+  counterparty_key: great-lakes-regional-health
+  event_date: 2026-01-12
+  outcome: accepted
+  position_offered: fallback_1
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine forum negotiation, accepted.
+- playbook_key: halcyon-baseline
+  playbook_version: '1.0'
+  rule_key: notices.method
+  counterparty_key: dublin-city-clinics-group
+  event_date: 2026-01-19
+  outcome: countered
+  position_offered: preferred
+  recommended_stance: light
+  category: general_history
+  count: 1
+  final_text: Routine method negotiation, countered.
+- playbook_key: halcyon-baseline
+  playbook_version: '1.0'
+  rule_key: assignment.consent_requirement
+  counterparty_key: albion-public-health-trust
+  event_date: 2026-01-26
+  outcome: accepted
+  position_offered: fallback_2
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine consent requirement negotiation, accepted.
+- playbook_key: halcyon-baseline
+  playbook_version: '1.0'
+  rule_key: amendment.written_amendment
+  counterparty_key: cascade-health-alliance
+  event_date: 2026-02-05
+  outcome: rejected
+  position_offered: preferred
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine written amendment negotiation, rejected.
+- playbook_key: halcyon-baseline
+  playbook_version: '1.0'
+  rule_key: force_majeure.scope
+  counterparty_key: bluecrest-physician-group
+  event_date: 2026-02-12
+  outcome: pending
+  position_offered: fallback_1
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine scope negotiation, pending.
+- playbook_key: halcyon-mutual-nda
+  playbook_version: '1.0'
+  rule_key: confidentiality.standard_of_care
+  counterparty_key: harborview-regional-clinics
+  event_date: 2026-02-19
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine standard of care negotiation, accepted.
+- playbook_key: halcyon-mutual-nda
+  playbook_version: '1.0'
+  rule_key: confidentiality.permitted_disclosures
+  counterparty_key: north-sea-health-cooperative
+  event_date: 2026-02-26
+  outcome: accepted
+  position_offered: fallback_1
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine permitted disclosures negotiation, accepted.
+- playbook_key: halcyon-mutual-nda
+  playbook_version: '1.0'
+  rule_key: term.survival_period
+  counterparty_key: prairie-wind-medical-group
+  event_date: 2026-03-05
+  outcome: countered
+  position_offered: preferred
+  recommended_stance: light
+  category: general_history
+  count: 1
+  final_text: Routine survival period negotiation, countered.
+- playbook_key: halcyon-mutual-nda
+  playbook_version: '1.0'
+  rule_key: intellectual_property.no_license
+  counterparty_key: lakeshore-family-care-network
+  event_date: 2026-03-12
+  outcome: accepted
+  position_offered: fallback_2
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine no license negotiation, accepted.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: payment.taxes
+  counterparty_key: summit-pediatrics-group
+  event_date: 2026-03-19
+  outcome: rejected
+  position_offered: preferred
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine taxes negotiation, rejected.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: termination.effect_of_termination
+  counterparty_key: riverside-urgent-care
+  event_date: 2026-03-26
+  outcome: pending
+  position_offered: fallback_1
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine effect of termination negotiation, pending.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: suspension.suspension_rights
+  counterparty_key: clearwater-telehealth-startup
+  event_date: 2026-04-05
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine suspension rights negotiation, accepted.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: limitation_of_liability.consequential_damages_exclusion
+  counterparty_key: oakhill-family-practice
+  event_date: 2026-04-12
+  outcome: accepted
+  position_offered: fallback_1
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine consequential damages exclusion negotiation, accepted.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: indemnification.ip_infringement_indemnity
+  counterparty_key: west-dublin-private-clinic
+  event_date: 2026-04-19
+  outcome: countered
+  position_offered: preferred
+  recommended_stance: light
+  category: general_history
+  count: 1
+  final_text: Routine ip infringement indemnity negotiation, countered.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: warranties.disclaimer
+  counterparty_key: meridian-health-partners
+  event_date: 2026-04-26
+  outcome: accepted
+  position_offered: fallback_2
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine disclaimer negotiation, accepted.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: intellectual_property.ownership
+  counterparty_key: great-lakes-regional-health
+  event_date: 2026-05-05
+  outcome: rejected
+  position_offered: preferred
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine ownership negotiation, rejected.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: security.security_program
+  counterparty_key: dublin-city-clinics-group
+  event_date: 2026-05-12
+  outcome: pending
+  position_offered: fallback_1
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine security program negotiation, pending.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: security.certifications
+  counterparty_key: albion-public-health-trust
+  event_date: 2026-05-19
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine certifications negotiation, accepted.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: compliance.compliance_with_laws
+  counterparty_key: cascade-health-alliance
+  event_date: 2026-05-26
+  outcome: accepted
+  position_offered: fallback_1
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine compliance with laws negotiation, accepted.
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: data_transfers.transfer_mechanism
+  counterparty_key: bluecrest-physician-group
+  event_date: 2026-06-05
+  outcome: countered
+  position_offered: preferred
+  recommended_stance: light
+  category: general_history
+  count: 1
+  final_text: Routine transfer mechanism negotiation, countered.
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: data_transfers.data_residency
+  counterparty_key: harborview-regional-clinics
+  event_date: 2026-06-12
+  outcome: accepted
+  position_offered: fallback_2
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine data residency negotiation, accepted.
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: limitation_of_liability.dpa_liability_alignment
+  counterparty_key: north-sea-health-cooperative
+  event_date: 2026-06-19
+  outcome: rejected
+  position_offered: preferred
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine dpa liability alignment negotiation, rejected.
+- playbook_key: halcyon-hipaa-overlay
+  playbook_version: '1.0'
+  rule_key: data_protection.permitted_uses_of_phi
+  counterparty_key: prairie-wind-medical-group
+  event_date: 2026-06-26
+  outcome: pending
+  position_offered: fallback_1
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine permitted uses of phi negotiation, pending.
+- playbook_key: halcyon-hipaa-overlay
+  playbook_version: '1.0'
+  rule_key: security.phi_encryption
+  counterparty_key: lakeshore-family-care-network
+  event_date: 2026-01-05
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine phi encryption negotiation, accepted.
+- playbook_key: halcyon-hipaa-overlay
+  playbook_version: '1.0'
+  rule_key: breach_notification.notification_timeline
+  counterparty_key: summit-pediatrics-group
+  event_date: 2026-01-12
+  outcome: accepted
+  position_offered: fallback_1
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine notification timeline negotiation, accepted.
+- playbook_key: halcyon-gdpr-overlay
+  playbook_version: '1.0'
+  rule_key: data_protection.records_of_processing
+  counterparty_key: riverside-urgent-care
+  event_date: 2026-01-19
+  outcome: countered
+  position_offered: preferred
+  recommended_stance: light
+  category: general_history
+  count: 1
+  final_text: Routine records of processing negotiation, countered.
+- playbook_key: halcyon-gdpr-overlay
+  playbook_version: '1.0'
+  rule_key: data_transfers.transfer_impact_assessment
+  counterparty_key: clearwater-telehealth-startup
+  event_date: 2026-01-26
+  outcome: accepted
+  position_offered: fallback_2
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine transfer impact assessment negotiation, accepted.
+- playbook_key: halcyon-gdpr-overlay
+  playbook_version: '1.0'
+  rule_key: compliance.gdpr_compliance
+  counterparty_key: oakhill-family-practice
+  event_date: 2026-02-05
+  outcome: rejected
+  position_offered: preferred
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine gdpr compliance negotiation, rejected.
+- playbook_key: halcyon-vendor-msa-customer
+  playbook_version: '1.0'
+  rule_key: payment.payment_terms
+  counterparty_key: west-dublin-private-clinic
+  event_date: 2026-02-12
+  outcome: pending
+  position_offered: fallback_1
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine payment terms negotiation, pending.
+- playbook_key: halcyon-vendor-msa-customer
+  playbook_version: '1.0'
+  rule_key: termination.transition_assistance
+  counterparty_key: meridian-health-partners
+  event_date: 2026-02-19
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine transition assistance negotiation, accepted.
+- playbook_key: halcyon-vendor-msa-customer
+  playbook_version: '1.0'
+  rule_key: limitation_of_liability.cap_amount
+  counterparty_key: great-lakes-regional-health
+  event_date: 2026-02-26
+  outcome: accepted
+  position_offered: fallback_1
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine cap amount negotiation, accepted.
+- playbook_key: halcyon-vendor-msa-customer
+  playbook_version: '1.0'
+  rule_key: warranties.performance_warranty
+  counterparty_key: dublin-city-clinics-group
+  event_date: 2026-03-05
+  outcome: countered
+  position_offered: preferred
+  recommended_stance: light
+  category: general_history
+  count: 1
+  final_text: Routine performance warranty negotiation, countered.
+- playbook_key: halcyon-baseline
+  playbook_version: '1.0'
+  rule_key: governing_law.choice_of_law
+  counterparty_key: albion-public-health-trust
+  event_date: 2026-03-12
+  outcome: accepted
+  position_offered: fallback_2
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine choice of law negotiation, accepted.
+- playbook_key: halcyon-baseline
+  playbook_version: '1.0'
+  rule_key: dispute_resolution.forum
+  counterparty_key: cascade-health-alliance
+  event_date: 2026-03-19
+  outcome: rejected
+  position_offered: preferred
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine forum negotiation, rejected.
+- playbook_key: halcyon-baseline
+  playbook_version: '1.0'
+  rule_key: notices.method
+  counterparty_key: bluecrest-physician-group
+  event_date: 2026-03-26
+  outcome: pending
+  position_offered: fallback_1
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine method negotiation, pending.
+- playbook_key: halcyon-baseline
+  playbook_version: '1.0'
+  rule_key: assignment.consent_requirement
+  counterparty_key: harborview-regional-clinics
+  event_date: 2026-04-05
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine consent requirement negotiation, accepted.
+- playbook_key: halcyon-baseline
+  playbook_version: '1.0'
+  rule_key: amendment.written_amendment
+  counterparty_key: north-sea-health-cooperative
+  event_date: 2026-04-12
+  outcome: accepted
+  position_offered: fallback_1
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine written amendment negotiation, accepted.
+- playbook_key: halcyon-baseline
+  playbook_version: '1.0'
+  rule_key: force_majeure.scope
+  counterparty_key: prairie-wind-medical-group
+  event_date: 2026-04-19
+  outcome: countered
+  position_offered: preferred
+  recommended_stance: light
+  category: general_history
+  count: 1
+  final_text: Routine scope negotiation, countered.
+- playbook_key: halcyon-mutual-nda
+  playbook_version: '1.0'
+  rule_key: confidentiality.standard_of_care
+  counterparty_key: lakeshore-family-care-network
+  event_date: 2026-04-26
+  outcome: accepted
+  position_offered: fallback_2
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine standard of care negotiation, accepted.
+- playbook_key: halcyon-mutual-nda
+  playbook_version: '1.0'
+  rule_key: confidentiality.permitted_disclosures
+  counterparty_key: summit-pediatrics-group
+  event_date: 2026-05-05
+  outcome: rejected
+  position_offered: preferred
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine permitted disclosures negotiation, rejected.
+- playbook_key: halcyon-mutual-nda
+  playbook_version: '1.0'
+  rule_key: term.survival_period
+  counterparty_key: riverside-urgent-care
+  event_date: 2026-05-12
+  outcome: pending
+  position_offered: fallback_1
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine survival period negotiation, pending.
+- playbook_key: halcyon-mutual-nda
+  playbook_version: '1.0'
+  rule_key: intellectual_property.no_license
+  counterparty_key: clearwater-telehealth-startup
+  event_date: 2026-05-19
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine no license negotiation, accepted.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: payment.taxes
+  counterparty_key: oakhill-family-practice
+  event_date: 2026-05-26
+  outcome: accepted
+  position_offered: fallback_1
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine taxes negotiation, accepted.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: termination.effect_of_termination
+  counterparty_key: west-dublin-private-clinic
+  event_date: 2026-06-05
+  outcome: countered
+  position_offered: preferred
+  recommended_stance: light
+  category: general_history
+  count: 1
+  final_text: Routine effect of termination negotiation, countered.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: suspension.suspension_rights
+  counterparty_key: meridian-health-partners
+  event_date: 2026-06-12
+  outcome: accepted
+  position_offered: fallback_2
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine suspension rights negotiation, accepted.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: limitation_of_liability.consequential_damages_exclusion
+  counterparty_key: great-lakes-regional-health
+  event_date: 2026-06-19
+  outcome: rejected
+  position_offered: preferred
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine consequential damages exclusion negotiation, rejected.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: indemnification.ip_infringement_indemnity
+  counterparty_key: dublin-city-clinics-group
+  event_date: 2026-06-26
+  outcome: pending
+  position_offered: fallback_1
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine ip infringement indemnity negotiation, pending.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: warranties.disclaimer
+  counterparty_key: albion-public-health-trust
+  event_date: 2026-01-05
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine disclaimer negotiation, accepted.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: intellectual_property.ownership
+  counterparty_key: cascade-health-alliance
+  event_date: 2026-01-12
+  outcome: accepted
+  position_offered: fallback_1
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine ownership negotiation, accepted.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: security.security_program
+  counterparty_key: bluecrest-physician-group
+  event_date: 2026-01-19
+  outcome: countered
+  position_offered: preferred
+  recommended_stance: light
+  category: general_history
+  count: 1
+  final_text: Routine security program negotiation, countered.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: security.certifications
+  counterparty_key: harborview-regional-clinics
+  event_date: 2026-01-26
+  outcome: accepted
+  position_offered: fallback_2
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine certifications negotiation, accepted.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: compliance.compliance_with_laws
+  counterparty_key: north-sea-health-cooperative
+  event_date: 2026-02-05
+  outcome: rejected
+  position_offered: preferred
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine compliance with laws negotiation, rejected.
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: data_transfers.transfer_mechanism
+  counterparty_key: prairie-wind-medical-group
+  event_date: 2026-02-12
+  outcome: pending
+  position_offered: fallback_1
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine transfer mechanism negotiation, pending.
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: data_transfers.data_residency
+  counterparty_key: lakeshore-family-care-network
+  event_date: 2026-02-19
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine data residency negotiation, accepted.
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: limitation_of_liability.dpa_liability_alignment
+  counterparty_key: summit-pediatrics-group
+  event_date: 2026-02-26
+  outcome: accepted
+  position_offered: fallback_1
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine dpa liability alignment negotiation, accepted.
+- playbook_key: halcyon-hipaa-overlay
+  playbook_version: '1.0'
+  rule_key: data_protection.permitted_uses_of_phi
+  counterparty_key: riverside-urgent-care
+  event_date: 2026-03-05
+  outcome: countered
+  position_offered: preferred
+  recommended_stance: light
+  category: general_history
+  count: 1
+  final_text: Routine permitted uses of phi negotiation, countered.
+- playbook_key: halcyon-hipaa-overlay
+  playbook_version: '1.0'
+  rule_key: security.phi_encryption
+  counterparty_key: clearwater-telehealth-startup
+  event_date: 2026-03-12
+  outcome: accepted
+  position_offered: fallback_2
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine phi encryption negotiation, accepted.
+- playbook_key: halcyon-hipaa-overlay
+  playbook_version: '1.0'
+  rule_key: breach_notification.notification_timeline
+  counterparty_key: oakhill-family-practice
+  event_date: 2026-03-19
+  outcome: rejected
+  position_offered: preferred
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine notification timeline negotiation, rejected.
+- playbook_key: halcyon-gdpr-overlay
+  playbook_version: '1.0'
+  rule_key: data_protection.records_of_processing
+  counterparty_key: west-dublin-private-clinic
+  event_date: 2026-03-26
+  outcome: pending
+  position_offered: fallback_1
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine records of processing negotiation, pending.
+- playbook_key: halcyon-gdpr-overlay
+  playbook_version: '1.0'
+  rule_key: data_transfers.transfer_impact_assessment
+  counterparty_key: meridian-health-partners
+  event_date: 2026-04-05
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine transfer impact assessment negotiation, accepted.
+- playbook_key: halcyon-gdpr-overlay
+  playbook_version: '1.0'
+  rule_key: compliance.gdpr_compliance
+  counterparty_key: great-lakes-regional-health
+  event_date: 2026-04-12
+  outcome: accepted
+  position_offered: fallback_1
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine gdpr compliance negotiation, accepted.
+- playbook_key: halcyon-vendor-msa-customer
+  playbook_version: '1.0'
+  rule_key: payment.payment_terms
+  counterparty_key: dublin-city-clinics-group
+  event_date: 2026-04-19
+  outcome: countered
+  position_offered: preferred
+  recommended_stance: light
+  category: general_history
+  count: 1
+  final_text: Routine payment terms negotiation, countered.
+- playbook_key: halcyon-vendor-msa-customer
+  playbook_version: '1.0'
+  rule_key: termination.transition_assistance
+  counterparty_key: albion-public-health-trust
+  event_date: 2026-04-26
+  outcome: accepted
+  position_offered: fallback_2
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine transition assistance negotiation, accepted.
+- playbook_key: halcyon-vendor-msa-customer
+  playbook_version: '1.0'
+  rule_key: limitation_of_liability.cap_amount
+  counterparty_key: cascade-health-alliance
+  event_date: 2026-05-05
+  outcome: rejected
+  position_offered: preferred
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine cap amount negotiation, rejected.
+- playbook_key: halcyon-vendor-msa-customer
+  playbook_version: '1.0'
+  rule_key: warranties.performance_warranty
+  counterparty_key: bluecrest-physician-group
+  event_date: 2026-05-12
+  outcome: pending
+  position_offered: fallback_1
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine performance warranty negotiation, pending.
+- playbook_key: halcyon-baseline
+  playbook_version: '1.0'
+  rule_key: governing_law.choice_of_law
+  counterparty_key: harborview-regional-clinics
+  event_date: 2026-05-19
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine choice of law negotiation, accepted.
+- playbook_key: halcyon-baseline
+  playbook_version: '1.0'
+  rule_key: dispute_resolution.forum
+  counterparty_key: north-sea-health-cooperative
+  event_date: 2026-05-26
+  outcome: accepted
+  position_offered: fallback_1
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine forum negotiation, accepted.
+- playbook_key: halcyon-baseline
+  playbook_version: '1.0'
+  rule_key: notices.method
+  counterparty_key: prairie-wind-medical-group
+  event_date: 2026-06-05
+  outcome: countered
+  position_offered: preferred
+  recommended_stance: light
+  category: general_history
+  count: 1
+  final_text: Routine method negotiation, countered.
+- playbook_key: halcyon-baseline
+  playbook_version: '1.0'
+  rule_key: assignment.consent_requirement
+  counterparty_key: lakeshore-family-care-network
+  event_date: 2026-06-12
+  outcome: accepted
+  position_offered: fallback_2
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine consent requirement negotiation, accepted.
+- playbook_key: halcyon-baseline
+  playbook_version: '1.0'
+  rule_key: amendment.written_amendment
+  counterparty_key: summit-pediatrics-group
+  event_date: 2026-06-19
+  outcome: rejected
+  position_offered: preferred
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine written amendment negotiation, rejected.
+- playbook_key: halcyon-baseline
+  playbook_version: '1.0'
+  rule_key: force_majeure.scope
+  counterparty_key: riverside-urgent-care
+  event_date: 2026-06-26
+  outcome: pending
+  position_offered: fallback_1
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine scope negotiation, pending.
+- playbook_key: halcyon-mutual-nda
+  playbook_version: '1.0'
+  rule_key: confidentiality.standard_of_care
+  counterparty_key: clearwater-telehealth-startup
+  event_date: 2026-01-05
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine standard of care negotiation, accepted.
+- playbook_key: halcyon-mutual-nda
+  playbook_version: '1.0'
+  rule_key: confidentiality.permitted_disclosures
+  counterparty_key: oakhill-family-practice
+  event_date: 2026-01-12
+  outcome: accepted
+  position_offered: fallback_1
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine permitted disclosures negotiation, accepted.
+- playbook_key: halcyon-mutual-nda
+  playbook_version: '1.0'
+  rule_key: term.survival_period
+  counterparty_key: west-dublin-private-clinic
+  event_date: 2026-01-19
+  outcome: countered
+  position_offered: preferred
+  recommended_stance: light
+  category: general_history
+  count: 1
+  final_text: Routine survival period negotiation, countered.
+- playbook_key: halcyon-mutual-nda
+  playbook_version: '1.0'
+  rule_key: intellectual_property.no_license
+  counterparty_key: meridian-health-partners
+  event_date: 2026-01-26
+  outcome: accepted
+  position_offered: fallback_2
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine no license negotiation, accepted.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: payment.taxes
+  counterparty_key: great-lakes-regional-health
+  event_date: 2026-02-05
+  outcome: rejected
+  position_offered: preferred
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine taxes negotiation, rejected.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: termination.effect_of_termination
+  counterparty_key: dublin-city-clinics-group
+  event_date: 2026-02-12
+  outcome: pending
+  position_offered: fallback_1
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine effect of termination negotiation, pending.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: suspension.suspension_rights
+  counterparty_key: albion-public-health-trust
+  event_date: 2026-02-19
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine suspension rights negotiation, accepted.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: limitation_of_liability.consequential_damages_exclusion
+  counterparty_key: cascade-health-alliance
+  event_date: 2026-02-26
+  outcome: accepted
+  position_offered: fallback_1
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine consequential damages exclusion negotiation, accepted.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: indemnification.ip_infringement_indemnity
+  counterparty_key: bluecrest-physician-group
+  event_date: 2026-03-05
+  outcome: countered
+  position_offered: preferred
+  recommended_stance: light
+  category: general_history
+  count: 1
+  final_text: Routine ip infringement indemnity negotiation, countered.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: warranties.disclaimer
+  counterparty_key: harborview-regional-clinics
+  event_date: 2026-03-12
+  outcome: accepted
+  position_offered: fallback_2
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine disclaimer negotiation, accepted.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: intellectual_property.ownership
+  counterparty_key: north-sea-health-cooperative
+  event_date: 2026-03-19
+  outcome: rejected
+  position_offered: preferred
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine ownership negotiation, rejected.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: security.security_program
+  counterparty_key: prairie-wind-medical-group
+  event_date: 2026-03-26
+  outcome: pending
+  position_offered: fallback_1
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine security program negotiation, pending.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: security.certifications
+  counterparty_key: lakeshore-family-care-network
+  event_date: 2026-04-05
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine certifications negotiation, accepted.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: compliance.compliance_with_laws
+  counterparty_key: summit-pediatrics-group
+  event_date: 2026-04-12
+  outcome: accepted
+  position_offered: fallback_1
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine compliance with laws negotiation, accepted.
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: data_transfers.transfer_mechanism
+  counterparty_key: riverside-urgent-care
+  event_date: 2026-04-19
+  outcome: countered
+  position_offered: preferred
+  recommended_stance: light
+  category: general_history
+  count: 1
+  final_text: Routine transfer mechanism negotiation, countered.
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: data_transfers.data_residency
+  counterparty_key: clearwater-telehealth-startup
+  event_date: 2026-04-26
+  outcome: accepted
+  position_offered: fallback_2
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine data residency negotiation, accepted.
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: limitation_of_liability.dpa_liability_alignment
+  counterparty_key: oakhill-family-practice
+  event_date: 2026-05-05
+  outcome: rejected
+  position_offered: preferred
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine dpa liability alignment negotiation, rejected.
+- playbook_key: halcyon-hipaa-overlay
+  playbook_version: '1.0'
+  rule_key: data_protection.permitted_uses_of_phi
+  counterparty_key: west-dublin-private-clinic
+  event_date: 2026-05-12
+  outcome: pending
+  position_offered: fallback_1
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine permitted uses of phi negotiation, pending.
+- playbook_key: halcyon-hipaa-overlay
+  playbook_version: '1.0'
+  rule_key: security.phi_encryption
+  counterparty_key: meridian-health-partners
+  event_date: 2026-05-19
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine phi encryption negotiation, accepted.
+- playbook_key: halcyon-hipaa-overlay
+  playbook_version: '1.0'
+  rule_key: breach_notification.notification_timeline
+  counterparty_key: great-lakes-regional-health
+  event_date: 2026-05-26
+  outcome: accepted
+  position_offered: fallback_1
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine notification timeline negotiation, accepted.
+- playbook_key: halcyon-gdpr-overlay
+  playbook_version: '1.0'
+  rule_key: data_protection.records_of_processing
+  counterparty_key: dublin-city-clinics-group
+  event_date: 2026-06-05
+  outcome: countered
+  position_offered: preferred
+  recommended_stance: light
+  category: general_history
+  count: 1
+  final_text: Routine records of processing negotiation, countered.
+- playbook_key: halcyon-gdpr-overlay
+  playbook_version: '1.0'
+  rule_key: data_transfers.transfer_impact_assessment
+  counterparty_key: albion-public-health-trust
+  event_date: 2026-06-12
+  outcome: accepted
+  position_offered: fallback_2
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine transfer impact assessment negotiation, accepted.
+- playbook_key: halcyon-gdpr-overlay
+  playbook_version: '1.0'
+  rule_key: compliance.gdpr_compliance
+  counterparty_key: cascade-health-alliance
+  event_date: 2026-06-19
+  outcome: rejected
+  position_offered: preferred
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine gdpr compliance negotiation, rejected.
+- playbook_key: halcyon-vendor-msa-customer
+  playbook_version: '1.0'
+  rule_key: payment.payment_terms
+  counterparty_key: bluecrest-physician-group
+  event_date: 2026-06-26
+  outcome: pending
+  position_offered: fallback_1
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine payment terms negotiation, pending.
+- playbook_key: halcyon-vendor-msa-customer
+  playbook_version: '1.0'
+  rule_key: termination.transition_assistance
+  counterparty_key: harborview-regional-clinics
+  event_date: 2026-01-05
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine transition assistance negotiation, accepted.
+- playbook_key: halcyon-vendor-msa-customer
+  playbook_version: '1.0'
+  rule_key: limitation_of_liability.cap_amount
+  counterparty_key: north-sea-health-cooperative
+  event_date: 2026-01-12
+  outcome: accepted
+  position_offered: fallback_1
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine cap amount negotiation, accepted.
+- playbook_key: halcyon-vendor-msa-customer
+  playbook_version: '1.0'
+  rule_key: warranties.performance_warranty
+  counterparty_key: prairie-wind-medical-group
+  event_date: 2026-01-19
+  outcome: countered
+  position_offered: preferred
+  recommended_stance: light
+  category: general_history
+  count: 1
+  final_text: Routine performance warranty negotiation, countered.
+- playbook_key: halcyon-baseline
+  playbook_version: '1.0'
+  rule_key: governing_law.choice_of_law
+  counterparty_key: lakeshore-family-care-network
+  event_date: 2026-01-26
+  outcome: accepted
+  position_offered: fallback_2
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine choice of law negotiation, accepted.
+- playbook_key: halcyon-baseline
+  playbook_version: '1.0'
+  rule_key: dispute_resolution.forum
+  counterparty_key: summit-pediatrics-group
+  event_date: 2026-02-05
+  outcome: rejected
+  position_offered: preferred
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine forum negotiation, rejected.
+- playbook_key: halcyon-baseline
+  playbook_version: '1.0'
+  rule_key: notices.method
+  counterparty_key: riverside-urgent-care
+  event_date: 2026-02-12
+  outcome: pending
+  position_offered: fallback_1
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine method negotiation, pending.
+- playbook_key: halcyon-baseline
+  playbook_version: '1.0'
+  rule_key: assignment.consent_requirement
+  counterparty_key: clearwater-telehealth-startup
+  event_date: 2026-02-19
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine consent requirement negotiation, accepted.
+- playbook_key: halcyon-baseline
+  playbook_version: '1.0'
+  rule_key: amendment.written_amendment
+  counterparty_key: oakhill-family-practice
+  event_date: 2026-02-26
+  outcome: accepted
+  position_offered: fallback_1
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine written amendment negotiation, accepted.
+- playbook_key: halcyon-baseline
+  playbook_version: '1.0'
+  rule_key: force_majeure.scope
+  counterparty_key: west-dublin-private-clinic
+  event_date: 2026-03-05
+  outcome: countered
+  position_offered: preferred
+  recommended_stance: light
+  category: general_history
+  count: 1
+  final_text: Routine scope negotiation, countered.
+- playbook_key: halcyon-mutual-nda
+  playbook_version: '1.0'
+  rule_key: confidentiality.standard_of_care
+  counterparty_key: meridian-health-partners
+  event_date: 2026-03-12
+  outcome: accepted
+  position_offered: fallback_2
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine standard of care negotiation, accepted.
+- playbook_key: halcyon-mutual-nda
+  playbook_version: '1.0'
+  rule_key: confidentiality.permitted_disclosures
+  counterparty_key: great-lakes-regional-health
+  event_date: 2026-03-19
+  outcome: rejected
+  position_offered: preferred
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine permitted disclosures negotiation, rejected.
+- playbook_key: halcyon-mutual-nda
+  playbook_version: '1.0'
+  rule_key: term.survival_period
+  counterparty_key: dublin-city-clinics-group
+  event_date: 2026-03-26
+  outcome: pending
+  position_offered: fallback_1
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine survival period negotiation, pending.
+- playbook_key: halcyon-mutual-nda
+  playbook_version: '1.0'
+  rule_key: intellectual_property.no_license
+  counterparty_key: albion-public-health-trust
+  event_date: 2026-04-05
+  outcome: accepted
+  position_offered: preferred
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine no license negotiation, accepted.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: payment.taxes
+  counterparty_key: cascade-health-alliance
+  event_date: 2026-04-12
+  outcome: accepted
+  position_offered: fallback_1
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine taxes negotiation, accepted.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: termination.effect_of_termination
+  counterparty_key: bluecrest-physician-group
+  event_date: 2026-04-19
+  outcome: countered
+  position_offered: preferred
+  recommended_stance: light
+  category: general_history
+  count: 1
+  final_text: Routine effect of termination negotiation, countered.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: suspension.suspension_rights
+  counterparty_key: harborview-regional-clinics
+  event_date: 2026-04-26
+  outcome: accepted
+  position_offered: fallback_2
+  recommended_stance: balanced
+  category: general_history
+  count: 1
+  final_text: Routine suspension rights negotiation, accepted.
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: limitation_of_liability.consequential_damages_exclusion
+  counterparty_key: north-sea-health-cooperative
+  event_date: 2026-05-05
+  outcome: rejected
+  position_offered: preferred
+  recommended_stance: firm
+  category: general_history
+  count: 1
+  final_text: Routine consequential damages exclusion negotiation, rejected.
+exceptions:
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: definitions.roles_of_parties
+  rung: 2
+  counterparty_key: dublin-city-clinics-group
+  zone: yellow
+  approver_role: privacy_counsel
+  approved_by: Privacy Counsel
+  rationale: Joint-controller acknowledgement limited to one named ancillary activity.
+  agreed_text: Agreed language reflecting fallback rung 2 of definitions.roles_of_parties.
+  give_get_obtained: null
+  parameter_values: {}
+  status: approved
+  requested_at: 2026-01-06
+  decided_at: 2026-01-09
+  expires_at: 2027-01-09
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: definitions.roles_of_parties
+  rung: 2
+  counterparty_key: north-sea-health-cooperative
+  zone: yellow
+  approver_role: privacy_counsel
+  approved_by: Privacy Counsel
+  rationale: Joint-controller acknowledgement limited to one named ancillary activity.
+  agreed_text: Agreed language reflecting fallback rung 2 of definitions.roles_of_parties.
+  give_get_obtained: null
+  parameter_values: {}
+  status: approved
+  requested_at: 2026-01-20
+  decided_at: 2026-01-23
+  expires_at: 2027-01-23
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: data_protection.processing_instructions
+  rung: 2
+  counterparty_key: meridian-health-partners
+  zone: yellow
+  approver_role: privacy_counsel
+  approved_by: Privacy Counsel
+  rationale: Broader instruction channel for a tier-1 account, with notice of cost impact.
+  agreed_text: Agreed language reflecting fallback rung 2 of data_protection.processing_instructions.
+  give_get_obtained: null
+  parameter_values: {}
+  status: approved
+  requested_at: 2026-02-06
+  decided_at: 2026-02-09
+  expires_at: 2027-02-09
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: data_protection.processing_instructions
+  rung: 2
+  counterparty_key: great-lakes-regional-health
+  zone: yellow
+  approver_role: privacy_counsel
+  approved_by: Privacy Counsel
+  rationale: Broader instruction channel for a tier-1 account, with notice of cost impact.
+  agreed_text: Agreed language reflecting fallback rung 2 of data_protection.processing_instructions.
+  give_get_obtained: null
+  parameter_values: {}
+  status: requested
+  requested_at: 2026-02-20
+  decided_at: null
+  expires_at: null
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: data_protection.purpose_limitation
+  rung: 2
+  counterparty_key: dublin-city-clinics-group
+  zone: yellow
+  approver_role: privacy_counsel
+  approved_by: Privacy Counsel
+  rationale: Processing schedule updated by notice rather than signed amendment.
+  agreed_text: Agreed language reflecting fallback rung 2 of data_protection.purpose_limitation.
+  give_get_obtained: null
+  parameter_values: {}
+  status: expired
+  requested_at: 2026-03-06
+  decided_at: 2026-03-09
+  expires_at: null
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: data_protection.purpose_limitation
+  rung: 2
+  counterparty_key: albion-public-health-trust
+  zone: yellow
+  approver_role: privacy_counsel
+  approved_by: Privacy Counsel
+  rationale: Processing schedule updated by notice rather than signed amendment.
+  agreed_text: Agreed language reflecting fallback rung 2 of data_protection.purpose_limitation.
+  give_get_obtained: null
+  parameter_values: {}
+  status: approved
+  requested_at: 2026-03-20
+  decided_at: 2026-03-23
+  expires_at: 2027-03-23
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: data_protection.personnel_confidentiality
+  rung: 1
+  counterparty_key: bluecrest-physician-group
+  zone: yellow
+  approver_role: privacy_counsel
+  approved_by: Privacy Counsel
+  rationale: Training required at onboarding only, as a one-time concession.
+  agreed_text: Agreed language reflecting fallback rung 1 of data_protection.personnel_confidentiality.
+  give_get_obtained: null
+  parameter_values: {}
+  status: approved
+  requested_at: 2026-04-06
+  decided_at: 2026-04-09
+  expires_at: 2027-04-09
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: data_protection.personnel_confidentiality
+  rung: 2
+  counterparty_key: west-dublin-private-clinic
+  zone: yellow
+  approver_role: privacy_counsel
+  approved_by: Privacy Counsel
+  rationale: Background-check confirmation for personnel with standing access to PHI.
+  agreed_text: Agreed language reflecting fallback rung 2 of data_protection.personnel_confidentiality.
+  give_get_obtained: null
+  parameter_values: {}
+  status: approved
+  requested_at: 2026-04-20
+  decided_at: 2026-04-23
+  expires_at: 2027-04-23
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: data_protection.personnel_confidentiality
+  rung: 2
+  counterparty_key: meridian-health-partners
+  zone: yellow
+  approver_role: privacy_counsel
+  approved_by: Privacy Counsel
+  rationale: Background-check confirmation for personnel with standing access to PHI.
+  agreed_text: Agreed language reflecting fallback rung 2 of data_protection.personnel_confidentiality.
+  give_get_obtained: null
+  parameter_values: {}
+  status: requested
+  requested_at: 2026-05-06
+  decided_at: null
+  expires_at: null
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: data_protection.data_subject_requests
+  rung: 2
+  counterparty_key: meridian-health-partners
+  zone: yellow
+  approver_role: privacy_counsel
+  approved_by: Privacy Counsel
+  rationale: Two-business-day forwarding with quarterly free-assistance hours for a tier-1 account.
+  agreed_text: Agreed language reflecting fallback rung 2 of data_protection.data_subject_requests.
+  give_get_obtained: null
+  parameter_values: {}
+  status: expired
+  requested_at: 2026-05-20
+  decided_at: 2026-05-23
+  expires_at: null
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: data_protection.data_subject_requests
+  rung: 2
+  counterparty_key: great-lakes-regional-health
+  zone: yellow
+  approver_role: privacy_counsel
+  approved_by: Privacy Counsel
+  rationale: Two-business-day forwarding with quarterly free-assistance hours for a tier-1 account.
+  agreed_text: Agreed language reflecting fallback rung 2 of data_protection.data_subject_requests.
+  give_get_obtained: null
+  parameter_values: {}
+  status: approved
+  requested_at: 2026-06-06
+  decided_at: 2026-06-09
+  expires_at: 2027-06-09
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: data_protection.data_return_and_deletion
+  rung: 2
+  counterparty_key: meridian-health-partners
+  zone: yellow
+  approver_role: privacy_counsel
+  approved_by: Privacy Counsel
+  rationale: Extended export window to support an enterprise transition.
+  agreed_text: Agreed language reflecting fallback rung 2 of data_protection.data_return_and_deletion.
+  give_get_obtained: null
+  parameter_values: {}
+  status: approved
+  requested_at: 2026-06-20
+  decided_at: 2026-06-23
+  expires_at: 2027-06-23
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: data_protection.data_return_and_deletion
+  rung: 2
+  counterparty_key: cascade-health-alliance
+  zone: yellow
+  approver_role: privacy_counsel
+  approved_by: Privacy Counsel
+  rationale: Extended export window to support an enterprise transition.
+  agreed_text: Agreed language reflecting fallback rung 2 of data_protection.data_return_and_deletion.
+  give_get_obtained: null
+  parameter_values: {}
+  status: approved
+  requested_at: 2026-01-06
+  decided_at: 2026-01-09
+  expires_at: 2027-01-09
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: data_protection.data_return_and_deletion
+  rung: 2
+  counterparty_key: albion-public-health-trust
+  zone: yellow
+  approver_role: privacy_counsel
+  approved_by: Privacy Counsel
+  rationale: Extended export window to support an enterprise transition.
+  agreed_text: Agreed language reflecting fallback rung 2 of data_protection.data_return_and_deletion.
+  give_get_obtained: null
+  parameter_values: {}
+  status: requested
+  requested_at: 2026-01-20
+  decided_at: null
+  expires_at: null
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: audit.customer_audit_rights
+  rung: 1
+  counterparty_key: west-dublin-private-clinic
+  zone: yellow
+  approver_role: security_lead
+  approved_by: Security Lead
+  rationale: 8-business-day DPA audit-notice window, SOC 2 report already on file.
+  agreed_text: Agreed language reflecting fallback rung 1 of audit.customer_audit_rights.
+  give_get_obtained: null
+  parameter_values: {}
+  status: expired
+  requested_at: 2026-02-06
+  decided_at: 2026-02-09
+  expires_at: null
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: audit.audit_cost
+  rung: 3
+  counterparty_key: dublin-city-clinics-group
+  zone: yellow
+  approver_role: general_counsel
+  approved_by: General Counsel
+  rationale: Halcyon absorbs its own time on a second on-site audit in the same year (strategic only).
+  agreed_text: Agreed language reflecting fallback rung 3 of audit.audit_cost.
+  give_get_obtained: null
+  parameter_values: {}
+  status: approved
+  requested_at: 2026-02-20
+  decided_at: 2026-02-23
+  expires_at: 2027-02-23
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: audit.audit_cost
+  rung: 3
+  counterparty_key: albion-public-health-trust
+  zone: yellow
+  approver_role: general_counsel
+  approved_by: General Counsel
+  rationale: Halcyon absorbs its own time on a second on-site audit in the same year (strategic only).
+  agreed_text: Agreed language reflecting fallback rung 3 of audit.audit_cost.
+  give_get_obtained: null
+  parameter_values: {}
+  status: approved
+  requested_at: 2026-03-06
+  decided_at: 2026-03-09
+  expires_at: 2027-03-09
+- playbook_key: halcyon-dpa-processor
+  playbook_version: '1.0'
+  rule_key: security.technical_organisational_measures
+  rung: 1
+  counterparty_key: north-sea-health-cooperative
+  zone: yellow
+  approver_role: security_lead
+  approved_by: Security Lead
+  rationale: 45-day material-update notice window.
+  agreed_text: Agreed language reflecting fallback rung 1 of security.technical_organisational_measures.
+  give_get_obtained: null
+  parameter_values: {}
+  status: approved
+  requested_at: 2026-03-20
+  decided_at: 2026-03-23
+  expires_at: 2027-03-23
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: payment.payment_terms
+  rung: 3
+  counterparty_key: dublin-city-clinics-group
+  zone: yellow
+  approver_role: cfo
+  approved_by: CFO
+  rationale: Net 75 payment terms against annual prepayment (strategic only).
+  agreed_text: Agreed language reflecting fallback rung 3 of payment.payment_terms.
+  give_get_obtained: null
+  parameter_values: {}
+  status: requested
+  requested_at: 2026-04-06
+  decided_at: null
+  expires_at: null
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: audit.customer_audit_rights
+  rung: 3
+  counterparty_key: meridian-health-partners
+  zone: yellow
+  approver_role: security_lead
+  approved_by: Security Lead
+  rationale: Two on-site audits per year for a tier-1 account.
+  agreed_text: Agreed language reflecting fallback rung 3 of audit.customer_audit_rights.
+  give_get_obtained: null
+  parameter_values: {}
+  status: expired
+  requested_at: 2026-04-20
+  decided_at: 2026-04-23
+  expires_at: null
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: audit.customer_audit_rights
+  rung: 3
+  counterparty_key: great-lakes-regional-health
+  zone: yellow
+  approver_role: security_lead
+  approved_by: Security Lead
+  rationale: Two on-site audits per year for a tier-1 account.
+  agreed_text: Agreed language reflecting fallback rung 3 of audit.customer_audit_rights.
+  give_get_obtained: null
+  parameter_values: {}
+  status: approved
+  requested_at: 2026-05-06
+  decided_at: 2026-05-09
+  expires_at: 2027-05-09
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: audit.customer_audit_rights
+  rung: 1
+  counterparty_key: lakeshore-family-care-network
+  zone: yellow
+  approver_role: security_lead
+  approved_by: Security Lead
+  rationale: 10-business-day audit-notice window.
+  agreed_text: Agreed language reflecting fallback rung 1 of audit.customer_audit_rights.
+  give_get_obtained: null
+  parameter_values: {}
+  status: approved
+  requested_at: 2026-05-20
+  decided_at: 2026-05-23
+  expires_at: 2027-05-23
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: limitation_of_liability.cap_amount
+  rung: 3
+  counterparty_key: albion-public-health-trust
+  zone: yellow
+  approver_role: general_counsel
+  approved_by: General Counsel
+  rationale: 36-month liability cap for a strategic account (rung later removed in v1.1).
+  agreed_text: Agreed language reflecting fallback rung 3 of limitation_of_liability.cap_amount.
+  give_get_obtained: null
+  parameter_values: {}
+  status: approved
+  requested_at: 2026-06-06
+  decided_at: 2026-06-09
+  expires_at: 2027-06-09
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: term.auto_renewal
+  rung: 1
+  counterparty_key: meridian-health-partners
+  zone: yellow
+  approver_role: vp_sales
+  approved_by: VP Sales
+  rationale: 5-business-day non-renewal notice window for a tier-1 account.
+  agreed_text: Agreed language reflecting fallback rung 1 of term.auto_renewal.
+  give_get_obtained: null
+  parameter_values: {}
+  status: requested
+  requested_at: 2026-06-20
+  decided_at: null
+  expires_at: null
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: term.auto_renewal
+  rung: 1
+  counterparty_key: great-lakes-regional-health
+  zone: yellow
+  approver_role: vp_sales
+  approved_by: VP Sales
+  rationale: 5-business-day non-renewal notice window for a tier-1 account.
+  agreed_text: Agreed language reflecting fallback rung 1 of term.auto_renewal.
+  give_get_obtained: null
+  parameter_values: {}
+  status: expired
+  requested_at: 2026-01-06
+  decided_at: 2026-01-09
+  expires_at: null
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: termination.for_convenience
+  rung: 1
+  counterparty_key: dublin-city-clinics-group
+  zone: yellow
+  approver_role: vp_sales
+  approved_by: VP Sales
+  rationale: 75-day termination-for-convenience notice for an enterprise/strategic account.
+  agreed_text: Agreed language reflecting fallback rung 1 of termination.for_convenience.
+  give_get_obtained: null
+  parameter_values: {}
+  status: approved
+  requested_at: 2026-01-20
+  decided_at: 2026-01-23
+  expires_at: 2027-01-23
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: termination.for_cause_cure_period
+  rung: 1
+  counterparty_key: harborview-regional-clinics
+  zone: yellow
+  approver_role: commercial_counsel
+  approved_by: Commercial Counsel
+  rationale: 7-business-day cure period.
+  agreed_text: Agreed language reflecting fallback rung 1 of termination.for_cause_cure_period.
+  give_get_obtained: null
+  parameter_values: {}
+  status: approved
+  requested_at: 2026-02-06
+  decided_at: 2026-02-09
+  expires_at: 2027-02-09
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: service_levels.uptime_commitment
+  rung: 1
+  counterparty_key: great-lakes-regional-health
+  zone: yellow
+  approver_role: vp_customer_success
+  approved_by: VP Customer Success
+  rationale: 72-hour scheduled-maintenance notice window.
+  agreed_text: Agreed language reflecting fallback rung 1 of service_levels.uptime_commitment.
+  give_get_obtained: null
+  parameter_values: {}
+  status: approved
+  requested_at: 2026-02-20
+  decided_at: 2026-02-23
+  expires_at: 2027-02-23
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: warranties.performance_warranty
+  rung: 1
+  counterparty_key: cascade-health-alliance
+  zone: yellow
+  approver_role: commercial_counsel
+  approved_by: Commercial Counsel
+  rationale: 10-day warranty cure period paired with a service-credit remedy.
+  agreed_text: Agreed language reflecting fallback rung 1 of warranties.performance_warranty.
+  give_get_obtained: null
+  parameter_values: {}
+  status: requested
+  requested_at: 2026-03-06
+  decided_at: null
+  expires_at: null
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: insurance.coverage_requirements
+  rung: 1
+  counterparty_key: meridian-health-partners
+  zone: yellow
+  approver_role: cfo
+  approved_by: CFO
+  rationale: $25M cyber coverage-evidence ceiling.
+  agreed_text: Agreed language reflecting fallback rung 1 of insurance.coverage_requirements.
+  give_get_obtained: null
+  parameter_values: {}
+  status: expired
+  requested_at: 2026-03-20
+  decided_at: 2026-03-23
+  expires_at: null
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: payment.payment_terms
+  rung: 3
+  counterparty_key: dublin-city-clinics-group
+  zone: yellow
+  approver_role: cfo
+  approved_by: CFO
+  rationale: Net 75 payment terms against annual prepayment (strategic only).
+  agreed_text: Agreed language reflecting fallback rung 3 of payment.payment_terms.
+  give_get_obtained: null
+  parameter_values: {}
+  status: approved
+  requested_at: 2026-04-06
+  decided_at: 2026-04-09
+  expires_at: 2027-04-09
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: audit.customer_audit_rights
+  rung: 3
+  counterparty_key: great-lakes-regional-health
+  zone: yellow
+  approver_role: security_lead
+  approved_by: Security Lead
+  rationale: Two on-site audits per year for a tier-1 account.
+  agreed_text: Agreed language reflecting fallback rung 3 of audit.customer_audit_rights.
+  give_get_obtained: null
+  parameter_values: {}
+  status: approved
+  requested_at: 2026-04-20
+  decided_at: 2026-04-23
+  expires_at: 2027-04-23
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: audit.customer_audit_rights
+  rung: 1
+  counterparty_key: lakeshore-family-care-network
+  zone: yellow
+  approver_role: security_lead
+  approved_by: Security Lead
+  rationale: 10-business-day audit-notice window.
+  agreed_text: Agreed language reflecting fallback rung 1 of audit.customer_audit_rights.
+  give_get_obtained: null
+  parameter_values: {}
+  status: approved
+  requested_at: 2026-05-06
+  decided_at: 2026-05-09
+  expires_at: 2027-05-09
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: limitation_of_liability.cap_amount
+  rung: 3
+  counterparty_key: albion-public-health-trust
+  zone: yellow
+  approver_role: general_counsel
+  approved_by: General Counsel
+  rationale: 36-month liability cap for a strategic account (rung later removed in v1.1).
+  agreed_text: Agreed language reflecting fallback rung 3 of limitation_of_liability.cap_amount.
+  give_get_obtained: null
+  parameter_values: {}
+  status: approved
+  requested_at: 2026-05-20
+  decided_at: 2026-05-23
+  expires_at: 2027-05-23
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: term.auto_renewal
+  rung: 1
+  counterparty_key: meridian-health-partners
+  zone: yellow
+  approver_role: vp_sales
+  approved_by: VP Sales
+  rationale: 5-business-day non-renewal notice window for a tier-1 account.
+  agreed_text: Agreed language reflecting fallback rung 1 of term.auto_renewal.
+  give_get_obtained: null
+  parameter_values: {}
+  status: approved
+  requested_at: 2026-06-06
+  decided_at: 2026-06-09
+  expires_at: 2027-06-09
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: termination.for_convenience
+  rung: 1
+  counterparty_key: dublin-city-clinics-group
+  zone: yellow
+  approver_role: vp_sales
+  approved_by: VP Sales
+  rationale: 75-day termination-for-convenience notice for an enterprise/strategic account.
+  agreed_text: Agreed language reflecting fallback rung 1 of termination.for_convenience.
+  give_get_obtained: null
+  parameter_values: {}
+  status: approved
+  requested_at: 2026-06-20
+  decided_at: 2026-06-23
+  expires_at: 2027-06-23
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: termination.for_cause_cure_period
+  rung: 1
+  counterparty_key: harborview-regional-clinics
+  zone: yellow
+  approver_role: commercial_counsel
+  approved_by: Commercial Counsel
+  rationale: 7-business-day cure period.
+  agreed_text: Agreed language reflecting fallback rung 1 of termination.for_cause_cure_period.
+  give_get_obtained: null
+  parameter_values: {}
+  status: approved
+  requested_at: 2026-01-06
+  decided_at: 2026-01-09
+  expires_at: 2027-01-09
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: service_levels.uptime_commitment
+  rung: 1
+  counterparty_key: great-lakes-regional-health
+  zone: yellow
+  approver_role: vp_customer_success
+  approved_by: VP Customer Success
+  rationale: 72-hour scheduled-maintenance notice window.
+  agreed_text: Agreed language reflecting fallback rung 1 of service_levels.uptime_commitment.
+  give_get_obtained: null
+  parameter_values: {}
+  status: approved
+  requested_at: 2026-01-20
+  decided_at: 2026-01-23
+  expires_at: 2027-01-23
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: warranties.performance_warranty
+  rung: 1
+  counterparty_key: cascade-health-alliance
+  zone: yellow
+  approver_role: commercial_counsel
+  approved_by: Commercial Counsel
+  rationale: 10-day warranty cure period paired with a service-credit remedy.
+  agreed_text: Agreed language reflecting fallback rung 1 of warranties.performance_warranty.
+  give_get_obtained: null
+  parameter_values: {}
+  status: approved
+  requested_at: 2026-02-06
+  decided_at: 2026-02-09
+  expires_at: 2027-02-09
+- playbook_key: halcyon-saas-msa-vendor
+  playbook_version: '1.0'
+  rule_key: insurance.coverage_requirements
+  rung: 1
+  counterparty_key: meridian-health-partners
+  zone: yellow
+  approver_role: cfo
+  approved_by: CFO
+  rationale: $25M cyber coverage-evidence ceiling.
+  agreed_text: Agreed language reflecting fallback rung 1 of insurance.coverage_requirements.
+  give_get_obtained: null
+  parameter_values: {}
+  status: approved
+  requested_at: 2026-02-20
+  decided_at: 2026-02-23
+  expires_at: 2027-02-23
+

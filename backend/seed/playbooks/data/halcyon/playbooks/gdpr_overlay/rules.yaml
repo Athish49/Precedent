@@ -1,0 +1,3113 @@
+# Halcyon GDPR overlay (task 3.10). Processor side. Applies when regimes
+# includes gdpr and overrides the DPA rules that share a rule_key.
+rules:
+  - rule_key: data_protection.processing_instructions
+    title: Processing only on documented instructions (GDPR)
+    required: true
+    risk_weight: 7
+    negotiable: false
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      The Processor processes Personal Data only on the Controller's
+      documented instructions, including for transfers. The Agreement, the DPA
+      and the Controller's configuration of the Services are the complete
+      instructions, and the Processor tells the Controller if an instruction
+      appears to infringe the GDPR.
+    risk_rationale: >
+      Article 28(3)(a) makes this term mandatory, so a DPA without it exposes
+      both parties to enforcement and cannot be signed. Halcyon runs one
+      multi-tenant platform for about 310 customers, and open-ended or
+      informal instructions from one Controller would require bespoke
+      processing that a median contract of $165k a year does not fund. A
+      Processor that goes beyond its instructions is treated as a controller
+      under Article 28(10), which would take Halcyon outside the role its
+      SOC 2 Type II, ISO 27001 and HITRUST r2 controls are designed for.
+    detection_guidance: >
+      Look for "documented instructions", "only on the instructions of the
+      Controller", "including with regard to transfers", "complete and final
+      instructions" and "infringes". Check three things: that processing is
+      limited to documented instructions, that the legal-requirement exception
+      comes with a duty to inform the Controller first, and that the Processor
+      must flag an instruction it believes infringes the GDPR. Wording that
+      lets the Controller issue any further instruction at no charge, or that
+      makes the Processor responsible for the lawfulness of instructions, is a
+      deviation or a red line, not a variant.
+    source_ref: >
+      GDPR Art. 28(3)(a); Art. 28(3) final subparagraph (instructions that
+      infringe the Regulation); Art. 29; Art. 28(10)
+    authored_by: Privacy Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Documented instructions, Agreement as the complete set
+        zone: green
+        summary: >
+          Processing only on documented instructions, with the Agreement, the
+          DPA and the Controller's use of the Services as the complete set.
+        language: >
+          The Processor shall process Personal Data only on documented
+          instructions from the Controller, including with regard to transfers
+          of Personal Data to a third country or an international
+          organisation, unless required to do otherwise by Union or Member
+          State law to which the Processor is subject. In that case the
+          Processor shall inform the Controller of the legal requirement
+          before processing, unless that law prohibits such information on
+          important grounds of public interest. The parties agree that the
+          Agreement, this DPA and the Controller's configuration and use of
+          the Services constitute the Controller's complete documented
+          instructions. Any additional or different instruction requires the
+          written agreement of both parties and, where it falls outside the
+          scope of the Services, may be subject to additional fees. The
+          Processor shall inform the Controller without undue delay if, in the
+          Processor's opinion, an instruction infringes the GDPR or other
+          Union or Member State data protection provisions, and the Processor
+          may suspend performance of that instruction until the Controller
+          confirms or amends it in writing.
+      - kind: acceptable_variant
+        label: Instructions through the Services and by written notice
+        zone: green
+        summary: >
+          Counterparty wording that keeps instructions documented and within
+          the scope of the Services.
+        language: >
+          The Processor shall act solely on the written instructions of the
+          Controller when processing Personal Data, including in relation to
+          any transfer outside the European Economic Area. The Controller's
+          instructions are those set out in the Agreement and this DPA and
+          those given through the administrative features of the Services.
+          Further instructions shall be given in writing, shall be consistent
+          with the Agreement and shall take effect once the parties have
+          agreed how they will be carried out. Where Union or Member State law
+          requires the Processor to process Personal Data otherwise, the
+          Processor shall notify the Controller of that requirement in advance
+          unless the law forbids it. The Processor shall promptly tell the
+          Controller if it considers that an instruction breaches Data
+          Protection Laws.
+      - kind: acceptable_variant
+        label: Instructions clause tracking the Regulation's wording
+        zone: green
+        summary: >
+          A short clause that restates Article 28(3)(a) without the
+          complete-instructions sentence but adds no wider duty.
+        language: >
+          The Processor processes the Personal Data only on documented
+          instructions from the Controller, including with regard to transfers
+          of Personal Data to a third country or an international
+          organisation, unless required to do so by Union or Member State law
+          to which the Processor is subject; in such a case, the Processor
+          shall inform the Controller of that legal requirement before
+          processing, unless that law prohibits such information on important
+          grounds of public interest. The Processor shall immediately inform
+          the Controller if, in its opinion, an instruction infringes the GDPR
+          or other Union or Member State data protection provisions. The
+          Controller's instructions are documented in the Agreement and in
+          this DPA.
+        internal_note: >
+          Acceptable only where the last sentence, or equivalent wording,
+          ties the instructions to the Agreement. If it is missing, add the
+          complete-instructions sentence from the preferred language.
+      - kind: acceptable_variant
+        label: Instructions fixed by the Order Form and this DPA
+        zone: green
+        summary: >
+          Counterparty wording that ties instructions to the Order Form in
+          place of the Agreement as a whole, where the Order Form itself
+          references this DPA.
+        language: >
+          The Processor shall process Personal Data only in accordance with
+          the Controller's documented instructions, which are those recorded
+          in the applicable Order Form and this DPA, including as to
+          transfers of Personal Data outside the European Economic Area. Any
+          processing required by Union or Member State law outside those
+          instructions shall be notified to the Controller in advance unless
+          the law prohibits it, and the Processor shall tell the Controller
+          without undue delay if it considers an instruction to infringe the
+          GDPR.
+    red_lines:
+      - key: gdpr-instr-unbounded-instructions
+        description: >
+          The Processor must follow any instruction the Controller gives,
+          whether or not documented or within the scope of the Services, with
+          no change process and at the Processor's cost.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause obliges the Processor to comply with every instruction
+            the Controller issues from time to time, including oral or
+            informal instructions or instructions outside the scope of the
+            Services, without any requirement that the parties agree the
+            instruction in writing and without any right for the Processor to
+            charge for or decline instructions beyond the Services. Answer no
+            if instructions must be documented and consistent with the
+            Agreement.
+        action: block
+        rationale: >
+          Halcyon Engage is a single multi-tenant service. A duty to carry
+          out any instruction from one Controller cannot be delivered on a
+          shared platform and removes the limit that keeps Halcyon a
+          Processor.
+      - key: gdpr-instr-legality-warranty
+        description: >
+          The Processor is made responsible for the lawfulness of the
+          Controller's instructions.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause requires the Processor to verify, warrant or ensure
+            that the Controller's instructions comply with data protection
+            law, or makes the Processor liable for processing carried out in
+            accordance with an instruction that later proves unlawful. Answer
+            no if the Processor's only duty is to inform the Controller when,
+            in the Processor's opinion, an instruction infringes the law.
+        action: block
+        rationale: >
+          The Regulation places responsibility for the lawfulness of
+          processing on the Controller. Halcyon does not see the Controller's
+          lawful basis or patient notices and cannot underwrite them.
+    dependencies:
+      - related_rule_key: data_protection.records_of_processing
+        relation: read_with
+        note: >
+          The documented instructions define the authorised scope of
+          processing; the records of processing activities must describe
+          that same scope accurately, including any sub-processor engaged to
+          carry it out. Update one whenever the other changes.
+      - related_rule_key: data_transfers.transfer_mechanism
+        relation: read_with
+        note: >
+          Instructions must cover transfers. Check that the transfer clause is
+          itself a documented instruction to make the listed transfers.
+    test_cases:
+      - name: Documented instructions with complete-instructions sentence
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Halcyon, as Processor, will handle Personal Data solely in line
+          with the Controller's documented instructions, and this extends to
+          any transfer to a third country. The Agreement, this DPA and the
+          way the Controller sets up and uses the Services together make up
+          the full set of those instructions; anything further must be agreed
+          by both parties in writing. If a law of the Union or a Member State
+          compels other processing, the Processor will tell the Controller
+          beforehand unless that law bars it from doing so. The Processor
+          will alert the Controller without undue delay where it believes an
+          instruction infringes the GDPR.
+      - name: Written instructions through the admin console
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          The Processor acts only on the Controller's written instructions in
+          respect of Personal Data, including transfers out of the EEA. Those
+          instructions are found in the Agreement, in this DPA and in the
+          settings the Controller selects in the administration console. Any
+          later instruction is to be in writing and consistent with the
+          Agreement. The Processor will notify the Controller promptly if it
+          considers an instruction to be contrary to Data Protection Laws, and
+          will give advance notice of any processing required by Member State
+          law unless prohibited.
+      - name: No duty to flag infringing instructions
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          The Processor shall process Personal Data in accordance with the
+          Controller's documented instructions as set out in the Agreement.
+          The Processor may process Personal Data otherwise where required by
+          applicable law.
+      - name: Instructions by any means with prompt implementation
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          The Processor shall process Personal Data only on the Controller's
+          instructions, which the Controller's project team may give by email
+          or through the support portal as the need arises, and the Processor
+          shall use reasonable efforts to implement each instruction promptly.
+          The Processor shall tell the Controller if it believes an
+          instruction infringes the GDPR.
+      - name: Any instruction of whatever nature at the Processor's cost
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: red_line
+        expected_red_line_key: gdpr-instr-unbounded-instructions
+        expected_zone: red
+        sample_text: >
+          The Processor shall comply at its own expense with all instructions
+          of whatever nature, written or verbal, that the Controller or any of
+          its affiliates may give from time to time concerning the Personal
+          Data, whether or not such instructions relate to the Services.
+      - name: Processor warrants instructions are lawful
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: red_line
+        expected_red_line_key: gdpr-instr-legality-warranty
+        expected_zone: red
+        sample_text: >
+          Before acting on any instruction the Processor shall satisfy itself
+          that the instruction is lawful under Data Protection Laws, and the
+          Processor shall be liable for any processing carried out on an
+          instruction that is subsequently found to be unlawful.
+      - name: No instructions clause in the DPA
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: missing
+        expected_zone: yellow
+        sample_text: ""
+      - name: Trap - Processor need not follow undocumented instructions
+        context: {region: eu, regimes: [gdpr]}
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          The Processor processes Personal Data only on the Controller's
+          documented instructions, including as to transfers, which are fully
+          set out in the Agreement and this DPA. The Processor is not required
+          to comply with all instructions of whatever nature; an instruction
+          that is verbal, or that falls outside the Services, has no effect
+          until both parties have agreed it in writing. The Processor will
+          inform the Controller in advance of processing required by Union or
+          Member State law, where permitted, and will inform the Controller
+          without delay if it considers an instruction to infringe the GDPR.
+
+  - rule_key: data_protection.data_subject_requests
+    title: Assistance with Data Subject requests (GDPR)
+    required: true
+    risk_weight: 6
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      The Controller answers Data Subjects. The Processor provides
+      self-service tools, forwards any request it receives directly within
+      five business days, does not reply on the substance, and gives further
+      help on request, charging for work beyond the tools.
+    risk_rationale: >
+      The Controller has one month under Article 12(3) to answer a request,
+      so it needs requests passed on quickly, but only the Controller can
+      verify a patient's identity and decide whether an exemption applies.
+      Halcyon has one privacy counsel and two contracts managers for about
+      310 customers; a duty to answer patients directly, or to provide
+      unlimited free search and export work, would make Halcyon responsible
+      for clinical-record decisions it has no basis to make. Charging for
+      work beyond the self-service tools keeps the cost of unusual requests
+      out of a median $165k contract.
+    detection_guidance: >
+      Look for "Data Subject", "rights under Chapter III", "access,
+      rectification, erasure, restriction, portability or objection",
+      "promptly notify the Controller", "shall not respond" and a period in
+      days or hours. Record the period for forwarding a request received
+      directly, convert it to business days, and note whether the Processor
+      must answer the Data Subject itself and whether assistance is free.
+      A commitment to assist "by appropriate technical and organisational
+      measures, insofar as this is possible" follows the Regulation and is
+      compliant.
+    source_ref: >
+      GDPR Art. 28(3)(e); Chapter III (Arts. 12 to 23), in particular
+      Art. 12(3) (one-month response period)
+    authored_by: Privacy Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Self-service tools, forward within five business days
+        zone: green
+        summary: >
+          Self-service tools first, direct requests forwarded within five
+          business days, no substantive reply by the Processor, chargeable
+          further assistance.
+        language: >
+          Taking into account the nature of the processing, the Processor
+          shall assist the Controller by appropriate technical and
+          organisational measures, insofar as this is possible, in fulfilling
+          the Controller's obligation to respond to requests from Data
+          Subjects exercising their rights under Chapter III of the GDPR. The
+          Services include features that allow the Controller to retrieve,
+          correct, export, restrict and delete Personal Data, and the
+          Controller shall use those features first. If the Processor
+          receives a request from a Data Subject that identifies the
+          Controller, the Processor shall forward it to the Controller within
+          five (5) business days of receipt and shall not respond to the Data
+          Subject other than to confirm that the request has been passed to
+          the Controller. Where the Controller cannot fulfil a request using
+          the features of the Services, the Processor shall provide further
+          reasonable assistance on the Controller's written request, and may
+          charge for that assistance at its then-current professional
+          services rates. The Controller is responsible for verifying the
+          identity of the Data Subject and for the content and timing of the
+          response.
+      - kind: fallback
+        rung: 1
+        label: Forward within three business days, capped free assistance
+        zone: green
+        summary: >
+          Direct requests forwarded within three business days, and
+          assistance is free where the self-service tools cannot do the job.
+        language: >
+          Taking into account the nature of the processing, the Processor
+          shall assist the Controller by appropriate technical and
+          organisational measures, insofar as this is possible, in responding
+          to requests from Data Subjects exercising their rights under
+          Chapter III of the GDPR. The Controller shall first use the
+          features of the Services that allow it to retrieve, correct,
+          export, restrict and delete Personal Data. If the Processor
+          receives a request from a Data Subject that identifies the
+          Controller, the Processor shall forward it to the Controller within
+          three (3) business days of receipt and shall not respond to the
+          Data Subject other than to confirm that the request has been passed
+          to the Controller. Where a request cannot be fulfilled using the
+          features of the Services, the Processor shall provide the
+          reasonable assistance the Controller requests in writing at no
+          additional charge; assistance that the Controller could have
+          performed itself using those features may be charged at the
+          Processor's then-current professional services rates. The
+          Controller remains responsible for verifying the identity of the
+          Data Subject and for the response.
+      - kind: fallback
+        rung: 2
+        label: Forward within two business days, all reasonable assistance free
+        zone: yellow
+        approver_role: privacy_counsel
+        give_get: >
+          Ask the Controller to name a single privacy contact address for
+          forwarded requests and to accept that the Processor's assistance
+          is limited to Personal Data held in the production Services.
+        summary: >
+          Direct requests forwarded within two business days and all
+          reasonable assistance provided without charge.
+        language: >
+          Taking into account the nature of the processing, the Processor
+          shall assist the Controller by appropriate technical and
+          organisational measures, insofar as this is possible, in responding
+          to requests from Data Subjects exercising their rights under
+          Chapter III of the GDPR. If the Processor receives a request from a
+          Data Subject that identifies the Controller, the Processor shall
+          forward it to the privacy contact notified by the Controller within
+          two (2) business days of receipt and shall not respond to the Data
+          Subject other than to confirm that the request has been passed to
+          the Controller. The Processor shall provide, at no additional
+          charge, the reasonable assistance the Controller requests in
+          writing in order to respond to a request, limited to Personal Data
+          held in the production environment of the Services. The Controller
+          remains responsible for verifying the identity of the Data Subject
+          and for the content and timing of the response.
+        internal_note: >
+          Two business days is the shortest period support operations can
+          meet across public holidays in Boston and Dublin. Do not agree a
+          period in hours.
+      - kind: acceptable_variant
+        label: Prompt notification, no reply without instructions
+        zone: green
+        summary: >
+          Counterparty wording that requires prompt forwarding within a
+          stated period of five business days or longer and bars a direct
+          reply.
+        language: >
+          The Processor shall promptly, and in any event within seven (7)
+          days, notify the Controller of any communication it receives from a
+          Data Subject seeking to exercise rights under Data Protection Laws
+          in respect of Personal Data, and shall not answer any such
+          communication except on the Controller's documented instructions.
+          The Processor shall give the Controller such cooperation as the
+          Controller reasonably requires to deal with the request, having
+          regard to the functionality of the Services that is available to
+          the Controller, and the Controller shall bear the Processor's
+          reasonable costs of cooperation that goes beyond that
+          functionality.
+    parameters:
+      - key: dsr_forwarding_business_days
+        label: Business days to forward a Data Subject request received directly
+        value_type: duration_days
+        unit: business days
+        direction: higher_is_better
+        preferred_value: 5
+        green_limit: 3
+        yellow_limit: 1
+        extraction_hint: >
+          Read the period within which the Processor must pass on a request
+          it receives from a Data Subject. Convert calendar days to business
+          days (7 days is 5, 5 days is 3) and hours to business days (24
+          hours is 1, 48 hours is 2, 72 hours is 3). "Promptly" or "without
+          undue delay" with no period is recorded as absent. "Immediately" or
+          "same day" is 0.
+    red_lines:
+      - key: gdpr-dsr-processor-responds
+        description: >
+          The Processor must answer Data Subjects on the Controller's behalf
+          or carries the Controller's response deadline.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause requires the Processor to respond on the substance to
+            Data Subjects itself, to decide whether a Data Subject request is
+            valid or an exemption applies, or to ensure that requests are
+            answered within the statutory period. Answer no if the Processor
+            only forwards requests, confirms receipt to the Data Subject and
+            assists the Controller.
+        action: block
+        rationale: >
+          Responding to Data Subjects is a Controller duty under Chapter III.
+          Halcyon cannot verify a patient's identity or weigh clinical-record
+          exemptions, and taking the decision would make it a controller for
+          that processing.
+    objections:
+      - objection: Five business days is too long when we only have one month to answer the patient.
+        their_rationale: >
+          A request that reaches the Processor first loses a week of the
+          Controller's statutory period before the Controller knows about it.
+        response: >
+          Requests rarely reach us directly, because patients deal with your
+          clinics and not with Halcyon. Where one does, we can commit to
+          forwarding it within three business days, which leaves you almost
+          the whole of the one-month period. The tools in the Services then
+          let your team locate and export the record without waiting for us.
+        talking_points:
+          - Fewer than a handful of direct requests reach Halcyon in a year.
+          - The one-month period can be extended by two months for complex requests under Article 12(3).
+          - Offer three business days before discussing anything shorter.
+        recommended_position: {rule_key: data_protection.data_subject_requests, rung: 1}
+        frequency: common
+        counterparty_profile: EU private clinic groups with an in-house data protection officer
+      - objection: We should not have to pay you to comply with a legal obligation.
+        their_rationale: >
+          Article 28 requires the Processor to assist, so the Controller sees
+          a fee as charging for compliance.
+        response: >
+          The Regulation requires assistance by appropriate technical and
+          organisational measures, and we meet that through the access,
+          export, correction and deletion features included in your
+          subscription at no extra cost. The charge applies only to manual
+          work that those features do not cover. We are willing to waive it
+          for requests that the tools cannot fulfil, so that you pay only
+          where your team chooses to have us do work it could do itself.
+        talking_points:
+          - The self-service features cover access, rectification, erasure, restriction and portability.
+          - Charges in the last year were rare and limited to bulk historical exports.
+        recommended_position: {rule_key: data_protection.data_subject_requests, rung: 1}
+        frequency: common
+        counterparty_profile: Procurement-led reviews using a controller template
+      - objection: You hold the data, so you should reply to the patient directly.
+        their_rationale: >
+          The Controller wants to reduce its own administrative load and
+          assumes the Processor can run the search.
+        response: >
+          We are not able to reply to patients on the substance of a request.
+          Only you can confirm who the patient is, decide what may be
+          disclosed from a clinical record and apply any exemption, and a
+          Processor that took those decisions would be acting as a controller.
+          What we can do is forward requests quickly and make sure your team
+          can complete the search and export in the Services in minutes.
+        talking_points:
+          - Halcyon has no means to verify a patient's identity.
+          - Offer a walkthrough of the export and deletion features for the Controller's privacy team.
+        frequency: occasional
+        counterparty_profile: Small clinic groups without a privacy team
+    dependencies:
+      - related_rule_key: data_protection.processing_instructions
+        relation: read_with
+        note: >
+          Any reply to a Data Subject beyond an acknowledgement would need a
+          documented instruction; the two clauses must not contradict each
+          other.
+    test_cases:
+      - name: Forwarding within five working days with chargeable extras
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Where an individual contacts the Processor to exercise a right
+          under Chapter III of the GDPR and names the Controller, the
+          Processor will pass the request to the Controller no later than
+          five working days after receiving it and will do no more than
+          acknowledge it to the individual. The Controller will use the
+          export, correction and deletion functions of the Services to deal
+          with requests, and the Processor will give further reasonable help
+          on written request at its standard professional services rates.
+      - name: Seven-day notification and no reply without instructions
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          The Processor must notify the Controller promptly, and at the
+          latest within seven days, of any Data Subject communication
+          concerning rights under Data Protection Laws and must not reply to
+          it unless the Controller so instructs in writing. The Processor
+          will cooperate as reasonably required, and the Controller will meet
+          the reasonable cost of cooperation beyond the functionality of the
+          Services.
+      - name: Three business days and free help where tools fall short
+        context: {region: eu, regimes: [gdpr], counterparty_tier: tier_2}
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          The Processor shall send to the Controller, within three business
+          days of receipt, any request from a Data Subject relating to the
+          Controller's Personal Data and shall only acknowledge the request.
+          If the Controller is unable to satisfy a request through the
+          Services, the Processor shall help without charge; help with tasks
+          the Controller could carry out itself in the Services is billable.
+      - name: Two business days and free assistance
+        context: {region: eu, regimes: [gdpr], counterparty_tier: tier_1}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Requests received by the Processor from Data Subjects shall be
+          forwarded to the Controller's privacy mailbox within two business
+          days, and the Processor shall not reply beyond confirming that the
+          request has been forwarded. The Processor shall give all reasonable
+          assistance requested by the Controller in writing, free of charge,
+          in respect of Personal Data in the production Services.
+      - name: Same-day forwarding
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: deviation
+        expected_zone: red
+        sample_text: >
+          The Processor shall forward every Data Subject request to the
+          Controller immediately and in any case on the day it is received,
+          and shall provide whatever assistance the Controller requires at no
+          cost.
+      - name: Processor answers Data Subjects within one month
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: red_line
+        expected_red_line_key: gdpr-dsr-processor-responds
+        expected_zone: red
+        sample_text: >
+          The Processor shall respond directly to each Data Subject who makes
+          a request concerning Personal Data, shall determine whether the
+          request is well founded, and shall ensure that a complete response
+          is issued within one month of receipt.
+      - name: Trap - Processor does not respond except to acknowledge
+        context: {region: eu, regimes: [gdpr]}
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          The Processor shall not respond directly to a Data Subject, and
+          shall not determine whether a request is well founded; within five
+          business days of receipt it shall refer the request to the
+          Controller, who alone is responsible for ensuring that a response
+          is issued within one month. The Processor may tell the Data Subject
+          that the request has been referred. Additional assistance beyond
+          the features of the Services is available at the Processor's
+          professional services rates.
+
+  - rule_key: data_protection.dpia_assistance
+    title: Assistance with impact assessments and prior consultation (GDPR)
+    required: true
+    risk_weight: 5
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      The Processor helps the Controller with data protection impact
+      assessments and prior consultation by supplying its documentation,
+      audit reports and standard assessment pack. Bespoke work is chargeable.
+    risk_rationale: >
+      Article 28(3)(f) requires assistance with the duties in Articles 35
+      and 36, but the assessment is the Controller's, because only the
+      Controller knows its purposes and patient population. Halcyon's SOC 2
+      Type II report, ISO 27001 certificate and HITRUST r2 assessment already
+      answer most security questions, and one privacy counsel cannot write
+      bespoke assessments for about 310 customers. Uncapped free assistance
+      on a median $165k contract turns a documentation duty into unpaid
+      consultancy.
+    detection_guidance: >
+      Look for "data protection impact assessment", "DPIA", "prior
+      consultation", "Article 35", "Article 36" and "taking into account the
+      nature of the processing and the information available to the
+      Processor". Record any number of hours of assistance included without
+      charge, and whether the Processor is asked to carry out the assessment
+      or deal with the Supervisory Authority itself. "Reasonable assistance"
+      limited by the information available to the Processor is compliant.
+    source_ref: GDPR Art. 28(3)(f); Art. 35 (impact assessment); Art. 36 (prior consultation)
+    authored_by: Privacy Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Documentation-based assistance, bespoke work chargeable
+        zone: green
+        summary: >
+          Reasonable assistance through existing documentation and audit
+          reports; anything bespoke at professional services rates.
+        language: >
+          Taking into account the nature of the processing and the
+          information available to the Processor, the Processor shall provide
+          the Controller with reasonable assistance in carrying out data
+          protection impact assessments relating to the Controller's use of
+          the Services and in any prior consultation with a Supervisory
+          Authority that the GDPR requires of the Controller. The Processor
+          shall meet this obligation by making available the Documentation,
+          its description of technical and organisational measures, its
+          current independent audit reports and certifications, and its
+          standard assessment information pack for the Services. Where the
+          Controller reasonably requires assistance beyond those materials,
+          the Processor shall provide it on written request and may charge
+          for it at its then-current professional services rates. The
+          Controller remains responsible for carrying out the assessment,
+          for its conclusions and for any consultation with a Supervisory
+          Authority.
+      - kind: fallback
+        rung: 1
+        label: Eight hours of bespoke assistance included each year
+        zone: green
+        summary: >
+          Standard materials plus up to eight hours a year of bespoke
+          assistance without charge.
+        language: >
+          Taking into account the nature of the processing and the
+          information available to the Processor, the Processor shall provide
+          the Controller with reasonable assistance in carrying out data
+          protection impact assessments relating to the Controller's use of
+          the Services and in any prior consultation with a Supervisory
+          Authority that the GDPR requires of the Controller. The Processor
+          shall make available the Documentation, its description of
+          technical and organisational measures, its current independent
+          audit reports and certifications, and its standard assessment
+          information pack. In addition, the Processor shall provide up to
+          eight (8) hours of assistance beyond those materials in each
+          contract year at no additional charge, including written answers
+          to the Controller's reasonable questions. Assistance beyond that
+          allowance may be charged at the Processor's then-current
+          professional services rates. The Controller remains responsible for
+          the assessment and for any consultation with a Supervisory
+          Authority.
+      - kind: fallback
+        rung: 2
+        label: Twenty hours of bespoke assistance included each year
+        zone: yellow
+        approver_role: privacy_counsel
+        conditions: {deal_value_band: [enterprise, strategic]}
+        give_get: >
+          Ask the Controller to accept the SOC 2 Type II report in place of
+          its own security questionnaire for the assessment.
+        summary: >
+          Standard materials plus up to twenty hours a year of bespoke
+          assistance without charge, for larger deals.
+        language: >
+          Taking into account the nature of the processing and the
+          information available to the Processor, the Processor shall provide
+          the Controller with reasonable assistance in carrying out data
+          protection impact assessments relating to the Controller's use of
+          the Services and in any prior consultation with a Supervisory
+          Authority that the GDPR requires of the Controller. The Processor
+          shall make available the Documentation, its description of
+          technical and organisational measures, its current independent
+          audit reports and certifications, and its standard assessment
+          information pack. In addition, the Processor shall provide up to
+          twenty (20) hours of assistance beyond those materials in each
+          contract year at no additional charge, including written answers
+          to the Controller's reasonable questions and attendance at one
+          meeting with the Controller's data protection officer. Assistance
+          beyond that allowance may be charged at the Processor's
+          then-current professional services rates. The Controller remains
+          responsible for the assessment and for any consultation with a
+          Supervisory Authority.
+      - kind: acceptable_variant
+        label: Reasonable assistance at the Controller's cost
+        zone: green
+        summary: >
+          Counterparty wording that follows the Regulation and puts the cost
+          of assistance on the Controller.
+        language: >
+          The Processor shall, at the Controller's request and cost, give
+          the Controller such assistance as the Controller reasonably
+          requires, having regard to the nature of the processing and the
+          information available to the Processor, to enable the Controller
+          to comply with its obligations under Articles 35 and 36 of the
+          GDPR in connection with the Services. The Processor may satisfy
+          this obligation by providing its existing security documentation
+          and audit reports.
+      - kind: acceptable_variant
+        label: Assistance through a named privacy contact
+        zone: green
+        summary: >
+          Counterparty wording naming a specific privacy contact for impact
+          assessment questions, consistent with the standard assistance
+          commitment.
+        language: >
+          The Processor shall designate a privacy contact to whom the
+          Controller may direct reasonable questions arising from a data
+          protection impact assessment or prior consultation under Articles
+          35 and 36 of the GDPR, and shall answer such questions having
+          regard to the nature of the processing and the information
+          available to the Processor, drawing on its existing documentation
+          and audit reports where they answer the question.
+    parameters:
+      - key: dpia_free_assistance_hours
+        label: Hours of bespoke assessment assistance included without charge each year
+        value_type: number
+        unit: hours per contract year
+        direction: lower_is_better
+        preferred_value: 0
+        green_limit: 8
+        yellow_limit: 20
+        extraction_hint: >
+          Read the number of hours of assistance beyond standard
+          documentation that the Processor must give each year without
+          charge. If assistance is at the Controller's cost, or limited to
+          existing documentation, record 0. If all assistance is free with
+          no limit, record 999.
+    red_lines:
+      - key: gdpr-dpia-processor-conducts
+        description: >
+          The Processor must carry out the Controller's impact assessment or
+          consult the Supervisory Authority in the Controller's place.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause requires the Processor to perform, author or be
+            responsible for the Controller's data protection impact
+            assessment, to warrant that the processing does not result in a
+            high risk, or to conduct prior consultation with a Supervisory
+            Authority on the Controller's behalf. Answer no if the Processor
+            only provides information and assistance to the Controller.
+        action: block
+        rationale: >
+          Articles 35 and 36 place both duties on the Controller. Halcyon
+          does not know the Controller's purposes, lawful basis or patient
+          population and cannot own the assessment's conclusions.
+    objections:
+      - objection: Assistance with impact assessments is a statutory duty and must be free.
+        their_rationale: >
+          The Controller reads Article 28(3)(f) as an unconditional
+          obligation and treats any charge as a refusal to comply.
+        response: >
+          We agree the duty exists, and we meet it at no charge through the
+          assessment pack, the description of our security measures and our
+          SOC 2 Type II, ISO 27001 and HITRUST r2 reports, which together
+          answer the questions an assessment of Halcyon Engage normally
+          raises. The Regulation limits the duty to the information available
+          to the Processor, and the charge applies only to tailored work
+          beyond that. To meet you part way, we can include eight hours of
+          tailored assistance each year without charge.
+        talking_points:
+          - Send the assessment pack before the call; it usually closes the point.
+          - Article 28(3)(f) qualifies the duty by the nature of the processing and the information available.
+        recommended_position: {rule_key: data_protection.dpia_assistance, rung: 1}
+        frequency: common
+        counterparty_profile: EU private clinic groups using a controller-drafted DPA
+      - objection: You know your system best, so you should complete the assessment for us.
+        their_rationale: >
+          The Controller lacks in-house privacy staff and sees the
+          assessment as a description of the vendor's product.
+        response: >
+          An impact assessment turns on why you process patient data, on
+          what legal basis and what the risks are for your patients, and
+          only you can answer those questions. We supply everything about
+          how the Services handle the data, in a pack laid out to match the
+          sections of a typical assessment, so that your team can complete
+          it quickly. We are happy to answer follow-up questions in writing.
+        talking_points:
+          - The pack follows the headings that supervisory authority templates use.
+          - Offer a call between the Controller's data protection officer and Halcyon's privacy counsel.
+        frequency: occasional
+        counterparty_profile: Small clinic groups without a data protection officer
+    dependencies:
+      - related_rule_key: data_transfers.transfer_impact_assessment
+        relation: read_with
+        note: >
+          The DPIA and the transfer impact assessment are both risk
+          assessments the Controller relies on; where a transfer is also in
+          scope, keep the two assessments consistent with each other.
+    test_cases:
+      - name: Assistance through existing documentation
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Having regard to the nature of the processing and the information
+          it holds, the Processor will reasonably assist the Controller with
+          impact assessments under the GDPR and with prior consultation of
+          the regulator where the Controller is obliged to consult. It will
+          do so by supplying its product documentation, security description
+          and latest third-party audit reports. Tailored work beyond these
+          materials is provided on request and billed at the Processor's
+          professional services rates. The assessment itself is the
+          Controller's responsibility.
+      - name: Assistance at the Controller's request and cost
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          On request and at the Controller's expense, the Processor shall
+          provide the assistance the Controller reasonably needs to comply
+          with Articles 35 and 36 of the GDPR, considering the nature of the
+          processing and the information available to the Processor, and may
+          do this by providing existing audit reports and security papers.
+      - name: Eight free hours a year
+        context: {region: eu, regimes: [gdpr], deal_value_band: mid}
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          The Processor will support the Controller's data protection impact
+          assessments by providing its documentation and audit reports and,
+          each contract year, a maximum of eight hours of further support
+          free of charge. Support above eight hours is charged at
+          professional services rates. The Controller owns the assessment.
+      - name: Twenty free hours on an enterprise deal
+        context: {region: eu, regimes: [gdpr], deal_value_band: enterprise}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          In addition to its standard documentation and audit reports, the
+          Processor shall give the Controller up to twenty hours of
+          assistance per contract year without charge for impact assessments
+          and prior consultation, including one meeting with the Controller's
+          data protection officer. Further assistance is chargeable.
+      - name: Unlimited free assistance
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: deviation
+        expected_zone: red
+        sample_text: >
+          The Processor shall provide, free of charge and without limit, all
+          assistance, information and personnel that the Controller requests
+          in connection with any data protection impact assessment or
+          consultation with a Supervisory Authority.
+      - name: Processor carries out the assessment
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: red_line
+        expected_red_line_key: gdpr-dpia-processor-conducts
+        expected_zone: red
+        sample_text: >
+          The Processor shall carry out a data protection impact assessment
+          of the Services on the Controller's behalf before go-live, shall
+          confirm that the processing presents no high risk to individuals,
+          and shall consult the competent Supervisory Authority for the
+          Controller where required.
+
+  - rule_key: data_protection.records_of_processing
+    title: Records of processing activities (GDPR)
+    required: true
+    risk_weight: 5
+    negotiable: false
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      The Processor keeps a written record of the categories of processing it
+      carries out for the Controller, in the form Article 30(2) requires, and
+      makes it available to the Controller or a competent Supervisory
+      Authority on reasonable request within ten business days.
+    risk_rationale: >
+      Article 30(2) is a standing duty on every processor regardless of what
+      the Agreement says, so the clause only fixes how quickly Halcyon
+      produces the record on request; it cannot be negotiated away. Halcyon
+      runs one processing operation across roughly 310 customers, so its
+      record is maintained centrally by the privacy counsel's team rather
+      than per customer, and ten business days reflects the time to extract
+      the customer-specific extract from that central record without
+      diverting the team from live breach or request work.
+    detection_guidance: >
+      Look for "records of processing activities", "Article 30", "written
+      record", "categories of processing" and a period for producing the
+      record. A clause that only restates the statutory duty with no period
+      for production is still compliant; record the period as absent in that
+      case. A clause that purports to remove or exclude the duty entirely is
+      a deviation or red line, since the duty exists regardless of contract
+      wording.
+    source_ref: GDPR Art. 30(2) (content of the processor's record); Art. 30(4) (availability to a Supervisory Authority)
+    authored_by: Privacy Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Central record, available within ten business days
+        zone: green
+        summary: >
+          A central written record covering all processing under the
+          Agreement, made available to the Controller or a Supervisory
+          Authority within ten business days of a reasonable request.
+        language: >
+          The Processor shall maintain a written record of the categories of
+          processing it carries out on behalf of the Controller, containing
+          the information required by Article 30(2) of the GDPR, including
+          the Controller's name and contact details, the categories of
+          processing, any transfers of Personal Data to a third country and
+          the identity of that country, and a general description of the
+          technical and organisational security measures referred to in
+          Article 32(1). The Processor shall make this record, or the extract
+          relevant to the Controller, available to the Controller within ten
+          (10) business days of a reasonable written request, and shall make
+          it available to a competent Supervisory Authority on request, as
+          required by Article 30(4).
+      - kind: acceptable_variant
+        label: Record referenced by the Documentation and audit reports
+        zone: green
+        summary: >
+          Counterparty wording that points to the Processor's existing
+          record and audit materials instead of restating Article 30(2).
+        language: >
+          The Processor shall keep records of its processing activities in
+          accordance with Article 30(2) of the GDPR and shall, on the
+          Controller's reasonable written request and within a reasonable
+          time, provide the Controller with the information from those
+          records relevant to the Controller's Personal Data, which may be
+          supplied together with the Processor's current security
+          documentation and audit reports.
+      - kind: acceptable_variant
+        label: Record described by reference to Article 30(2) content
+        zone: green
+        summary: >
+          Counterparty wording listing the Article 30(2) content items
+          directly rather than cross-referring to the Article.
+        language: >
+          The Processor shall maintain, in writing, a record of the name and
+          contact details of the Controller, the categories of processing
+          carried out on the Controller's behalf, any transfers of Personal
+          Data to a third country and the safeguards applicable to them, and
+          a general description of the technical and organisational security
+          measures applied, and shall make the record available to the
+          Controller on reasonable written request.
+    parameters:
+      - key: records_production_business_days
+        label: Business days to produce the Controller's extract of the processing record
+        value_type: duration_days
+        unit: business days
+        direction: higher_is_better
+        preferred_value: 10
+        green_limit: 5
+        yellow_limit: 2
+        extraction_hint: >
+          Read the period within which the Processor must produce the
+          record, or the Controller's extract of it, after a reasonable
+          request. If the clause states no period, record the period as
+          absent rather than 0.
+    red_lines:
+      - key: gdpr-ror-no-records-duty
+        description: >
+          The clause states or implies that the Processor has no duty to
+          maintain a written record of processing.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause disclaims, excludes or states that the Processor is
+            not required to keep any written record of the processing it
+            carries out for the Controller. Answer no if the clause is silent
+            on records or affirms the duty, even without a production period.
+        action: block
+        rationale: >
+          The Article 30(2) duty exists independently of the Agreement; a
+          clause that purports to remove it misstates the law and would
+          mislead a Controller reviewing Halcyon's compliance posture.
+    test_cases:
+      - name: Central record produced within ten business days
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Halcyon keeps a written record of the processing it performs for
+          the Controller, covering the matters set out in Article 30(2) of
+          the GDPR, including categories of processing, any third-country
+          transfers and a general description of its security measures. On a
+          reasonable written request, Halcyon will provide the Controller's
+          extract of that record within ten business days, and will make the
+          record available to a competent Supervisory Authority on request.
+      - name: Record referenced through documentation and audit reports
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          The Processor maintains records of processing activities as
+          required by Article 30(2) and will share the information relevant
+          to the Controller, together with its current security
+          documentation and audit reports, within a reasonable time of a
+          written request.
+      - name: Record exists but no production commitment
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          The Processor maintains a record of the processing carried out for
+          the Controller as required by applicable law.
+      - name: Record limited to a short extract on demand same day
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          The Processor shall produce, within one business day of any
+          request, a complete copy of all its processing records across all
+          customers for the Controller's inspection.
+      - name: No duty to keep records of processing
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: red_line
+        expected_red_line_key: gdpr-ror-no-records-duty
+        expected_zone: red
+        sample_text: >
+          Nothing in this DPA requires the Processor to maintain any record
+          of the categories of processing it carries out for the Controller.
+      - name: No records of processing clause
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: missing
+        expected_zone: yellow
+        sample_text: ""
+      - name: Trap - record kept even though no period is stated
+        context: {region: eu, regimes: [gdpr]}
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          The Processor maintains, and will continue to maintain, the record
+          of processing activities required by Article 30(2) of the GDPR,
+          which it does not propose to discontinue or withhold from the
+          Controller or from a competent Supervisory Authority.
+
+  - rule_key: data_transfers.transfer_mechanism
+    title: Lawful mechanism for international transfers (GDPR)
+    required: true
+    risk_weight: 8
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Personal Data transferred outside the EEA or the UK moves under the
+      Standard Contractual Clauses, Module Two, incorporated by reference,
+      with the UK Addendum applied for transfers of UK data, or under an
+      applicable adequacy decision where one exists.
+    risk_rationale: >
+      A transfer under Chapter V without a valid mechanism exposes both
+      parties to enforcement and could force Halcyon to suspend processing
+      for its EU customers, a group that includes some of its largest
+      accounts up to $2.4M a year. Incorporating the Commission's Standard
+      Contractual Clauses by reference, rather than negotiating bespoke
+      transfer terms deal by deal, lets Halcyon support its EU private
+      clinic group customers consistently while keeping its AWS eu-west-1
+      hosting and its US-based support and engineering functions available
+      where the Clauses' safeguards are met.
+    detection_guidance: >
+      Look for "Standard Contractual Clauses", "Module Two", "Commission
+      Implementing Decision (EU) 2021/914", "UK Addendum", "International
+      Data Transfer Agreement", "adequacy decision" and "Restricted
+      Transfer". Check which module is used, which entity is the data
+      exporter and importer, and whether the Clauses are incorporated by
+      reference or attached in full. A clause relying only on the
+      Controller's general compliance promise, with no named mechanism, is a
+      deviation. Absence where the Controller's Personal Data can be
+      accessed from outside the EEA or UK is a missing mandatory term.
+    source_ref: >
+      GDPR Arts. 44 to 49 (Chapter V); Art. 46(2)(c); Commission Implementing
+      Decision (EU) 2021/914 (Standard Contractual Clauses); UK International
+      Data Transfer Addendum
+    authored_by: Privacy Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: SCCs Module Two by reference, UK Addendum where relevant
+        zone: green
+        summary: >
+          The Standard Contractual Clauses, Module Two, incorporated by
+          reference, with the UK Addendum layered on for UK Personal Data.
+        language: >
+          To the extent the Processor's processing of Personal Data under
+          this DPA involves a transfer of Personal Data originating in the
+          European Economic Area to a country not covered by an adequacy
+          decision of the European Commission, the parties incorporate by
+          reference the Standard Contractual Clauses approved by Commission
+          Implementing Decision (EU) 2021/914, Module Two (Controller to
+          Processor), with the Controller as data exporter and the Processor
+          as data importer, completed using the details in this DPA and its
+          annexes. To the extent such a transfer involves Personal Data
+          protected by the UK GDPR, the parties incorporate the UK
+          International Data Transfer Addendum to those Clauses. Where the
+          European Commission or, for the UK, the Secretary of State issues an
+          adequacy decision covering the destination country, the parties may
+          rely on it in place of the Clauses for transfers to that country.
+      - kind: fallback
+        rung: 1
+        label: SCCs attached in full as an annex
+        zone: green
+        summary: >
+          The same mechanism, set out in full as a signed annex rather than
+          incorporated by reference.
+        language: >
+          The parties shall execute, as Annex [number] to this DPA, the
+          Standard Contractual Clauses approved by Commission Implementing
+          Decision (EU) 2021/914, Module Two (Controller to Processor),
+          completed with the Controller as data exporter and the Processor as
+          data importer, together with the UK International Data Transfer
+          Addendum where the transfer involves Personal Data protected by the
+          UK GDPR. Those executed Clauses govern any transfer of Personal
+          Data originating in the European Economic Area or the United
+          Kingdom to a country not covered by an adequacy decision.
+      - kind: fallback
+        rung: 2
+        label: Controller-specified annex content within the Clauses
+        zone: yellow
+        approver_role: privacy_counsel
+        conditions: {counterparty_tier: [tier_1]}
+        give_get: >
+          Ask the Controller to accept Halcyon's standard description of
+          technical and organisational measures as Annex II rather than
+          drafting its own.
+        summary: >
+          The Clauses as above, with Controller-drafted annex content
+          describing the categories of data and data subjects.
+        language: >
+          The parties incorporate the Standard Contractual Clauses approved
+          by Commission Implementing Decision (EU) 2021/914, Module Two
+          (Controller to Processor), and the UK International Data Transfer
+          Addendum where relevant, as the mechanism for any transfer of
+          Personal Data originating in the European Economic Area or the
+          United Kingdom to a country not covered by an adequacy decision. The
+          Controller shall provide the description of the categories of data
+          subjects and Personal Data for Annex I, and the Processor shall
+          provide the description of technical and organisational measures
+          for Annex II, each acting reasonably and promptly so as not to
+          delay the Agreement's effective date.
+      - kind: acceptable_variant
+        label: Framework certification in place of the Clauses
+        zone: green
+        summary: >
+          A recognised transfer framework certification used instead of the
+          Clauses for transfers to a participating country.
+        language: >
+          Where the Processor or a Sub-processor is certified under the EU-US
+          Data Privacy Framework or an equivalent successor framework
+          recognised by the European Commission as providing adequate
+          protection for the relevant transfer, the parties may rely on that
+          certification in place of the Standard Contractual Clauses for
+          transfers covered by it, for so long as the certification and the
+          underlying adequacy decision remain valid.
+    parameters:
+      - key: transfer_mechanism_type
+        label: Mechanism relied on for restricted transfers
+        value_type: enum
+        direction: set_membership
+        preferred_value: sccs_module_two
+        green_limit: [sccs_module_two, adequacy_decision, framework_certification]
+        yellow_limit: [controller_drafted_annexes]
+        allowed_values:
+          - sccs_module_two
+          - adequacy_decision
+          - framework_certification
+          - controller_drafted_annexes
+          - no_named_mechanism
+        extraction_hint: >
+          Read which mechanism the clause names for transfers out of the EEA
+          or UK. If the clause lets the Controller draft the data-subject or
+          security annexes rather than using Halcyon's standard text, record
+          controller_drafted_annexes. If no mechanism is named at all, record
+          no_named_mechanism.
+    red_lines:
+      - key: gdpr-transfer-no-mechanism
+        description: >
+          Personal Data may be transferred outside the EEA or the UK with no
+          Standard Contractual Clauses, adequacy decision or other Chapter V
+          mechanism identified.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause permits the Processor to transfer Personal Data to a
+            country outside the European Economic Area or the United Kingdom
+            that is not covered by an adequacy decision, without naming the
+            Standard Contractual Clauses, a binding corporate rules
+            authorisation, a recognised certification framework or another
+            Chapter V transfer mechanism. Answer no if a named mechanism
+            applies to every such transfer, even if the clause also allows an
+            adequacy decision to be relied on instead.
+        action: block
+        rationale: >
+          A restricted transfer with no Chapter V mechanism is unlawful under
+          Articles 44 to 49 regardless of what the Agreement says, and leaves
+          Halcyon and the Controller both exposed to supervisory authority
+          enforcement.
+    objections:
+      - objection: We need the Clauses attached and signed, not just referenced.
+        their_rationale: >
+          The Controller's own compliance file requires a signed copy of the
+          transfer mechanism it relies on.
+        response: >
+          We are glad to attach the Clauses as a signed annex rather than
+          incorporate them by reference; the substance is identical and this
+          keeps your file self-contained. We will complete Annex I and II
+          using the details already in this DPA so nothing needs to be
+          redrafted.
+        talking_points:
+          - Incorporation by reference and a signed annex have the same legal effect.
+          - Offer to pre-fill the annexes from the DPA's existing fields.
+        recommended_position: {rule_key: data_transfers.transfer_mechanism, rung: 1}
+        frequency: common
+        counterparty_profile: EU private clinic groups with a compliance audit file
+      - objection: We want to write our own description of the security measures in Annex II.
+        their_rationale: >
+          A tier_1 counterparty's data protection officer wants language that
+          matches its own risk assessment rather than a supplier's template.
+        response: >
+          We can work from your description of the categories of data and
+          data subjects for Annex I. For Annex II we ask to use our own
+          description of technical and organisational measures, since it
+          reflects what is actually implemented across the Services and is
+          consistent with our SOC 2 Type II and ISO 27001 scope; we are happy
+          to walk your team through it line by line.
+        talking_points:
+          - Mismatched Annex II text against actual controls creates an audit finding, not a protection.
+          - Offer a joint review call before the annexes are finalised.
+        recommended_position: {rule_key: data_transfers.transfer_mechanism, rung: 2}
+        frequency: occasional
+        counterparty_profile: Large hospital systems and public health bodies
+      - objection: Our data must never leave the EEA, Clauses or not.
+        their_rationale: >
+          The Controller equates any transfer mechanism with data leaving
+          Europe and wants a stricter commitment.
+        response: >
+          The Clauses are the mechanism that applies only if data is
+          transferred outside the EEA or UK; they do not themselves cause a
+          transfer. For your account, production Personal Data is hosted and
+          processed in our EU region, and the data residency clause in this
+          DPA, not the transfer clause, is where we commit to keep it there.
+        talking_points:
+          - Point to the data_transfers.data_residency rule for the hosting commitment.
+          - Explain that remote support access is addressed separately and is limited.
+        recommended_position: {rule_key: data_transfers.data_residency, rung: 0}
+        frequency: occasional
+        counterparty_profile: EU private clinic groups new to cloud hosting
+    dependencies:
+      - related_rule_key: data_transfers.data_residency
+        relation: read_with
+        note: >
+          The transfer mechanism covers data leaving the EEA or UK; the data
+          residency rule covers where it is hosted in the first place. Read
+          both before responding to a transfer objection.
+      - related_rule_key: data_transfers.transfer_impact_assessment
+        relation: requires
+        note: >
+          Reliance on the Clauses is not enough on its own; the transfer
+          impact assessment rule's commitments are what the Clauses require
+          in practice after Schrems II.
+    test_cases:
+      - name: SCCs Module Two incorporated by reference, UK Addendum included
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Any transfer of Personal Data originating in the EEA to a country
+          outside it that lacks an adequacy decision is governed by the
+          Standard Contractual Clauses under Commission Implementing Decision
+          (EU) 2021/914, Module Two, incorporated into this DPA by reference,
+          with the Controller as exporter and the Processor as importer. The
+          UK International Data Transfer Addendum applies to any such
+          transfer of UK Personal Data. An applicable adequacy decision may
+          be relied on instead where one exists.
+      - name: Data Privacy Framework certification relied on
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Where the Processor is certified under the EU-US Data Privacy
+          Framework or a successor scheme recognised by the European
+          Commission as adequate, transfers to the United States covered by
+          that certification may rely on it instead of the Standard
+          Contractual Clauses, for as long as the certification and the
+          underlying adequacy finding remain in force.
+      - name: SCCs signed as a full annex
+        context: {region: eu, regimes: [gdpr], counterparty_tier: tier_2}
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          Annex 3 to this DPA is the Standard Contractual Clauses, Module Two,
+          under Commission Implementing Decision (EU) 2021/914, executed by
+          the parties, naming the Controller as exporter and the Processor as
+          importer, together with the UK Addendum where UK data is involved.
+      - name: Controller drafts both annexes for a tier_1 account
+        context: {region: eu, regimes: [gdpr], counterparty_tier: tier_1}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          The parties adopt the Standard Contractual Clauses, Module Two, and
+          the UK Addendum where applicable, for restricted transfers. The
+          Controller shall prepare both Annex I, describing the categories of
+          data and data subjects, and Annex II, describing the technical and
+          organisational security measures, for the Processor's review and
+          agreement before signature.
+      - name: Transfer clause restates compliance with no named mechanism
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          The Processor shall comply with applicable law in respect of any
+          transfer of Personal Data outside the European Economic Area.
+      - name: Transfers permitted with no mechanism at all
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: red_line
+        expected_red_line_key: gdpr-transfer-no-mechanism
+        expected_zone: red
+        sample_text: >
+          The Processor may process and store Personal Data at any facility
+          operated by the Processor or its Sub-processors worldwide, and
+          Customer consents to such processing wherever it occurs.
+      - name: Trap - adequacy decision offered as an alternative, not instead of all safeguards
+        context: {region: eu, regimes: [gdpr]}
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Transfers of Personal Data to a country covered by a European
+          Commission adequacy decision may proceed under that decision; this
+          does not remove the Standard Contractual Clauses, Module Two, under
+          Commission Implementing Decision (EU) 2021/914, as the mechanism
+          that continues to apply to any transfer to a country the decision
+          does not cover.
+
+  - rule_key: data_transfers.transfer_impact_assessment
+    title: Transfer impact assessment and government access requests (GDPR)
+    required: true
+    risk_weight: 7
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      The Processor gives the Controller the information it needs to assess
+      the law and practice of a destination country, applies the supplementary
+      measures described in its Documentation, and notifies the Controller of
+      a government access request it is legally permitted to disclose,
+      challenging requests it considers unlawful.
+    risk_rationale: >
+      Following the CJEU's Schrems II judgment, the Standard Contractual
+      Clauses are not enough on their own; the exporter must assess whether
+      the importing country's law undermines the Clauses' protections, and
+      the Processor must supply the facts that assessment needs. Halcyon's
+      AWS eu-west-1 hosting and its SOC 2 Type II and ISO 27001 controls
+      support encryption and access-logging measures that answer most of
+      that assessment, but committing to challenge every government request
+      in every destination country regardless of its merits would expose a
+      430-employee company to legal costs no single $165k median contract
+      could fund.
+    detection_guidance: >
+      Look for "transfer impact assessment", "laws and practices of the
+      third country", "supplementary measures", "government access request",
+      "challenge" and "transparency report". Check whether the Processor must
+      assess the destination law itself (acceptable only if it is also
+      supplying the facts to the Controller) or whether it supports the
+      Controller's own assessment. A duty to resist every request regardless
+      of its legal basis, with no reference to applicable law, is a
+      deviation. Absence where the Clauses are relied on for a transfer is a
+      missing issue.
+    source_ref: >
+      GDPR Art. 46 (transfers subject to appropriate safeguards); Art. 49(1)
+      (derogations, as a last resort); EDPB Recommendations 01/2020 on
+      supplementary measures following Case C-311/18 (Schrems II)
+    authored_by: Privacy Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Information and supplementary measures, lawful challenge only
+        zone: green
+        summary: >
+          The Processor supplies assessment information and documented
+          supplementary measures, and challenges only requests it reasonably
+          believes are unlawful.
+        language: >
+          The Processor shall make available to the Controller the
+          information reasonably necessary for the Controller to assess
+          whether the laws and practices of a third country to which Personal
+          Data is transferred undermine the protection given by the transfer
+          mechanism used, including the categories of government access to
+          data in that country that are publicly known to the Processor. The
+          Processor shall apply the technical supplementary measures set out
+          in its Documentation, including encryption of Personal Data at rest
+          and in transit using keys the Processor controls. If the Processor
+          receives a legally binding request from a public authority for
+          disclosure of Personal Data, it shall, unless legally prohibited
+          from doing so, notify the Controller before disclosure and shall
+          challenge the request where the Processor reasonably considers it
+          unlawful under the law of the requesting authority or in conflict
+          with Union or Member State law, seeking interim measures where
+          available. The Processor shall publish, or make available to the
+          Controller on request, a general description of the volume and
+          type of such requests it receives.
+      - kind: fallback
+        rung: 1
+        label: Information and measures without a challenge commitment
+        zone: green
+        summary: >
+          The same information and measures, with a best-efforts rather than
+          reasonable-grounds standard for challenging requests.
+        language: >
+          The Processor shall make available to the Controller the
+          information reasonably necessary to assess the laws and practices
+          of a third country to which Personal Data is transferred, and shall
+          apply the supplementary measures described in its Documentation. If
+          the Processor receives a legally binding government request for
+          Personal Data, it shall use reasonable efforts to notify the
+          Controller before complying, unless prohibited by law, and will
+          consider in good faith whether grounds exist to challenge the
+          request.
+      - kind: fallback
+        rung: 2
+        label: Annual transparency summary in place of per-request notice
+        zone: yellow
+        approver_role: privacy_counsel
+        conditions: {counterparty_tier: [tier_3]}
+        give_get: >
+          Offer an annual written summary of government requests in place of
+          individual notice, to reduce the Processor's per-request burden on
+          smaller accounts.
+        summary: >
+          Information and supplementary measures as above, with an annual
+          transparency summary instead of notice for each individual request.
+        language: >
+          The Processor shall make available to the Controller the
+          information reasonably necessary to assess the laws and practices
+          of a third country to which Personal Data is transferred, and shall
+          apply the supplementary measures described in its Documentation. In
+          place of notice of each individual government request, the
+          Processor shall provide the Controller, on written request no more
+          than once in each contract year, a summary of the number and
+          general nature of legally binding government requests for Personal
+          Data the Processor received in the preceding twelve months.
+      - kind: acceptable_variant
+        label: Reliance on the Processor's published transparency report
+        zone: green
+        summary: >
+          Counterparty wording accepting a published transparency report
+          instead of bespoke per-customer reporting.
+        language: >
+          The Processor shall make available the information the Controller
+          reasonably needs to carry out its transfer risk assessment,
+          including by reference to the Processor's published transparency
+          report describing government requests for data, and shall apply
+          the supplementary measures set out in its Documentation.
+    red_lines:
+      - key: gdpr-tia-standing-access-waiver
+        description: >
+          The Processor grants a government authority standing access to
+          Personal Data outside legal process, or waives its right to
+          challenge an unlawful request.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause gives any government or law enforcement authority
+            ongoing or automatic access to Personal Data without a request
+            under applicable legal process, or requires the Processor to
+            comply with every government request regardless of its legality
+            and to waive any right to challenge or seek judicial review of
+            such a request. Answer no if the Processor is only required to
+            comply with legally binding requests and may challenge requests
+            it reasonably considers unlawful.
+        action: block
+        rationale: >
+          Standing, unreviewable government access is the exact weakness
+          Schrems II found fatal to earlier transfer mechanisms; agreeing to
+          it would make every transfer under this DPA unlawful regardless of
+          the Clauses in place.
+    objections:
+      - objection: You must challenge every government request we don't consent to, full stop.
+        their_rationale: >
+          The Controller wants an unconditional commitment rather than one
+          tied to the Processor's own legal judgment.
+        response: >
+          We will always notify you before complying wherever the law
+          permits, and we challenge any request we reasonably believe is
+          unlawful; EDPB guidance expects exactly that standard, not an
+          unconditional refusal regardless of the law in the requesting
+          country. An unconditional commitment to refuse would expose Halcyon
+          to contempt or similar sanctions that a reasonable-grounds
+          commitment avoids.
+        talking_points:
+          - Cite the EDPB's own supplementary-measures guidance as the benchmark.
+          - Offer the annual transparency summary as added visibility.
+        recommended_position: {rule_key: data_transfers.transfer_impact_assessment, rung: 0}
+        frequency: common
+        counterparty_profile: EU private clinic groups with an active data protection officer
+      - objection: We need notice of every individual request, not an annual summary.
+        their_rationale: >
+          A tier_3 counterparty's objection is really about wanting the
+          default position; this appears when our deal desk has already
+          offered the summary too early.
+        response: >
+          Per-request notice is our standard commitment, and we will provide
+          it wherever the law permits. The annual summary is an option we
+          sometimes offer smaller accounts to reduce administrative overhead
+          on both sides; we are glad to keep per-request notice for your
+          account instead.
+        talking_points:
+          - Confirm per-request notice is the default before offering the fallback.
+        recommended_position: {rule_key: data_transfers.transfer_impact_assessment, rung: 0}
+        frequency: rare
+        counterparty_profile: Small clinic groups
+    dependencies:
+      - related_rule_key: data_transfers.transfer_mechanism
+        relation: requires
+        note: >
+          This rule is the supplementary-measures commitment that makes the
+          Clauses adopted under the transfer mechanism rule effective in
+          practice.
+    test_cases:
+      - name: Information, supplementary measures and lawful challenge
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Halcyon will give the Controller the information it reasonably
+          needs to judge whether the law of a destination country undermines
+          the transfer safeguards in place, and will keep in place the
+          technical measures, including encryption with keys it controls,
+          described in its Documentation. Where Halcyon receives a binding
+          government request for Personal Data, it will tell the Controller
+          first unless the law forbids this, and will challenge the request
+          where it reasonably believes the request is unlawful.
+      - name: Reliance on the published transparency report
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Halcyon will supply the information needed for the Controller's
+          transfer risk assessment, including through its published
+          transparency report on government data requests, and will maintain
+          the supplementary measures described in the Documentation.
+      - name: Best-efforts notice without a reasonable-grounds challenge standard
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          The Processor will make reasonable efforts to tell the Controller
+          before complying with a binding government data request, where the
+          law allows, and will think about whether there are grounds to
+          contest it.
+      - name: Annual summary for a small clinic account
+        context: {region: eu, regimes: [gdpr], counterparty_tier: tier_3}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Once a year, on written request, the Processor will tell the
+          Controller how many legally binding government requests for
+          Personal Data it received in the past twelve months and briefly
+          describe their nature, instead of notifying the Controller of each
+          one individually.
+      - name: No information or measures beyond the Clauses themselves
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          The parties rely on the Standard Contractual Clauses for any
+          restricted transfer and make no further commitment regarding the
+          laws of the destination country.
+      - name: Standing government access with no challenge right
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: red_line
+        expected_red_line_key: gdpr-tia-standing-access-waiver
+        expected_zone: red
+        sample_text: >
+          The Processor grants continuous access to its systems to any
+          government authority that requests it and waives any right to
+          challenge, appeal or seek judicial review of such a request.
+      - name: Trap - challenge limited to unlawful requests, not a blanket refusal
+        context: {region: eu, regimes: [gdpr]}
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          The Processor does not undertake to refuse every government
+          request regardless of the law; it will comply with a legally
+          binding request where no lawful ground exists to resist it, while
+          notifying the Controller first wherever permitted and challenging
+          any request it reasonably considers unlawful.
+
+  - rule_key: data_transfers.data_residency
+    title: Data residency for EU Personal Data (GDPR)
+    required: true
+    risk_weight: 7
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Personal Data of EU and UK Data Subjects is hosted and processed in
+      Halcyon's AWS eu-west-1 region on its standard multi-tenant
+      infrastructure, with remote access by support and engineering staff
+      outside the EEA permitted only under the technical and organisational
+      measures in the DPA.
+    risk_rationale: >
+      Halcyon operates one EU hosting region, eu-west-1, built and certified
+      to SOC 2 Type II, ISO 27001 and HITRUST r2 standards across its whole
+      customer base; a commitment to a different region or a dedicated
+      environment would require infrastructure Halcyon does not run for any
+      customer. EU private clinic groups are a meaningful share of the
+      roughly 310 accounts on the platform, and residency in the EU region
+      is the baseline they expect without needing to escalate; anything
+      narrower, such as a single named country facility or a single-tenant
+      build, is a cost and engineering commitment that must go through
+      security leadership.
+    detection_guidance: >
+      Look for "hosted in", "stored exclusively within", "data centres
+      located in", "EU region", "single-tenant" and "on-premises". Check
+      whether the clause names the EU region generally, a specific country
+      or facility, or a dedicated deployment. Remote access controls for
+      support staff are a separate point from where data is stored; do not
+      treat a limit on support access alone as a residency commitment.
+      Absence where the counterparty is an EU or UK account processing
+      Personal Data is a missing mandatory term.
+    source_ref: >
+      GDPR Art. 44 (transfers only in accordance with Chapter V, relevant
+      where access from outside the EEA is in issue); Art. 32 (security of
+      processing, relevant to the measures around remote access)
+    authored_by: Privacy Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: EU region hosting, multi-tenant
+        zone: green
+        summary: >
+          Personal Data of EU and UK Data Subjects is hosted in Halcyon's EU
+          region on the standard multi-tenant Services.
+        language: >
+          The Processor shall host and process Personal Data of Data
+          Subjects located in the European Economic Area or the United
+          Kingdom using its EU hosting region (AWS eu-west-1) on its standard
+          multi-tenant infrastructure. Remote access to that Personal Data by
+          Processor personnel located outside the European Economic Area for
+          support, maintenance or engineering purposes is permitted, subject
+          to the technical and organisational measures described in this DPA,
+          including role-based access controls, logging and encryption in
+          transit.
+      - kind: fallback
+        rung: 1
+        label: EU region hosting with access restricted to the EEA and UK
+        zone: green
+        summary: >
+          The same EU region hosting commitment, with remote access to
+          Personal Data limited to personnel located in the EEA or the UK.
+        language: >
+          The Processor shall host and process Personal Data of Data
+          Subjects located in the European Economic Area or the United
+          Kingdom using its EU hosting region (AWS eu-west-1) on its standard
+          multi-tenant infrastructure. Remote access to that Personal Data
+          shall be limited to Processor personnel located in the European
+          Economic Area or the United Kingdom, except where access from
+          another location is strictly necessary to resolve a service
+          incident and is logged and time-limited.
+      - kind: fallback
+        rung: 2
+        label: Named facility within the EU region
+        zone: yellow
+        approver_role: security_lead
+        conditions: {counterparty_tier: [tier_1]}
+        give_get: >
+          Ask for a multi-year term or an uplift in Fees to offset the
+          reduced flexibility of naming a single facility.
+        summary: >
+          Hosting named to the specific AWS facility within the EU region
+          rather than the region generally.
+        language: >
+          The Processor shall host and process Personal Data of Data
+          Subjects located in the European Economic Area or the United
+          Kingdom in the AWS eu-west-1 facility located in Dublin, Ireland,
+          on its standard multi-tenant infrastructure, and shall give the
+          Controller at least ninety (90) days' written notice before moving
+          that processing to a different facility within the European
+          Economic Area.
+      - kind: acceptable_variant
+        label: Residency expressed as a data-centre location warranty
+        zone: green
+        summary: >
+          Counterparty wording stating the same EU region commitment as a
+          warranty rather than an operative clause.
+        language: >
+          The Processor warrants that, for the duration of the Agreement,
+          Personal Data of Data Subjects in the European Economic Area or the
+          United Kingdom will be stored and processed in the Processor's
+          European Union hosting region, subject to remote access by support
+          personnel in accordance with this DPA's security measures.
+    parameters:
+      - key: eu_data_hosting_commitment
+        label: Hosting commitment for EU and UK Personal Data
+        value_type: enum
+        direction: set_membership
+        preferred_value: eu_region_multi_tenant
+        green_limit: [eu_region_multi_tenant]
+        yellow_limit: [named_single_facility]
+        allowed_values:
+          - eu_region_multi_tenant
+          - named_single_facility
+          - single_tenant_deployment
+          - on_premises_deployment
+          - outside_eu_region
+        extraction_hint: >
+          Read where the clause commits to host EU or UK Personal Data. The
+          region generally (eu-west-1, "EU region", "European Union") is
+          eu_region_multi_tenant. A single named data centre, city or
+          availability zone is named_single_facility. A dedicated
+          single-customer environment is single_tenant_deployment. Hosting at
+          the Controller's own premises is on_premises_deployment. Any
+          commitment to a non-EU region for EU data is outside_eu_region.
+    red_lines:
+      - key: gdpr-residency-single-tenant-or-on-prem
+        description: >
+          The Controller requires a single-tenant or on-premises deployment
+          for its EU Personal Data.
+        condition_type: parameter
+        condition:
+          parameter_key: eu_data_hosting_commitment
+          op: in
+          value: [single_tenant_deployment, on_premises_deployment]
+        action: block
+        rationale: >
+          Halcyon Engage is built and certified as a multi-tenant service; a
+          dedicated environment or on-premises build is an engineering
+          commitment outside the product Halcyon operates and sells at its
+          current scale and pricing.
+    objections:
+      - objection: Our data protection officer requires the exact data centre, not just "the EU region".
+        their_rationale: >
+          Internal policy at a tier_1 health system names a facility rather
+          than a region in its vendor risk register.
+        response: >
+          We can name the specific facility within our EU region, which today
+          is in Dublin, and commit to ninety days' notice before any move
+          within the EU. Because that narrows our operational flexibility, we
+          ask our security lead to sign off, which we can turn around
+          quickly for an account of your size.
+        talking_points:
+          - Explain that eu-west-1 today is a single Dublin facility, so naming it changes little in practice.
+          - Offer the ninety-day notice period as the safeguard against an unannounced move.
+        recommended_position: {rule_key: data_transfers.data_residency, rung: 2}
+        frequency: occasional
+        counterparty_profile: Large hospital systems with a formal vendor risk register
+      - objection: Support staff outside Europe should never be able to see our patients' data.
+        their_rationale: >
+          The Controller is concerned about remote access as much as storage
+          location.
+        response: >
+          We can commit to limiting remote access to Personal Data to staff
+          located in the EEA or the UK, with narrow, logged and time-limited
+          exceptions only where needed to resolve an active incident. This
+          keeps our EU and UK support team as the primary point of contact
+          for your account.
+        talking_points:
+          - Distinguish storage location, already in the EU region, from support staff location.
+          - Offer the fallback at rung 1 rather than the named-facility fallback, since the concern is about access, not the data centre.
+        recommended_position: {rule_key: data_transfers.data_residency, rung: 1}
+        frequency: common
+        counterparty_profile: EU private clinic groups
+      - objection: We want our data on our own servers, not in the cloud at all.
+        their_rationale: >
+          A smaller clinic group's IT lead is more comfortable with an
+          on-premises system than cloud hosting generally.
+        response: >
+          Halcyon Engage is delivered only as a multi-tenant cloud service, so
+          we are not able to offer an on-premises deployment at any tier. Our
+          EU region hosting carries SOC 2 Type II, ISO 27001 and HITRUST r2
+          certification that an on-premises build at your site would not have
+          without significant investment on your side.
+        talking_points:
+          - Offer a walkthrough of the certifications as a substitute for on-site control.
+        frequency: rare
+        counterparty_profile: Small clinic groups with legacy on-premises systems
+    dependencies:
+      - related_rule_key: data_transfers.transfer_mechanism
+        relation: read_with
+        note: >
+          Residency in the EU region is the primary control; the transfer
+          mechanism rule covers the narrower case of data leaving the EEA or
+          UK for support or sub-processing purposes.
+    test_cases:
+      - name: EU region multi-tenant hosting
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Personal Data belonging to Data Subjects in the EEA or the UK is
+          hosted and processed in Halcyon's EU hosting region on its standard
+          shared infrastructure. Processor staff outside the EEA may access
+          that data remotely for support and engineering purposes, subject to
+          the access controls, logging and encryption described in this DPA.
+      - name: Residency stated as a warranty
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          The Processor warrants that Personal Data of EEA and UK Data
+          Subjects will, throughout the Agreement, be stored and processed in
+          its European Union region, with remote support access governed by
+          this DPA's security measures.
+      - name: EU region hosting with access limited to the EEA and UK
+        context: {region: eu, regimes: [gdpr], counterparty_tier: tier_2}
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          Personal Data of EEA and UK Data Subjects is hosted in the
+          Processor's EU region, and remote access to it is restricted to
+          Processor staff located in the EEA or the UK, except for logged,
+          time-limited access strictly necessary to resolve an incident.
+      - name: Named Dublin facility with ninety days' notice of a move
+        context: {region: eu, regimes: [gdpr], counterparty_tier: tier_1}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Personal Data of EEA and UK Data Subjects is hosted at the
+          Processor's data centre in Dublin, Ireland, and the Processor will
+          give ninety days' written notice before moving that processing to
+          another EU facility.
+      - name: Hosting location left to the Processor's discretion
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          The Processor may host Personal Data at any of its facilities as it
+          determines from time to time, without restriction as to location.
+      - name: Single-tenant deployment required
+        context: {region: eu, regimes: [gdpr], counterparty_tier: tier_1}
+        expected_outcome: red_line
+        expected_red_line_key: gdpr-residency-single-tenant-or-on-prem
+        expected_zone: red
+        sample_text: >
+          The Processor shall provide a dedicated, single-tenant instance of
+          the Services, hosted on infrastructure used exclusively for the
+          Controller's Personal Data.
+      - name: Trap - naming the facility is not the same as on-premises
+        context: {region: eu, regimes: [gdpr]}
+        is_trap: true
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Personal Data is hosted at the Processor's own data centre in
+          Dublin, Ireland on infrastructure the Processor owns and operates,
+          and is not hosted at the Controller's premises or on
+          Controller-owned hardware.
+
+  - rule_key: breach_notification.notification_timeline
+    title: Personal data breach notification to the Controller (GDPR)
+    required: true
+    risk_weight: 8
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      The Processor notifies the Controller without undue delay, and in any
+      event within 72 hours of confirming a Personal Data Breach affecting
+      the Controller's Personal Data, so the Controller can meet its own
+      72-hour duty to the Supervisory Authority under Article 33.
+    risk_rationale: >
+      Article 33(1) gives the Controller 72 hours from becoming aware of a
+      breach to notify its Supervisory Authority, so the Processor's own
+      notification period under Article 33(2) has to leave the Controller
+      enough of that window to act; Halcyon commits to 72 hours from
+      confirmation as the outer limit a Controller can still work with.
+      Triggering notification on mere suspicion rather than confirmation
+      would flood Halcyon's roughly 310 customers with false alarms from the
+      security team's routine alert triage, which a two-person security
+      leadership structure cannot sustain without degrading its response to
+      confirmed incidents.
+    detection_guidance: >
+      Look for "without undue delay", "within 72 hours", "within 24 hours",
+      "after becoming aware", "upon confirmation" and "suspected or actual".
+      Record both the period and whether it runs from suspicion, discovery or
+      confirmation. This rule governs notice from the Processor to the
+      Controller; it overrides the general DPA breach_notification rule for
+      any agreement in scope of this overlay. Absence in an agreement
+      covering Personal Data is a missing mandatory term.
+    source_ref: >
+      GDPR Art. 33(2) (processor's duty to notify the controller without
+      undue delay); Art. 33(1) and (3) (controller's 72-hour duty to the
+      Supervisory Authority); Art. 34 (communication to the data subject)
+    authored_by: Privacy Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Without undue delay, within 72 hours of confirmation
+        zone: green
+        summary: >
+          Notice without undue delay and in any event within 72 hours of the
+          Processor confirming a Personal Data Breach.
+        language: >
+          The Processor shall notify the Controller without undue delay, and
+          in any event within seventy-two (72) hours, after confirming that a
+          Personal Data Breach affecting the Controller's Personal Data has
+          occurred. The notification shall describe, to the extent then
+          known, the nature of the Personal Data Breach, the categories and
+          approximate number of Data Subjects and Personal Data records
+          concerned, the likely consequences, and the measures taken or
+          proposed to address it, and shall be supplemented without undue
+          delay as further information becomes available. The Processor's
+          obligation under this clause arises on confirmation that a Personal
+          Data Breach has occurred, and not on a mere unconfirmed alert or
+          anomaly that the Processor's security team is still investigating.
+      - kind: fallback
+        rung: 1
+        label: Within 48 hours of confirmation
+        zone: green
+        give_get: >
+          Ask Customer to accept that the first notice may be preliminary and
+          supplemented as the investigation continues, rather than complete
+          on first notice.
+        summary: Notice without undue delay and within 48 hours of confirmation.
+        language: >
+          The Processor shall notify the Controller without undue delay, and
+          in any event within forty-eight (48) hours, after confirming that a
+          Personal Data Breach affecting the Controller's Personal Data has
+          occurred, providing the information described in this clause to the
+          extent then known and supplementing it without undue delay.
+      - kind: fallback
+        rung: 2
+        label: Within 24 hours of confirmation
+        zone: yellow
+        approver_role: security_lead
+        conditions: {data_sensitivity: [special_category]}
+        give_get: >
+          Ask for the Processor's liability for breach notification costs to
+          stay inside whichever dedicated data-breach liability cap applies
+          to the agreement (the SaaS MSA's data breach super-cap, or the
+          DPA's own liability-alignment cap), and consult privacy_counsel
+          before committing.
+        summary: >
+          Notice without undue delay and within 24 hours of confirmation, for
+          deals involving special category data.
+        language: >
+          The Processor shall notify the Controller without undue delay, and
+          in any event within twenty-four (24) hours, after confirming that a
+          Personal Data Breach affecting the Controller's Personal Data has
+          occurred, providing the information described in this clause to the
+          extent then known and supplementing it without undue delay.
+      - kind: acceptable_variant
+        label: Notice framed around the Controller's own 72-hour duty
+        zone: green
+        summary: >
+          Counterparty wording that ties the Processor's period to leaving
+          the Controller time within its own statutory window.
+        language: >
+          The Processor shall inform the Controller without undue delay
+          after becoming aware that a Personal Data Breach affecting the
+          Controller's Personal Data has occurred, and in any event in
+          sufficient time, and no later than seventy-two (72) hours after
+          confirmation, to allow the Controller to meet its obligations under
+          Article 33 of the GDPR.
+    parameters:
+      - key: breach_notice_hours
+        label: Hours to notify the Controller after confirming a Personal Data Breach
+        value_type: number
+        unit: hours
+        direction: higher_is_better
+        preferred_value: 72
+        green_limit: 48
+        yellow_limit: 24
+        extraction_hint: >
+          Read the period within which the Processor must notify the
+          Controller after a Personal Data Breach. Convert "without undue
+          delay" with no stated outer limit to 72. A period stated in days is
+          multiplied by 24. The green band matches the general DPA breach
+          notification rule this rule overrides and the company-wide breach
+          notification appetite: 72 hours or 48 hours is green; only the
+          24-hour fallback needs an approver.
+      - key: breach_notice_trigger
+        label: Event that starts the notification clock
+        value_type: enum
+        direction: exact
+        preferred_value: confirmed
+        green_limit: [confirmed]
+        allowed_values: [confirmed, suspected_or_actual]
+        extraction_hint: >
+          Record confirmed if the clock starts when the Processor confirms or
+          establishes that a breach occurred. Record suspected_or_actual if
+          the clock starts on a mere suspicion, report or unconfirmed alert.
+    red_lines:
+      - key: gdpr-breach-suspicion-trigger
+        description: >
+          The notification period runs from mere suspicion of a breach
+          rather than its confirmation.
+        condition_type: parameter
+        condition:
+          parameter_key: breach_notice_trigger
+          op: eq
+          value: suspected_or_actual
+        action: block
+        rationale: >
+          A trigger on suspicion converts every unconfirmed security alert
+          into a reportable event, which the security team cannot sustain at
+          Halcyon's scale and which produces false alarms of no benefit to
+          the Controller.
+    objections:
+      - objection: Seventy-two hours leaves us almost no time to tell the regulator.
+        their_rationale: >
+          The Controller's own 72-hour clock under Article 33(1) runs from
+          when it becomes aware, which could be from the moment Halcyon
+          notifies it.
+        response: >
+          We can move to 48 hours from confirmation, which gives your team a
+          full day inside your own 72-hour window, and our security team can
+          meet that period for the great majority of incidents. We can also
+          share preliminary information as soon as we have it, even before
+          the formal notice, so you are not starting from zero.
+        talking_points:
+          - Offer 48 hours as the standard improvement before discussing 24.
+          - Point out that Article 33(1) itself runs from the controller's own awareness, which the preliminary information addresses.
+        recommended_position: {rule_key: breach_notification.notification_timeline, rung: 1}
+        frequency: common
+        counterparty_profile: EU private clinic groups and tier_1 hospital systems
+      - objection: Notify us the moment you suspect something, not once you have confirmed it.
+        their_rationale: >
+          The Controller would rather have early, imperfect warning than a
+          later, confirmed one.
+        response: >
+          We understand the instinct, but a trigger on suspicion would have
+          us reporting dozens of false alarms a month across our customer
+          base, which would drown out the incidents that matter to you. What
+          we can commit to is a fast confirmation process and, once we
+          escalate an event internally for investigation, keeping you
+          informed of material developments even before confirmation if you
+          would find that useful.
+        talking_points:
+          - Describe the internal escalation and triage process briefly.
+          - Offer informal early-warning contact as a middle ground, short of a contractual suspicion trigger.
+        recommended_position: {rule_key: breach_notification.notification_timeline, rung: 0}
+        frequency: occasional
+        counterparty_profile: EU private clinic groups with a cautious data protection officer
+      - objection: Special category health data needs faster notice than the standard period.
+        their_rationale: >
+          A counterparty processing sensitive health data wants the fastest
+          commitment Halcyon offers.
+        response: >
+          For deals involving special category data we can commit to 24
+          hours from confirmation, which is our fastest tier and requires our
+          security lead's sign-off given the operational commitment involved.
+          We ask in return that breach notification costs sit inside the data
+          breach super-cap rather than outside it.
+        talking_points:
+          - Confirm the deal involves special_category data before offering rung 2.
+          - Tie the faster commitment to the data breach super-cap trade.
+        recommended_position: {rule_key: breach_notification.notification_timeline, rung: 2}
+        frequency: occasional
+        counterparty_profile: EU private clinic groups handling sensitive clinical data
+    dependencies:
+      - related_rule_key: audit.supervisory_authority_cooperation
+        relation: read_with
+        note: >
+          This rule fixes when the Processor must tell the Controller about a
+          Personal Data Breach; the cooperation rule fixes how Halcyon
+          supports the Controller's own notification to the Supervisory
+          Authority on a timeline that follows from this one. Read both
+          together when responding to an objection about either.
+    test_cases:
+      - name: Notice within 72 hours of confirmation
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Where the Processor confirms that a Personal Data Breach affecting
+          the Controller's Personal Data has occurred, it will tell the
+          Controller without undue delay and in any case within seventy-two
+          hours of that confirmation, describing what is then known about the
+          breach and updating that information as it develops.
+      - name: Notice framed around the Controller's Article 33 deadline
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          The Processor will tell the Controller without undue delay once it
+          becomes aware of a confirmed Personal Data Breach, and in any event
+          in time, and no later than seventy-two hours after confirmation, to
+          let the Controller meet its own regulatory notification deadline.
+      - name: Notice within 48 hours of confirmation
+        context: {region: eu, regimes: [gdpr], counterparty_tier: tier_1}
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          Once the Processor has confirmed a Personal Data Breach concerning
+          the Controller's Personal Data, it will notify the Controller
+          without undue delay and no later than forty-eight hours afterward.
+      - name: Notice within 24 hours for special category data
+        context: {region: eu, regimes: [gdpr], data_sensitivity: special_category}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          For Personal Data that includes special categories of data, the
+          Processor will notify the Controller of a confirmed Personal Data
+          Breach without undue delay and within twenty-four hours of
+          confirmation.
+      - name: Notice tied to weekly batch reporting
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: deviation
+        expected_zone: red
+        sample_text: >
+          The Processor will include any Personal Data Breach confirmed in
+          the preceding week in its routine weekly service report to the
+          Controller.
+      - name: Notice triggered by mere suspicion
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: red_line
+        expected_red_line_key: gdpr-breach-suspicion-trigger
+        expected_zone: red
+        sample_text: >
+          The Processor shall notify the Controller within twenty-four hours
+          of any suspected or actual Personal Data Breach, whether or not the
+          Processor has confirmed that Personal Data was in fact affected.
+      - name: Trap - preliminary information before confirmation is not a suspicion trigger
+        context: {region: eu, regimes: [gdpr]}
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          The Processor's formal notification obligation runs from
+          confirmation of a Personal Data Breach, not from suspicion; the
+          Processor may, but is not obliged to, share preliminary information
+          with the Controller while an incident is still under investigation
+          and before it has been confirmed.
+
+  - rule_key: subprocessors.authorisation_model
+    title: Sub-processor authorisation model (GDPR)
+    required: true
+    risk_weight: 7
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      The Controller gives the Processor general written authorisation to
+      engage Sub-processors from a published list, the Processor gives 30
+      days' notice of a new or replacement Sub-processor, and the Controller
+      may object on reasonable data protection grounds within that period.
+    risk_rationale: >
+      Article 28(2) allows either a general or a specific prior authorisation
+      model; specific consent for each Sub-processor would give any one of
+      Halcyon's roughly 310 customers an effective veto over infrastructure
+      shared by the whole platform, such as the cloud hosting and messaging
+      sub-processors every customer depends on. General authorisation with a
+      published list and a 30-day objection window gives Controllers real
+      notice and a real objection right under Article 28(2) without letting
+      one account block a platform-wide change.
+    detection_guidance: >
+      Look for "general written authorisation", "specific prior written
+      authorisation", "Sub-processors listed at", "object" and a notice
+      period in days. Record whether consent is general or specific, and the
+      notice period before a new Sub-processor may begin processing. This
+      rule overrides the general DPA subprocessors.authorisation_model rule
+      for any agreement in scope of this overlay. Absence is a missing
+      mandatory term.
+    source_ref: >
+      GDPR Art. 28(2) (general or specific prior authorisation); Art. 28(4)
+      (flow-down of the same data protection obligations to Sub-processors)
+    authored_by: Privacy Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: General authorisation, 30 days' notice, right to object
+        zone: green
+        summary: >
+          General written authorisation from a published list, 30 days'
+          notice of a change, and a right to object on reasonable grounds.
+        language: >
+          The Controller gives the Processor general written authorisation
+          to engage Sub-processors to assist in providing the Services,
+          provided the Processor maintains a current list of its
+          Sub-processors, available at the location specified in this DPA,
+          and imposes on each Sub-processor, by contract, data protection
+          obligations no less protective of Personal Data than those set out
+          in this DPA, as required by Article 28(4) of the GDPR. The Processor
+          shall give the Controller at least thirty (30) days' written notice,
+          including by updating the published list, before a new
+          Sub-processor begins processing Personal Data on the Controller's
+          behalf. The Controller may object to a new Sub-processor on
+          reasonable data protection grounds by written notice within that
+          thirty-day period, in which case the parties shall discuss the
+          objection in good faith; if the parties do not resolve it, the
+          Controller's sole remedy is to terminate the affected Services on
+          written notice, without penalty, as its exclusive remedy for the
+          objection.
+      - kind: fallback
+        rung: 1
+        label: 60 days' notice
+        zone: yellow
+        approver_role: privacy_counsel
+        give_get: >
+          Ask for an extended notice list subscription (the Controller
+          agrees to monitor the published list rather than requiring direct
+          email notice of every change).
+        summary: >
+          The same general authorisation model, with 60 days' notice instead
+          of 30.
+        language: >
+          The Controller gives the Processor general written authorisation to
+          engage Sub-processors on the terms set out in this clause, provided
+          the Processor maintains a current published list and flows down
+          data protection obligations under Article 28(4). The Processor
+          shall give the Controller at least sixty (60) days' written notice
+          before a new Sub-processor begins processing Personal Data on the
+          Controller's behalf, and the Controller may object on reasonable
+          data protection grounds within that period, with termination of the
+          affected Services as the Controller's exclusive remedy if the
+          objection is not resolved.
+      - kind: fallback
+        rung: 2
+        label: Specific consent limited to special-category sub-processors
+        zone: yellow
+        approver_role: privacy_counsel
+        conditions: {data_sensitivity: [special_category]}
+        give_get: >
+          Ask the Controller to accept the general authorisation model at
+          sixty days' notice for every other Sub-processor, in exchange for
+          the narrower consent right.
+        summary: >
+          General authorisation with sixty days' notice for Sub-processors
+          generally, but specific prior written consent before engaging a
+          new Sub-processor that will process special category data.
+        language: >
+          The Controller gives the Processor general written authorisation
+          to engage Sub-processors on the terms set out in this clause,
+          except that, before engaging a new Sub-processor that will have
+          access to special categories of Personal Data concerning the
+          Controller's Data Subjects, the Processor shall obtain the
+          Controller's specific prior written consent to that Sub-processor.
+          For every other Sub-processor, the Processor shall give the
+          Controller at least sixty (60) days' written notice before the
+          Sub-processor begins processing, during which period the
+          Controller may object on reasonable data protection grounds, with
+          termination of the affected Services as the Controller's exclusive
+          remedy if the objection is not resolved.
+      - kind: acceptable_variant
+        label: Notice by posting to the list, deemed acceptance
+        zone: green
+        summary: >
+          Counterparty wording achieving the same general-authorisation
+          outcome through a deemed-acceptance mechanic.
+        language: >
+          The Processor may engage Sub-processors under a general
+          authorisation from the Controller, subject to maintaining a
+          published list of current Sub-processors and imposing equivalent
+          data protection obligations on each of them. The Processor shall
+          update the list at least thirty (30) days before a new
+          Sub-processor begins processing Personal Data, and the Controller
+          shall be deemed to have consented unless it objects in writing
+          within that period on reasonable data protection grounds, in which
+          case the Controller's remedy is limited to terminating the affected
+          Services.
+    parameters:
+      - key: subprocessor_notice_days
+        label: Notice before a new Sub-processor may process Personal Data
+        value_type: duration_days
+        unit: days
+        direction: lower_is_better
+        preferred_value: 30
+        green_limit: 30
+        yellow_limit: 60
+        extraction_hint: >
+          Read the number of days' notice before a new Sub-processor may
+          begin processing. If notice is given only after the Sub-processor
+          has already started, record 0.
+    red_lines:
+      - key: gdpr-subprocessor-per-instance-consent
+        description: >
+          The Controller must give specific prior written consent to each
+          individual Sub-processor rather than a general authorisation.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause requires the Processor to obtain the Controller's
+            specific, individual written consent before engaging each named
+            Sub-processor, rather than a general authorisation covering
+            Sub-processors added to a published list after notice. Answer no
+            if the Controller's role is limited to objecting to a Sub-
+            processor named on the list within a notice period.
+        action: block
+        rationale: >
+          Per-Sub-processor consent would let any one of about 310 customers
+          block infrastructure, such as cloud hosting, shared by the whole
+          platform, and is not something Halcyon can operate at its current
+          scale.
+    objections:
+      - objection: We need specific consent for every sub-processor, not just the right to object.
+        their_rationale: >
+          The Controller's procurement policy requires affirmative consent
+          rather than a silence-is-consent objection window.
+        response: >
+          A general authorisation with a published list and a real right to
+          object is what Article 28(2) contemplates alongside specific
+          consent, and it is the only model we can operate across a shared
+          platform used by around 310 customers. We give thirty days' notice
+          before any change and will discuss any objection in good faith, and
+          if we cannot resolve it you may terminate the affected Services
+          without penalty.
+        talking_points:
+          - Article 28(2) expressly permits general authorisation as an alternative to specific consent.
+          - Emphasise the uncapped termination remedy if an objection cannot be resolved.
+        recommended_position: {rule_key: subprocessors.authorisation_model, rung: 0}
+        frequency: common
+        counterparty_profile: Large hospital systems with a formal vendor approval process
+      - objection: Thirty days is not enough time for our data protection officer to review a new vendor.
+        their_rationale: >
+          A tier_1 counterparty's internal review process for a new
+          sub-processor can take longer than a month.
+        response: >
+          We can extend notice to sixty days, which gives your data
+          protection officer a full review cycle before the change takes
+          effect; in return we ask that you monitor our published
+          sub-processor list rather than requiring a separate notice to be
+          sent for every update, since that keeps the process efficient for
+          all 310 of our customers.
+        talking_points:
+          - Offer sixty days before discussing per-instance consent.
+          - Note this requires privacy_counsel sign-off given the operational commitment.
+        recommended_position: {rule_key: subprocessors.authorisation_model, rung: 1}
+        frequency: occasional
+        counterparty_profile: Tier_1 hospital systems and large EU clinic groups
+      - objection: If we object to a sub-processor, we want a fee refund, not just a right to terminate.
+        their_rationale: >
+          The Controller sees termination without a refund as an empty
+          remedy if it has already prepaid Fees.
+        response: >
+          Termination on notice, without penalty, is the remedy we can offer
+          for an unresolved objection; a refund of prepaid Fees sits with our
+          general termination terms rather than the sub-processor clause, and
+          we would need to look at those together rather than expand this
+          clause on its own.
+        talking_points:
+          - Point to the termination_for_convenience and effect_of_termination rules for refund mechanics.
+        frequency: rare
+        counterparty_profile: Procurement-led reviews
+    dependencies:
+      - related_rule_key: subprocessors.subprocessor_changes
+        relation: read_with
+        note: >
+          This rule fixes the authorisation model and notice period; the
+          agreement's subprocessor_changes rule (in the SaaS MSA or the DPA)
+          fixes the mechanics of how the published list is maintained and
+          updated. Read both together.
+      - related_rule_key: breach_notification.notification_timeline
+        relation: read_with
+        note: >
+          A Sub-processor's own non-compliance that causes a Personal Data
+          Breach brings in the notification timeline rule; the flow-down
+          obligation in this clause is one of the facts Halcyon investigates
+          when deciding whether a notifiable breach has occurred.
+    test_cases:
+      - name: General authorisation, published list, 30 days' notice
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          The Controller authorises the Processor generally to use
+          Sub-processors to help deliver the Services, provided the Processor
+          keeps a current list of them available to the Controller and binds
+          each one by contract to data protection terms as protective as
+          those in this DPA. The Processor will give the Controller thirty
+          days' written notice, including by updating that list, before a new
+          Sub-processor starts processing Personal Data, and the Controller
+          may object on reasonable data protection grounds within that
+          period, with termination of the affected Services as its only
+          remedy if the objection is not resolved.
+      - name: Deemed consent unless objection within thirty days
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Sub-processors may be engaged under the Controller's general
+          authorisation, subject to a published, current list and equivalent
+          contractual protections. The Controller is taken to consent to a
+          newly listed Sub-processor unless it objects in writing, on
+          reasonable data protection grounds, within thirty days of the list
+          being updated; its remedy if unresolved is to terminate the
+          affected Services.
+      - name: Sixty days' notice with list-monitoring in return
+        context: {region: eu, regimes: [gdpr], counterparty_tier: tier_1}
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: yellow
+        sample_text: >
+          The Processor may engage new Sub-processors under the Controller's
+          general authorisation, giving sixty days' written notice before
+          each one begins processing, during which the Controller may object
+          on reasonable data protection grounds; the Controller agrees to
+          monitor the Processor's published Sub-processor list for updates.
+      - name: Notice given only after the sub-processor is live
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: deviation
+        expected_zone: red
+        sample_text: >
+          The Processor may engage Sub-processors at its discretion and will
+          update its published list to reflect a new Sub-processor after it
+          has begun processing Personal Data.
+      - name: Specific prior consent required for every sub-processor
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: red_line
+        expected_red_line_key: gdpr-subprocessor-per-instance-consent
+        expected_zone: red
+        sample_text: >
+          The Processor shall not engage any Sub-processor to process
+          Personal Data without first obtaining the Controller's specific
+          written consent naming that Sub-processor individually.
+      - name: No sub-processor authorisation clause
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: missing
+        expected_zone: yellow
+        sample_text: ""
+      - name: Trap - objecting is a real right, not mere notice
+        context: {region: eu, regimes: [gdpr]}
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          The Controller's general authorisation for Sub-processors does not
+          remove its right to object; if the Controller objects on reasonable
+          data protection grounds within thirty days of being notified of a
+          new Sub-processor, the parties will discuss the objection in good
+          faith, and the Controller may terminate the affected Services if it
+          is not resolved.
+
+  - rule_key: audit.supervisory_authority_cooperation
+    title: Cooperation with the Supervisory Authority (GDPR)
+    required: true
+    risk_weight: 6
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      The Processor cooperates with a Supervisory Authority on request,
+      notifies the Controller within five business days of a regulatory
+      enquiry concerning the Controller's Personal Data, and does not respond
+      to the enquiry on the merits without the Controller's input unless the
+      law requires an immediate response.
+    risk_rationale: >
+      Article 31 requires cooperation with a Supervisory Authority on
+      request, and a Controller needs to know promptly if a regulator is
+      asking about its own Personal Data so it can manage its own regulatory
+      position. Halcyon's privacy counsel, who also serves as its data
+      protection officer, is the natural point of contact for Irish and other
+      EU regulators across all of Halcyon's roughly 310 customers, so the
+      clause commits Halcyon to tell the Controller quickly without making
+      every low-level regulatory contact a formal event requiring legal
+      review before any reply.
+    detection_guidance: >
+      Look for "supervisory authority", "cooperate on request", "notify the
+      Controller of any enquiry, investigation or request from a regulator",
+      "unless prohibited by law" and a notice period in days. Record the
+      notice period for telling the Controller about a regulatory enquiry
+      concerning the Controller's data, and whether the Processor may reply
+      to the regulator on the merits before the Controller is told. A clause
+      limited to cooperating with audits under the DPA's existing audit
+      rule, with no mention of a Supervisory Authority, does not satisfy this
+      rule.
+    source_ref: GDPR Art. 31 (cooperation with the supervisory authority on request)
+    authored_by: Privacy Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Cooperate on request, notify within five business days
+        zone: green
+        summary: >
+          Cooperation with a Supervisory Authority on request, and notice to
+          the Controller within five business days of an enquiry concerning
+          the Controller's Personal Data.
+        language: >
+          The Processor shall cooperate, on request, with a competent
+          Supervisory Authority in the performance of that authority's tasks,
+          as required by Article 31 of the GDPR. If a Supervisory Authority
+          contacts the Processor with an enquiry, investigation or request
+          for information concerning the Controller's Personal Data, the
+          Processor shall notify the Controller within five (5) business days
+          of receipt, unless prohibited by law from doing so, and shall not
+          respond to the Supervisory Authority on the substance of that
+          enquiry before notifying the Controller, except where an immediate
+          response is required by law. This clause does not limit the
+          Supervisory Authority's own powers to carry out an audit of the
+          Processor under Article 31, which the Processor shall facilitate.
+      - kind: fallback
+        rung: 1
+        label: Notify within three business days
+        zone: green
+        summary: Notice to the Controller within three business days instead of five.
+        language: >
+          The Processor shall cooperate, on request, with a competent
+          Supervisory Authority as required by Article 31 of the GDPR. If a
+          Supervisory Authority contacts the Processor with an enquiry,
+          investigation or request concerning the Controller's Personal Data,
+          the Processor shall notify the Controller within three (3) business
+          days of receipt, unless prohibited by law, and shall not respond on
+          the substance before notifying the Controller except where an
+          immediate response is required by law.
+      - kind: fallback
+        rung: 2
+        label: Notify within one business day
+        zone: yellow
+        approver_role: privacy_counsel
+        conditions: {counterparty_tier: [tier_1]}
+        summary: >
+          Notice to the Controller within one business day, for larger
+          accounts with their own regulatory affairs function.
+        language: >
+          The Processor shall cooperate, on request, with a competent
+          Supervisory Authority as required by Article 31 of the GDPR. If a
+          Supervisory Authority contacts the Processor with an enquiry,
+          investigation or request concerning the Controller's Personal Data,
+          the Processor shall notify the Controller within one (1) business
+          day of receipt, unless prohibited by law, and shall not respond on
+          the substance before notifying the Controller except where an
+          immediate response is required by law.
+      - kind: acceptable_variant
+        label: Cooperation and notice framed as a general compliance duty
+        zone: green
+        summary: >
+          Counterparty wording achieving the same cooperation and notice
+          outcome in more general terms.
+        language: >
+          The Processor shall give a competent Supervisory Authority such
+          cooperation as it is required by law to give, and shall tell the
+          Controller as soon as reasonably practicable, and in any case
+          within five business days, if that authority contacts the Processor
+          about the Controller's Personal Data, save where the law forbids
+          such notice or requires an immediate response.
+      - kind: acceptable_variant
+        label: Cooperation and notice naming the data protection officer
+        zone: green
+        summary: >
+          Counterparty wording routing notice through the Processor's data
+          protection officer specifically.
+        language: >
+          The Processor shall cooperate with a competent Supervisory
+          Authority as required by Article 31 of the GDPR. The Processor's
+          data protection officer shall notify the Controller within five
+          business days of any enquiry, investigation or request for
+          information that a Supervisory Authority directs at the Processor
+          concerning the Controller's Personal Data, unless prohibited by
+          law, and the Processor shall not respond on the substance before
+          that notice except where an immediate response is required by law.
+    parameters:
+      - key: supervisory_enquiry_notice_days
+        label: Business days to notify the Controller of a regulatory enquiry
+        value_type: duration_days
+        unit: business days
+        direction: higher_is_better
+        preferred_value: 5
+        green_limit: 3
+        yellow_limit: 1
+        extraction_hint: >
+          Read the period within which the Processor must tell the Controller
+          about a Supervisory Authority enquiry concerning the Controller's
+          Personal Data. "As soon as reasonably practicable" with a stated
+          outer limit uses that limit; with no limit, record the period as
+          absent.
+    red_lines:
+      - key: gdpr-sac-responds-before-notice
+        description: >
+          The Processor may answer a Supervisory Authority on the substance
+          of an enquiry concerning the Controller's data before telling the
+          Controller, with no exception limited to a legal requirement.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause lets the Processor respond on the merits to a
+            Supervisory Authority's enquiry about the Controller's Personal
+            Data without first notifying the Controller, in circumstances
+            other than where an immediate response is required by law.
+            Answer no if the Processor must notify the Controller first
+            except where the law requires an immediate response.
+        action: block
+        rationale: >
+          A Controller that first learns of a regulatory enquiry concerning
+          its own data from the regulator itself, rather than from Halcyon,
+          cannot manage its own defence or disclosure obligations.
+    objections:
+      - objection: Five business days is too slow when a regulator is involved.
+        their_rationale: >
+          The Controller wants to be told immediately given the stakes of
+          regulatory contact.
+        response: >
+          We can commit to three business days, which still gives our privacy
+          counsel, who is also our data protection officer, time to confirm
+          what the enquiry actually concerns before telling you, so the
+          notice you receive is accurate rather than a guess.
+        talking_points:
+          - Offer three business days before discussing one.
+          - Note the Processor must still confirm the enquiry concerns the Controller's data before notice is meaningful.
+        recommended_position: {rule_key: audit.supervisory_authority_cooperation, rung: 1}
+        frequency: common
+        counterparty_profile: EU private clinic groups with their own data protection officer
+      - objection: A large health system wants one business day given its own regulatory reporting duties.
+        their_rationale: >
+          A tier_1 counterparty has its own short internal escalation window
+          to its board and regulators.
+        response: >
+          For an account of your size we can commit to notice within one
+          business day; this needs our privacy counsel's sign-off given the
+          operational commitment, which we can turn around quickly given the
+          size of the relationship.
+        talking_points:
+          - Confirm counterparty_tier is tier_1 before offering rung 2.
+        recommended_position: {rule_key: audit.supervisory_authority_cooperation, rung: 2}
+        frequency: occasional
+        counterparty_profile: Tier_1 hospital systems
+    dependencies:
+      - related_rule_key: audit.customer_audit_rights
+        relation: read_with
+        note: >
+          This rule covers cooperation with a regulator; the DPA's
+          customer_audit_rights rule covers audits by the Controller itself.
+          They are distinct and both apply.
+    test_cases:
+      - name: Cooperation and notice within five business days
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Halcyon will cooperate, on request, with a competent Supervisory
+          Authority as Article 31 of the GDPR requires. If such an authority
+          contacts Halcyon about the Controller's Personal Data, Halcyon will
+          tell the Controller within five business days of receiving that
+          contact, unless the law forbids it, and will not answer the
+          authority on the substance first, except where the law requires an
+          immediate reply.
+      - name: Cooperation framed as a general compliance duty
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          The Processor will give any cooperation to a Supervisory Authority
+          that the law requires, and will let the Controller know as soon as
+          reasonably practicable, and within five business days at the
+          latest, if that authority contacts the Processor about the
+          Controller's data, except where the law bars notice or needs an
+          immediate answer.
+      - name: Notice within three business days
+        context: {region: eu, regimes: [gdpr], counterparty_tier: tier_2}
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          If a Supervisory Authority contacts the Processor regarding the
+          Controller's Personal Data, the Processor will notify the
+          Controller within three business days, unless prohibited by law,
+          and will not reply on the substance beforehand except where an
+          immediate reply is legally required.
+      - name: Notice within one business day for a large health system
+        context: {region: eu, regimes: [gdpr], counterparty_tier: tier_1}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          If a Supervisory Authority contacts the Processor about the
+          Controller's Personal Data, the Processor will tell the Controller
+          within one business day, unless the law forbids it, and will not
+          respond on the merits first except where the law requires an
+          immediate response.
+      - name: No notice commitment at all
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          The Processor will cooperate with a Supervisory Authority as
+          required by law. Nothing in this clause requires the Processor to
+          notify the Controller of any contact from a Supervisory Authority.
+      - name: Processor may answer the regulator on the merits before telling the Controller
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: red_line
+        expected_red_line_key: gdpr-sac-responds-before-notice
+        expected_zone: red
+        sample_text: >
+          The Processor may respond fully to any enquiry from a Supervisory
+          Authority concerning the Controller's Personal Data at its own
+          discretion, and is not required to notify the Controller before or
+          after doing so.
+      - name: Trap - immediate legal response does not require prior notice
+        context: {region: eu, regimes: [gdpr]}
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          The Processor will notify the Controller within five business days
+          of any Supervisory Authority contact concerning the Controller's
+          Personal Data and will not answer on the merits before doing so,
+          except that, where the law requires an immediate response, the
+          Processor may respond and will notify the Controller as soon as
+          reasonably possible afterward.
+
+  - rule_key: governing_law.choice_of_law
+    title: Governing law (GDPR overlay)
+    required: true
+    risk_weight: 6
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      For agreements in scope of this overlay, Irish law governs, reflecting
+      Halcyon Care Ireland Ltd as the contracting entity for EU deals, with
+      the law of England and Wales also pre-approved for UK deals.
+    risk_rationale: >
+      Halcyon Care Ireland Ltd, based in Dublin, is the entity that contracts
+      with EU customers and sits inside the EU's single supervisory and
+      judicial framework that the GDPR itself presumes; litigating an EU
+      data processing relationship under a non-EU law creates friction with
+      the GDPR's own territorial design under Article 3 and with the Irish
+      Data Protection Commission's jurisdiction over Halcyon's EU entity.
+      England and Wales law is pre-approved only for UK deals, reflecting
+      the UK's separate post-Brexit data protection regime rather than the
+      EU one this overlay otherwise governs.
+    detection_guidance: >
+      Look for "governed by", "construed in accordance with the laws of" and
+      a named jurisdiction, usually read together with the agreement's main
+      governing law clause. This rule overrides the baseline and NDA
+      governing_law.choice_of_law rules for any agreement in scope of this
+      overlay. A clause naming a different law specifically for the data
+      protection terms than for the rest of the agreement is a notable
+      deviation, since it can create inconsistent protection across the same
+      relationship.
+    source_ref: >
+      Halcyon Risk Policy RP-04 (governing law); GDPR Art. 3 (territorial
+      scope, relevant to why an EU-law seat for the data relationship matters
+      regardless of the Agreement's chosen law)
+    authored_by: Privacy Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Irish law
+        zone: green
+        summary: The law of Ireland governs.
+        language: >
+          This Agreement and this DPA are governed by, and shall be construed
+          in accordance with, the laws of Ireland, without regard to its
+          conflict of laws rules.
+      - kind: fallback
+        rung: 1
+        label: England and Wales law for UK deals
+        zone: green
+        conditions: {region: [uk]}
+        summary: The law of England and Wales governs, for UK deals.
+        language: >
+          This Agreement and this DPA are governed by, and shall be construed
+          in accordance with, the laws of England and Wales, without regard
+          to its conflict of laws rules.
+      - kind: fallback
+        rung: 2
+        label: Law of another EU member state
+        zone: yellow
+        approver_role: privacy_counsel
+        conditions: {region: [eu]}
+        give_get: >
+          Ask for venue in Ireland, or for arbitration seated in Dublin, so
+          that enforcement still runs through a familiar forum.
+        summary: The law of the counterparty's home EU member state governs.
+        language: >
+          This Agreement and this DPA are governed by, and shall be construed
+          in accordance with, the laws of [EU member state], without regard
+          to its conflict of laws rules.
+      - kind: acceptable_variant
+        label: Irish law, counterparty wording
+        zone: green
+        summary: Irish law expressed in different words.
+        language: >
+          The validity, construction and performance of this Agreement and
+          this DPA shall be governed by Irish law.
+    parameters:
+      - key: gdpr_governing_law_jurisdiction
+        label: Jurisdiction whose law governs under this overlay
+        value_type: enum
+        direction: set_membership
+        preferred_value: ireland
+        green_limit: [ireland]
+        yellow_limit: [england_and_wales, other_eu_member_state]
+        allowed_values: [ireland, england_and_wales, other_eu_member_state, other]
+        extraction_hint: >
+          Map the named jurisdiction. England and Wales is green only when the
+          deal's region is uk; record it as england_and_wales regardless of
+          region and let the context override decide the zone. Anything
+          outside the EU, the UK or Ireland is other.
+        context_overrides:
+          - when: {region: [uk]}
+            green_limit: [ireland, england_and_wales]
+    red_lines:
+      - key: gdpr-law-split-governing-law
+        description: >
+          The agreement names a different governing law for the data
+          protection terms than for the rest of the agreement.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause states that the data processing terms, or the parties'
+            data protection obligations, are governed by a different
+            jurisdiction's law than the one chosen for the agreement
+            generally. Answer no if one governing law clause applies to the
+            whole agreement, including the DPA.
+        action: escalate
+        approver_role: general_counsel
+        rationale: >
+          A split governing law for the data terms creates two different
+          answers to the same question, such as how a breach of the DPA is
+          remedied, and must be reviewed by General Counsel before
+          acceptance.
+    objections:
+      - objection: Irish law has nothing to do with our deal; we are based in Germany.
+        their_rationale: >
+          The counterparty sees no connection between Ireland and its own
+          operations.
+        response: >
+          Halcyon Care Ireland Ltd, our EU entity, is the contracting party
+          for EU customers and is established in Dublin, so Irish law is the
+          law of our own contracting entity, in the same way Delaware law
+          applies to our US contracts. If you would prefer the law of your
+          own member state, we can agree to that, provided we have venue or
+          arbitration seated in Dublin so disputes are heard in a forum both
+          sides know.
+        talking_points:
+          - Confirm which Halcyon entity is the counterparty on the signature page.
+          - Offer the member-state fallback together with a Dublin venue or seat.
+        recommended_position: {rule_key: governing_law.choice_of_law, rung: 2}
+        frequency: common
+        counterparty_profile: EU private clinic groups outside Ireland
+      - objection: As a UK customer we expect English law, not Irish law.
+        their_rationale: >
+          A UK counterparty assumes its own jurisdiction's law applies by
+          default.
+        response: >
+          For UK deals we agree to the law of England and Wales as a
+          pre-approved position, so this is one we can accept without further
+          escalation.
+        talking_points:
+          - Confirm the deal's region is uk before agreeing, since this fallback does not apply to EU deals.
+        recommended_position: {rule_key: governing_law.choice_of_law, rung: 1}
+        frequency: common
+        counterparty_profile: UK private clinic groups
+    dependencies:
+      - related_rule_key: data_transfers.transfer_mechanism
+        relation: read_with
+        note: >
+          The Standard Contractual Clauses incorporated under the transfer
+          mechanism rule carry their own governing-law clause for the
+          Clauses themselves, distinct from the Agreement's own governing
+          law; check the two are not read as conflicting when negotiating
+          either one.
+    test_cases:
+      - name: Irish law
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          This Agreement and the accompanying data processing agreement are
+          governed by Irish law, excluding its conflict of laws principles.
+      - name: Irish law, internal-laws wording
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          The performance and construction of this Agreement and this DPA
+          shall be determined under the laws of Ireland.
+      - name: England and Wales law for a UK deal
+        context: {region: uk, regimes: [gdpr]}
+        expected_outcome: fallback
+        expected_position_rung: 1
+        expected_zone: green
+        sample_text: >
+          This Agreement and this DPA are governed by the laws of England and
+          Wales, without regard to conflict of laws rules.
+      - name: German law for a German clinic group
+        context: {region: eu, regimes: [gdpr], counterparty_tier: tier_2}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          This Agreement and this DPA shall be governed by the laws of the
+          Federal Republic of Germany.
+      - name: England and Wales law for an EU (non-UK) deal
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          This Agreement and this DPA are governed by the laws of England and
+          Wales.
+      - name: Different law for the data protection terms than the rest of the agreement
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: red_line
+        expected_red_line_key: gdpr-law-split-governing-law
+        expected_zone: red
+        sample_text: >
+          This Agreement is governed by the laws of Ireland, except that the
+          data processing agreement and the parties' data protection
+          obligations are governed by the laws of the Controller's own
+          member state.
+      - name: Trap - naming Ireland for both the Agreement and the DPA is not a split
+        context: {region: eu, regimes: [gdpr]}
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          This Agreement, including the data processing agreement attached to
+          it, is governed in its entirety by the laws of Ireland; no separate
+          or different law applies to the data protection terms.
+
+  - rule_key: compliance.gdpr_compliance
+    title: Each party's own compliance with GDPR
+    required: true
+    risk_weight: 5
+    negotiable: false
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Each party complies with its own obligations under the GDPR and
+      applicable UK data protection law in its respective role, the
+      Controller is solely responsible for establishing its lawful basis and
+      giving notice to Data Subjects, and neither party's obligations under
+      this clause expand what is set out elsewhere in the DPA.
+    risk_rationale: >
+      Article 24 makes the Controller responsible for demonstrating
+      compliance, including its lawful basis and the notices it gives
+      patients, and Article 28(1) makes the Processor responsible only for
+      providing sufficient guarantees in its own role; a clause that lets a
+      Controller shift its own lawful-basis or notice obligations onto
+      Halcyon would make Halcyon answer for decisions about patient
+      relationships it has no visibility into. Stating each party's own
+      responsibility plainly heads off that kind of drafting before it
+      reaches the operative clauses.
+    detection_guidance: >
+      Look for "Data Protection Laws", "Regulation (EU) 2016/679", "UK
+      GDPR", "each party shall comply with its obligations", "lawful basis"
+      and "Controller is solely responsible for". Check that the clause
+      allocates responsibility by role rather than placing the Controller's
+      duties, such as establishing a lawful basis or giving Article 13 and 14
+      notices, onto the Processor. Because this is a role-allocation
+      statement rather than an operative data-handling duty, it typically has
+      no number to extract as a parameter.
+    source_ref: >
+      GDPR Art. 5(2) (accountability); Art. 24 (controller's responsibility);
+      Art. 28(1) (processor's obligations)
+    authored_by: Privacy Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-08
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Compliance allocated by role
+        zone: green
+        summary: >
+          Each party complies with its own GDPR obligations in its role, and
+          the Controller alone is responsible for lawful basis and
+          Data Subject notices.
+        language: >
+          Each party shall comply with its respective obligations under the
+          GDPR, the UK GDPR and other applicable data protection law in
+          connection with the Personal Data processed under this Agreement,
+          in its capacity as Controller or Processor as the case may be. As
+          between the parties, the Controller is solely responsible for
+          determining the purposes and means of the processing, establishing
+          a lawful basis for it under Article 6, and, where applicable,
+          Article 9, and giving any notice to Data Subjects required by
+          Articles 13 and 14. Nothing in this clause extends the Processor's
+          obligations beyond those set out elsewhere in this DPA.
+      - kind: acceptable_variant
+        label: Compliance allocated by role, counterparty wording
+        zone: green
+        summary: >
+          Counterparty wording achieving the same role-based allocation.
+        language: >
+          Each party is responsible for complying with the data protection
+          law applicable to it in its role under this Agreement. The
+          Controller is responsible for its lawful basis for processing and
+          for any notice it must give to Data Subjects; the Processor's
+          responsibilities are those set out in this DPA.
+      - kind: acceptable_variant
+        label: Compliance clause naming the UK GDPR expressly
+        zone: green
+        summary: >
+          The same role-based allocation, with the UK GDPR named alongside
+          the GDPR for a deal that spans both regimes.
+        language: >
+          Each party shall comply with the data protection law applicable to
+          it, whether the GDPR, the UK GDPR, or both, in connection with the
+          Personal Data processed under this Agreement, in its capacity as
+          Controller or Processor. The Controller is solely responsible for
+          its lawful basis for processing and for any notice it must give to
+          Data Subjects under either regime; the Processor's obligations are
+          those set out in this DPA.
+    red_lines:
+      - key: gdpr-compliance-lawful-basis-shifted
+        description: >
+          The Processor is made responsible for the Controller's lawful
+          basis for processing or for the notices owed to Data Subjects.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause requires the Processor to establish, confirm, warrant
+            or be responsible for the Controller's lawful basis for
+            processing Personal Data under Article 6 or Article 9, or to give
+            the notices to Data Subjects required by Articles 13 or 14 on the
+            Controller's behalf. Answer no if the clause only states that
+            each party complies with its own obligations in its own role.
+        action: block
+        rationale: >
+          Halcyon does not know why a Controller collects a given patient's
+          data or what it tells that patient, and cannot warrant decisions it
+          cannot see.
+    test_cases:
+      - name: Compliance allocated by role
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Each party will meet its own duties under the GDPR, the UK GDPR and
+          other applicable data protection law for the Personal Data handled
+          under this Agreement, acting as Controller or Processor as the case
+          may be. The Controller alone is responsible for deciding why and
+          how the Personal Data is processed, for having a lawful basis under
+          Article 6, and where relevant Article 9, and for any notice owed to
+          Data Subjects under Articles 13 and 14.
+      - name: Compliance allocated by role, counterparty wording
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          Each party is responsible for its own compliance with applicable
+          data protection law in the role it occupies. The Controller bears
+          responsibility for its lawful basis and for any notice to Data
+          Subjects; the Processor's duties are as set out in the DPA.
+      - name: Mutual compliance clause silent on lawful basis responsibility
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Each party shall comply with Data Protection Laws applicable to the
+          processing of Personal Data under this Agreement.
+      - name: Compliance clause naming only the Processor
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          The Processor shall at all times comply with the GDPR in respect of
+          the Personal Data it processes under this Agreement.
+      - name: Processor warrants the Controller's lawful basis
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: red_line
+        expected_red_line_key: gdpr-compliance-lawful-basis-shifted
+        expected_zone: red
+        sample_text: >
+          The Processor warrants that a valid lawful basis exists for all
+          processing of Personal Data under this Agreement and shall be
+          responsible for any notices owed to Data Subjects under Articles 13
+          and 14 of the GDPR.
+      - name: No GDPR compliance clause
+        context: {region: eu, regimes: [gdpr]}
+        expected_outcome: missing
+        expected_zone: yellow
+        sample_text: ""
+      - name: Trap - stating the Processor also complies with its own duties does not shift the Controller's
+        context: {region: eu, regimes: [gdpr]}
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          The Processor will meet its own obligations under the GDPR in its
+          role as Processor; this does not make the Processor responsible
+          for the Controller's lawful basis under Article 6 or for notices
+          the Controller must give Data Subjects under Articles 13 and 14,
+          which remain the Controller's sole responsibility.

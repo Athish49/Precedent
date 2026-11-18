@@ -1,0 +1,7 @@
+# Failing fixture: edits applied to a copy of fixtures/valid by test_playbook_models.py.
+description: 'Cross-check: context keys are context dimensions.'
+file: playbooks/saas_msa_vendor/risk.yaml
+edits:
+- path: [rules, 0, test_cases, 2, context]
+  set: {deal_size: enterprise}
+expect: {code: context.unknown_dimension, message: deal_size, rule_key: limitation_of_liability.cap_amount}

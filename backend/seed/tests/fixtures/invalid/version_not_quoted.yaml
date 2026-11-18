@@ -1,0 +1,7 @@
+# Failing fixture: edits applied to a copy of fixtures/valid by test_playbook_models.py.
+description: An unquoted version is a YAML number.
+file: playbooks/saas_msa_vendor/playbook.yaml
+edits:
+- path: [version, version]
+  set: 1.0
+expect: {code: schema, message: in quotes}

@@ -10,6 +10,7 @@ import logging
 
 from app.core.config import get_settings
 from app.core.logging import configure_logging
+from app.core.namespace import assert_namespace
 from app.db.base import get_session_factory, init_db
 from app.services.obligations.monitor import run_monitor
 
@@ -20,6 +21,7 @@ async def main() -> None:
     init_db(settings.database_url)
     factory = get_session_factory()
     async with factory() as session:
+        await assert_namespace(session)
         result = await run_monitor(session)
         await session.commit()
     logging.getLogger(__name__).info(

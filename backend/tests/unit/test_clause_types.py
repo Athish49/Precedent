@@ -1,8 +1,16 @@
 """Unit tests for the clause-type normalizer (T-022)."""
 
+from unittest.mock import AsyncMock, MagicMock
+
 import pytest
 
-from app.services.document_processing.clause_types import normalize_clause_type
+from app.services.document_processing import clause_types
+from app.services.document_processing.clause_types import (
+    clear_synonym_cache,
+    load_synonym_cache,
+    normalize_clause_type,
+    set_synonym_cache,
+)
 
 # ---------------------------------------------------------------------------
 # Exact-match tests
@@ -99,6 +107,52 @@ def test_exact_match_audit():
 
 def test_exact_match_insurance():
     assert normalize_clause_type("Insurance") == "insurance"
+
+
+# ---------------------------------------------------------------------------
+# Leading-numbering stripping tests (regression: task 5.4's end-to-end
+# verification found that a numbered heading like "9. AUDIT" — exactly as the
+# segmenter stores it in heading_text, numbering intact — scored only ~77 on
+# token_sort_ratio against the "audit" dictionary key (below the 80 cutoff),
+# because the numeric prefix makes up a large fraction of a short string. This
+# silently failed short canonical names across the corpus while longer ones
+# (e.g. "indemnification") were long enough to tolerate the prefix.)
+# ---------------------------------------------------------------------------
+
+
+def test_strips_decimal_prefix_exact_match():
+    # Without stripping, "9. audit" vs "audit" scores ~77 — below the fuzzy
+    # cutoff of 80 — so this previously fell through to "other".
+    assert normalize_clause_type("9. AUDIT") == "audit"
+
+
+def test_strips_two_digit_decimal_prefix():
+    assert normalize_clause_type("11. Audit") == "audit"
+
+
+def test_strips_subclause_decimal_prefix():
+    assert normalize_clause_type("4.1 Term") == "term"
+
+
+def test_strips_alpha_prefix():
+    assert normalize_clause_type("(a) Term") == "term"
+
+
+def test_strips_roman_prefix():
+    assert normalize_clause_type("iv. Insurance") == "insurance"
+
+
+def test_strip_leading_numbering_leaves_unnumbered_text_unchanged():
+    assert normalize_clause_type("Insurance") == "insurance"
+
+
+def test_fuzzy_match_term_and_survival():
+    # Common real-world heading pattern (NDAs/confidentiality agreements),
+    # parallel to the existing "term and termination" entry — added because
+    # task 5.4's corpus hit exactly this heading for a clause whose body text
+    # sets the contract's term.
+    assert normalize_clause_type("Term and Survival") == "term"
+    assert normalize_clause_type("8. TERM AND SURVIVAL") == "term"
 
 
 # ---------------------------------------------------------------------------
@@ -230,3 +284,54 @@ def test_case_insensitive_mixed():
 
 def test_leading_trailing_whitespace():
     assert normalize_clause_type("  Termination  ") == "termination"
+
+
+# ---------------------------------------------------------------------------
+# DB-backed synonym cache (task 5.5): no live database connection needed —
+# `tests/conftest.py`'s autouse fixture populates the cache for every test
+# in the suite from the clause_family seed migrations' literal data. These
+# tests exercise the cache mechanism itself: an unpopulated cache fails
+# loudly, `set_synonym_cache` populates it directly, and `load_synonym_cache`
+# (the function `app.main`'s lifespan calls at startup) populates it from a
+# mocked AsyncSession/`list_clause_families` the same way `test_taxonomy_repo
+# .py` mocks DB access elsewhere.
+# ---------------------------------------------------------------------------
+
+
+def test_unpopulated_cache_raises():
+    clear_synonym_cache()
+    try:
+        with pytest.raises(RuntimeError):
+            normalize_clause_type("Indemnification")
+    finally:
+        # Restore a populated cache so later tests in this module aren't
+        # affected by import/collection order quirks (the autouse fixture
+        # also re-populates it before each test regardless).
+        set_synonym_cache({"indemnification": "indemnification"})
+
+
+@pytest.mark.asyncio
+async def test_load_synonym_cache_populates_from_clause_family_table():
+    family_a = MagicMock()
+    family_a.key = "indemnification"
+    family_a.synonyms = ["indemnification", "indemnity"]
+    family_b = MagicMock()
+    family_b.key = "termination"
+    family_b.synonyms = ["termination", "term and termination"]
+
+    session = AsyncMock()
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr(
+            "app.db.repositories.taxonomy_repo.list_clause_families",
+            AsyncMock(return_value=[family_a, family_b]),
+        )
+        await load_synonym_cache(session)
+
+    assert normalize_clause_type("Indemnity") == "indemnification"
+    assert normalize_clause_type("Term and Termination") == "termination"
+    assert clause_types._synonym_map == {
+        "indemnification": "indemnification",
+        "indemnity": "indemnification",
+        "termination": "termination",
+        "term and termination": "termination",
+    }

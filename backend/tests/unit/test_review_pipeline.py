@@ -24,11 +24,17 @@ _MODULE = "app.workflows.review_pipeline"
 def _make_contract(
     contract_type: str = "nda",
     counterparty_id: uuid.UUID | None = None,
+    party_role: str = "vendor",
+    paper_origin: str = "own",
+    context: dict | None = None,
 ) -> MagicMock:
     c = MagicMock()
     c.id = uuid.uuid4()
     c.contract_type = contract_type
     c.counterparty_id = counterparty_id or uuid.uuid4()
+    c.party_role = party_role
+    c.paper_origin = paper_origin
+    c.context = context
     return c
 
 
@@ -195,7 +201,13 @@ async def test_concurrent_fetch_calls_both_gather_dependencies():
     ):
         result = await run_pipeline(session, contract_id)
 
-    resolve_mock.assert_called_once_with(session, contract.contract_type)
+    resolve_mock.assert_called_once_with(
+        session,
+        contract.contract_type,
+        contract.party_role,
+        contract.paper_origin,
+        contract.context,
+    )
     clauses_mock.assert_called_once_with(session, contract_id)
     assert result.redlines == []
 
@@ -262,3 +274,174 @@ async def test_stance_filter_light_skips_low_severity_flags():
 
     assert result.redlines == []
     llm_mock.assert_not_called()
+
+
+# ---------------------------------------------------------------------------
+# Task 5.5: preferred-language fallback comes from rule positions only.
+# ---------------------------------------------------------------------------
+
+
+def _position_response(kind: str, rung: int | None, language: str):
+    from app.schemas.playbook import RulePositionResponse
+
+    now = datetime.now(UTC)
+    return RulePositionResponse(
+        id=uuid.uuid4(), rule_id=uuid.uuid4(), kind=kind, rung=rung, label=kind,
+        language=language, summary=None, zone="green", approver_role_id=None,
+        conditions=None, give_get=None, internal_note=None, created_at=now, updated_at=now,
+    )
+
+
+async def _run_with_rule(rule: SimpleNamespace | None) -> tuple[MagicMock, AsyncMock]:
+    """Run the pipeline over one flagged 'indemnification' clause with *rule*
+    as its resolved rule; return the generate_redline and persist mocks."""
+    session = AsyncMock()
+    contract_id = uuid.uuid4()
+    clause_id = uuid.uuid4()
+    contract = _make_contract()
+    contract.id = contract_id
+    flag = _make_flag(contract_id=contract_id, clause_id=clause_id, severity="high")
+    analysis = AnalysisResult(
+        flags=[flag],
+        risk=RiskDTO(score=7.5, max_clause_severity="high", weights_version="v1"),
+    )
+    rules = {"indemnification": rule} if rule is not None else {}
+    generate = MagicMock(return_value=_make_redline_out())
+    persist_mock = AsyncMock(return_value=(_make_redline_row(contract_id), MagicMock()))
+
+    with (
+        patch(f"{_MODULE}.contract_repo.get_contract", new=AsyncMock(return_value=contract)),
+        patch(f"{_MODULE}.routing.resolve", new=AsyncMock(return_value=_make_resolved())),
+        patch(f"{_MODULE}.routing.rules_by_clause_type", return_value=rules),
+        patch(
+            f"{_MODULE}.clause_repo.get_clauses_for_contract",
+            new=AsyncMock(return_value=[_make_clause(contract_id, clause_id)]),
+        ),
+        patch(
+            f"{_MODULE}.contract_analysis_service.analyze",
+            new=AsyncMock(return_value=analysis),
+        ),
+        patch(f"{_MODULE}.nms_repo.get_counterparty_pattern", new=AsyncMock(return_value=None)),
+        patch(f"{_MODULE}.llm_call.generate_redline", new=generate),
+        patch(f"{_MODULE}.render.render", return_value=_make_render_result()),
+        patch(f"{_MODULE}.persist.persist_redline", new=persist_mock),
+    ):
+        await run_pipeline(session, contract_id, stance_mode="balanced")
+    return generate, persist_mock
+
+
+@pytest.mark.asyncio
+async def test_preferred_language_from_preferred_position():
+    rule = SimpleNamespace(
+        positions=[_position_response("preferred", 0, "Preferred text.")], objections=[]
+    )
+    generate, persist_mock = await _run_with_rule(rule)
+    assert generate.call_args.args[2] == "Preferred text."
+    assert persist_mock.call_args.args[8] == "Preferred text."
+
+
+@pytest.mark.asyncio
+async def test_preferred_language_falls_back_to_rung_zero_position():
+    """No kind='preferred' position, but a rung-0 position exists: its
+    language is used. Before migration 015 this case read the legacy
+    rule.preferred_language column instead."""
+    rule = SimpleNamespace(
+        positions=[_position_response("acceptable_variant", 0, "Rung zero text.")],
+        objections=[],
+    )
+    generate, persist_mock = await _run_with_rule(rule)
+    assert generate.call_args.args[2] == "Rung zero text."
+    assert persist_mock.call_args.args[8] == "Rung zero text."
+
+
+@pytest.mark.asyncio
+async def test_preferred_language_none_without_rung_zero_or_rule():
+    rule = SimpleNamespace(
+        positions=[_position_response("fallback", 1, "Fallback text.")], objections=[]
+    )
+    generate, _ = await _run_with_rule(rule)
+    assert generate.call_args.args[2] is None
+
+    generate, _ = await _run_with_rule(None)
+    assert generate.call_args.args[2] is None
+
+
+# ---------------------------------------------------------------------------
+# Audit fix: a flag's ladder comes from the rule identified by the flag's own
+# rule_key, not whichever rule in the clause family sorts first.
+# ---------------------------------------------------------------------------
+
+
+def _family_rule(rule_key: str, language: str) -> SimpleNamespace:
+    return SimpleNamespace(
+        rule_key=rule_key,
+        clause_type="indemnification",
+        positions=[_position_response("preferred", 0, language)],
+        objections=[],
+    )
+
+
+async def _run_with_family(flag_rule_key: str | None) -> tuple[MagicMock, AsyncMock, list]:
+    """Two resolved rules share clause_type 'indemnification'; the one that
+    sorts first by rule_key is 'indemnification.a_general'. Uses the REAL
+    rules_by_clause_type / rules_by_rule_key / rule_for_flag."""
+    session = AsyncMock()
+    contract_id = uuid.uuid4()
+    clause_id = uuid.uuid4()
+    contract = _make_contract()
+    contract.id = contract_id
+    flag = _make_flag(contract_id=contract_id, clause_id=clause_id, severity="high")
+    flag.rule_key = flag_rule_key
+    analysis = AnalysisResult(
+        flags=[flag],
+        risk=RiskDTO(score=7.5, max_clause_severity="high", weights_version="v1"),
+    )
+    family = [
+        _family_rule("indemnification.a_general", "GENERAL"),
+        _family_rule("indemnification.b_ip_infringement", "IP"),
+    ]
+    resolved = MagicMock()
+    resolved.rules = family
+    resolved.pinned_version_ids = []
+    generate = MagicMock(return_value=_make_redline_out())
+    persist_mock = AsyncMock(return_value=(_make_redline_row(contract_id), MagicMock()))
+
+    with (
+        patch(f"{_MODULE}.contract_repo.get_contract", new=AsyncMock(return_value=contract)),
+        patch(f"{_MODULE}.routing.resolve", new=AsyncMock(return_value=resolved)),
+        patch(
+            f"{_MODULE}.clause_repo.get_clauses_for_contract",
+            new=AsyncMock(return_value=[_make_clause(contract_id, clause_id)]),
+        ),
+        patch(
+            f"{_MODULE}.contract_analysis_service.analyze",
+            new=AsyncMock(return_value=analysis),
+        ),
+        patch(f"{_MODULE}.nms_repo.get_counterparty_pattern", new=AsyncMock(return_value=None)),
+        patch(f"{_MODULE}.llm_call.generate_redline", new=generate),
+        patch(f"{_MODULE}.render.render", return_value=_make_render_result()),
+        patch(f"{_MODULE}.persist.persist_redline", new=persist_mock),
+    ):
+        await run_pipeline(session, contract_id, stance_mode="balanced")
+    return generate, persist_mock, family
+
+
+@pytest.mark.asyncio
+async def test_flag_rule_key_selects_its_own_rule_not_first_in_clause_family():
+    generate, persist_mock, family = await _run_with_family("indemnification.b_ip_infringement")
+    assert persist_mock.call_args.kwargs["rule"] is family[1]
+    assert generate.call_args.args[2] == "IP"
+
+
+@pytest.mark.asyncio
+async def test_flag_without_rule_key_falls_back_to_clause_type_rule():
+    generate, persist_mock, family = await _run_with_family(None)
+    assert persist_mock.call_args.kwargs["rule"] is family[0]
+    assert generate.call_args.args[2] == "GENERAL"
+
+
+@pytest.mark.asyncio
+async def test_flag_with_unresolved_rule_key_gets_no_rule_not_a_clause_type_guess():
+    generate, persist_mock, _ = await _run_with_family("indemnification.dropped_by_applies_when")
+    assert persist_mock.call_args.kwargs["rule"] is None
+    assert generate.call_args.args[2] is None

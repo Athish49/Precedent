@@ -9,7 +9,8 @@ from fastapi import FastAPI
 from app.api.errors import AppError, app_error_handler, unhandled_error_handler
 from app.core.config import get_settings
 from app.core.logging import configure_logging
-from app.db.base import init_db
+from app.db.base import get_session_factory, init_db
+from app.services.document_processing.clause_types import load_synonym_cache
 
 
 @asynccontextmanager
@@ -17,6 +18,15 @@ async def lifespan(application: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
     configure_logging(settings.env)
     init_db(settings.database_url)
+
+    # Populate the process-wide clause-type synonym cache once at startup
+    # (app/services/document_processing/clause_types.py, task 5.5) so
+    # normalize_clause_type() stays a fast synchronous call with no DB
+    # round-trip per invocation.
+    session_factory = get_session_factory()
+    async with session_factory() as session:
+        await load_synonym_cache(session)
+
     yield
 
 

@@ -1,0 +1,7 @@
+# Failing fixture: edits applied to a copy of fixtures/valid by test_playbook_models.py.
+description: 'Cross-check: the playbook owner role exists in authority.yaml.'
+file: playbooks/saas_msa_vendor/playbook.yaml
+edits:
+- path: [owner_role]
+  set: nobody
+expect: {code: role.unknown, message: owner_role}

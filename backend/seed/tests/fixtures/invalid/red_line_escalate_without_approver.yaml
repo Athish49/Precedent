@@ -1,0 +1,7 @@
+# Failing fixture: edits applied to a copy of fixtures/valid by test_playbook_models.py.
+description: 'Cross-check: an escalating red line names an approver.'
+file: playbooks/baseline/rules.yaml
+edits:
+- path: [rules, 0, red_lines, 0, approver_role]
+  delete: true
+expect: {code: red_line.approver_missing, message: escalate, rule_key: governing_law.choice_of_law}

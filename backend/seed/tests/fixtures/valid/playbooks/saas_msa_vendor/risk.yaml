@@ -1,0 +1,365 @@
+# Test fixture. The first rule is the example from playbook_implementation.md
+# section 4, written out in full and extended to meet the per-rule minimums.
+rules:
+  - rule_key: limitation_of_liability.cap_amount
+    title: Aggregate liability cap
+    required: true
+    risk_weight: 10
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: false
+    position_summary: >
+      Each party's total liability is capped at the Fees paid in the 12 months
+      before the claim.
+    risk_rationale: >
+      Halcyon's median contract is $165k a year against $10M of cyber cover.
+      An uncapped or high-multiple cap on one contract can exceed the revenue
+      from that customer many times over and is not insurable.
+    detection_guidance: >
+      Look for "aggregate liability", "shall not exceed", "limited to". The cap
+      may be stated as a multiple of fees, a period of fees, or a fixed sum.
+      A liability clause with no cap is a deviation, not a missing clause.
+    source_ref: Halcyon Risk Policy RP-04; cyber policy aggregate limit
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-10
+    positions:
+      - kind: preferred
+        rung: 0
+        label: 12-month cap
+        zone: green
+        summary: Mutual cap at 12 months of Fees.
+        language: >
+          Except for the Excluded Claims, each party's total aggregate liability
+          arising out of or related to this Agreement shall not exceed the Fees
+          paid and payable by Customer in the twelve (12) months preceding the
+          first event giving rise to liability.
+      - kind: fallback
+        rung: 1
+        label: 18-month cap
+        zone: yellow
+        approver_role: commercial_counsel
+        conditions: {deal_value_band: [mid, enterprise, strategic]}
+        give_get: Ask for a 36-month initial term or annual prepayment.
+        summary: Mutual cap at 18 months of Fees.
+        language: >
+          Except for the Excluded Claims, each party's total aggregate liability
+          arising out of or related to this Agreement shall not exceed the Fees
+          paid and payable by Customer in the eighteen (18) months preceding the
+          first event giving rise to liability.
+      - kind: fallback
+        rung: 2
+        label: 24-month cap
+        zone: yellow
+        approver_role: general_counsel
+        conditions: {deal_value_band: [enterprise, strategic]}
+        give_get: Require that all indemnities sit inside the cap.
+        summary: Mutual cap at 24 months of Fees.
+        language: >
+          Except for the Excluded Claims, each party's total aggregate liability
+          arising out of or related to this Agreement shall not exceed the Fees
+          paid and payable by Customer in the twenty-four (24) months preceding
+          the first event giving rise to liability.
+      - kind: acceptable_variant
+        label: Fixed-sum cap at or below 12 months of Fees
+        zone: green
+        summary: A dollar cap no higher than 12 months of Fees.
+        language: >
+          Except for the Excluded Claims, the total aggregate liability of each
+          party arising out of or related to this Agreement shall not exceed the
+          greater of (a) the Fees paid in the prior twelve (12) months and
+          (b) US$[amount].
+    parameters:
+      - key: cap_multiple_months
+        label: Cap as months of Fees
+        value_type: number
+        unit: months
+        direction: lower_is_better
+        preferred_value: 12
+        green_limit: 12
+        yellow_limit: 24
+        extraction_hint: >
+          Convert "1x annual fees" to 12, "2x" to 24. A fixed sum is converted
+          using the contract's annual Fees when known.
+        context_overrides:
+          - when: {deal_value_band: [strategic]}
+            yellow_limit: 36
+    red_lines:
+      - key: lol-uncapped
+        description: Halcyon's liability is uncapped or the cap is deleted.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause leaves Halcyon's aggregate liability without any
+            monetary limit, other than for the listed Excluded Claims.
+        action: block
+        rationale: Uninsurable; see global red line 1.
+    objections:
+      - objection: Twelve months of fees does not cover our exposure if patient data is lost.
+        their_rationale: A breach affecting patients costs far more than the subscription.
+        response: >
+          We address data incidents separately through a higher dedicated cap,
+          so the general cap does not need to carry that risk. The general cap
+          covers ordinary contract claims, where twelve months of Fees is the
+          market position for software of this kind.
+        talking_points:
+          - Point to the data breach super-cap at 2x annual Fees.
+          - The cap is mutual and also protects Customer.
+        recommended_position: {rule_key: limitation_of_liability.data_breach_super_cap, rung: 0}
+        frequency: common
+        counterparty_profile: Large hospital systems
+      - objection: Our procurement policy requires every vendor to accept at least two years of fees.
+        their_rationale: The policy is applied to all suppliers regardless of what they provide.
+        response: >
+          We can move above twelve months where the deal supports it. For an
+          agreement of this size we can offer eighteen months of Fees, provided
+          the initial term is thirty-six months.
+        talking_points:
+          - Ask whether the policy distinguishes software from services.
+          - Offer the 18-month cap in return for a longer term.
+        recommended_position: {rule_key: limitation_of_liability.cap_amount, rung: 1}
+        frequency: occasional
+    dependencies:
+      - related_rule_key: limitation_of_liability.data_breach_super_cap
+        relation: trade_against
+        note: Offer the super-cap before raising the general cap.
+    test_cases:
+      - name: Standard 12-month cap
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Neither party's aggregate liability under this Agreement shall exceed
+          the fees paid by Customer in the twelve months before the claim arose.
+      - name: Fixed-sum cap equal to one year of fees
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          The liability of each party under this Agreement is limited to the
+          greater of the fees paid in the previous twelve months and US$150,000.
+      - name: 24-month cap on an enterprise deal
+        context: {deal_value_band: enterprise}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          In no event shall either party's cumulative liability under this
+          Agreement exceed two times the annual Fees payable by Customer.
+      - name: Five times annual fees
+        context: {deal_value_band: mid, regimes: [hipaa]}
+        expected_outcome: deviation
+        expected_zone: red
+        sample_text: >
+          Each party's aggregate liability shall not exceed five times the fees
+          paid by Customer in the year before the claim.
+      - name: Liability unlimited, reworded
+        expected_outcome: red_line
+        expected_red_line_key: lol-uncapped
+        expected_zone: red
+        sample_text: Halcyon's liability under this Agreement shall be unlimited.
+      - name: Trap - negated wording
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Nothing in this Agreement shall impose unlimited liability on either
+          party; each party's liability is limited to the fees paid in the
+          preceding twelve months.
+
+  - rule_key: limitation_of_liability.data_breach_super_cap
+    title: Data breach super-cap
+    required: false
+    risk_weight: 9
+    negotiable: true
+    default_zone: yellow
+    needs_human_judgment: true
+    judgment_note: >
+      Weigh the volume and sensitivity of the Customer Data against the dollar
+      value of the super-cap, not only the multiple.
+    applies_when: {data_sensitivity: [personal_data, phi, special_category]}
+    position_summary: >
+      Liability for a breach of the data protection and security obligations
+      has its own cap of twice the annual Fees, in place of the general cap.
+    risk_rationale: >
+      Customers that send PHI expect more than the general cap for data
+      incidents. A separate cap of twice the annual Fees meets that need while
+      keeping the exposure on a median $165k contract far inside the $10M
+      cyber policy.
+    detection_guidance: >
+      Look for a second, higher limit tied to "data breach", "security
+      incident" or "breach of the data protection obligations". If data claims
+      are listed as an exclusion from the cap instead, that is a red line on
+      this rule, not a missing clause.
+    source_ref: Halcyon Risk Policy RP-04
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2026-01-10
+    positions:
+      - kind: preferred
+        rung: 0
+        label: Super-cap at 2x annual Fees
+        zone: green
+        summary: Data breach liability capped at twice the annual Fees.
+        language: >
+          Halcyon's total aggregate liability arising out of a breach of its
+          obligations under the Data Protection section of this Agreement shall
+          not exceed two (2) times the Fees paid and payable by Customer in the
+          twelve (12) months preceding the first event giving rise to liability,
+          and this limit applies in place of, and not in addition to, the
+          general limit of liability.
+      - kind: fallback
+        rung: 1
+        label: Super-cap at 2.5x annual Fees
+        zone: yellow
+        approver_role: general_counsel
+        give_get: Ask Customer to accept the standard breach notification timeline.
+        summary: Data breach liability capped at two and a half times the annual Fees.
+        language: >
+          Halcyon's total aggregate liability arising out of a breach of its
+          obligations under the Data Protection section of this Agreement shall
+          not exceed two and one-half (2.5) times the Fees paid and payable by
+          Customer in the twelve (12) months preceding the first event giving
+          rise to liability, and this limit applies in place of, and not in
+          addition to, the general limit of liability.
+      - kind: fallback
+        rung: 2
+        label: Super-cap at 3x annual Fees, ceiling of US$5,000,000
+        zone: yellow
+        approver_role: general_counsel
+        conditions: {deal_value_band: [enterprise, strategic]}
+        give_get: Require a 36-month initial term.
+        summary: Data breach liability capped at three times the annual Fees and never above US$5M.
+        internal_note: Confirm the dollar figure with the CFO before offering this rung.
+        language: >
+          Halcyon's total aggregate liability arising out of a breach of its
+          obligations under the Data Protection section of this Agreement shall
+          not exceed the lesser of (a) three (3) times the Fees paid and payable
+          by Customer in the twelve (12) months preceding the first event giving
+          rise to liability and (b) US$5,000,000, and this limit applies in
+          place of, and not in addition to, the general limit of liability.
+      - kind: acceptable_variant
+        label: Super-cap stated as 24 months of Fees
+        zone: green
+        summary: The same limit expressed as a period of Fees.
+        language: >
+          For claims arising from a Security Incident affecting Customer Data,
+          Halcyon's aggregate liability shall be limited to the Fees paid and
+          payable in the twenty-four (24) months before the claim arose, which
+          limit replaces the general limit of liability for those claims.
+    parameters:
+      - key: super_cap_multiple
+        label: Super-cap as a multiple of annual Fees
+        value_type: number
+        unit: multiple of annual Fees
+        direction: lower_is_better
+        preferred_value: 2
+        green_limit: 2
+        yellow_limit: 3
+        extraction_hint: >
+          Convert a period of Fees to a multiple of annual Fees: 24 months is 2,
+          36 months is 3. A fixed sum is converted using the annual Fees when known.
+      - key: super_cap_ceiling_usd
+        label: Dollar ceiling on the super-cap
+        value_type: currency_usd
+        direction: lower_is_better
+        preferred_value: 5000000
+        green_limit: 5000000
+        yellow_limit: 5000000
+        extraction_hint: >
+          The fixed dollar amount, if the clause states one. Leave empty when
+          the super-cap is stated only as a multiple or period of Fees.
+      - key: super_cap_replaces_general_cap
+        label: Super-cap applies in place of the general cap
+        value_type: boolean
+        direction: exact
+        preferred_value: true
+        green_limit: true
+        extraction_hint: >
+          True when the clause says the data breach limit replaces the general
+          limit. False when the two limits can be added together.
+    red_lines:
+      - key: super-cap-above-3x
+        description: A data breach cap above three times the annual Fees.
+        condition_type: parameter
+        condition: {parameter_key: super_cap_multiple, op: gt, value: 3}
+        action: block
+        rationale: Above the level the General Counsel may approve under the risk policy.
+      - key: super-cap-data-breach-uncapped
+        description: Data breach liability is carved out of every cap.
+        condition_type: semantic
+        condition:
+          test: >
+            The clause excludes liability for data breaches or security
+            incidents from all limits of liability, so that it is unlimited.
+        action: block
+        rationale: Uncapped data breach liability cannot be insured under the $10M cyber policy.
+    objections:
+      - objection: Twice the fees is nowhere near the cost of notifying our patients after a breach.
+        their_rationale: Notification, credit monitoring and regulatory costs scale with patient numbers, not fees.
+        response: >
+          We understand that breach costs follow the number of patients. We can
+          increase the dedicated cap to two and a half times the annual Fees,
+          which is well above what we offer for any other category of claim.
+        talking_points:
+          - Explain that the super-cap sits on top of Halcyon's security commitments and certifications.
+          - Offer rung 1 before discussing a dollar figure.
+        recommended_position: {rule_key: limitation_of_liability.data_breach_super_cap, rung: 1}
+        frequency: common
+        counterparty_profile: Large hospital systems
+      - objection: Data breaches should be uncapped because the risk is entirely within your control.
+        their_rationale: The vendor runs the systems, so the vendor should carry the whole risk.
+        response: >
+          No software vendor of our size can insure unlimited liability, and we
+          will not promise what we could not pay. The dedicated cap is set by
+          reference to the cover we actually hold, so it is a limit Customer
+          can rely on.
+        talking_points:
+          - Halcyon holds $10M of cyber cover across about 310 customers.
+          - Security is shared; Customer controls its users and credentials.
+        frequency: occasional
+    dependencies:
+      - related_rule_key: limitation_of_liability.cap_amount
+        relation: read_with
+        note: The super-cap replaces the general cap for data claims; check both limits together.
+    test_cases:
+      - name: Super-cap at twice annual fees
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          Vendor's liability for breach of its data protection obligations is
+          limited to twice the annual fees and replaces the general cap for
+          those claims.
+      - name: Super-cap as 24 months of fees
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          For security incident claims, Vendor's liability shall not exceed the
+          fees paid in the two years before the incident, in lieu of the
+          general limitation.
+      - name: Three times fees with a dollar ceiling on a strategic deal
+        context: {deal_value_band: strategic, data_sensitivity: phi}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: >
+          Liability for data breaches is capped at the lower of three times the
+          annual fees and five million US dollars.
+      - name: Super-cap added on top of the general cap
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          Vendor's liability for data breaches shall not exceed twice the annual
+          fees, which amount is in addition to the general limitation of liability.
+      - name: Five times annual fees
+        expected_outcome: red_line
+        expected_red_line_key: super-cap-above-3x
+        expected_zone: red
+        sample_text: >
+          Vendor's liability for any security incident shall not exceed five
+          times the annual fees.
+      - name: Uncapped under the global red line
+        expected_outcome: red_line
+        expected_red_line_key: global-uncapped-liability
+        expected_zone: red
+        sample_text: >
+          Nothing in this Agreement limits Vendor's liability for any loss of
+          any kind, including loss arising from a security incident.

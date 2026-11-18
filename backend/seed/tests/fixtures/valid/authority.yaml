@@ -1,0 +1,110 @@
+# Test fixture: a small authority file. The real file has 9 roles, 12 global
+# red lines and at least 36 escalation policies.
+context_dimensions:
+  - key: deal_value_band
+    name: Deal value band
+    value_type: enum
+    source: metadata
+    values:
+      - {value: standard, definition: Under $100k a year}
+      - {value: mid, definition: $100k to $500k a year}
+      - {value: enterprise, definition: $500k to $1.5M a year}
+      - {value: strategic, definition: Over $1.5M a year}
+  - key: counterparty_tier
+    name: Counterparty tier
+    value_type: enum
+    source: metadata
+    values:
+      - {value: tier_1, label: Tier 1, definition: Large health system or public body}
+      - {value: tier_2, label: Tier 2, definition: Regional group}
+      - {value: tier_3, label: Tier 3, definition: Small practice or startup}
+  - key: data_sensitivity
+    name: Data sensitivity
+    value_type: enum
+    source: upload
+    values:
+      - {value: none, definition: No personal data is processed}
+      - {value: personal_data, definition: Personal data that is not health data}
+      - {value: phi, definition: Protected health information under HIPAA}
+      - {value: special_category, definition: Special category data under GDPR}
+  - key: region
+    name: Region
+    value_type: enum
+    source: upload
+    values:
+      - {value: us, definition: United States}
+      - {value: eu, definition: European Union}
+      - {value: uk, definition: United Kingdom}
+      - {value: other, definition: Anywhere else}
+  - key: regimes
+    name: Regulatory regimes
+    value_type: multi_enum
+    source: derived
+    values:
+      - {value: hipaa, definition: The agreement involves PHI and a business associate relationship}
+      - {value: gdpr, definition: The agreement involves personal data of people in the EU or UK}
+
+roles:
+  - {key: contracts_manager, name: Contracts Manager, function: legal, level: 1, default_sla_hours: 8}
+  - {key: commercial_counsel, name: Commercial Counsel, function: legal, level: 2, default_sla_hours: 24}
+  - {key: cfo, name: Chief Financial Officer, function: finance, level: 4, default_sla_hours: 48}
+  - {key: general_counsel, name: General Counsel, function: legal, level: 4, default_sla_hours: 48}
+
+global_red_lines:
+  - key: global-uncapped-liability
+    description: Uncapped aggregate liability for Halcyon.
+    condition_type: semantic
+    condition:
+      test: >
+        The agreement leaves Halcyon's total liability without any monetary
+        limit, other than for fraud, wilful misconduct or payment obligations.
+    action: block
+    rationale: >
+      Halcyon carries $10M of cyber and technology errors and omissions cover.
+      Unlimited liability on any one contract cannot be insured.
+  - key: global-governing-law-outside-lists
+    description: Governing law or venue in a jurisdiction outside the approved and escalated lists.
+    condition_type: semantic
+    condition:
+      test: >
+        The agreement is governed by the law of a jurisdiction that is not a US
+        state, Ireland, or England and Wales.
+    action: escalate
+    approver_role: general_counsel
+    rationale: >
+      Halcyon has no counsel or enforcement experience outside these
+      jurisdictions, so the cost and outcome of a dispute cannot be predicted.
+
+escalation_policies:
+  - key: liability-yellow
+    description: Liability deviations that match no approved position.
+    clause_type: limitation_of_liability
+    zone: yellow
+    approver_role: commercial_counsel
+    consult_roles: [contracts_manager]
+    sla_hours: 24
+    required_info:
+      - Annual Fees and term of the deal
+      - The cap the counterparty proposes, as months of Fees
+    priority: 50
+  - key: liability-red-strategic
+    description: Liability red lines on strategic deals in the SaaS playbook.
+    playbook: halcyon-saas-msa-vendor
+    clause_type: limitation_of_liability
+    zone: red
+    conditions: {deal_value_band: [strategic]}
+    approver_role: general_counsel
+    consult_roles: [cfo]
+    sla_hours: 48
+    required_info:
+      - Annual Fees and term of the deal
+      - Whether the insurer has been asked about the exposure
+    priority: 80
+  - key: catch-all-yellow
+    description: Any yellow deviation with no more specific policy.
+    zone: yellow
+    approver_role: contracts_manager
+    sla_hours: 8
+    required_info:
+      - The clause as drafted and the playbook position it departs from
+    priority: 0

@@ -94,6 +94,7 @@ async def test_analyze_returns_analysis_result() -> None:
         patch("app.services.contract_analysis.service.clause_repo") as mock_cl,
         patch("app.services.contract_analysis.service.analysis_repo") as mock_ar,
         patch("app.services.contract_analysis.service.resolve", _mock_resolve()),
+        patch("app.services.contract_analysis.service.playbook_repo") as mock_pb,
         patch("app.services.contract_analysis.service.run_layer1", return_value=[]),
         patch("app.services.contract_analysis.service.match_clauses_to_rules", return_value=[]),
         patch("app.services.contract_analysis.service.run_layer2", return_value=[]),
@@ -101,6 +102,8 @@ async def test_analyze_returns_analysis_result() -> None:
     ):
         mock_cr.get_contract = AsyncMock(return_value=contract)
         mock_cl.get_clauses_for_contract = AsyncMock(return_value=[])
+        mock_pb.list_red_lines_for_playbook = AsyncMock(return_value=[])
+        mock_pb.list_global_red_lines = AsyncMock(return_value=[])
         mock_ar.delete_flags_for_contract = AsyncMock()
         mock_ar.delete_risk_score_for_contract = AsyncMock()
         mock_ar.bulk_create_flags = AsyncMock(return_value=[flag_row])
@@ -134,6 +137,7 @@ async def test_analyze_flags_appear_in_result() -> None:
         patch("app.services.contract_analysis.service.clause_repo") as mock_cl,
         patch("app.services.contract_analysis.service.analysis_repo") as mock_ar,
         patch("app.services.contract_analysis.service.resolve", _mock_resolve()),
+        patch("app.services.contract_analysis.service.playbook_repo") as mock_pb,
         patch("app.services.contract_analysis.service.run_layer1", return_value=[]),
         patch("app.services.contract_analysis.service.match_clauses_to_rules", return_value=[]),
         patch("app.services.contract_analysis.service.run_layer2", return_value=[]),
@@ -141,6 +145,8 @@ async def test_analyze_flags_appear_in_result() -> None:
     ):
         mock_cr.get_contract = AsyncMock(return_value=contract)
         mock_cl.get_clauses_for_contract = AsyncMock(return_value=[])
+        mock_pb.list_red_lines_for_playbook = AsyncMock(return_value=[])
+        mock_pb.list_global_red_lines = AsyncMock(return_value=[])
         mock_ar.delete_flags_for_contract = AsyncMock()
         mock_ar.delete_risk_score_for_contract = AsyncMock()
         mock_ar.bulk_create_flags = AsyncMock(return_value=[flag_row])
@@ -216,6 +222,7 @@ async def test_analyze_clause_type_folded_into_detail() -> None:
         patch("app.services.contract_analysis.service.clause_repo") as mock_cl,
         patch("app.services.contract_analysis.service.analysis_repo") as mock_ar,
         patch("app.services.contract_analysis.service.resolve", _mock_resolve()),
+        patch("app.services.contract_analysis.service.playbook_repo") as mock_pb,
         patch("app.services.contract_analysis.service.run_layer1", return_value=[layer1_flag]),
         patch("app.services.contract_analysis.service.match_clauses_to_rules", return_value=[]),
         patch("app.services.contract_analysis.service.run_layer2", return_value=[]),
@@ -223,6 +230,8 @@ async def test_analyze_clause_type_folded_into_detail() -> None:
     ):
         mock_cr.get_contract = AsyncMock(return_value=contract)
         mock_cl.get_clauses_for_contract = AsyncMock(return_value=[])
+        mock_pb.list_red_lines_for_playbook = AsyncMock(return_value=[])
+        mock_pb.list_global_red_lines = AsyncMock(return_value=[])
         mock_ar.delete_flags_for_contract = AsyncMock()
         mock_ar.delete_risk_score_for_contract = AsyncMock()
         mock_ar.bulk_create_flags = _capture_bulk_create
@@ -260,6 +269,7 @@ async def test_analyze_deletes_prior_flags_before_persisting() -> None:
         patch("app.services.contract_analysis.service.clause_repo") as mock_cl,
         patch("app.services.contract_analysis.service.analysis_repo") as mock_ar,
         patch("app.services.contract_analysis.service.resolve", _mock_resolve()),
+        patch("app.services.contract_analysis.service.playbook_repo") as mock_pb,
         patch("app.services.contract_analysis.service.run_layer1", return_value=[]),
         patch("app.services.contract_analysis.service.match_clauses_to_rules", return_value=[]),
         patch("app.services.contract_analysis.service.run_layer2", return_value=[]),
@@ -267,6 +277,8 @@ async def test_analyze_deletes_prior_flags_before_persisting() -> None:
     ):
         mock_cr.get_contract = AsyncMock(return_value=contract)
         mock_cl.get_clauses_for_contract = AsyncMock(return_value=[])
+        mock_pb.list_red_lines_for_playbook = AsyncMock(return_value=[])
+        mock_pb.list_global_red_lines = AsyncMock(return_value=[])
         mock_ar.delete_flags_for_contract = AsyncMock()
         mock_ar.delete_risk_score_for_contract = AsyncMock()
         mock_ar.bulk_create_flags = AsyncMock(return_value=[])
@@ -299,6 +311,7 @@ async def test_analyze_commits_after_persist() -> None:
         patch("app.services.contract_analysis.service.clause_repo") as mock_cl,
         patch("app.services.contract_analysis.service.analysis_repo") as mock_ar,
         patch("app.services.contract_analysis.service.resolve", _mock_resolve()),
+        patch("app.services.contract_analysis.service.playbook_repo") as mock_pb,
         patch("app.services.contract_analysis.service.run_layer1", return_value=[]),
         patch("app.services.contract_analysis.service.match_clauses_to_rules", return_value=[]),
         patch("app.services.contract_analysis.service.run_layer2", return_value=[]),
@@ -306,6 +319,8 @@ async def test_analyze_commits_after_persist() -> None:
     ):
         mock_cr.get_contract = AsyncMock(return_value=contract)
         mock_cl.get_clauses_for_contract = AsyncMock(return_value=[])
+        mock_pb.list_red_lines_for_playbook = AsyncMock(return_value=[])
+        mock_pb.list_global_red_lines = AsyncMock(return_value=[])
         mock_ar.delete_flags_for_contract = AsyncMock()
         mock_ar.delete_risk_score_for_contract = AsyncMock()
         mock_ar.bulk_create_flags = AsyncMock(return_value=[])
@@ -336,6 +351,7 @@ async def test_analyze_sets_contract_status_to_analyzed() -> None:
         patch("app.services.contract_analysis.service.clause_repo") as mock_cl,
         patch("app.services.contract_analysis.service.analysis_repo") as mock_ar,
         patch("app.services.contract_analysis.service.resolve", _mock_resolve()),
+        patch("app.services.contract_analysis.service.playbook_repo") as mock_pb,
         patch("app.services.contract_analysis.service.run_layer1", return_value=[]),
         patch("app.services.contract_analysis.service.match_clauses_to_rules", return_value=[]),
         patch("app.services.contract_analysis.service.run_layer2", return_value=[]),
@@ -343,6 +359,8 @@ async def test_analyze_sets_contract_status_to_analyzed() -> None:
     ):
         mock_cr.get_contract = AsyncMock(return_value=contract)
         mock_cl.get_clauses_for_contract = AsyncMock(return_value=[])
+        mock_pb.list_red_lines_for_playbook = AsyncMock(return_value=[])
+        mock_pb.list_global_red_lines = AsyncMock(return_value=[])
         mock_ar.delete_flags_for_contract = AsyncMock()
         mock_ar.delete_risk_score_for_contract = AsyncMock()
         mock_ar.bulk_create_flags = AsyncMock(return_value=[])
@@ -472,6 +490,7 @@ async def test_analyze_combines_layer1_and_layer2_flags() -> None:
         patch("app.services.contract_analysis.service.clause_repo") as mock_cl,
         patch("app.services.contract_analysis.service.analysis_repo") as mock_ar,
         patch("app.services.contract_analysis.service.resolve", _mock_resolve()),
+        patch("app.services.contract_analysis.service.playbook_repo") as mock_pb,
         patch("app.services.contract_analysis.service.run_layer1", return_value=[l1_flag]),
         patch("app.services.contract_analysis.service.match_clauses_to_rules", return_value=[]),
         patch("app.services.contract_analysis.service.run_layer2", return_value=[l2_flag]),
@@ -479,6 +498,8 @@ async def test_analyze_combines_layer1_and_layer2_flags() -> None:
     ):
         mock_cr.get_contract = AsyncMock(return_value=contract)
         mock_cl.get_clauses_for_contract = AsyncMock(return_value=[])
+        mock_pb.list_red_lines_for_playbook = AsyncMock(return_value=[])
+        mock_pb.list_global_red_lines = AsyncMock(return_value=[])
         mock_ar.delete_flags_for_contract = AsyncMock()
         mock_ar.delete_risk_score_for_contract = AsyncMock()
         mock_ar.bulk_create_flags = _capture
@@ -520,6 +541,7 @@ async def test_analyze_risk_dto_has_expected_fields() -> None:
         patch("app.services.contract_analysis.service.clause_repo") as mock_cl,
         patch("app.services.contract_analysis.service.analysis_repo") as mock_ar,
         patch("app.services.contract_analysis.service.resolve", _mock_resolve()),
+        patch("app.services.contract_analysis.service.playbook_repo") as mock_pb,
         patch("app.services.contract_analysis.service.run_layer1", return_value=[]),
         patch("app.services.contract_analysis.service.match_clauses_to_rules", return_value=[]),
         patch("app.services.contract_analysis.service.run_layer2", return_value=[]),
@@ -527,6 +549,8 @@ async def test_analyze_risk_dto_has_expected_fields() -> None:
     ):
         mock_cr.get_contract = AsyncMock(return_value=contract)
         mock_cl.get_clauses_for_contract = AsyncMock(return_value=[])
+        mock_pb.list_red_lines_for_playbook = AsyncMock(return_value=[])
+        mock_pb.list_global_red_lines = AsyncMock(return_value=[])
         mock_ar.delete_flags_for_contract = AsyncMock()
         mock_ar.delete_risk_score_for_contract = AsyncMock()
         mock_ar.bulk_create_flags = AsyncMock(return_value=[])

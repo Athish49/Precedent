@@ -1,0 +1,168 @@
+# Test fixture: one baseline rule. It exercises an enum parameter, phrase and
+# regex red lines, an escalating red line and a missing-clause test case.
+rules:
+  - rule_key: governing_law.choice_of_law
+    title: Governing law
+    required: true
+    risk_weight: 6
+    negotiable: true
+    position_summary: >
+      The agreement is governed by Delaware law.
+    risk_rationale: >
+      Halcyon is a Delaware corporation and its counsel knows Delaware contract
+      law. Litigating under an unfamiliar law raises the cost and uncertainty
+      of every dispute, which matters at a median contract value of $165k.
+    detection_guidance: >
+      Look for "governed by", "construed in accordance with" or "laws of". The
+      clause is often combined with venue; this rule covers only the choice of
+      law. An agreement with no such clause is a missing clause.
+    authored_by: Senior Commercial Counsel
+    approved_by: General Counsel
+    last_reviewed_at: 2025-12-05
+    positions:
+      - kind: preferred
+        label: Delaware law
+        zone: green
+        summary: Delaware law governs.
+        language: >
+          This Agreement is governed by the laws of the State of Delaware,
+          without regard to its conflict of laws rules.
+      - kind: fallback
+        rung: 1
+        label: New York, Massachusetts or California law
+        zone: green
+        summary: The law of one of three other approved states governs.
+        language: >
+          This Agreement is governed by the laws of the State of New York,
+          without regard to its conflict of laws rules.
+      - kind: fallback
+        rung: 2
+        label: Another US state
+        zone: yellow
+        approver_role: commercial_counsel
+        conditions: {region: [us]}
+        give_get: Ask for venue in Delaware or for neutral arbitration.
+        summary: The law of the US state where the counterparty is based governs.
+        language: >
+          This Agreement is governed by the laws of the State of [state],
+          without regard to its conflict of laws rules.
+      - kind: acceptable_variant
+        label: Delaware law, counterparty wording
+        zone: green
+        summary: Delaware law expressed in different words.
+        language: >
+          The validity, interpretation and performance of this Agreement shall
+          be determined under the internal laws of the State of Delaware.
+    parameters:
+      - key: governing_law_jurisdiction
+        label: Jurisdiction whose law governs
+        value_type: enum
+        direction: set_membership
+        preferred_value: delaware
+        green_limit: [delaware, new_york, massachusetts, california, ireland, england_and_wales]
+        yellow_limit: [other_us_state]
+        allowed_values:
+          - delaware
+          - new_york
+          - massachusetts
+          - california
+          - ireland
+          - england_and_wales
+          - other_us_state
+          - other
+        extraction_hint: >
+          Map the named state or country to one of the allowed values. Any US
+          state not listed is other_us_state. Anything else is other.
+    red_lines:
+      - key: gov-law-non-approved-country
+        description: The law of a country outside the approved list governs.
+        condition_type: parameter
+        condition: {parameter_key: governing_law_jurisdiction, op: eq, value: other}
+        action: escalate
+        approver_role: general_counsel
+        rationale: Only the General Counsel may accept a law outside the approved and escalated lists.
+      - key: gov-law-counterparty-choice
+        description: The counterparty may choose or change the governing law.
+        condition_type: phrase
+        condition:
+          any:
+            - governing law may be changed by
+            - such law as the other party may designate
+          negation_guard: true
+        action: block
+        rationale: A law chosen later by one party makes the agreement's meaning unpredictable.
+      - key: gov-law-unspecified-home-law
+        description: The governing law is the counterparty's home law without naming it.
+        condition_type: regex
+        condition:
+          pattern: 'laws? of the (jurisdiction|country|state) (in which|where) .{0,40}(is|has its) (incorporated|domiciled|principal)'
+          flags: i
+        action: escalate
+        approver_role: commercial_counsel
+        rationale: The governing law must be named so it can be checked against the approved list.
+    objections:
+      - objection: We are a public body and cannot agree to the law of another state.
+        their_rationale: State procurement rules require home-state law.
+        response: >
+          We understand that the requirement comes from statute rather than
+          preference. We can accept the law of your state for this agreement.
+          In return we ask that disputes be heard in a neutral venue.
+        talking_points:
+          - Ask for the citation to the procurement rule.
+          - Offer the home-state law in return for neutral venue.
+        recommended_position: {rule_key: governing_law.choice_of_law, rung: 2}
+        frequency: common
+        counterparty_profile: Public health systems
+      - objection: Delaware has nothing to do with this deal.
+        their_rationale: Neither the customer nor the services are located there.
+        response: >
+          Delaware is where Halcyon is incorporated and its contract law is
+          well developed and familiar to both sides' counsel. If you prefer, we
+          can agree to New York law, which offers the same predictability.
+        talking_points:
+          - Delaware and New York law are the most common choices for US software agreements.
+        recommended_position: {rule_key: governing_law.choice_of_law, rung: 1}
+        frequency: occasional
+    test_cases:
+      - name: Delaware law
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          The laws of Delaware govern this Agreement, excluding its choice of
+          law principles.
+      - name: Delaware law, internal-laws wording
+        expected_outcome: acceptable_variant
+        expected_zone: green
+        sample_text: >
+          This Agreement shall be construed under the internal laws of the
+          State of Delaware.
+      - name: Texas law for a Texas health system
+        context: {region: us, counterparty_tier: tier_1}
+        expected_outcome: fallback
+        expected_position_rung: 2
+        expected_zone: yellow
+        sample_text: This Agreement is governed by the laws of the State of Texas.
+      - name: Law of Ontario
+        context: {region: other}
+        expected_outcome: red_line
+        expected_red_line_key: gov-law-non-approved-country
+        expected_zone: red
+        sample_text: This Agreement is governed by the laws of the Province of Ontario.
+      - name: Two governing laws
+        expected_outcome: deviation
+        expected_zone: yellow
+        sample_text: >
+          This Agreement is governed by the laws of Delaware as to its
+          formation and by the laws of Customer's home state as to its
+          performance.
+      - name: No governing law clause
+        expected_outcome: missing
+        expected_zone: yellow
+        sample_text: ""
+      - name: Trap - counterparty may not change the law
+        is_trap: true
+        expected_outcome: compliant
+        expected_zone: green
+        sample_text: >
+          This Agreement is governed by Delaware law, and the governing law may
+          not be changed by either party except by written amendment.

@@ -56,13 +56,84 @@ def test_draft_clause_without_preferred_language() -> None:
     ):
         response = client.post(
             "/api/drafting/clause",
-            json={"clause_type": "indemnification", "context": {"contract_type": "SaaS"}},
+            json={"clause_type": "indemnification", "context": "SaaS deal context"},
         )
 
     assert response.status_code == 200
     body = response.json()
     assert body["source"] == "frequency"
     assert body["text"] == "Frequency clause text."
+
+
+def test_draft_clause_forwards_playbook_resolution_fields() -> None:
+    """contract_type/party_role/paper_origin/mode (task 4.7) reach the
+    service layer unchanged, alongside the free-text context."""
+    with patch(
+        "app.api.routes.drafting.drafting_service.draft_clause",
+        new=AsyncMock(return_value=DraftResult(text="Playbook text.", source="playbook")),
+    ) as draft_mock:
+        response = client.post(
+            "/api/drafting/clause",
+            json={
+                "clause_type": "limitation_of_liability",
+                "context": "Enterprise SaaS deal.",
+                "contract_type": "saas_msa",
+                "party_role": "vendor",
+                "paper_origin": "own",
+                "mode": "playbook",
+            },
+        )
+
+    assert response.status_code == 200
+    assert response.json()["source"] == "playbook"
+    draft_mock.assert_called_once()
+    _, kwargs = draft_mock.call_args
+    assert kwargs["context"] == "Enterprise SaaS deal."
+    assert kwargs["contract_type"] == "saas_msa"
+    assert kwargs["party_role"] == "vendor"
+    assert kwargs["paper_origin"] == "own"
+    assert kwargs["mode"] == "playbook"
+    assert kwargs["deal_context"] is None
+
+
+def test_draft_clause_forwards_structured_deal_context() -> None:
+    """A structured deal_context dict reaches the service layer as-is."""
+    deal_context = {"regimes": ["hipaa", "gdpr"], "deal_value_band": "mid"}
+    with patch(
+        "app.api.routes.drafting.drafting_service.draft_clause",
+        new=AsyncMock(return_value=DraftResult(text="Overlay text.", source="playbook")),
+    ) as draft_mock:
+        response = client.post(
+            "/api/drafting/clause",
+            json={
+                "clause_type": "data_protection",
+                "context": "Cover PHI.",
+                "contract_type": "saas_msa",
+                "party_role": "customer",
+                "deal_context": deal_context,
+            },
+        )
+
+    assert response.status_code == 200
+    _, kwargs = draft_mock.call_args
+    assert kwargs["deal_context"] == deal_context
+    assert kwargs["context"] == "Cover PHI."
+    assert kwargs["mode"] is None
+
+
+def test_draft_clause_rejects_unknown_mode() -> None:
+    """mode is validated against the cascade steps it can start from."""
+    with patch(
+        "app.api.routes.drafting.drafting_service.draft_clause",
+        new=AsyncMock(return_value=DraftResult(text="x", source="llm")),
+    ) as draft_mock:
+        response = client.post(
+            "/api/drafting/clause",
+            json={"clause_type": "indemnification", "mode": "bogus"},
+        )
+
+    assert response.status_code == 422
+    draft_mock.assert_not_called()
 
 
 # ── POST /api/drafting/document ───────────────────────────────────────────────

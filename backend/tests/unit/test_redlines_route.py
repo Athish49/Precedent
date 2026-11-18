@@ -236,3 +236,155 @@ def test_decision_success() -> None:
     body = response.json()
     assert body["id"] == str(_REDLINE_ID)
     assert body["status"] == "accepted"
+
+
+# ── POST /api/redlines/{contract_id}: preferred-language fallback (task 5.5) ──
+
+
+def _position_response(kind: str, rung: int | None, language: str):
+    from app.schemas.playbook import RulePositionResponse
+
+    return RulePositionResponse(
+        id=uuid.uuid4(), rule_id=uuid.uuid4(), kind=kind, rung=rung, label=kind,
+        language=language, summary=None, zone="green", approver_role_id=None,
+        conditions=None, give_get=None, internal_note=None, created_at=_NOW, updated_at=_NOW,
+    )
+
+
+def _generate_with_rule(rule: object | None) -> MagicMock:
+    """POST /api/redlines/{id} over one flagged 'indemnification' clause with
+    *rule* as its resolved rule; return the generate_redline mock."""
+    from types import SimpleNamespace
+
+    from app.schemas.analysis import FlagDTO
+
+    mod = "app.api.routes.redlines"
+    contract = MagicMock()
+    contract.counterparty_id = None
+    contract.contract_type = "nda"
+    contract.party_role = "vendor"
+    contract.paper_origin = "own"
+    contract.context = None
+    flag = FlagDTO(
+        id=_FLAG_ID, contract_id=_CONTRACT_ID, clause_id=_CLAUSE_ID, flag_type="deviation",
+        severity="high", source="deterministic", char_start=0, char_end=10, detail={},
+        matched_rule_id=None, created_at=_NOW,
+    )
+    clause = SimpleNamespace(id=_CLAUSE_ID, clause_type="indemnification", text="Clause text.")
+    redline_out = MagicMock(replacement_text="Revised.")
+    generate = MagicMock(return_value=redline_out)
+    rules = {"indemnification": rule} if rule is not None else {}
+
+    with (
+        patch(f"{mod}.contract_repo.get_contract", new=AsyncMock(return_value=contract)),
+        patch(f"{mod}.analysis_repo.get_flags_for_contract", new=AsyncMock(return_value=[flag])),
+        patch(f"{mod}.routing.resolve", new=AsyncMock(return_value=MagicMock())),
+        patch(f"{mod}.routing.rules_by_clause_type", return_value=rules),
+        patch(f"{mod}.stance.queue_clauses", return_value=[flag]),
+        patch(f"{mod}.clause_repo.get_clause", new=AsyncMock(return_value=clause)),
+        patch(f"{mod}.nms_repo.get_counterparty_pattern", new=AsyncMock(return_value=None)),
+        patch(f"{mod}.llm_call.generate_redline", new=generate),
+        patch(f"{mod}.render.render", return_value=MagicMock()),
+        patch(
+            f"{mod}.persist.persist_redline",
+            new=AsyncMock(return_value=(_make_redline(), MagicMock())),
+        ),
+    ):
+        response = client.post(f"/api/redlines/{_CONTRACT_ID}", json={"stance_mode": "balanced"})
+    assert response.status_code == 200
+    return generate
+
+
+def test_generate_redlines_preferred_language_from_rung_zero_position() -> None:
+    """With no kind='preferred' position, the rung-0 position's language
+    feeds redline generation. The legacy column fallback is gone."""
+    from types import SimpleNamespace
+
+    rule = SimpleNamespace(
+        positions=[_position_response("acceptable_variant", 0, "Rung zero text.")],
+        objections=[],
+    )
+    generate = _generate_with_rule(rule)
+    assert generate.call_args.args[2] == "Rung zero text."
+
+
+def test_generate_redlines_preferred_language_none_without_rung_zero() -> None:
+    from types import SimpleNamespace
+
+    rule = SimpleNamespace(
+        positions=[_position_response("fallback", 1, "Fallback.")], objections=[]
+    )
+    assert _generate_with_rule(rule).call_args.args[2] is None
+    assert _generate_with_rule(None).call_args.args[2] is None
+
+
+# ── POST /api/redlines/{contract_id}: ladder chosen by the flag's rule_key ────
+
+
+def _generate_with_family(flag_rule_key: str | None) -> tuple[MagicMock, AsyncMock, list]:
+    """Two resolved rules share clause_type 'indemnification'. Uses the REAL
+    routing.rules_by_clause_type / rules_by_rule_key / rule_for_flag."""
+    from types import SimpleNamespace
+
+    from app.schemas.analysis import FlagDTO
+
+    mod = "app.api.routes.redlines"
+    contract = MagicMock()
+    contract.counterparty_id = None
+    contract.contract_type = "nda"
+    contract.party_role = "vendor"
+    contract.paper_origin = "own"
+    contract.context = None
+    flag = FlagDTO(
+        id=_FLAG_ID, contract_id=_CONTRACT_ID, clause_id=_CLAUSE_ID, flag_type="deviation",
+        severity="high", source="deterministic", char_start=0, char_end=10, detail={},
+        matched_rule_id=None, created_at=_NOW, rule_key=flag_rule_key,
+    )
+    clause = SimpleNamespace(id=_CLAUSE_ID, clause_type="indemnification", text="Clause text.")
+    family = [
+        SimpleNamespace(
+            rule_key="indemnification.a_general", clause_type="indemnification",
+            positions=[_position_response("preferred", 0, "GENERAL")], objections=[],
+        ),
+        SimpleNamespace(
+            rule_key="indemnification.b_ip_infringement", clause_type="indemnification",
+            positions=[_position_response("preferred", 0, "IP")], objections=[],
+        ),
+    ]
+    resolved = MagicMock()
+    resolved.rules = family
+    generate = MagicMock(return_value=MagicMock(replacement_text="Revised."))
+    persist_mock = AsyncMock(return_value=(_make_redline(), MagicMock()))
+
+    with (
+        patch(f"{mod}.contract_repo.get_contract", new=AsyncMock(return_value=contract)),
+        patch(f"{mod}.analysis_repo.get_flags_for_contract", new=AsyncMock(return_value=[flag])),
+        patch(f"{mod}.routing.resolve", new=AsyncMock(return_value=resolved)),
+        patch(f"{mod}.stance.queue_clauses", return_value=[flag]),
+        patch(f"{mod}.clause_repo.get_clause", new=AsyncMock(return_value=clause)),
+        patch(f"{mod}.nms_repo.get_counterparty_pattern", new=AsyncMock(return_value=None)),
+        patch(f"{mod}.llm_call.generate_redline", new=generate),
+        patch(f"{mod}.render.render", return_value=MagicMock()),
+        patch(f"{mod}.persist.persist_redline", new=persist_mock),
+    ):
+        response = client.post(f"/api/redlines/{_CONTRACT_ID}", json={"stance_mode": "balanced"})
+    assert response.status_code == 200
+    return generate, persist_mock, family
+
+
+def test_generate_redlines_uses_flag_rule_key_not_first_rule_in_family() -> None:
+    generate, persist_mock, family = _generate_with_family("indemnification.b_ip_infringement")
+    assert persist_mock.call_args.kwargs["rule"] is family[1]
+    assert generate.call_args.args[2] == "IP"
+
+
+def test_generate_redlines_flag_without_rule_key_uses_clause_type_rule() -> None:
+    generate, persist_mock, family = _generate_with_family(None)
+    assert persist_mock.call_args.kwargs["rule"] is family[0]
+    assert generate.call_args.args[2] == "GENERAL"
+
+
+def test_generate_redlines_unresolved_rule_key_gets_no_rule() -> None:
+    generate, persist_mock, _ = _generate_with_family("indemnification.not_resolved")
+    assert persist_mock.call_args.kwargs["rule"] is None
+    assert generate.call_args.args[2] is None

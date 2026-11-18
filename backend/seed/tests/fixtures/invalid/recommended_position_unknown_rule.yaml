@@ -1,0 +1,7 @@
+# Failing fixture: edits applied to a copy of fixtures/valid by test_playbook_models.py.
+description: 'Cross-check: recommended_position points at a rule that exists or is in the taxonomy.'
+file: playbooks/saas_msa_vendor/risk.yaml
+edits:
+- path: [rules, 0, objections, 0, recommended_position, rule_key]
+  set: limitation_of_liability.nonexistent
+expect: {code: objection.recommended_position, message: does not exist, rule_key: limitation_of_liability.cap_amount}

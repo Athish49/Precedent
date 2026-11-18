@@ -9,12 +9,35 @@ import logging
 import time
 
 import anthropic
+from anthropic._models import TypeAdapter as _AnthropicTypeAdapter
+from anthropic.lib._parse._response import parse_beta_response
+from anthropic.lib._parse._transform import transform_schema
 
 from app.core.config import get_settings
 from app.core.llm.errors import LLMError
 from app.core.llm.registry import get_model_for_task
 
+# ============================================================
+# >>> TEMPORARY DEV BYPASS IMPORT <<<
+# See backend/.llm_bypass_queue/README.md and app/core/llm/dev_bypass.py.
+# Delete this import together with the bypass blocks below, dev_bypass.py,
+# and the `llm_file_queue_bypass` setting once testing is done.
+# ============================================================
+from app.core.llm.dev_bypass import bypass_batch, bypass_structured, bypass_text
+
 logger = logging.getLogger(__name__)
+
+# Found live during task 5.4's end-to-end verification: 4096 is too small for
+# a Layer 2 content-analysis batch item covering a real multi-clause
+# contract — the model's structured JSON output was cut off mid-string
+# ("EOF while parsing a string"), which ``pydantic``'s ``validate_json``
+# correctly raises as a validation error, surfacing as an unhandled 500 all
+# the way up through ``run_pipeline``. Raised here, uniformly, for all three
+# call shapes (purely a transport budget, no prompt/scoring change) rather
+# than only for the one call that happened to hit it first. See
+# ``playbook_verification.md`` for which contracts still truncate even at
+# this higher ceiling, rather than raising it further to force a pass.
+_MAX_TOKENS = 8192
 
 # ---------------------------------------------------------------------------
 # Internal helpers
@@ -100,9 +123,31 @@ def call_structured[T](
 
     system, user_messages = _split_messages(messages, cache_prefix)
 
+    # ============================================================
+    # >>> TEMPORARY DEV BYPASS — START <<<
+    # This block reroutes this call through a local file queue instead of
+    # the real Anthropic API, so a human-run Claude Code agent can answer
+    # it for free during testing. Controlled by settings.llm_file_queue_bypass
+    # (default OFF). DELETE THIS ENTIRE BLOCK (and the setting) once testing
+    # is done — it must never run in production.
+    # ============================================================
+    if settings.llm_file_queue_bypass:
+        parsed_output = bypass_structured(
+            task=task,
+            intended_model=model,
+            system=system,
+            messages=user_messages,
+            response_model=response_model,
+        )
+        # >>> TEMPORARY DEV BYPASS — END <<<
+        return parsed_output
+    # ============================================================
+    # >>> TEMPORARY DEV BYPASS — END (real call resumes below) <<<
+    # ============================================================
+
     kwargs: dict = {
         "model": model,
-        "max_tokens": 4096,
+        "max_tokens": _MAX_TOKENS,
         "messages": user_messages,  # type: ignore[arg-type]
         "output_format": response_model,
     }
@@ -152,9 +197,30 @@ def call_text(
 
     system, user_messages = _split_messages(messages, cache_prefix)
 
+    # ============================================================
+    # >>> TEMPORARY DEV BYPASS — START <<<
+    # This block reroutes this call through a local file queue instead of
+    # the real Anthropic API, so a human-run Claude Code agent can answer
+    # it for free during testing. Controlled by settings.llm_file_queue_bypass
+    # (default OFF). DELETE THIS ENTIRE BLOCK (and the setting) once testing
+    # is done — it must never run in production.
+    # ============================================================
+    if settings.llm_file_queue_bypass:
+        text_output = bypass_text(
+            task=task,
+            intended_model=model,
+            system=system,
+            messages=user_messages,
+        )
+        # >>> TEMPORARY DEV BYPASS — END <<<
+        return text_output
+    # ============================================================
+    # >>> TEMPORARY DEV BYPASS — END (real call resumes below) <<<
+    # ============================================================
+
     kwargs: dict = {
         "model": model,
-        "max_tokens": 4096,
+        "max_tokens": _MAX_TOKENS,
         "messages": user_messages,  # type: ignore[arg-type]
     }
     if system is not None:
@@ -213,21 +279,67 @@ def call_batch[T](
     model = get_model_for_task(task, settings)
     client = _build_client()
 
+    # ============================================================
+    # >>> TEMPORARY DEV BYPASS — START <<<
+    # This block reroutes this call through a local file queue instead of
+    # the real Anthropic API, so a human-run Claude Code agent can answer
+    # it for free during testing. Controlled by settings.llm_file_queue_bypass
+    # (default OFF). DELETE THIS ENTIRE BLOCK (and the setting) once testing
+    # is done — it must never run in production.
+    # ============================================================
+    if settings.llm_file_queue_bypass:
+        bypass_items: list[dict] = []
+        for item in items:
+            b_system, b_user_messages = _split_messages(item["messages"], cache_prefix)
+            bypass_items.append(
+                {"custom_id": item["id"], "system": b_system, "messages": b_user_messages}
+            )
+        results = bypass_batch(
+            task=task,
+            intended_model=model,
+            items=bypass_items,
+            response_model=response_model,
+        )
+        # >>> TEMPORARY DEV BYPASS — END <<<
+        return results
+    # ============================================================
+    # >>> TEMPORARY DEV BYPASS — END (real call resumes below) <<<
+    # ============================================================
+
+    # Unlike ``call_structured``/``call_text``, which go through
+    # ``client.beta.messages.parse()`` (a client-side helper that itself
+    # converts a Pydantic ``output_format`` class into the wire-format
+    # ``output_config`` JSON schema before posting), ``batches.create()`` is
+    # a raw passthrough: its ``params`` are serialized as-is
+    # (``MessageCreateParamsNonStreaming``), so a bare Pydantic class under
+    # ``output_format`` is not valid wire format and fails JSON
+    # serialization locally. Build the same ``output_config`` shape
+    # ``parse()`` builds, using the SDK's own (private) schema-transform
+    # helper, so every item in the batch asks for structured output the way
+    # the real API expects.
+    schema = transform_schema(_AnthropicTypeAdapter(response_model).json_schema())
+    output_config = {"format": {"schema": schema, "type": "json_schema"}}
+
     # Build per-item request params.
     requests: list[dict] = []
     for item in items:
         system, user_messages = _split_messages(item["messages"], cache_prefix)
         params: dict = {
             "model": model,
-            "max_tokens": 4096,
+            "max_tokens": _MAX_TOKENS,
             "messages": user_messages,
-            "output_format": response_model,
+            "output_config": output_config,
         }
         if system is not None:
             params["system"] = system
         requests.append({"custom_id": item["id"], "params": params})
 
-    batch = client.beta.messages.batches.create(requests=requests)
+    # Structured outputs is itself a beta feature; ``parse()`` always adds
+    # this beta flag when ``output_format``/``output_config`` is used, and
+    # the raw batch endpoint needs it passed explicitly the same way.
+    batch = client.beta.messages.batches.create(
+        requests=requests, betas=["structured-outputs-2025-12-15"]
+    )
     logger.debug("LLM batch created batch_id=%s task=%s items=%d", batch.id, task, len(items))
 
     # Poll until processing ends.
@@ -250,14 +362,37 @@ def call_batch[T](
                 f"(task={task!r})"
             )
 
-        message = res.message
-        # Prefer parsed_output when present (beta parse path); fall back to None.
-        parsed = getattr(message, "parsed_output", None)
+        # ``batches.results()`` returns a raw ``BetaMessage`` (the batch
+        # endpoint never runs it through ``parse()``'s response wrapping),
+        # so it has no ``parsed_output`` of its own — build the same
+        # ``ParsedBetaMessage`` ``parse()`` would have returned, from the
+        # ``output_config`` schema this batch asked for.
+        stop_reason = res.message.stop_reason
+        if stop_reason == "refusal":
+            raise LLMError(
+                f"LLM batch item custom_id={custom_id!r} returned no structured output "
+                f"(task={task!r}, stop_reason={stop_reason!r})"
+            )
+
+        # ``parse_beta_response`` validates each text block's JSON against
+        # ``response_model`` and raises ``pydantic.ValidationError`` on
+        # malformed/truncated output (e.g. ``stop_reason="max_tokens"``).
+        # Surface that as ``LLMError`` like every other batch-item failure.
+        try:
+            parsed_message = parse_beta_response(
+                output_format=response_model, response=res.message
+            )
+        except ValueError as exc:  # pydantic.ValidationError subclasses ValueError
+            raise LLMError(
+                f"LLM batch item custom_id={custom_id!r} returned invalid structured output "
+                f"(task={task!r}, stop_reason={stop_reason!r}): {exc}"
+            ) from exc
+        parsed = parsed_message.parsed_output
 
         if parsed is None:
             raise LLMError(
                 f"LLM batch item custom_id={custom_id!r} returned no structured output "
-                f"(task={task!r})"
+                f"(task={task!r}, stop_reason={stop_reason!r})"
             )
 
         results[custom_id] = parsed  # type: ignore[assignment]

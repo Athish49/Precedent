@@ -1,0 +1,28 @@
+key: halcyon-gdpr-overlay
+name: Halcyon GDPR Overlay (Processor)
+practice_area: gdpr
+layer: overlay
+party_role: vendor
+paper_scope: both
+jurisdiction: EU
+precedence: 30
+owner_role: privacy_counsel
+parent: null
+applies_when: {regimes: [gdpr]}
+review_cadence_days: 180
+description: >
+  Positions that apply on top of the SaaS agreement and the data processing
+  agreement whenever Halcyon processes Personal Data subject to the GDPR or
+  the UK GDPR as Processor. The overlay replaces the regime-neutral DPA
+  positions on processing instructions, Data Subject requests, transfers,
+  data residency, Sub-processor authorisation and the breach timeline with
+  positions tied to the Regulation, and adds the terms that only arise under
+  it, including Irish governing law for deals contracted through Halcyon
+  Care Ireland Ltd.
+version:
+  version: "1.0"
+  effective_from: 2026-01-15
+  change_summary: Initial published version.
+  created_by: Privacy Counsel
+  approved_by: General Counsel
+rule_files: [rules.yaml]

@@ -7,6 +7,8 @@ from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
+from anthropic._models import construct_type_unchecked
+from anthropic.types.beta.messages import BetaMessageBatchIndividualResponse
 from pydantic import BaseModel
 
 import app.core.llm.gateway as gw_module
@@ -97,19 +99,70 @@ class TestFakeCallBatch:
 # ---------------------------------------------------------------------------
 
 
-def _make_batch_result(custom_id: str, parsed_obj: Any) -> MagicMock:
-    """Build a mock BetaMessageBatchIndividualResponse with a succeeded result."""
-    message = MagicMock()
-    message.parsed_output = parsed_obj
+def _decode_batch_line(line: dict[str, Any]) -> BetaMessageBatchIndividualResponse:
+    """Build a result exactly the way the real SDK does.
 
-    res = MagicMock()
-    res.type = "succeeded"
-    res.message = message
+    ``client.beta.messages.batches.results()`` returns a ``JSONLDecoder`` that
+    turns each JSONL line into a ``BetaMessageBatchIndividualResponse`` via
+    ``construct_type_unchecked``. A succeeded result's ``.message`` is a raw
+    ``BetaMessage``: it has **no** ``parsed_output``, so ``call_batch`` has to
+    parse the text block JSON against ``response_model`` itself.
+    """
+    return construct_type_unchecked(value=line, type_=BetaMessageBatchIndividualResponse)
 
-    item = MagicMock()
-    item.custom_id = custom_id
-    item.result = res
-    return item
+
+def _make_batch_result(
+    custom_id: str,
+    payload: BaseModel | str | None,
+    *,
+    stop_reason: str = "end_turn",
+) -> BetaMessageBatchIndividualResponse:
+    """Build a real succeeded ``BetaMessageBatchIndividualResponse``.
+
+    ``payload`` is the model's text output: a Pydantic instance (serialized to
+    JSON, as structured outputs would return), a raw string, or ``None`` for a
+    message with no text content block at all.
+    """
+    if isinstance(payload, BaseModel):
+        content: list[dict[str, Any]] = [{"type": "text", "text": payload.model_dump_json()}]
+    elif isinstance(payload, str):
+        content = [{"type": "text", "text": payload}]
+    else:
+        content = []
+
+    return _decode_batch_line(
+        {
+            "custom_id": custom_id,
+            "result": {
+                "type": "succeeded",
+                "message": {
+                    "id": f"msg_{custom_id}",
+                    "type": "message",
+                    "role": "assistant",
+                    "model": "claude-test",
+                    "content": content,
+                    "stop_reason": stop_reason,
+                    "stop_sequence": None,
+                    "usage": {"input_tokens": 10, "output_tokens": 5},
+                },
+            },
+        }
+    )
+
+
+def _make_errored_result(custom_id: str) -> BetaMessageBatchIndividualResponse:
+    return _decode_batch_line(
+        {
+            "custom_id": custom_id,
+            "result": {
+                "type": "errored",
+                "error": {
+                    "type": "error",
+                    "error": {"type": "overloaded_error", "message": "Overloaded"},
+                },
+            },
+        }
+    )
 
 
 class TestGatewayCallBatch:
@@ -168,13 +221,7 @@ class TestGatewayCallBatch:
         mock_client.beta.messages.batches.create.assert_called_once()
 
     def test_raises_llmerror_on_non_succeeded_result(self) -> None:
-        errored = MagicMock()
-        errored.type = "errored"
-        errored.custom_id = "bad-item"
-        errored.result = MagicMock()
-        errored.result.type = "errored"
-
-        mock_client = self._make_mock_client([errored])
+        mock_client = self._make_mock_client([_make_errored_result("bad-item")])
 
         with patch.object(gw_module, "_build_client", return_value=mock_client):
             with pytest.raises(LLMError, match="bad-item"):
@@ -185,6 +232,7 @@ class TestGatewayCallBatch:
                 )
 
     def test_raises_llmerror_when_parsed_output_is_none(self) -> None:
+        # No text content block -> parse_beta_response yields parsed_output None.
         item = _make_batch_result("null-item", None)
         mock_client = self._make_mock_client([item])
 
@@ -193,6 +241,65 @@ class TestGatewayCallBatch:
                 gw_module.call_batch(
                     "clause_analysis",
                     [{"id": "null-item", "messages": [{"role": "user", "content": "Hi"}]}],
+                    _RiskResult,
+                )
+
+    def test_results_are_validated_model_instances(self) -> None:
+        """The raw BetaMessage text is parsed into ``response_model`` instances."""
+        obj = _RiskResult(clause_type="indemnity", risk_level=4)
+        raw = _make_batch_result("typed", obj)
+        # Sanity: the real SDK shape carries no pre-parsed output.
+        assert not hasattr(raw.result.message, "parsed_output")
+
+        mock_client = self._make_mock_client([raw])
+        with patch.object(gw_module, "_build_client", return_value=mock_client):
+            result = gw_module.call_batch(
+                "clause_analysis",
+                [{"id": "typed", "messages": [{"role": "user", "content": "Hi"}]}],
+                _RiskResult,
+            )
+
+        assert isinstance(result["typed"], _RiskResult)
+        assert result["typed"] == obj
+
+    def test_raises_llmerror_on_refusal(self) -> None:
+        item = _make_batch_result(
+            "refused", "I can't help with that.", stop_reason="refusal"
+        )
+        mock_client = self._make_mock_client([item])
+
+        with patch.object(gw_module, "_build_client", return_value=mock_client):
+            with pytest.raises(LLMError, match="refusal"):
+                gw_module.call_batch(
+                    "clause_analysis",
+                    [{"id": "refused", "messages": [{"role": "user", "content": "Hi"}]}],
+                    _RiskResult,
+                )
+
+    def test_raises_llmerror_on_truncated_json(self) -> None:
+        """max_tokens truncation yields invalid JSON -> LLMError, not ValidationError."""
+        item = _make_batch_result(
+            "cut", '{"clause_type": "nda", "risk_lev', stop_reason="max_tokens"
+        )
+        mock_client = self._make_mock_client([item])
+
+        with patch.object(gw_module, "_build_client", return_value=mock_client):
+            with pytest.raises(LLMError, match="cut"):
+                gw_module.call_batch(
+                    "clause_analysis",
+                    [{"id": "cut", "messages": [{"role": "user", "content": "Hi"}]}],
+                    _RiskResult,
+                )
+
+    def test_raises_llmerror_on_schema_mismatch(self) -> None:
+        item = _make_batch_result("bad-schema", '{"clause_type": "nda"}')
+        mock_client = self._make_mock_client([item])
+
+        with patch.object(gw_module, "_build_client", return_value=mock_client):
+            with pytest.raises(LLMError, match="bad-schema"):
+                gw_module.call_batch(
+                    "clause_analysis",
+                    [{"id": "bad-schema", "messages": [{"role": "user", "content": "Hi"}]}],
                     _RiskResult,
                 )
 
