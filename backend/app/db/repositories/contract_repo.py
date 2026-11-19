@@ -2,11 +2,18 @@ from __future__ import annotations
 
 import uuid
 from datetime import date
+from typing import TYPE_CHECKING
 
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models.contract import Contract, ContractMetadata, Party
+from app.db.models.contract import Contract, ContractMetadata, ContractVersion, Party
+from app.db.models.party_link import ContractParty, ContractSignatory
+
+if TYPE_CHECKING:
+    from app.db.models.field import ContractField
+    from app.services.document_processing.types import PartyDraft, SignatoryDraft
 
 
 async def get_contract(session: AsyncSession, contract_id: uuid.UUID) -> Contract | None:
@@ -110,14 +117,120 @@ async def update_contract(session: AsyncSession, contract_id: uuid.UUID, **kwarg
 async def upsert_party(
     session: AsyncSession, normalized_name: str, display_name: str
 ) -> Party:
-    """Insert party if not exists (by normalized_name), else return existing."""
+    """Insert the party if it does not already exist, else return the
+    existing row. Uses ``INSERT ... ON CONFLICT (normalized_name) DO
+    NOTHING`` (plan section 5.6) so two concurrent uploads of the same
+    counterparty do not race on the unique constraint — the old
+    select-then-insert this replaces could raise an integrity error under
+    that race.
+    """
+    insert_stmt = (
+        pg_insert(Party)
+        .values(id=uuid.uuid4(), normalized_name=normalized_name, display_name=display_name)
+        .on_conflict_do_nothing(index_elements=["normalized_name"])
+    )
+    await session.execute(insert_stmt)
     result = await session.execute(
         select(Party).where(Party.normalized_name == normalized_name)
     )
-    existing = result.scalar_one_or_none()
-    if existing is not None:
-        return existing
+    return result.scalar_one()
 
-    party = Party(normalized_name=normalized_name, display_name=display_name)
-    session.add(party)
-    return party
+
+async def replace_contract_parties(
+    session: AsyncSession,
+    contract_id: uuid.UUID,
+    entries: list[tuple[uuid.UUID, "PartyDraft"]],
+) -> list[ContractParty]:
+    """Delete a contract's ``contract_party`` rows and insert *entries* in
+    their place, in order. Each entry pairs a resolved ``party.id`` with
+    the draft carrying its role and the facts Extract gave it.
+    """
+    await session.execute(delete(ContractParty).where(ContractParty.contract_id == contract_id))
+    rows: list[ContractParty] = []
+    for ordinal, (party_id, draft) in enumerate(entries):
+        row = ContractParty(
+            id=uuid.uuid4(),
+            contract_id=contract_id,
+            party_id=party_id,
+            role=draft.role,
+            role_label=draft.role_label,
+            entity_type=draft.entity_type,
+            jurisdiction=draft.jurisdiction,
+            address=draft.address,
+            ordinal=ordinal,
+        )
+        session.add(row)
+        rows.append(row)
+    await session.flush()
+    return rows
+
+
+async def replace_signatories(
+    session: AsyncSession,
+    version_id: uuid.UUID,
+    entries: list[tuple["SignatoryDraft", uuid.UUID | None]],
+) -> list[ContractSignatory]:
+    """Delete a version's ``contract_signatory`` rows and insert *entries*
+    in their place. Each entry pairs a draft with the ``contract_party.id``
+    it was linked to (``parties.link_signatory``), or None if it could not
+    be linked.
+    """
+    await session.execute(
+        delete(ContractSignatory).where(ContractSignatory.contract_version_id == version_id)
+    )
+    rows: list[ContractSignatory] = []
+    for draft, contract_party_id in entries:
+        row = ContractSignatory(
+            id=uuid.uuid4(),
+            contract_version_id=version_id,
+            contract_party_id=contract_party_id,
+            printed_name=draft.printed_name,
+            title=draft.title,
+            is_signed=draft.is_signed,
+            signed_date=draft.signed_date,
+        )
+        session.add(row)
+        rows.append(row)
+    await session.flush()
+    return rows
+
+
+async def write_metadata_projection(
+    session: AsyncSession,
+    contract_id: uuid.UUID,
+    version_id: uuid.UUID,
+    values_in_force: dict[str, "ContractField"],
+    registry_projection: dict[str, str],
+) -> ContractMetadata:
+    """Write the typed ``contract_metadata`` columns from the values in
+    force in ``contract_field`` (plan section 7.3: ``contract_metadata``
+    "is written by one function from ``contract_field``, in the same
+    transaction, and by nothing else").
+
+    ``registry_projection`` maps a field key to the ``contract_metadata``
+    column it projects to (``fields.FieldDef.projection``). A field with no
+    value in force clears its column to null.
+    """
+    result = await session.execute(
+        select(ContractMetadata).where(ContractMetadata.contract_id == contract_id)
+    )
+    metadata = result.scalar_one_or_none()
+    if metadata is None:
+        metadata = ContractMetadata(contract_id=contract_id)
+        session.add(metadata)
+    metadata.contract_version_id = version_id
+    for field_key, column_name in registry_projection.items():
+        field_row = values_in_force.get(field_key)
+        setattr(metadata, column_name, field_row.value if field_row is not None else None)
+    await session.flush()
+    return metadata
+
+
+async def find_by_sha256(session: AsyncSession, sha256: str) -> ContractVersion | None:
+    """Return the first ``contract_version`` row with this file hash, for
+    duplicate-upload detection (plan section 5.1), or None.
+    """
+    result = await session.execute(
+        select(ContractVersion).where(ContractVersion.file_sha256 == sha256)
+    )
+    return result.scalars().first()

@@ -35,7 +35,7 @@ class Obligation(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     contract_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("contract.id", name="fk_obligation_contract"),
+        ForeignKey("contract.id", name="fk_obligation_contract", ondelete="CASCADE"),
         nullable=False,
     )
     commitment: Mapped[str] = mapped_column(Text, nullable=False)
@@ -65,7 +65,7 @@ class Alert(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     contract_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("contract.id", name="fk_alert_contract"),
+        ForeignKey("contract.id", name="fk_alert_contract", ondelete="CASCADE"),
         nullable=False,
     )
     alert_type: Mapped[str] = mapped_column(Text, nullable=False)

@@ -12,9 +12,10 @@ from typing import Protocol
 
 from pgvector.sqlalchemy import Vector
 from pydantic import BaseModel
-from sqlalchemy import cast, select
+from sqlalchemy import cast, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import get_settings
 from app.core.embeddings import embed
 from app.db.models.clause import Clause, ClauseEmbedding
 
@@ -47,7 +48,14 @@ async def embed_and_store_clauses(
     clauses: list[ClauseRow],
     session: AsyncSession,
 ) -> None:
-    """Compute embeddings for all clause texts and persist ClauseEmbedding rows.
+    """Compute embeddings for *clauses* and persist ``ClauseEmbedding`` rows.
+
+    Idempotent: any existing embedding row for a clause in *clauses* is
+    deleted before the new one is inserted, so running this twice for the
+    same clauses leaves exactly one row per clause (the unique constraint
+    on ``clause_id`` would otherwise raise on the second run). Callers
+    control exactly which clauses get embedded -- this function does not
+    re-derive the list itself (task 3.2; plan section 5.8).
 
     Args:
         contract_id: UUID of the parent contract.
@@ -57,7 +65,11 @@ async def embed_and_store_clauses(
     if not clauses:
         return
 
+    clause_ids = [c.id for c in clauses]
+    await session.execute(delete(ClauseEmbedding).where(ClauseEmbedding.clause_id.in_(clause_ids)))
+
     vectors = await embed([c.text for c in clauses])
+    model_name = get_settings().embedding_model
 
     for clause, vector in zip(clauses, vectors, strict=True):
         row = ClauseEmbedding(
@@ -66,6 +78,7 @@ async def embed_and_store_clauses(
             contract_id=contract_id,
             clause_type=clause.clause_type,
             embedding=vector,
+            model=model_name,
         )
         session.add(row)
 

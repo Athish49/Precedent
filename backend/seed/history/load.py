@@ -55,6 +55,9 @@ from app.db.models.contract import Contract
 from app.db.models.exception import PlaybookException
 from app.db.models.nms import DecisionEvent
 from app.db.repositories import authority_repo, contract_repo, playbook_repo
+from app.services.document_processing.context_capture import (
+    list_classifiable_agreement_types,
+)
 from seed.common import SeedError, SeedFileError, build_parser, data_dir, run, seed_session
 from seed.common.yaml_loader import load_yaml_mapping
 from seed.history.models import H1_2026_END, H1_2026_START, DecisionHistoryFile
@@ -182,6 +185,24 @@ async def _get_or_create_contract(
         return cache[cache_key]
     cp = history.counterparty(counterparty_key)
     assert cp is not None  # load_valid_file already checked this
+
+    # contract_type and party_role come from the playbook's own fields, not
+    # from the playbook_key slug: the slug is only ever a human-readable
+    # identifier (e.g. "halcyon-saas-msa-vendor"), never a contract_type
+    # value. A contract_type must be a kind='agreement' agreement_type key
+    # (nda/saas_msa/dpa/vendor_msa); context_capture.py documents baseline
+    # and the hipaa/gdpr regimes as never a contract's own type -- those
+    # belong in context.regimes, which this file's counterparties already
+    # carry correctly. Getting this wrong previously produced values like
+    # "saas_msa_vendor" that violate contract.contract_type's real foreign
+    # key to agreement_type.key (caught, and the existing database remapped,
+    # when applying document_processing_implementation.md's migration 016).
+    playbook = await playbook_repo.get_playbook_by_key(session, playbook_key)
+    if playbook is None:
+        raise MissingReferenceError(f"playbook {playbook_key!r} not found")
+    agreement_keys = {a.key for a in await list_classifiable_agreement_types(session)}
+    contract_type = playbook.practice_area if playbook.practice_area in agreement_keys else None
+
     contract = Contract(
         title=f"{cp.display_name} — {playbook_key} (H1 2026 negotiation history)",
         object_key=f"seed/history/halcyon/{counterparty_key}/{playbook_key}.txt",
@@ -191,10 +212,10 @@ async def _get_or_create_contract(
             "No document body is stored here; see seed/history/data/halcyon/decisions.yaml."
         ),
         paper_origin="own",
-        contract_type=playbook_key.removeprefix("halcyon-").replace("-", "_"),
+        contract_type=contract_type,
         counterparty_id=party_ids[counterparty_key],
         status="executed",
-        party_role="vendor",
+        party_role=playbook.party_role,
         context=cp.context,
     )
     session.add(contract)

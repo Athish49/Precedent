@@ -1,4 +1,3 @@
-import importlib
 import os
 
 import pytest
@@ -31,40 +30,16 @@ for _name, _value in {
 
 from app.core.config import get_settings  # noqa: E402
 from app.main import app  # noqa: E402
-from app.services.document_processing import clause_types  # noqa: E402
 from tests.fake_llm import FakeLLMGateway  # noqa: E402
 from tests.in_memory_storage import InMemoryStorage  # noqa: E402
-
-
-def _clause_family_synonym_map() -> dict[str, str]:
-    """Build the synonym→clause-family-key mapping from the migrations that
-    seed ``clause_family`` (010 + 014), without touching a live database.
-
-    ``normalize_clause_type`` (``app/services/document_processing/
-    clause_types.py``, task 5.5) reads this mapping from a module-level
-    cache populated at app startup from the ``clause_family`` table. Unit
-    tests populate the same cache directly from the migrations' literal data
-    instead of hitting Postgres — this is the single source of truth for
-    both the real DB rows and this fixture, so the two can't drift.
-    """
-    migration_010 = importlib.import_module("migrations.versions.010_playbook_lookups")
-    migration_014 = importlib.import_module("migrations.versions.014_term_survival_synonym")
-    mapping: dict[str, str] = {}
-    for family in migration_010._CLAUSE_FAMILIES:
-        for synonym in family["synonyms"]:
-            mapping[synonym] = family["key"]
-    # Migration 014 adds one more synonym; read its own constants so this
-    # fixture can't drift from what that migration actually does.
-    mapping[migration_014._SYNONYM] = migration_014._FAMILY_KEY
-    return mapping
 
 # Every module that binds ``get_storage`` by name. A module that does
 # ``from app.core.storage import get_storage`` at import time must be listed
 # here so the autouse fixture below can replace its reference.
 _GET_STORAGE_TARGETS = (
     "app.core.storage.get_storage",
-    "app.services.document_processing.service.get_storage",
     "app.services.repository.service.get_storage",
+    "app.services.document_processing.ingest.get_storage",
 )
 
 
@@ -78,21 +53,6 @@ def _base_env(monkeypatch: pytest.MonkeyPatch) -> None:
     get_settings.cache_clear()
     yield  # type: ignore[misc]
     get_settings.cache_clear()
-
-
-@pytest.fixture(autouse=True)
-def _clause_type_synonym_cache() -> None:
-    """Populate the clause-type synonym cache for every test, no DB needed.
-
-    Production populates this cache once at app startup from the
-    ``clause_family`` table (``app.main``'s lifespan calls
-    ``load_synonym_cache``). Tests never run that lifespan hook, so without
-    this fixture ``normalize_clause_type`` would raise ``RuntimeError`` the
-    first time anything calls it.
-    """
-    clause_types.set_synonym_cache(_clause_family_synonym_map())
-    yield
-    clause_types.clear_synonym_cache()
 
 
 @pytest.fixture(autouse=True)

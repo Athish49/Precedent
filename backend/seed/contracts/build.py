@@ -19,15 +19,19 @@ position, or about a clause that a template intentionally omits - and are
 skipped entirely: they are never written into the DOCX body, so a review of
 the rendered contract never sees the answer key for its own deviations.
 
-Heading detection mirrors what the application's document segmenter looks
-for (``app/services/document_processing/segmentation.py``): a line starting
-with decimal numbering (``1.``, ``1.1``, ``2.3.4``) or written in full capital
-letters is treated as a heading and is given the Word "Heading 1" or
-"Heading 2" paragraph style, in addition to already matching the
-segmenter's own regex-based detection on the raw text. Using the DOCX
-heading style is a second, independent signal (structural flag, scheme 1)
-on top of the text-pattern signal (scheme 2), so headings are detected
-however the file is read.
+Documents are ingested through the live Extend Parse+Extract pipeline
+(``document_processing_plan.md`` section 5), not through a heading-detection
+heuristic of our own, so the formatting choices here matter for a different
+reason than they used to: they make the corpus look and structure itself
+like a real, numbered contract, the way Extend's Parse step expects to see
+one. A line starting with decimal numbering (``1.``, ``1.1``, ``2.3.4``) or
+written in full capital letters is given the Word "Heading 1" or "Heading 2"
+paragraph style, matching how a real contract template is normally typed.
+This gives Extend's parser two independent signals to find the same
+heading — the DOCX paragraph style and the numbered/capitalised text itself
+— so the corpus exercises the pipeline's section-detection logic (task 2.3)
+the same way a real uploaded contract would, on both signals, however the
+file is read.
 """
 
 from __future__ import annotations

@@ -19,8 +19,16 @@ Conventions:
 ```mermaid
 erDiagram
     CONTRACT ||--o{ CONTRACT_VERSION : "has versions"
-    CONTRACT ||--o{ CLAUSE : "segmented into"
-    CONTRACT ||--|| CONTRACT_METADATA : "has"
+    CONTRACT_VERSION ||--o{ CLAUSE : "segmented into"
+    CONTRACT_VERSION ||--o{ CONTRACT_FIELD : "has values"
+    CONTRACT_VERSION ||--o{ CONTRACT_SIGNATORY : "signed by"
+    CONTRACT_VERSION ||--o{ INGEST_RUN : "processed by"
+    CONTRACT ||--o{ CONTRACT_PARTY : "has"
+    PARTY ||--o{ CONTRACT_PARTY : "is"
+    CONTRACT_PARTY ||--o{ CONTRACT_SIGNATORY : "for"
+    CLAUSE ||--o{ CONTRACT_FIELD : "evidence in"
+    CLAUSE ||--o{ CLAUSE : "parent of"
+    CONTRACT ||--|| CONTRACT_METADATA : "typed summary of current version"
     CONTRACT ||--o{ FLAG : "analyzed into"
     CONTRACT ||--o{ REDLINE : "redlined into"
     CONTRACT ||--o{ OBLIGATION : "extracted into"
@@ -62,62 +70,121 @@ erDiagram
 
 ## 2. Core ingestion tables (S1 / S7)
 
+**Transitional note (2026-11-18).** This section describes the new schema from `document_processing_plan.md` §7.3, which is live. Migration `015` (task 5.2 of `document_processing_implementation.md`, destructive, not yet applied) drops the old untyped columns listed under "dropped, pending migration" below; until then they still physically exist on their tables alongside the new typed ones, and `clause.contract_version_id` is still nullable because old rows (if any) predate it.
+
 ### `contract`
 The repository record. The bytes live in object storage; this row is the metadata + pointers.
 
 | Column | Type | Notes |
 |---|---|---|
 | `id` | uuid PK | |
-| `title` | text | derived from metadata or filename |
-| `object_key` | text | logical key in object storage (source of truth), e.g. `contracts/{id}/{filename}`. Stored unprefixed; the storage backend adds the project prefix |
+| `title` | text | from the document (Extract's title field) or the uploaded filename |
+| `original_filename` | text | the filename as uploaded, nullable |
+| `object_key` | text | logical key in object storage (source of truth), e.g. `contracts/{id}/v1/{filename}`. Stored unprefixed; the storage backend adds the project prefix |
 | `source_format` | text | `pdf` \| `docx` |
-| `canonical_text` | text | the single reference text for all offsets |
+| `canonical_text` | text | a copy of the current version's text, written in the same transaction that sets `current_version_id`; `contract_version.canonical_text` is the source of truth |
 | `paper_origin` | text | `own` \| `counterparty` (CHECK) — set from upload context |
-| `contract_type` | text | an `agreement_type.key`, e.g. `saas_msa`, `nda`, `dpa`. Nullable. Set from the upload form, else classified in document processing; null when confidence is low *(set by phase 4)* |
-| `party_role` | text | `vendor` \| `customer` \| `mutual` — which side the organization is on. Nullable *(set by phase 4)* |
-| `context` | jsonb | deal facts keyed by `context_dimension.key`: `deal_value_band`, `counterparty_tier`, `data_sensitivity`, `region`, `regimes`. Nullable *(set by phase 4)* |
-| `counterparty_id` | uuid FK → party.id | normalized; nullable |
+| `contract_type` | text FK → agreement_type.key | e.g. `saas_msa`, `nda`, `dpa`. Nullable. A user-supplied value wins; otherwise the value Extend's Extract returned |
+| `contract_type_source` | text | `user` \| `extracted` (CHECK) |
+| `party_role` | text | `vendor` \| `customer` \| `mutual` — which side the organization is on. Nullable |
+| `context` | jsonb | deal facts keyed by `context_dimension.key`: `deal_value_band`, `counterparty_tier`, `data_sensitivity`, `region`, `regimes`. Nullable |
+| `counterparty_id` | uuid FK → party.id | a shortcut to the `contract_party` row with role `counterparty`, written in the same transaction; nullable |
 | `current_version_id` | uuid FK → contract_version.id | nullable |
-| `status` | text | `processing` \| `analyzed` \| `redlined` \| `executed` (CHECK) |
-| `created_at` / `updated_at` | timestamptz | |
+| `status` | text | `processing` \| `failed` \| `ready` \| `analyzed` \| `redlined` \| `executed` (CHECK) |
+| `status_reason` | text | nullable; set when `status = failed` (`password_protected`, `unsupported_format`, `too_large`, `unreadable`, `no_text`, `extraction_failed`, `timeout`, `provider_unavailable`) |
+| `created_at` / `updated_at` | timestamptz | `updated_at` has an `onupdate` |
 
-Indexes: GIN on `to_tsvector('english', canonical_text)` (full-text); btree on `contract_type`, `counterparty_id`, `status`.
+Indexes: GIN on `to_tsvector('english', canonical_text)` (full-text); btree on `contract_type`, `counterparty_id`, `status`. Every child foreign key to `contract.id` is `ON DELETE CASCADE`.
 
 ### `clause`
-One row per segmented clause. Load-bearing for S2/S5/S7/Version Comparison (FR-3).
+One row per segmented clause, scoped to a version. Load-bearing for S2/S5/S7/Version Comparison (FR-3).
 
 | Column | Type | Notes |
 |---|---|---|
-| `id` | uuid PK | stable across versions where possible (used for diff alignment) |
-| `contract_id` | uuid FK → contract.id | |
-| `ordinal` | int | order within the contract |
-| `clause_type` | text FK → clause_family.key | canonical type from S1 normalizer (e.g. `indemnification`); `other` is a family, so unmatched headings still resolve |
-| `issue_keys` | jsonb | list of `clause_issue.key` values for the rules matched inside the clause. Nullable *(set by phase 4)* |
-| `heading_text` | text | raw heading as found |
-| `text` | text | clause body |
-| `char_start` | int | offset into `contract.canonical_text` |
-| `char_end` | int | offset |
+| `id` | uuid PK | |
+| `contract_id` | uuid FK → contract.id | kept for cheap filtering |
+| `contract_version_id` | uuid FK → contract_version.id | nullable only until migration `015` makes it not null |
+| `clause_key` | uuid, not null | a fresh value per clause today; reserved for the versioning pillar to carry across versions. Indexed on `(contract_id, clause_key)` |
+| `ordinal` | int | document order within the version, parents before children |
+| `level` | int | `1` = top-level section, `2+` = sub-clause (e.g. `(a)`, `6.1`) |
+| `parent_id` | uuid FK → clause.id, self-referential | nullable; set for level 2+ |
+| `section_number` | text | e.g. `"6"`, `"6.1"`; nullable |
+| `title` | text | clean title, numbering stripped; nullable |
+| `heading_text` | text | the raw heading as written, before cleanup |
+| `clause_type` | text FK → clause_family.key | the family — Extract's section family when valid, else a dictionary/fuzzy match, else `other`; `preamble` and `signature_block` are also families, so the whole document is covered |
+| `type_source` | text | `extract` \| `dictionary` \| `none` (CHECK) |
+| `issue_keys` | jsonb | list of `clause_issue.key` values a compound title also maps to. Nullable |
+| `text` | text | the exact slice of canonical text for this clause's range |
+| `char_start` / `char_end` | int | offsets into `contract_version.canonical_text`; CHECK `char_end > char_start`, `char_start >= 0` |
+| `page_start` / `page_end` | int | nullable |
+| `text_sha256` | text | nullable |
 
-Indexes: btree `(contract_id, ordinal)`, btree `clause_type`.
+Reading rule for every consumer: **current version, level 1**, unless it explicitly asks for `level=all` or another version — `clause_repo.get_clauses_for_contract` applies this by default. Unique on `(contract_version_id, ordinal)`; `ON DELETE CASCADE` from both `contract_version_id` and `parent_id`. `flag.clause_id` and `redline.clause_id` are now real foreign keys to `clause.id` (`ON DELETE SET NULL`).
+
+### `contract_field` (new)
+One row per extracted value — the source of truth for fields. Keyed by the field registry in `document_processing/fields.py`.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | uuid PK | |
+| `contract_id` / `contract_version_id` | uuid FK, cascade | |
+| `field_key` | text | a field registry key, e.g. `liability_cap_amount` |
+| `value` | jsonb, not null | the typed value: number, string, boolean, ISO date or list |
+| `source` | text | `extract` \| `derived` \| `user` (CHECK) |
+| `confidence` | text | `high` (quote found in canonical text), `low` (not found), or null for `user` (CHECK) |
+| `quote`, `page`, `char_start`, `char_end` | text/int | evidence; offsets are into the version's canonical text, null when the quote wasn't found |
+| `clause_id` | uuid FK → clause.id | the clause the evidence falls in; `ON DELETE SET NULL` |
+| `ingest_run_id` | uuid FK → ingest_run.id | which run produced it; null for `user` |
+| `created_at` | timestamptz | |
+
+Unique on `(contract_version_id, field_key, source)`. The value in force is `user` over `extract` over `derived` — a user correction is a new row, never an overwrite, so re-processing never touches it. Index on `(field_key, contract_id)`.
 
 ### `contract_metadata`
-The ~50 extracted fields (S1, deterministic). One row per contract.
+A small **typed summary** of the values in force in `contract_field` for the current version — written by one function, in the same transaction, and by nothing else. Everything not listed here is read from `contract_field`; a field is promoted to a column only when something needs to query it in SQL.
 
 | Column | Type | Notes |
 |---|---|---|
 | `contract_id` | uuid PK/FK → contract.id | |
-| `parties` | jsonb | list of {name, role} |
+| `contract_version_id` | uuid FK → contract_version.id | which version this summarises |
 | `effective_date` / `expiry_date` | date | nullable |
-| `governing_law` | text | nullable |
-| `liability_cap` | jsonb | {value, currency} nullable |
-| `notice_period_days` | int | nullable |
+| `expiry_is_derived` | boolean | true when `expiry_date` was computed from `effective_date` + `initial_term_months` rather than stated |
+| `initial_term_months` / `renewal_term_months` / `renewal_notice_days` | int | months and days, not years × 365 |
 | `auto_renewal` | boolean | nullable |
-| `payment_terms` | text | nullable |
-| `financial_fields` | jsonb | values/fees/penalties/rates |
-| `milestone_dates` | jsonb | list of dates |
-| `extracted` | jsonb | catch-all for the remaining core fields |
+| `governing_law` / `dispute_resolution` | text | nullable |
+| `total_value_amount` / `liability_cap_amount` | numeric | nullable; paired with `currency` |
+| `currency` | text | shared by both amount columns |
+| `liability_cap_basis` | text | nullable |
+| `payment_terms_days` | int | nullable |
+| `termination_for_convenience` | boolean | nullable |
+| `termination_notice_days` | int | nullable |
 
-Rationale: a few high-value fields are promoted to columns for querying/faceting; the long tail lives in `extracted` jsonb. S9 analytics reads these.
+**Dropped, pending migration `015`** (still physically present today, read by nothing once task 3.6 lands): `parties` (jsonb list of `{name, role: "unknown"}`, replaced by `contract_party`), `liability_cap` (jsonb `{value, currency}`, replaced by the typed columns above), `financial_fields` (jsonb, keys never matched what the analytics views read), `milestone_dates` (jsonb, belongs to the obligations service), `notice_period_days`, `payment_terms`, `extracted` (catch-all jsonb).
+
+### `contract_party` (new)
+Replaces `contract_metadata.parties`.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | uuid PK | |
+| `contract_id` | uuid FK → contract.id, cascade | |
+| `party_id` | uuid FK → party.id | |
+| `role` | text | `own` \| `counterparty` \| `other` (CHECK) |
+| `role_label` | text | the name used in the document, e.g. "Supplier" |
+| `entity_type`, `jurisdiction`, `address` | text | nullable |
+| `ordinal` | int | |
+
+Unique on `(contract_id, party_id)`.
+
+### `contract_signatory` (new)
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | uuid PK | |
+| `contract_version_id` | uuid FK → contract_version.id, cascade | |
+| `contract_party_id` | uuid FK → contract_party.id | nullable |
+| `printed_name`, `title` | text | nullable |
+| `is_signed` | boolean | nullable |
+| `signed_date` | date | nullable |
 
 ### `party`
 Normalized counterparty (for NMS grouping — FR requires a stable key).
@@ -127,37 +194,61 @@ Normalized counterparty (for NMS grouping — FR requires a stable key).
 | `id` | uuid PK | |
 | `normalized_name` | text UNIQUE | e.g. "acme inc" after dedupe |
 | `display_name` | text | e.g. "Acme, Inc." |
+| `is_own_org` | boolean, not null default false | set from the `OWN_ORG_NAMES` setting during party resolution |
+
+Insert uses `ON CONFLICT (normalized_name) DO NOTHING` through `contract_repo.upsert_party`, so concurrent ingests can't race on the unique name.
 
 ### `clause_embedding` (pgvector)
-Embeddings computed on write (S7) for S4 precedent retrieval. Single fixed dimension (384).
+Embeddings computed at ingest (S1, after the main transaction) for S4 precedent retrieval. Single fixed dimension (384).
 
 | Column | Type | Notes |
 |---|---|---|
 | `id` | uuid PK | |
-| `clause_id` | uuid FK → clause.id | |
+| `clause_id` | uuid FK → clause.id, cascade, UNIQUE | re-embedding replaces the row rather than duplicating it |
 | `contract_id` | uuid FK → contract.id | denormalized for filtering |
 | `clause_type` | text | denormalized for scoped search |
+| `model` | text | the embedding model that produced the vector |
 | `embedding` | vector(384) | pgvector |
 
-Index: `USING hnsw (embedding vector_cosine_ops)` (or ivfflat) for ANN search.
+Index: `USING hnsw (embedding vector_cosine_ops)` (or ivfflat) for ANN search. Written for level 1 clauses only, skipping `preamble` and `signature_block`.
+
+### `ingest_run` (new)
+One row per processing attempt. What produced a contract's data, and whether anything went wrong.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | uuid PK | |
+| `contract_version_id` | uuid FK → contract_version.id | |
+| `provider` | text | `extend` |
+| `processor`, `processor_version`, `parse_engine_version` | text | the pinned Extend processor/version in force for this run |
+| external ids | text | Extend file id, extract run id, parse run id |
+| `status` | text | `running` \| `succeeded` \| `failed` (CHECK) |
+| `failure_reason` | text | nullable |
+| `warnings` | jsonb, not null default `[]` | e.g. unanchored sections, dropped field values, counterparty not resolved |
+| `credits_used` | numeric | nullable |
+| `started_at` / `finished_at` | timestamptz | |
+| bucket keys | text | where the raw `parse.json` and `extract.json` responses are stored |
 
 ## 3. Versioning tables (S7 / Version Comparison)
 
 ### `contract_version`
-Every stored version with parent-child links (amendments/addenda/edits).
+Every stored version with parent-child links (amendments/addenda/edits). The first upload is written as version 1 by document processing; later versions remain the versioning pillar's responsibility (out of scope here — see `document_processing_plan.md` §1.1).
 
 | Column | Type | Notes |
 |---|---|---|
 | `id` | uuid PK | |
 | `contract_id` | uuid FK → contract.id | |
-| `version_number` | int | monotonic per contract |
+| `version_number` | int | monotonic per contract; unique on `(contract_id, version_number)` |
 | `parent_version_id` | uuid FK → contract_version.id | nullable (self-referential) |
 | `object_key` | text | bytes for this version |
-| `canonical_text` | text | |
+| `canonical_text` | text | the source of truth for this version's offsets |
 | `relation` | text | `version` \| `amendment` \| `addendum` (CHECK) |
+| `file_sha256` | text | indexed; drives the duplicate-upload check (409 unless `force=true`) |
+| `file_size_bytes`, `page_count` | int | nullable |
+| `source_format`, `original_filename` | text | nullable |
 | `created_at` | timestamptz | |
 
-Index: btree `(contract_id, version_number)`.
+Index: btree `(contract_id, version_number)`; index on `file_sha256`.
 
 ## 4. Analysis tables (S2)
 
@@ -662,7 +753,7 @@ S9 owns **no tables** — it is deterministic SQL views/materialized views over 
 
 - `v_contract_intelligence` — join `contract` + `contract_metadata`.
 - `v_portfolio_risk` — severity-weighted roll-up over `flag` + `risk_score` (NOT a naive average; weight by `high` severity count / max).
-- `v_contract_value` — sum/group `contract_metadata.financial_fields`.
+- `v_contract_value` — sum/group `contract_metadata.total_value_amount` + `currency` (not the dropped `financial_fields` jsonb).
 - `v_tabular_review` — one row per contract, columns = promoted metadata fields, plus optional NL columns joined from `qa_cache`.
 - `v_renewal_dashboard` — `contract_metadata` expiry + latest `risk_score` + latest renewal `alert` payload.
 
@@ -687,6 +778,7 @@ Each table has a paired Pydantic model for API I/O and internal transfer, plus t
 - `013_decision_event_counterparty_nullable` — widens `decision_event.counterparty_id` to nullable, matching `contract.counterparty_id`, and removes the zero/nil-UUID placeholder the application used to write for an unknown counterparty; unrelated to the playbook rule shape.
 - `014_term_survival_synonym` — adds the `"term and survival"` heading synonym to `clause_family.synonyms` (a gap between migration `010`'s seed and the in-code `_SYNONYMS` dict, needed before `_SYNONYMS` is retired).
 - `015_drop_legacy_rule_columns` (destructive, task 5.5) — catches up any rule written through the CRUD API after `011` with no child rows yet, then drops the five legacy `playbook_rule` columns (`preferred_language`, `acceptable_variations`, `prohibited_terms`, `fallback_language`, `escalation_threshold`). Authored and dry-run tested; not yet applied to a live database.
+- Document processing's own migrations (`document_processing_implementation.md` phases 1 and 5, referred to there as Migration A, B and C) are serialized against the same head as the playbook migrations above. Migration A adds the `contract`/`contract_version`/`clause` columns and cascades in §2 above (`contract_version_id` on `clause` stays nullable here). Migration B adds `contract_field`, `contract_party`, `contract_signatory`, `ingest_run` and the new `contract_metadata` columns, without dropping the old ones. Migration C (destructive, task 5.2, needs the user's go-ahead) re-ingests or deletes clause/metadata/embedding rows with no `contract_version_id`, makes `clause.contract_version_id` not null, and drops the seven old `contract_metadata` columns listed under "dropped, pending migration" in §2.
 - Every schema change is a migration; no manual DDL. Migrations are written serially: one author at a time, `down_revision` set to the current head.
 - **Reference data comes from migrations; seed data does not.** A migration never reads a file under `backend/seed/`. Company content — clause issues, context dimensions, roles, policies, playbooks, rules, synthetic contracts and history — is loaded by the seed loaders in `backend/seed/` (Backend_Structure §6), which upsert by stable key, never modify a published version, and refuse to run outside the project schema.
 - Operational scripts: `scripts/move_to_schema.py` (one-time move of the original 17 tables and 6 views from `public` into the project schema, dry-run by default) and `scripts/check_partition.py` (read-only check that nothing of this project sits outside its namespace).

@@ -22,7 +22,7 @@ class QACache(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     contract_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("contract.id", name="fk_qa_cache_contract"),
+        ForeignKey("contract.id", name="fk_qa_cache_contract", ondelete="CASCADE"),
         nullable=False,
     )
     question: Mapped[str] = mapped_column(Text, nullable=False)

@@ -5,13 +5,13 @@ import {
   HoverCardTrigger,
   HoverCardContent,
 } from '@/components/ui/hover-card';
-import type { PlaybookRule, Contract, ContractMetadata } from '@/lib/api/types';
+import type { PlaybookRule, ContractDetail } from '@/lib/api/types';
 import { cn } from '@/lib/utils';
 
 type HoverCardVariant =
   | { variant: 'rule'; rule: PlaybookRule }
   | { variant: 'citation'; char_start: number; char_end: number; text: string }
-  | { variant: 'contract-meta'; contract: Contract; metadata?: ContractMetadata }
+  | { variant: 'contract-meta'; contract: ContractDetail }
   | { variant: 'counterparty'; name: string; acceptanceRate?: number }
   | { variant: 'custom'; children: React.ReactNode };
 
@@ -74,18 +74,15 @@ function CitationContent({
   );
 }
 
-function ContractMetaContent({
-  contract,
-  metadata,
-}: {
-  contract: Contract;
-  metadata?: ContractMetadata;
-}) {
+function ContractMetaContent({ contract }: { contract: ContractDetail }) {
+  const metadata = contract.metadata;
+  const counterparty = contract.parties.find((p) => p.role === 'counterparty');
   return (
     <div className="space-y-1.5">
       <div className="text-sm font-medium leading-tight">{contract.title}</div>
       <div className="space-y-0.5 text-xs text-muted-foreground">
         <div>Status: {contract.status}</div>
+        {counterparty && <div>Counterparty: {counterparty.name}</div>}
         {metadata?.effective_date && <div>Effective: {metadata.effective_date}</div>}
         {metadata?.expiry_date && <div>Expires: {metadata.expiry_date}</div>}
         {metadata?.governing_law && <div>Law: {metadata.governing_law}</div>}
@@ -135,7 +132,7 @@ export function HoverCard({ trigger, content, side = 'bottom', className }: Hove
           />
         )}
         {content.variant === 'contract-meta' && (
-          <ContractMetaContent contract={content.contract} metadata={content.metadata} />
+          <ContractMetaContent contract={content.contract} />
         )}
         {content.variant === 'counterparty' && (
           <CounterpartyContent name={content.name} acceptanceRate={content.acceptanceRate} />

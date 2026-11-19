@@ -40,10 +40,15 @@ class Redline(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     contract_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("contract.id", name="fk_redline_contract"),
+        ForeignKey("contract.id", name="fk_redline_contract", ondelete="CASCADE"),
         nullable=False,
     )
-    clause_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    # FK added by migration 016 (doc_proc task 1.1); SET NULL on clause delete.
+    clause_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("clause.id", name="fk_redline_clause", ondelete="SET NULL"),
+        nullable=True,
+    )
     flag_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
     # review_run_id has no FK — review_run table is created in a later task
     review_run_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)

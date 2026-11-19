@@ -42,8 +42,8 @@ class FakeHistoryDB:
 
     # -- fixture-building helpers --------------------------------------------
 
-    def add_playbook(self, key: str) -> Row:
-        row = Row(key=key)
+    def add_playbook(self, key: str, *, practice_area: str, party_role: str) -> Row:
+        row = Row(key=key, practice_area=practice_area, party_role=party_role)
         self.playbooks[key] = row
         self.versions[row.id] = []
         return row
@@ -139,3 +139,13 @@ def make_fakes(
 ) -> tuple[FakeHistoryDB, FakeSession, FakePlaybookRepo, FakeAuthorityRepo, FakeContractRepo]:
     db = db if db is not None else FakeHistoryDB()
     return db, FakeSession(db), FakePlaybookRepo(db), FakeAuthorityRepo(db), FakeContractRepo(db)
+
+
+# The four real kind='agreement' agreement_type keys. Stands in for
+# context_capture.list_classifiable_agreement_types, which does a real
+# query this in-memory test double has no database for.
+_AGREEMENT_KIND_KEYS = ("nda", "saas_msa", "dpa", "vendor_msa")
+
+
+async def fake_list_classifiable_agreement_types(session: Any) -> list[Row]:
+    return [Row(key=key) for key in _AGREEMENT_KIND_KEYS]

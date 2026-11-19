@@ -31,7 +31,6 @@ _TASK_TIER: dict[str, str] = {
     "entity_extract_simple": "fast",
     "section_label": "fast",
     "search.nl_to_filter": "fast",
-    "contract_type_classify": "fast",
     # Smart / complex tasks
     "clause_analysis": "smart",
     "playbook.rule_test": "smart",

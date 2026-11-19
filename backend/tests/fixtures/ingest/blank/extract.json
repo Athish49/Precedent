@@ -1,0 +1,14 @@
+{
+ "object": "extract_run",
+ "id": "exr_blank_000000000000000000",
+ "extractor": null,
+ "extractorVersion": null,
+ "status": "PROCESSED",
+ "parseRunId": "pr_blank",
+ "output": {
+  "value": {},
+  "metadata": {}
+ },
+ "failureReason": null,
+ "failureMessage": null
+}

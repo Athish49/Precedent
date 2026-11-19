@@ -13,9 +13,8 @@ import type {
   ChangeSet,
   Clause,
   ComplianceCheckResult,
-  Contract,
+  ContractDetail,
   ContractFilters,
-  ContractMetadata,
   ContractValue,
   CreateDraftVersionBody,
   CreatePlaybookBody,
@@ -45,7 +44,6 @@ import type {
   PortfolioRisk,
   PrecedentClause,
   PrecedentDraftResult,
-  ProcessedContract,
   PublishVersionBody,
   QABody,
   QAResult,
@@ -69,18 +67,32 @@ import type {
   ContractRow,
   UpdatePlaybookBody,
   UpdateRuleBody,
+  UploadAcceptedResponse,
   Version,
   VersionRelation,
 } from './types';
 
 // ─── S1 Documents ─────────────────────────────────────────────────────────────
 
-export function useContract(id: string) {
+// Terminal statuses for the ingest pipeline (document_processing_
+// implementation.md section 4.3) — once reached, polling stops.
+const TERMINAL_DOCUMENT_STATUSES = new Set(['ready', 'failed']);
+
+// `GET /api/documents/{id}`. While the contract is `processing`, this polls
+// every 2 seconds (react-query `refetchInterval`) until the status reaches
+// `ready` or `failed`, matching the upload flow's poll cadence. Callers
+// that want to stop polling early (e.g. a 5-minute cap after upload) pass
+// `enabled: false` once they've given up.
+export function useContract(id: string, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: keys.contract(id),
-    queryFn: () =>
-      apiFetch<Contract & { metadata: ContractMetadata }>(`/documents/${id}`),
-    enabled: !!id,
+    queryFn: () => apiFetch<ContractDetail>(`/documents/${id}`),
+    enabled: !!id && (options?.enabled ?? true),
+    refetchInterval: (query) => {
+      const status = query.state.data?.status;
+      if (!status || TERMINAL_DOCUMENT_STATUSES.has(status)) return false;
+      return 2000;
+    },
   });
 }
 
@@ -100,6 +112,11 @@ export function useContractText(id: string) {
   });
 }
 
+// `POST /api/documents` — returns `202 {contract_id, version_id, status}`
+// (section 4.3); the caller is expected to poll `useContract(contract_id)`
+// until `status` is `ready` or `failed`. A `409 duplicate_file` response
+// surfaces as an `ApiError` with `code === 'duplicate_file'` and
+// `detail.existing_contract_id` — pass `force: true` to re-upload anyway.
 export function useUploadDocument() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -109,12 +126,14 @@ export function useUploadDocument() {
       contract_type,
       party_role,
       context,
+      force,
     }: {
       file: File;
       paper_origin: PaperOrigin;
       contract_type?: string;
       party_role?: string;
       context?: Record<string, unknown>;
+      force?: boolean;
     }) => {
       const form = new FormData();
       form.append('file', file);
@@ -124,10 +143,28 @@ export function useUploadDocument() {
       if (context && Object.keys(context).length > 0) {
         form.append('context', JSON.stringify(context));
       }
-      return apiFetch<ProcessedContract>('/documents', { method: 'POST', body: form });
+      if (force) form.append('force', 'true');
+      return apiFetch<UploadAcceptedResponse>('/documents', { method: 'POST', body: form });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contracts'] });
+    },
+  });
+}
+
+// `POST /api/documents/{id}/reprocess` — `202`, or `409 has_analysis`
+// unless `force: true` (section 4.3).
+export function useReprocessDocument() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ contractId, force }: { contractId: string; force?: boolean }) =>
+      apiFetch<UploadAcceptedResponse>(`/documents/${contractId}/reprocess`, {
+        method: 'POST',
+        params: force ? { force: true } : undefined,
+      }),
+    onSuccess: (_data, { contractId }) => {
+      queryClient.invalidateQueries({ queryKey: keys.contract(contractId) });
+      queryClient.invalidateQueries({ queryKey: keys.contractClauses(contractId) });
     },
   });
 }

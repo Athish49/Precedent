@@ -1,6 +1,9 @@
 -- Analytics Views (S9)
 -- Human-readable reference for the 5 analytics views.
--- Managed by migration 009_analytics_views.py
+-- Managed by migration 009_analytics_views.py (initial creation) and
+-- migration 018_doc_proc_analytics_views.py (repointed onto the typed
+-- contract_metadata columns from the document-processing schema change,
+-- plan section 7.3).
 --
 -- Every object is qualified with the project schema, because the database is
 -- shared with other projects. The schema name is not written here: it comes
@@ -14,7 +17,8 @@
 -- 1. v_contract_intelligence
 --    One row per contract: metadata + latest contract-level risk score.
 -- ---------------------------------------------------------------------------
-CREATE OR REPLACE VIEW :"schema".v_contract_intelligence AS
+DROP VIEW IF EXISTS :"schema".v_contract_intelligence;
+CREATE VIEW :"schema".v_contract_intelligence AS
 SELECT
     c.id                        AS contract_id,
     c.title,
@@ -27,9 +31,10 @@ SELECT
     cm.expiry_date,
     cm.governing_law,
     cm.auto_renewal,
-    cm.notice_period_days,
-    cm.liability_cap,
-    cm.payment_terms,
+    cm.renewal_notice_days,
+    cm.liability_cap_amount,
+    cm.liability_cap_basis,
+    cm.payment_terms_days,
     rs.score                    AS risk_score,
     rs.max_clause_severity,
     c.created_at,
@@ -51,7 +56,8 @@ LEFT JOIN LATERAL (
 --    Severity-weighted roll-up: high=3, medium=2, low=1.
 --    Portfolio score = SUM(weighted_flags) / total_contracts (via AVG).
 -- ---------------------------------------------------------------------------
-CREATE OR REPLACE VIEW :"schema".v_portfolio_risk AS
+DROP VIEW IF EXISTS :"schema".v_portfolio_risk;
+CREATE VIEW :"schema".v_portfolio_risk AS
 WITH flag_weights AS (
     SELECT
         contract_id,
@@ -98,20 +104,21 @@ FROM contract_risk;
 
 -- ---------------------------------------------------------------------------
 -- 3. v_contract_value
---    One row per contract: financial fields extracted from jsonb.
+--    One row per contract: typed financial columns from contract_metadata.
 -- ---------------------------------------------------------------------------
-CREATE OR REPLACE VIEW :"schema".v_contract_value AS
+DROP VIEW IF EXISTS :"schema".v_contract_value;
+CREATE VIEW :"schema".v_contract_value AS
 SELECT
     c.id                                              AS contract_id,
     c.title,
     c.contract_type,
     c.counterparty_id,
     p.display_name                                    AS counterparty_name,
-    cm.financial_fields,
-    cm.financial_fields->>'total_value'               AS total_value,
-    cm.financial_fields->>'currency'                  AS currency,
-    cm.financial_fields->>'annual_value'              AS annual_value,
-    cm.financial_fields->>'payment_frequency'         AS payment_frequency,
+    cm.total_value_amount,
+    cm.currency,
+    cm.liability_cap_amount,
+    cm.liability_cap_basis,
+    cm.payment_terms_days,
     cm.effective_date,
     cm.expiry_date,
     CASE
@@ -130,7 +137,8 @@ LEFT JOIN :"schema".party p ON p.id = c.counterparty_id;
 --    One row per contract: metadata + flag counts + obligation counts +
 --    redline counts.
 -- ---------------------------------------------------------------------------
-CREATE OR REPLACE VIEW :"schema".v_tabular_review AS
+DROP VIEW IF EXISTS :"schema".v_tabular_review;
+CREATE VIEW :"schema".v_tabular_review AS
 SELECT
     c.id                           AS contract_id,
     c.title,
@@ -142,9 +150,10 @@ SELECT
     cm.expiry_date,
     cm.governing_law,
     cm.auto_renewal,
-    cm.notice_period_days,
-    cm.payment_terms,
-    cm.liability_cap,
+    cm.renewal_notice_days,
+    cm.payment_terms_days,
+    cm.liability_cap_amount,
+    cm.liability_cap_basis,
     rs.score                       AS risk_score,
     rs.max_clause_severity,
     COALESCE(flag_counts.high_flags, 0)   AS high_flags,
@@ -194,7 +203,8 @@ LEFT JOIN LATERAL (
 -- 5. v_renewal_dashboard
 --    One row per contract: expiry metadata + risk score + latest renewal alert.
 -- ---------------------------------------------------------------------------
-CREATE OR REPLACE VIEW :"schema".v_renewal_dashboard AS
+DROP VIEW IF EXISTS :"schema".v_renewal_dashboard;
+CREATE VIEW :"schema".v_renewal_dashboard AS
 SELECT
     c.id                           AS contract_id,
     c.title,
@@ -203,7 +213,7 @@ SELECT
     p.display_name                 AS counterparty_name,
     cm.expiry_date,
     cm.auto_renewal,
-    cm.notice_period_days,
+    cm.renewal_notice_days,
     cm.governing_law,
     rs.score                       AS risk_score,
     rs.max_clause_severity,

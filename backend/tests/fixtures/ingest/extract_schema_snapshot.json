@@ -1,0 +1,465 @@
+{
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The title of the agreement."
+    },
+    "contract_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "nda",
+        "saas_msa",
+        "dpa",
+        "vendor_msa",
+        null
+      ],
+      "description": "The type of agreement."
+    },
+    "parties": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "role_label": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The name used for this party in the document, e.g. 'Supplier' or 'Customer'."
+          },
+          "entity_type": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Legal entity type, e.g. 'corporation', 'LLC'."
+          },
+          "jurisdiction": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "State or country of incorporation."
+          },
+          "address": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "signatories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "printed_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "party_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The party this signatory represents."
+          },
+          "is_signed": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "signed_date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "extend:type": "date"
+          }
+        }
+      }
+    },
+    "clauses": {
+      "type": "array",
+      "description": "Every top-level numbered section in order. Do not include sub-clauses. Also include exhibit/schedule/annex/appendix-style sections (e.g. 'Exhibit A', 'Schedule 1', 'Annex 2') as their own top-level entries in this list, using whatever label is actually printed \u2014 including non-numeric labels \u2014 as section_number.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "section_number": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The section number as written, e.g. '1', '2.1', 'ARTICLE IV', 'Exhibit A', 'Schedule 1'."
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The section title without the number."
+          },
+          "family": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "term_and_termination",
+              "payment",
+              "liability",
+              "indemnification",
+              "confidentiality",
+              "ip_ownership",
+              "governing_law",
+              "dispute_resolution",
+              "assignment",
+              "non_compete",
+              "non_solicitation",
+              "sla",
+              "warranty",
+              "data_protection",
+              "insurance",
+              "audit_rights",
+              "exclusivity",
+              "most_favoured_customer",
+              "change_of_control",
+              "survival",
+              "notices",
+              "force_majeure",
+              "amendment",
+              "entire_agreement",
+              "severability",
+              "waiver",
+              "counterparts",
+              "representations",
+              "definitions",
+              "other",
+              "scope_of_services",
+              null
+            ],
+            "description": "The clause family this section belongs to."
+          }
+        }
+      }
+    },
+    "effective_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "extend:type": "date",
+      "description": "The date on which the agreement becomes effective or was entered into. Leave null if not stated."
+    },
+    "expiry_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "extend:type": "date",
+      "description": "The explicit end date of the agreement. Leave null if not stated. Only if an explicit end date is written; do not compute from the term."
+    },
+    "initial_term_months": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "The initial term of the agreement in months (convert years to months). Leave null if not stated."
+    },
+    "auto_renewal": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "description": "Whether the agreement automatically renews. If the document has a term/renewal clause or section but it does not grant an automatic-renewal right (e.g. it states only a fixed term with no renewal clause, or renewal requires an affirmative new agreement), answer false, not null. Leave null only when the document has no clause addressing the term or renewal at all."
+    },
+    "renewal_term_months": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "The renewal term in months. Leave null if not stated."
+    },
+    "renewal_notice_days": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "The number of days' notice required to prevent auto-renewal. Leave null if not stated."
+    },
+    "governing_law": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The state or jurisdiction whose laws govern this agreement. Leave null if not stated."
+    },
+    "dispute_resolution": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "litigation",
+        "arbitration",
+        "mediation",
+        "escalation",
+        null
+      ],
+      "description": "The dispute resolution mechanism that applies. If arbitration is excluded, do not answer arbitration. Use 'escalation' when the contract requires an informal internal escalation or negotiation step (e.g. senior-management negotiation) before formal proceedings, distinct from litigation/arbitration/mediation themselves. Leave null if not stated."
+    },
+    "dispute_venue": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The specific court or forum designated for disputes. Leave null if not stated."
+    },
+    "liability_cap_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The maximum aggregate liability amount in the contract currency as a numeric value. Leave null if stated as a multiple of fees or not stated."
+    },
+    "liability_cap_basis": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The basis or description of the liability cap (e.g., '12 months of fees', '$1,000,000'). If liability is expressly stated as uncapped or unlimited, state that (e.g. 'uncapped' / 'no limit') rather than leaving this null. If the cap is defined by reference to another document or agreement (e.g. 'subject to the Agreement's limitation of liability') rather than restated here, describe that cross-reference rather than leaving this null. Leave null only if liability/cap is not addressed at all."
+    },
+    "total_value_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The total contract value as a numeric amount. If the contract states multiple fee components (e.g. a recurring subscription fee plus a one-time implementation fee), sum them into a single total figure, or state the clearly primary/largest recurring figure if the components are not additive \u2014 do not decline to answer merely because the figure is composite. Leave null only when no numeric figure is stated at all; do not guess."
+    },
+    "currency": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The currency of monetary amounts in the contract (e.g., 'USD'). Leave null if not stated."
+    },
+    "payment_terms_days": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "Payment due in this many days (net-30 = 30). Leave null if not stated."
+    },
+    "termination_for_convenience": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "description": "Whether either party may terminate for convenience (without cause). A right to terminate ongoing discussions or negotiations without cause (not just a signed agreement's ongoing obligations) also counts as termination for convenience. If the document has a termination/renewal-type clause or section but it does not grant this right (e.g. it only allows termination for cause), answer false, not null. Leave null only when the document has no clause addressing termination at all."
+    },
+    "termination_for_convenience_party": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "either",
+        "customer",
+        "vendor",
+        null
+      ],
+      "description": "Which party may terminate for convenience, if any. Answer this only when termination_for_convenience is true (the document grants a right to terminate without cause, including a right to terminate ongoing discussions/negotiations without cause). If the document has a termination clause but it does not grant a convenience-termination right (termination_for_convenience is false), or if there is no termination clause at all, leave null."
+    },
+    "termination_notice_days": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "The number of days' advance notice required before a termination takes effect, for a termination NOT conditioned on curing a breach (e.g. a convenience or fixed-notice termination). Do not use this field for a cure period \u2014 see cure_period_days for that. Leave null if not stated."
+    },
+    "cure_period_days": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "The number of days a party has to FIX/CURE a breach before the other party may terminate because of it \u2014 this is distinct from a general termination notice period (see termination_notice_days for that). Leave null if not stated."
+    },
+    "notice_period_days": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "General notice period in days. Leave null if not stated."
+    },
+    "indemnification_cap_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Maximum indemnification liability amount. Leave null if not stated."
+    },
+    "liability_exclusions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of liability carve-outs or exclusions from the cap. Leave null if not stated."
+    },
+    "assignment_requires_consent": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "description": "Whether assignment requires the other party's prior written consent. Leave null if not stated."
+    },
+    "assignment_exceptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of exceptions where assignment is permitted without consent. Leave null if not stated."
+    },
+    "confidentiality_period_years": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "Confidentiality obligation duration in years after termination. Leave null if not stated."
+    },
+    "ip_ownership": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "customer",
+        "vendor",
+        "joint",
+        null
+      ],
+      "description": "Who owns intellectual property created under this agreement. Leave null if not stated."
+    },
+    "non_compete_months": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "Non-compete restriction duration in months. Leave null if not stated."
+    },
+    "non_solicitation_months": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "Non-solicitation restriction duration in months. Leave null if not stated."
+    },
+    "sla_uptime_percent": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Service level uptime percentage commitment. Leave null if not stated."
+    },
+    "sla_response_time_hours": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "Service level response time commitment in hours. Leave null if not stated."
+    },
+    "warranty_period_days": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "Warranty period in days. Leave null if not stated."
+    },
+    "breach_notification_hours": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "Hours within which a security breach must be notified. Leave null if not stated."
+    },
+    "data_processing_agreement": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "description": "Whether a data processing agreement or addendum is in place. Leave null if not stated."
+    },
+    "gdpr_applicable": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "description": "Whether GDPR applies to this agreement. Leave null if not stated."
+    },
+    "survival_clauses": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Clause titles or descriptions that survive termination. Leave null if not stated."
+    },
+    "insurance_required": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "description": "Whether the agreement requires insurance. Leave null if not stated."
+    },
+    "exclusivity": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "description": "Whether the agreement contains exclusivity provisions. Leave null if not stated."
+    },
+    "most_favoured_customer": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "description": "Whether most-favoured-customer pricing applies. Leave null if not stated."
+    },
+    "audit_rights": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "description": "Whether the agreement grants audit rights. Leave null if not stated."
+    },
+    "change_of_control_restriction": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "description": "Whether change of control triggers restrictions or termination rights. Leave null if not stated."
+    }
+  }
+}

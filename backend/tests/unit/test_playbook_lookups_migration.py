@@ -278,7 +278,9 @@ def test_offline_sql_renders_clause_family_insert_with_cast() -> None:
     )
     assert proc.returncode == 0, proc.stderr
     sql = proc.stdout
-    assert sql.count("INSERT INTO clause_family") == 29
+    # Migration 016 (doc_proc task 1.1) adds two more clause_family rows
+    # (preamble, signature_block) on top of migration 010's 29.
+    assert sql.count("INSERT INTO clause_family") == 31
     assert sql.count("CAST(") >= 29
     # Every clause_family insert carries its own cast, not just some of them.
     for line in sql.splitlines():

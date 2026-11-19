@@ -1,0 +1,15 @@
+{
+  "contract_type": null,
+  "title": "Services Agreement",
+  "parties": [
+    {
+      "name": "Acme Corp",
+      "role_label": "Supplier",
+      "entity_type": "corporation",
+      "jurisdiction": "Delaware"
+    }
+  ],
+  "signatories": [],
+  "assignment_requires_consent": null,
+  "assignment_exceptions": []
+}

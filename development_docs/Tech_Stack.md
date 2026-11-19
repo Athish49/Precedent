@@ -10,7 +10,7 @@ This document is authoritative for every technology choice and every external-se
 - **pytest** for tests; **ruff** for lint/format; **mypy** for type checking.
 - Dependency management: **uv** (preferred) or pip + `requirements.txt`. Pin versions.
 
-Rationale: the deterministic-first design leans heavily on document parsing (PDF/DOCX), NER, regex, and pattern heuristics — all strongest in Python. The Anthropic SDK and sentence-transformers are first-class in Python.
+Rationale: the deterministic-first design leans heavily on regex and pattern heuristics for everything downstream of ingestion. Document parsing itself (PDF/DOCX) is delegated to Extend AI (§6); the Anthropic SDK, the Extend client and sentence-transformers are all first-class in Python.
 
 ## 2. Database — single Neon Postgres
 
@@ -132,13 +132,16 @@ Anthropic has **no embeddings endpoint**. pgvector needs vectors from somewhere.
 
 Note: on free-tier compute, model load adds startup time and memory — acceptable for a portfolio project. If it strains the host, the embeddings module can fall back to a hosted embedding API behind the same interface, but default to local.
 
-## 6. Document parsing (deterministic, S1)
+## 6. Document processing (Extend AI + our own code, S1)
 
-- **PDF:** `pdfplumber` (text + layout: font sizes, bold, coordinates, whitespace). Digital PDFs only — no OCR.
-- **DOCX:** `python-docx` (explicit heading styles + list numbering — more robust than PDF layout inference).
-- **NER:** `spaCy` (`en_core_web_sm`) for PERSON/ORG extraction; regex for dates, financials, governing law, notice blocks.
-- **Clause-type normalization:** a synonym/fuzzy dictionary (`rapidfuzz` for fuzzy matching heading text → canonical clause type). No LLM. The vocabulary is the `clause_family` table (29 families with heading synonyms, inserted by migration `010`); the normaliser reads the equivalent in-code dictionary today and switches to the table, cached at startup, with migration `013`.
-- **Deal context:** `regimes` (`hipaa`, `gdpr`) by deterministic keyword rules; `deal_value_band` from the band boundaries in `context_dimension`. No LLM.
+PDF/DOCX parsing, NER-based party/date extraction and the 34 regex field extractors described in earlier revisions of this document are **removed**. Document processing is now built on **Extend AI** (`https://api.extend.ai`, Light tier): **Parse** rebuilds canonical text (paragraphs, tables, headers/footers, page numbers) from the raw file, and **Extract** returns structured fields with citations and the ordered top-level section list (number, title, family), from one JSON schema generated from our field registry. Both file types (and scanned PDFs, via Extend's OCR) go through the same client.
+
+- **`core/extend/client.py`:** the only module that calls Extend. Built on `httpx` (already a dependency; no Extend SDK is added). Methods: `upload`, `extract` (creates the run, polls to a final state), `parse_output` (fetches Parse blocks by `parseRunId`, no extra charge), `parse` (a standalone Parse-only run for the text-only path used by `store_version`). Errors map to typed exceptions (`ExtendRunFailed`, `ExtendTimeout`, `ExtendUnavailable`, `ExtendAuthError`); 429 and 5xx are retried with backoff. A CI guard restricts the string `api.extend.ai` to this module and restricts the import of `core/extend` to `document_processing/`, the same pattern as the `core/llm` guard.
+- **Canonical text, segmentation, clause typing:** all ours, over Extend's output — `document_processing/canonical.py`, `sections.py`, `clause_typing.py`. Extend's clause text is never used for clause boundaries or stored text, only its section list (number/title/family) as a hint for where to cut; character offsets are computed by our own code against the canonical text we build, so they are exact by construction, never a model's byte-for-byte guess.
+- **Clause typing** keeps a synonym/fuzzy dictionary (`rapidfuzz` for fuzzy matching, `token_sort_ratio >= 80`), but now as the *fallback*: Extract's family wins first when it is a valid `clause_family` key, then the dictionary, then `other`. The vocabulary is the `clause_family` table (29 families plus `preamble` and `signature_block`), cached at startup.
+- **Determinism:** Extend is a model behind an API, so document processing no longer promises bit-identical output for identical input. The replacement rule (`document_processing_plan.md` §3.6): each file version is processed once, with pinned Extend processor versions (`extraction_light` and `parse_light`, both pinned), and the raw Parse/Extract responses are stored in the bucket; nothing downstream regenerates text or offsets. Tests replay recorded Parse/Extract responses — no network call in CI.
+- **Deal context:** `regimes` (`hipaa`, `gdpr`) by deterministic keyword rules; `deal_value_band` from the band boundaries in `context_dimension`. No LLM, no Extend.
+- **New secret:** `EXTEND_API_KEY`, required for any upload; ingest fails with a clear, retryable status if it is unset or Extend is unavailable.
 
 ## 7. Diff engine (deterministic, shared by S3 + Version Comparison)
 
@@ -172,6 +175,8 @@ All via environment (loaded with `pydantic-settings` into a typed `Settings` obj
 ```
 DATABASE_URL=                 # required
 ANTHROPIC_API_KEY=
+EXTEND_API_KEY=                # required for any document upload (S1 ingest)
+OWN_ORG_NAMES=                 # comma-separated names our organization signs under (S1 party-role matching)
 PROJECT_NAMESPACE=precedent   # drives the Postgres schema and the object-key prefix
 DB_SCHEMA=                    # optional override; defaults to PROJECT_NAMESPACE; never "public"
 OBJECT_STORAGE_PREFIX=        # optional override; defaults to PROJECT_NAMESPACE
@@ -188,4 +193,6 @@ No auth secrets (no auth). A `.env.example` documents every variable. The applic
 
 ## 11. Dependency summary
 
-Core: `fastapi`, `uvicorn`, `pydantic`, `pydantic-settings`, `sqlalchemy`, `alembic`, `psycopg[binary]`, `pgvector`, `anthropic`, `sentence-transformers`, `pdfplumber`, `python-docx`, `spacy` (+ `en_core_web_sm`), `rapidfuzz`, `diff-match-patch`, `boto3`. Dev: `pytest`, `pytest-asyncio`, `httpx` (test client), `ruff`, `mypy`. Seed (separate `seed` dependency group, not an application dependency; install with `uv sync --group seed`): `pyyaml`.
+Core: `fastapi`, `uvicorn`, `pydantic`, `pydantic-settings`, `sqlalchemy`, `alembic`, `psycopg[binary]`, `pgvector`, `anthropic`, `httpx` (also the Extend client), `sentence-transformers`, `rapidfuzz`, `diff-match-patch`, `boto3`. Dev: `pytest`, `pytest-asyncio`, `httpx` (test client), `ruff`, `mypy`; `python-docx` (the fixture generator). Seed (separate `seed` dependency group, not an application dependency; install with `uv sync --group seed`): `pyyaml`, `python-docx` (the corpus builder).
+
+`pdfplumber`, `spacy` and `en_core_web_sm` are **removed** — they were the old local PDF parser and NER engine, replaced by Extend AI (above). `python-docx` is no longer a runtime dependency of the application; it moved to the `seed` and `dev` groups, which still use it to build and inspect DOCX fixtures.

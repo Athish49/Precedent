@@ -24,7 +24,7 @@ from pathlib import Path
 import pytest
 
 sys.path.insert(0, str(Path(__file__).parent / "fixtures"))
-from fake_history_repo import make_fakes  # noqa: E402
+from fake_history_repo import fake_list_classifiable_agreement_types, make_fakes  # noqa: E402
 
 from seed.common.errors import SeedFileError  # noqa: E402
 from seed.history import load  # noqa: E402
@@ -109,6 +109,7 @@ def _wire(db):
     load.playbook_repo = fake_playbooks
     load.authority_repo = fake_authority
     load.contract_repo = fake_contracts
+    load.list_classifiable_agreement_types = fake_list_classifiable_agreement_types
     return db, session
 
 
@@ -117,7 +118,7 @@ def _seeded_db():
     from fake_history_repo import FakeHistoryDB
 
     db = FakeHistoryDB()
-    pb = db.add_playbook(SAAS)
+    pb = db.add_playbook(SAAS, practice_area="saas_msa", party_role="vendor")
     v10 = db.add_version(SAAS, "1.0")
     rule = db.add_rule(v10, "payment.late_fees")
     db.add_position(rule, 0, kind="preferred")
@@ -185,7 +186,7 @@ async def test_decision_event_count_expands_to_that_many_rows():
 @pytest.mark.asyncio
 async def test_same_counterparty_two_playbooks_gets_two_contracts():
     db, pb, v10, rule = _seeded_db()
-    dpa_pb = db.add_playbook(DPA)
+    dpa_pb = db.add_playbook(DPA, practice_area="dpa", party_role="vendor")
     dpa_v10 = db.add_version(DPA, "1.0")
     dpa_rule = db.add_rule(dpa_v10, "audit.customer_audit_rights")
     db.add_position(dpa_rule, 0, kind="preferred")
@@ -206,7 +207,67 @@ async def test_same_counterparty_two_playbooks_gets_two_contracts():
 
     assert report.contracts == 2
     contracts = [o for o in db.added if type(o).__name__ == "Contract"]
-    assert {c.contract_type for c in contracts} == {"saas_msa_vendor", "dpa_processor"}
+    # contract_type comes from the playbook's practice_area, never its key
+    # slug (the bug this fixes; see _get_or_create_contract's docstring).
+    assert {c.contract_type for c in contracts} == {"saas_msa", "dpa"}
+    assert {c.party_role for c in contracts} == {"vendor"}
+
+
+@pytest.mark.asyncio
+async def test_baseline_playbook_contract_gets_null_type_and_real_role():
+    """baseline/hipaa/gdpr practice areas are never a contract's own type
+    (context_capture.py's documented convention) -- contract_type must be
+    NULL for them, and party_role must come from the playbook, not be
+    hardcoded to 'vendor'."""
+    BASELINE = "halcyon-baseline"
+    db, pb, v10, rule = _seeded_db()
+    baseline_pb = db.add_playbook(BASELINE, practice_area="baseline", party_role="mutual")
+    baseline_v10 = db.add_version(BASELINE, "1.0")
+    baseline_rule = db.add_rule(baseline_v10, "notices.address")
+    db.add_position(baseline_rule, 0, kind="preferred")
+    _, session = _wire(db)
+
+    # _history()'s default exception targets SAAS; give it one targeting
+    # BASELINE instead (same counterparty/playbook), so only one
+    # (counterparty, playbook) contract gets created, not two.
+    history = _history(
+        events=[
+            _event(
+                playbook_key=BASELINE,
+                rule_key="notices.address",
+                position_offered="preferred",
+            )
+        ],
+        exceptions=[
+            _exception(
+                playbook_key=BASELINE,
+                rule_key="notices.address",
+                rung=0,
+            )
+        ],
+    )
+    await load.run_load(history, session=session)
+
+    contracts = [o for o in db.added if type(o).__name__ == "Contract"]
+    assert len(contracts) == 1
+    assert contracts[0].contract_type is None
+    assert contracts[0].party_role == "mutual"
+
+
+@pytest.mark.asyncio
+async def test_every_written_contract_type_is_a_real_agreement_key_or_null():
+    """Guards against this exact bug recurring: whatever the loader writes
+    to contract_type must be one of the real kind='agreement' keys, or
+    NULL -- never a compound playbook-key-derived string."""
+    db, pb, v10, rule = _seeded_db()
+    _, session = _wire(db)
+
+    history = _history()
+    await load.run_load(history, session=session)
+
+    contracts = [o for o in db.added if type(o).__name__ == "Contract"]
+    allowed = {"nda", "saas_msa", "dpa", "vendor_msa", None}
+    assert all(c.contract_type in allowed for c in contracts)
 
 
 @pytest.mark.asyncio

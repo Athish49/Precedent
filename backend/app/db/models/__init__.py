@@ -3,6 +3,8 @@ from app.db.models.authority import ApproverRole, EscalationPolicy
 from app.db.models.clause import Clause, ClauseEmbedding
 from app.db.models.contract import Contract, ContractMetadata, ContractVersion, Party
 from app.db.models.exception import PlaybookException
+from app.db.models.field import ContractField
+from app.db.models.ingest_run import IngestRun
 from app.db.models.nms import DecisionEvent
 from app.db.models.obligation import Alert, Obligation
 from app.db.models.playbook import (
@@ -17,6 +19,7 @@ from app.db.models.playbook import (
     RulePosition,
     RuleTestCase,
 )
+from app.db.models.party_link import ContractParty, ContractSignatory
 from app.db.models.qa_cache import QACache
 from app.db.models.redline import Redline
 from app.db.models.review_run import ReviewRun
@@ -31,12 +34,16 @@ __all__ = [
     "ClauseFamily",
     "ClauseIssue",
     "Contract",
+    "ContractField",
     "ContractMetadata",
+    "ContractParty",
+    "ContractSignatory",
     "ContractVersion",
     "ContextDimension",
     "DecisionEvent",
     "EscalationPolicy",
     "Flag",
+    "IngestRun",
     "Obligation",
     "Party",
     "Playbook",

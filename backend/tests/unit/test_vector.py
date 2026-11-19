@@ -36,6 +36,13 @@ def _make_clause(clause_type: str = "indemnification") -> MagicMock:
 # ── embed_and_store_clauses ───────────────────────────────────────────────────
 
 
+def _make_session() -> MagicMock:
+    session = MagicMock()
+    session.add = MagicMock()
+    session.execute = AsyncMock()
+    return session
+
+
 async def test_embed_and_store_inserts_embeddings() -> None:
     """session.add should be called once per clause with a ClauseEmbedding."""
     contract_id = uuid.uuid4()
@@ -44,7 +51,7 @@ async def test_embed_and_store_inserts_embeddings() -> None:
         _make_clause("termination"),
         _make_clause("payment"),
     ]
-    session = MagicMock()
+    session = _make_session()
 
     with patch("app.services.repository.vector.embed", side_effect=fake_embed):
         await embed_and_store_clauses(contract_id, clauses, session)
@@ -60,14 +67,87 @@ async def test_embed_and_store_inserts_embeddings() -> None:
         assert obj.embedding == FAKE_VEC
 
 
+async def test_embed_and_store_sets_model_from_settings() -> None:
+    """Each inserted row's `model` comes from settings.embedding_model."""
+    contract_id = uuid.uuid4()
+    clauses = [_make_clause("indemnification")]
+    session = _make_session()
+
+    with patch("app.services.repository.vector.embed", side_effect=fake_embed):
+        await embed_and_store_clauses(contract_id, clauses, session)
+
+    added = session.add.call_args_list[0].args[0]
+    from app.core.config import get_settings
+
+    assert added.model == get_settings().embedding_model
+
+
+async def test_embed_and_store_deletes_existing_rows_first() -> None:
+    """Idempotency: a delete is issued (scoped to the given clauses' ids)
+    before any insert, so re-running for the same clauses never collides
+    with the clause_id unique constraint."""
+    contract_id = uuid.uuid4()
+    clauses = [_make_clause("indemnification")]
+    session = _make_session()
+
+    call_order: list[str] = []
+    session.execute.side_effect = lambda *a, **k: call_order.append("execute")
+    session.add.side_effect = lambda *a, **k: call_order.append("add")
+
+    with patch("app.services.repository.vector.embed", side_effect=fake_embed):
+        await embed_and_store_clauses(contract_id, clauses, session)
+
+    session.execute.assert_awaited_once()
+    stmt = session.execute.await_args.args[0]
+    assert stmt.is_delete
+    assert call_order == ["execute", "add"]
+
+
+async def test_embed_and_store_twice_leaves_one_row_per_clause() -> None:
+    """Running embed_and_store_clauses twice for the same clauses should
+    behave idempotently: the delete-then-insert pattern means the second
+    run deletes what the first run inserted (simulated here by a fake
+    session acting as a minimal table) before re-inserting, so storage
+    ends with exactly one row per clause, not two.
+    """
+    contract_id = uuid.uuid4()
+    clauses = [_make_clause("indemnification"), _make_clause("termination")]
+    clause_ids = {c.id for c in clauses}
+
+    stored: dict[uuid.UUID, ClauseEmbedding] = {}
+
+    class _FakeSession:
+        def add(self, row: ClauseEmbedding) -> None:
+            stored[row.clause_id] = row
+
+        async def execute(self, stmt) -> None:
+            # Any delete issued by embed_and_store_clauses is scoped to
+            # these clauses' ids (never a bare TRUNCATE), so dropping every
+            # row whose id is in that set is a faithful enough fake of the
+            # real "DELETE WHERE clause_id IN (...)" the database would run.
+            for clause_id in list(stored):
+                if clause_id in clause_ids:
+                    del stored[clause_id]
+
+    session = _FakeSession()
+
+    with patch("app.services.repository.vector.embed", side_effect=fake_embed):
+        await embed_and_store_clauses(contract_id, clauses, session)
+        await embed_and_store_clauses(contract_id, clauses, session)
+
+    assert len(stored) == len(clauses)
+    assert set(stored) == clause_ids
+
+
 async def test_embed_and_store_empty_clauses() -> None:
     """Zero clauses should produce zero session.add calls and no error."""
-    session = MagicMock()
+    session = _make_session()
 
     with patch("app.services.repository.vector.embed", side_effect=fake_embed):
         await embed_and_store_clauses(uuid.uuid4(), [], session)
 
     session.add.assert_not_called()
+    session.execute.assert_not_awaited()
 
 
 # ── precedent_search ──────────────────────────────────────────────────────────

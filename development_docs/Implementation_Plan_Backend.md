@@ -89,27 +89,29 @@ Task ID format: `T-0XX`. Dependencies list is exhaustive (transitive deps not re
 
 ## Phase 2 — S1 Document Processing (foundation for all review features)
 
-- [ ] **T-020 · Parsers** · deps: T-003
+**Superseded (2026-11-18).** T-020 through T-025 described the original local-parsing design (`pdfplumber`/`python-docx` parsing, spaCy NER + regex metadata, a synchronous `process()` call) and are no longer the plan. That design is replaced end to end by `document_processing_plan.md` (Extend AI Parse + Extract, our own canonical-text builder/segmenter/clause typer/field mapper, async ingest with `202` + polling, the schema in plan §7). The task breakdown that actually ran is `document_processing_implementation.md` phases 0–3 (tasks 0.1–0.3, 1.1–1.3, 2.1–2.9, 3.1–3.6), which is done as of this writing; phase 5 (deleting the five files these tasks named) has not yet run. Do not pick up T-020 to T-025 as written below; they are kept only for history.
+
+- [ ] ~~**T-020 · Parsers** · deps: T-003~~ — superseded, see above.
   - `services/document_processing/parsers.py`: `pdfplumber` (text + font/bold/coords/whitespace) and `python-docx` (heading styles + numbering) → a common `canonical_text` + structure signal. Digital PDFs only. (Architecture Diagram 2; Tech_Stack §6.)
   - **Accept:** both formats yield identical canonical-text contract for the same logical doc; offsets are into canonical text.
 
-- [ ] **T-021 · Segmentation** · deps: T-020
+- [ ] ~~**T-021 · Segmentation** · deps: T-020~~ — superseded, see above.
   - `segmentation.py`: multi-scheme heading detection (decimal `1.1`, alpha `(a)`, roman `iv.`, ALL CAPS, bold) with blank-line fallback; clause boundaries → clause array with `char_start/char_end`.
   - **Accept:** determinism test; unstructured letter agreements fall back gracefully.
 
-- [ ] **T-022 · Clause-type normalizer** · deps: T-021
+- [ ] ~~**T-022 · Clause-type normalizer** · deps: T-021~~ — superseded, see above.
   - `clause_types.py`: synonym/fuzzy dictionary (`rapidfuzz`) mapping heading text → canonical `clause_type` (e.g. "Hold Harmless"→`indemnification`). No LLM. Vocabulary aligned with S6 taxonomy.
   - **Accept:** covers a documented set of canonical types; deterministic; unknown headings map to `other`.
 
-- [ ] **T-023 · Metadata extraction + counterparty** · deps: T-020
+- [ ] ~~**T-023 · Metadata extraction + counterparty** · deps: T-020~~ — superseded, see above.
   - `extraction.py`: spaCy NER (PERSON/ORG) + regex (dates, financials, governing law, notice blocks) → the ~50-field metadata object; normalized `counterparty_id` (upsert `party` with dedupe). No LLM.
   - **Accept:** promoted fields + `extracted` jsonb populated; party dedupe ("Acme Inc."≈"Acme, Inc.").
 
-- [ ] **T-024 · S1 service + persistence** · deps: T-021, T-022, T-023, T-010
+- [ ] ~~**T-024 · S1 service + persistence** · deps: T-021, T-022, T-023, T-010~~ — superseded, see above.
   - `service.py::process(file, paper_origin) -> ProcessedContract`: parse → segment → type → extract → put bytes to storage → persist `contract`, `clause[]`, `contract_metadata`, `party`. Emits the `ProcessedContract` DTO.
   - **Accept:** SC-1 — a PDF/DOCX processes end-to-end with zero LLM calls; rows persisted; offsets preserved.
 
-- [ ] **T-025 · S1 API** · deps: T-024, T-015
+- [ ] ~~**T-025 · S1 API** · deps: T-024, T-015~~ — superseded, see above.
   - `api/routes/documents.py`: the four S1 endpoints (API_Spec §S1). Register router.
   - **Accept:** upload returns `ProcessedContract`; clause/text/metadata GETs work; tests via fixtures.
 
@@ -319,7 +321,7 @@ Task ID format: `T-0XX`. Dependencies list is exhaustive (transitive deps not re
 
 ## Dependency quick-map (for parallelization)
 
-- **Critical path:** T-001 → T-002 → T-003 → T-020..T-024 (S1) → then S7/S6 → S2 → S3 → Review Pipeline.
+- **Critical path:** T-001 → T-002 → T-003 → T-020..T-024 (S1, superseded — see Phase 2 note; the equivalent foundation is `document_processing_implementation.md` phases 0–3) → then S7/S6 → S2 → S3 → Review Pipeline.
 - **Independent early tracks (after T-003):** T-010, T-011, T-012, T-014, T-015 can all proceed in parallel.
 - **Independent mid tracks:** S6 (T-035–T-039) is independent of S7 (T-030–T-034); S4 (T-070–T-072) independent of S5 (T-073–T-076); S8 (T-080–T-083) independent of S9 (T-084–T-085).
 - **Convergence points:** Review Pipeline (T-060) needs S1+S6+S2+S3; Analytics views (T-084) need S2+S8.

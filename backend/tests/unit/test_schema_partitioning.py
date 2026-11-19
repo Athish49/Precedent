@@ -75,6 +75,12 @@ _EXPECTED_TABLES = {
     "rule_test_case",
     # Added by migration 012 (task 1.3): contract, review and outcome tables.
     "playbook_exception",
+    # Added by migration 017 (doc_proc task 1.2): new tables for the
+    # Extend-based ingest pipeline (fields, parties, signatories, ingest runs).
+    "contract_field",
+    "contract_party",
+    "contract_signatory",
+    "ingest_run",
 }
 
 # Views are created by hand-written SQL in migrations 004 and 009.

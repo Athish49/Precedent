@@ -1,6 +1,6 @@
-"""Contract type and context capture (task 4.1).
+"""Contract type and context capture.
 
-Four pieces of logic, all in one module because they share the same lookup
+Three pieces of logic, all in one module because they share the same lookup
 tables and the same tolerance for those tables being unpopulated
 (``playbook_implementation.md`` section 4.1, item 6 — ``context_dimension``
 is seed-or-user data and may have zero rows):
@@ -8,28 +8,28 @@ is seed-or-user data and may have zero rows):
 1. ``validate_contract_type`` / ``validate_party_role`` / ``validate_context``
    — used by the upload route and the repository PATCH route to turn a bad
    value into ``AppError(400, ...)`` before anything is persisted.
-2. ``classify_contract_type`` — the one new structured LLM call (fast tier,
-   task key ``contract_type_classify``), used by document processing when
-   the caller did not supply ``contract_type``.
-3. ``derive_regimes`` — deterministic keyword rules, no model call.
-4. ``derive_deal_value_band`` — reads the band boundaries from the
+2. ``derive_regimes`` — deterministic keyword rules, no model call.
+3. ``derive_deal_value_band`` — reads the band boundaries from the
    ``context_dimension`` row for ``deal_value_band`` when it exists and is
    well-formed, else falls back to the hardcoded defaults from
    ``playbook_implementation.md`` section 2.2.
+
+Contract type itself is no longer classified by a model call here: when the
+uploader does not supply ``contract_type``, ``document_processing/ingest.py``
+(tasks 3.1 and 3.4) takes it from Extract's own classification instead
+(``document_processing_plan.md`` section 3.6). This module makes no LLM
+gateway call and imports nothing from the Anthropic client package.
 """
 
 from __future__ import annotations
 
 import re
-from pathlib import Path
 from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.errors import AppError
-from app.core.llm import gateway
-from app.core.llm.schemas.classification import ContractTypeClassification
 from app.db.models.taxonomy import AgreementType, ContextDimension
 
 # ---------------------------------------------------------------------------
@@ -139,66 +139,6 @@ async def validate_context(session: AsyncSession, context: dict[str, Any]) -> No
                     "invalid_context_value",
                     f"{key} value {candidate!r} is not one of {sorted(allowed)!r}",
                 )
-
-
-# ---------------------------------------------------------------------------
-# Classification — one structured LLM call, fast tier, new prompt file.
-# ---------------------------------------------------------------------------
-
-_PROMPT_PATH = (
-    Path(__file__).parent.parent.parent / "core" / "llm" / "prompts" / "contract_type_classify.md"
-)
-_SYSTEM_PROMPT = _PROMPT_PATH.read_text()
-
-_TASK = "contract_type_classify"
-
-# Confidence threshold: below this, leave contract_type null rather than
-# store a guess (task 4.1 item 2: "leave it null if confidence is low
-# (define a reasonable confidence threshold)" — 0.6 is the threshold chosen
-# here; it is above a coin flip but does not demand near-certainty, since
-# false negatives (null) are cheap and false positives feed a stale type
-# into playbook resolution).
-CONFIDENCE_THRESHOLD = 0.6
-
-_EXCERPT_CHARS = 3000
-
-
-async def classify_contract_type(session: AsyncSession, title: str, text_excerpt: str) -> str | None:
-    """Classify the document's contract type from its title and the first
-    3,000 characters of its canonical text, with one structured LLM call.
-
-    Returns the classified ``agreement_type`` key, or ``None`` if there are
-    no classifiable candidates, the model could not decide, the model
-    returned a key outside the candidate set, or confidence is below
-    :data:`CONFIDENCE_THRESHOLD`.
-    """
-    candidates = await list_classifiable_agreement_types(session)
-    if not candidates:
-        return None
-
-    candidate_lines = "\n".join(f"- {c.key}: {c.name}" for c in candidates)
-    user_content = (
-        f"Title: {title}\n\n"
-        f"Candidate contract types:\n{candidate_lines}\n\n"
-        f"Document excerpt (first {_EXCERPT_CHARS} characters):\n"
-        f"{text_excerpt[:_EXCERPT_CHARS]}"
-    )
-
-    result: ContractTypeClassification = gateway.call_structured(
-        task=_TASK,
-        messages=[
-            {"role": "system", "content": _SYSTEM_PROMPT},
-            {"role": "user", "content": user_content},
-        ],
-        response_model=ContractTypeClassification,
-    )
-
-    valid_keys = {c.key for c in candidates}
-    if result.contract_type not in valid_keys:
-        return None
-    if result.confidence < CONFIDENCE_THRESHOLD:
-        return None
-    return result.contract_type
 
 
 # ---------------------------------------------------------------------------

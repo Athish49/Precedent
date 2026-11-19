@@ -56,6 +56,32 @@ jobs:
             exit 1
           fi
 
+      - name: Guard — api.extend.ai only in app/core/extend/
+        run: |
+          host="api.extend.ai"
+          bad=$(grep -rn "$host" app/ tests/ --include="*.py" \
+                | grep -v "app/core/extend/" \
+                | grep -v "tests/fixtures/extend_eval/" \
+                | grep -v "^tests/unit/test_extend_client\.py:" \
+                | grep -v "^tests/unit/test_ci_guards\.py:" || true)
+          if [ -n "$bad" ]; then
+            echo "ERROR: '$host' found outside app/core/extend/:"
+            echo "$bad"
+            exit 1
+          fi
+
+      - name: Guard — core.extend imported only in app/services/document_processing
+        run: |
+          bad=$(grep -rnE "core\.extend|core/extend|core import extend" \
+                app/ --include="*.py" \
+                | grep -v "app/services/document_processing/" \
+                | grep -v "app/core/extend/" || true)
+          if [ -n "$bad" ]; then
+            echo "ERROR: 'core.extend' imported outside app/services/document_processing:"
+            echo "$bad"
+            exit 1
+          fi
+
       # backend/seed/ is optional and must be deletable. Mirrors
       # tests/unit/test_seed_isolation.py; passes whether or not seed/ exists.
       - name: Guard — nothing outside seed/ uses seed/

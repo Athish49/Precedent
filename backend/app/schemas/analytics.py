@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import datetime
 import uuid
-from typing import Any
 
 from pydantic import BaseModel
 
@@ -20,9 +19,10 @@ class ContractIntelligenceRow(BaseModel):
     expiry_date: datetime.date | None
     governing_law: str | None
     auto_renewal: bool | None
-    notice_period_days: int | None
-    liability_cap: Any | None
-    payment_terms: str | None
+    renewal_notice_days: int | None
+    liability_cap_amount: float | None
+    liability_cap_basis: str | None
+    payment_terms_days: int | None
     risk_score: float | None
     max_clause_severity: str | None
     created_at: datetime.datetime
@@ -49,11 +49,11 @@ class ContractValueRow(BaseModel):
     contract_type: str | None
     counterparty_id: uuid.UUID | None
     counterparty_name: str | None
-    financial_fields: Any | None
-    total_value: str | None
+    total_value_amount: float | None
     currency: str | None
-    annual_value: str | None
-    payment_frequency: str | None
+    liability_cap_amount: float | None
+    liability_cap_basis: str | None
+    payment_terms_days: int | None
     effective_date: datetime.date | None
     expiry_date: datetime.date | None
     duration_days: int | None
@@ -73,9 +73,10 @@ class TabularReviewRow(BaseModel):
     expiry_date: datetime.date | None
     governing_law: str | None
     auto_renewal: bool | None
-    notice_period_days: int | None
-    payment_terms: str | None
-    liability_cap: Any | None
+    renewal_notice_days: int | None
+    payment_terms_days: int | None
+    liability_cap_amount: float | None
+    liability_cap_basis: str | None
     risk_score: float | None
     max_clause_severity: str | None
     high_flags: int
@@ -98,7 +99,7 @@ class RenewalDashboardRow(BaseModel):
     counterparty_name: str | None
     expiry_date: datetime.date | None
     auto_renewal: bool | None
-    notice_period_days: int | None
+    renewal_notice_days: int | None
     governing_law: str | None
     risk_score: float | None
     max_clause_severity: str | None

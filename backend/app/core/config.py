@@ -89,7 +89,61 @@ class Settings(BaseSettings):
         "batched LLM calls.",
     )
 
+    # ── Document processing: Extend (task 0.1 / plan section 5) ───────────────
+    extend_api_key: str | None = Field(
+        default=None,
+        description="Extend API key. Optional so other settings keep working "
+        "without it; document ingest fails with a clear, retryable error "
+        "when unset rather than at import time.",
+    )
+    extend_base_url: str = Field(
+        default="",
+        description="Extend API base URL. Blank defers to ExtendClient's own "
+        "default (app/core/extend/client.py) — the literal URL lives there "
+        "only, per the CI guard that confines it to that package.",
+    )
+    extend_extract_processor: str = Field(
+        default="extraction_light",
+        description="Extend Extract processor name (pinned, per plan section 3).",
+    )
+    extend_extract_version: str = Field(
+        default="3.8.0",
+        description="Pinned Extend Extract processor version.",
+    )
+    extend_parse_engine: str = Field(
+        default="parse_light",
+        description="Extend Parse engine name (pinned, per plan section 3).",
+    )
+    extend_parse_version: str = Field(
+        default="1.0.0",
+        description="Pinned Extend Parse engine version.",
+    )
+    extend_poll_interval_seconds: float = Field(
+        default=3,
+        description="Seconds between polls while waiting for an Extend run to finish.",
+    )
+    extend_timeout_seconds: float = Field(
+        default=300,
+        description="Seconds to wait for an Extend run before raising ExtendTimeout.",
+    )
+    own_org_names: list[str] = Field(
+        default_factory=list,
+        description="Our own organisation's name(s), for party role assignment "
+        "(plan section 5.6). Parsed from a comma-separated OWN_ORG_NAMES.",
+    )
+    max_upload_mb: int = Field(
+        default=25,
+        description="Maximum accepted upload size in megabytes.",
+    )
+
     # ── Validation ────────────────────────────────────────────────────────────
+    @field_validator("own_org_names", mode="before")
+    @classmethod
+    def _parse_own_org_names(cls, value: object) -> object:
+        if isinstance(value, str):
+            return [name.strip() for name in value.split(",") if name.strip()]
+        return value
+
     @field_validator("project_namespace", "db_schema", "object_storage_prefix", mode="before")
     @classmethod
     def _strip_namespace_values(cls, value: object) -> object:

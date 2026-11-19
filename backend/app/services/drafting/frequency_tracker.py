@@ -23,22 +23,25 @@ async def _fetch_clause_texts(
 ) -> list[str]:
     from sqlalchemy import desc, select
 
-    from app.db.models.clause import Clause
     from app.db.models.contract import Contract
+    from app.db.repositories import clause_repo
 
-    stmt = (
-        select(Clause.text)
-        .join(Contract, Clause.contract_id == Contract.id)
-        .where(Clause.clause_type == clause_type)
-    )
+    # Candidate contracts, most recent first, filtered by the requested
+    # context. The clauses themselves are fetched through clause_repo's
+    # reading rule (plan section 7.3): current version, level 1.
+    stmt = select(Contract.id).order_by(desc(Contract.created_at)).limit(last_n)
     if contract_type is not None:
         stmt = stmt.where(Contract.contract_type == contract_type)
     if counterparty_id is not None:
         stmt = stmt.where(Contract.counterparty_id == counterparty_id)
-    stmt = stmt.order_by(desc(Contract.created_at)).limit(last_n)
 
     result = await session.execute(stmt)
-    return list(result.scalars().all())
+    contract_ids = list(result.scalars().all())
+    if not contract_ids:
+        return []
+
+    clauses = await clause_repo.get_clauses_for_contracts(session, contract_ids, level="top")
+    return [c.text for c in clauses if c.clause_type == clause_type]
 
 
 def _pick_best(texts: list[str], min_frequency: int) -> tuple[str, int] | None:
