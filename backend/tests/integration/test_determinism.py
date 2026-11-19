@@ -100,53 +100,9 @@ def test_analytics_portfolio_risk_determinism():
     assert r1.contracts_high_severity == 2
 
 
-def test_s1_segmentation_determinism():
-    """Same ParsedDocument → identical SegmentedClause list across repeated calls."""
-    from app.services.document_processing.parsers import ParsedDocument, StructureSignal
-    from app.services.document_processing.segmentation import segment
-
-    blocks: list[tuple[str, bool, bool]] = [
-        ("1. DEFINITIONS", False, False),
-        ("For purposes of this Agreement, the following terms apply.", False, False),
-        ("2. PAYMENT TERMS", False, False),
-        ("Customer shall pay all fees within thirty (30) days of invoice date.", False, False),
-        ("3. INDEMNIFICATION", False, False),
-        (
-            "Each party shall indemnify and hold harmless the other party from any claims.",
-            False,
-            False,
-        ),
-    ]
-
-    texts = [b[0] for b in blocks]
-    canonical = "\n\n".join(texts)
-    signals: list[StructureSignal] = []
-    cursor = 0
-    for text, is_bold, is_heading in blocks:
-        signals.append(
-            StructureSignal(
-                char_start=cursor,
-                char_end=cursor + len(text),
-                is_bold=is_bold,
-                font_size=None,
-                is_heading=is_heading,
-                heading_level=None,
-                raw_text=text,
-            )
-        )
-        cursor += len(text) + 2  # +2 for "\n\n" separator
-
-    doc = ParsedDocument(canonical_text=canonical, structure_signals=signals)
-
-    result1 = segment(doc)
-    result2 = segment(doc)
-    result3 = segment(doc)
-
-    assert result1 == result2 == result3
-    assert len(result1) == 3
-
-    for c1, c2 in zip(result1, result2, strict=True):
-        assert c1.heading_text == c2.heading_text
-        assert c1.text == c2.text
-        assert c1.char_start == c2.char_start
-        assert c1.char_end == c2.char_end
+# The old pipeline's segmentation-determinism case (same ParsedDocument ->
+# identical SegmentedClause list) was removed with parsers.py and
+# segmentation.py (doc_proc task 5.1). The new pipeline's determinism —
+# same recorded Extend response -> identical pipeline.build_result output —
+# is proved by tests/unit/test_dp_pipeline_replay.py, which runs the full
+# replay corpus, not reproduced here.

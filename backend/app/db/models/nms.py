@@ -31,7 +31,7 @@ class DecisionEvent(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     contract_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("contract.id", name="fk_decision_event_contract"),
+        ForeignKey("contract.id", name="fk_decision_event_contract", ondelete="CASCADE"),
         nullable=False,
     )
     # Nullable (task 4.6): a redline can be generated before a counterparty

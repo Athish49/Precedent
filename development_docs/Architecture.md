@@ -7,7 +7,7 @@ Deterministic-first architecture: LLMs are used only where semantic understandin
 - **One database — Neon Postgres.** Holds contract metadata, `tsvector` full-text, `pgvector` embeddings, the Negotiation Memory Store (append-only event log), the obligations store, and the analytics view layer. Object storage holds source documents as the single source of truth.
 - **Project namespace on shared infrastructure.** The database and storage accounts are shared with other projects. One setting, `PROJECT_NAMESPACE` (`precedent`), drives both partitions: every table, view and the migration history live in a Postgres schema of that name (nothing in `public` except the shared `vector` extension), and every object key is stored under a `precedent/` prefix applied inside the storage backend. See Diagram 14.
 - **Cloud only.** There is one database (cloud Postgres) and one storage backend (S3-compatible). No local database, no local file backend, no browser storage. The application refuses to start if the database URL or any of the four object-storage settings is missing.
-- **Clause-type normalizer (S1) is shared infrastructure.** The canonical clause `type` is consumed by S2 (rule matching + structural checks), S5 (navigation), S7 (redline history), and the Version Comparison workflow (diff alignment). Its vocabulary is S6's taxonomy: the `clause_family` table (29 families, inserted by migration) is the source of truth, and each family has `clause_issue` rows for the negotiable points inside it.
+- **Clause typing (S1) is shared infrastructure.** The canonical clause `type` is consumed by S2 (rule matching + structural checks), S5 (navigation), S7 (redline history), and the Version Comparison workflow (diff alignment). Its vocabulary is S6's taxonomy: the `clause_family` table (29 families plus `preamble` and `signature_block`, inserted by migration) is the source of truth. S1 takes Extend Extract's family for a section first, when it is a valid `clause_family` key; otherwise a synonym/fuzzy dictionary match against the family's `clause_issue` rows; otherwise `other`.
 - **The playbook is data, not prose.** A rule is a record with a ladder of positions, numeric parameters, testable red lines, objections and test cases, held in an immutable published version. Every finding, redline and approval cites the rule, position and version that produced it.
 - **Three zones.** Every governed finding is green, yellow or red. The zone is assigned by deterministic code and decides routing; the numeric score is for reporting only.
 - **Shared diff engine (S7).** One char-level, clause-aligned diff engine is reused by S3 (redline markup) and the Version Comparison workflow. It aligns clauses by stable S1 clause id before diffing.
@@ -92,54 +92,41 @@ flowchart TD
 
 ## Diagram 2 — Service 1: Document Processing
 
-**Purpose:** Deterministic ingestion — parse the document, segment into clauses with character offsets, tag clause types, and extract ~50 structured metadata fields. Foundation every downstream citation and structural check depends on. Zero LLM for parsing, segmentation and extraction. The one exception is contract-type classification, a single fast-tier call made only when the uploader did not supply the type; its result is stored, left null when confidence is low, and never used for control flow inside S1.
+**Purpose:** Ingestion via Extend AI (Light tier), not local parsing. Extend's **Parse** rebuilds canonical text from the file (paragraphs, tables, headers/footers tagged); Extend's **Extract** returns structured fields with citations and the ordered list of top-level sections (number, title, family) from the same document, using one JSON schema generated from our field registry. From there everything is ours: a canonical-text builder cleans and joins Parse's blocks (dropping headers/footers, closing line-break hyphens); a segmenter anchors Extract's section list onto that text to cut clause boundaries, so clause character offsets are exact by construction and never come from the model; a clause typer takes Extract's family per section when valid, else a dictionary/fuzzy match, else `other`; and a field mapper locates each Extract citation's quote in canonical text to attach offsets and a confidence, and resolves parties into own-organisation vs counterparty. Contract type is one field in the Extract schema — no separate classification call. Each file version is processed once, with pinned Extend processor versions, and the raw Parse/Extract responses are stored in the bucket; nothing downstream regenerates text or offsets (`document_processing_plan.md` sections 3.6, 5.2–5.6).
 
-**Integrations:** Feeds S2 (analysis), S5 (clause array for Q&A), S7 (storage), and S9 (metadata). Emits the canonical clause types, `charStart`/`charEnd` offsets, and normalized `counterpartyId` used platform-wide. Scanned/OCR PDFs are out of scope by design.
+**Integrations:** Feeds S2 (analysis), S5 (clause array for Q&A), S7 (storage), and S9 (metadata). Emits the canonical clause types, `charStart`/`charEnd` offsets, and normalized `counterpartyId` used platform-wide. Upload is asynchronous: `POST /api/documents` returns `202` with status `processing`; the client polls. Scanned PDFs are now handled — Extend OCRs them — though this is not yet proven on real-world scans beyond the live test in `document_processing_plan.md` section 3.5.
 
 ```mermaid
 flowchart TD
-    A([Document Upload\nPDF or DOCX]) --> FMT{Format?}
-    FMT -->|DOCX| DX[DOCX Parser\nDeterministic\ntext + explicit heading styles + numbering]
-    FMT -->|PDF| B[PDF Parser\nDeterministic\nraw text + font sizes · bold · whitespace · coords]
+    A([Document Upload\nPDF or DOCX]) --> VAL[Validate: size · magic bytes\nsha256 · duplicate check]
+    VAL -->|202 contract_id\nstatus = processing| BG[Background ingest]
 
-    DX --> C[Canonical Text + Structure Signal\nsingle source for charStart/charEnd]
-    B --> C
+    BG --> XU[Extend: upload file]
+    XU --> XE[Extend Extract — Light tier\nschema from our field registry\ncitations enabled, pinned version]
+    XE --> XP[Fetch Extend Parse blocks\nby parseRunId, no extra charge]
+    XP --> RAW[(Store raw parse.json\n+ extract.json in bucket)]
 
-    C --> D[Heading & Structure Detector\nDeterministic\ndecimal · alpha · roman · ALL CAPS · bold\nfallback: blank-line paragraphs]
-    D --> E[Clause Boundary Segmentation\nDeterministic]
-    E --> TN[Clause-Type Normalizer\nDeterministic\nsynonym/fuzzy dictionary: heading text → canonical type]
-    TN --> F[Clause Array\nid · type · text · charStart · charEnd]
+    RAW --> CT[Canonical Text Builder — ours\ndrop footers/page numbers/repeated headers\nclose line-break hyphens, join blocks]
+    CT --> SEG[Segmenter — ours\nanchor Extract's section list onto blocks\nthen cut sub-clauses: (a) · 6.1 · 6.1.2]
+    SEG --> TYP[Clause Typer — ours\nExtract's family when valid\nelse dictionary/fuzzy, else other]
+    TYP --> F[Clause Array\nid · clause_key · type · text · charStart · charEnd]
 
-    C --> G[NER + Pattern Matching Engine\nDeterministic]
-    G --> G1[Party & Org Extraction\n+ normalized counterpartyId]
-    G --> G2[Date Extraction]
-    G --> G3[Financial Field Extraction]
-    G --> G4[Governing Law Detection]
-    G --> G5[Notice & Address Extraction]
+    XE --> MAP[Field Mapper — ours\nExtract value + citation → canonical-text offsets\nsanity checks · derived values]
+    CT --> MAP
+    MAP --> H[Fields with evidence\n+ contract_metadata projection]
+    MAP --> PTY[Party Resolver — ours\nown_org_names vs counterparty]
 
-    G1 --> H[Metadata Object\n~50 fields]
-    G2 --> H
-    G3 --> H
-    G4 --> H
-    G5 --> H
+    UPL([Upload Context]) --> PO[Paper Origin Flag\nown · counterparty]
+    XE --> CT2[Contract Type\none Extract enum field\nuser-supplied value wins if given]
 
-    UPL([Upload Context]) --> PO[Paper Origin Flag\nDeterministic\nown · counterparty]
-
-    UPL --> CTQ{Contract type\nsupplied?}
-    CTQ -->|Yes| CT[Contract Type + Party Role\nvalidated against agreement_type]
-    CTQ -->|No| CLS[LLM Call — fast tier\nClassify contract type\ntitle + first 3,000 chars\nnull when confidence is low]
-    CLS --> CT
-    C --> CLS
-    UPL --> CX[Deal Context — Deterministic\nregimes by keyword rules: hipaa · gdpr\ndeal value band from band boundaries\nvalidated against context_dimension]
-    C --> CX
-
-    F --> OUT([Output Contract\nclauses[] + metadata + paperOrigin + canonical text\n+ contract type · party role · context\nto Service 2 / Service 6 / Service 7])
+    F --> OUT([Output: clauses[] + fields + metadata\n+ parties/signatories + paperOrigin\n+ contract type · party role · context\nto Service 2 / Service 6 / Service 7])
     H --> OUT
+    PTY --> OUT
     PO --> OUT
-    CT --> OUT
-    CX --> OUT
+    CT2 --> OUT
 
-    style CLS fill:#fff3ee,stroke:#eb6c36
+    style XE fill:#fff3ee,stroke:#eb6c36
+    style XP fill:#fff3ee,stroke:#eb6c36
 ```
 
 ---
@@ -566,7 +553,7 @@ sequenceDiagram
     U->>ART: Upload event (webhook / queue)<br/>+ optional contract type, party role, context
 
     ART->>S1: Process PDF/DOCX
-    Note over S1: Deterministic parse → clauses[] + metadata<br/>contract type (supplied or classified) + context
+    Note over S1: Extend Parse + Extract, polled to completion,<br/>then our own segmenter/typer/field mapper → clauses[] + fields<br/>contract type (supplied, else Extract's enum) + context
     S1-->>ART: clauses[] + metadata + paperOrigin<br/>+ contract type + party role + context
 
     ART->>S6: Resolve(contract type, party role,<br/>paper origin, context)
@@ -742,7 +729,7 @@ flowchart TD
 
 | Service | Type | LLM Calls |
 |---|---|---|
-| S1 — Document Processing | Deterministic | 0; 1 fast-tier classification only when the contract type is not supplied |
+| S1 — Document Processing | Extend AI (Parse + Extract) + our own deterministic code | 0 calls to our LLM gateway; 1 Extend Extract run per upload (which internally also runs Parse) — a model call, but outside `core/llm/` and not used for control flow |
 | S2 — Contract Analysis | Fixed Workflow | 1 (batched; split by clause batch if the prompt is too large) |
 | S3 — Redline & Suggestion | LLM Calls | 1 per clause |
 | S4 — Drafting | Cascade | 0–1 per request |

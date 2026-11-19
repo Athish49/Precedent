@@ -8,7 +8,7 @@ Python + FastAPI backend for the Precedent contract-intelligence platform.
 
 ## Stack
 
-Python 3.13 · FastAPI · SQLAlchemy 2 (async) + Alembic · Neon Postgres + pgvector · Anthropic Claude (via `app/core/llm/` gateway) · sentence-transformers (bge-small-en-v1.5, 384-dim) · Object storage (Cloudflare R2 or any S3-compatible bucket; required, no local mode). See `../development_docs/Tech_Stack.md`.
+Python 3.13 · FastAPI · SQLAlchemy 2 (async) + Alembic · Neon Postgres + pgvector · Anthropic Claude (via `app/core/llm/` gateway) · Extend AI (via `app/core/extend/` client — document parsing + field extraction, replacing the old local `pdfplumber`/`python-docx`/spaCy pipeline) · sentence-transformers (bge-small-en-v1.5, 384-dim) · Object storage (Cloudflare R2 or any S3-compatible bucket; required, no local mode). See `../development_docs/Tech_Stack.md`.
 
 ---
 
@@ -36,6 +36,8 @@ Edit `.env` and fill in:
 |---|---|---|
 | `DATABASE_URL` | Yes | Neon Postgres — `postgresql+psycopg://user:pass@ep-xxx.us-east-2.aws.neon.tech/neondb?sslmode=require` |
 | `ANTHROPIC_API_KEY` | Yes | `sk-ant-…` |
+| `EXTEND_API_KEY` | Yes | Extend AI key. Required for S1 (document processing) ingest — a Parse + Extract call runs on every upload. Never log this key |
+| `OWN_ORG_NAMES` | No | Comma-separated names the organization signs under, used to tell our party apart from the counterparty at ingest. Defaults to empty, in which case no party role is guessed |
 | `PROJECT_NAMESPACE` | No | Namespace for everything this project owns on shared infrastructure. Defaults to `precedent` |
 | `DB_SCHEMA` | No | Postgres schema. Defaults to the namespace. Must match `^[a-z][a-z0-9_]*$` and must not be `public` |
 | `OBJECT_STORAGE_PREFIX` | No | Key prefix inside the bucket. Defaults to the namespace |
@@ -138,6 +140,7 @@ backend/
 │   │   ├── config.py            # Pydantic-settings Settings
 │   │   ├── diff/                # Clause aligner + char-level differ
 │   │   ├── embeddings.py        # sentence-transformers singleton
+│   │   ├── extend/              # Extend AI client (S1 ingest): upload, Extract (poll), fetch Parse blocks
 │   │   ├── llm/                 # Gateway, registry, schemas, prompts
 │   │   └── storage.py           # S3/R2 backend (cloud only), project key prefix
 │   ├── db/
@@ -146,7 +149,7 @@ backend/
 │   │   └── repositories/        # Async query functions
 │   ├── schemas/                 # Pydantic request/response models
 │   ├── services/                # Business logic (one dir per service)
-│   │   ├── document_processing/ # S1: parse, segment, extract metadata
+│   │   ├── document_processing/ # S1: Extend Parse+Extract, then our own canonical text/segmentation/typing/field mapping (ingest.py). The old pipeline (parsers.py/segmentation.py/clause_types.py/extraction.py/service.py) has been deleted.
 │   │   ├── contract_analysis/   # S2: flag detection + risk scoring
 │   │   ├── redline/             # S3: LLM redlines + render + persist
 │   │   ├── playbook/            # S6: playbook rules + routing
@@ -175,7 +178,7 @@ backend/
 ## Architecture rules
 
 - **LLM isolation:** All Anthropic calls go through `app/core/llm/gateway.py`. No service outside `app/core/llm/` imports `anthropic`.
-- **S1 and S9 are LLM-free:** `document_processing` and `analytics` are deterministic — they never import `core/llm`.
+- **S9 is LLM-free; S1 is not, but it's not our LLM gateway either.** `analytics` is deterministic and never imports `core/llm`. `document_processing` also never imports `core/llm` — but it does call Extend AI (`core/extend/`) on every upload for Parse and Extract, which is a model behind an API. The commitment is not "no model calls" but that each file version is processed once, with pinned Extend processor versions, and the raw responses are stored; nothing downstream regenerates text or offsets. Only `document_processing/` imports `core/extend`, and the string `api.extend.ai` appears only inside `core/extend/` — both guarded in CI the same way as the `core/llm` guard.
 - **Char offsets are sacred:** `char_start`/`char_end` and `clause_type` are computed once in S1 and carried downstream — never recomputed.
 - **Session discipline:** Services `flush()`; routes `commit()`.
 - **Router auto-discovery:** `main.py` discovers all routers via `pkgutil.iter_modules` on `app/api/routes/` — drop a file with a `router` attribute to register it; no edits to `main.py` needed.

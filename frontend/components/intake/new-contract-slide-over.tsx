@@ -5,12 +5,40 @@ import { useRouter } from 'next/navigation';
 import { FileText, UploadCloud, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SlideOver } from '@/components/primitives/slide-over';
-import { useUploadDocument, useRunReviewUpload, useReviewRun } from '@/lib/api/hooks';
-import type { GateDecision, PaperOrigin } from '@/lib/api/types';
+import { ApiError } from '@/lib/api/client';
+import {
+  useUploadDocument,
+  useRunReviewUpload,
+  useReviewRun,
+  useContract,
+  useContractClauses,
+} from '@/lib/api/hooks';
+import type { DuplicateFileDetail, GateDecision, PaperOrigin } from '@/lib/api/types';
 import { cn } from '@/lib/utils';
 
 type IntakeMode = 'process' | 'review';
 type WizardStep = 'upload' | 'mode' | 'submitting' | 'polling' | 'done' | 'error';
+
+// A `failed` contract's `status_reason` (document_processing_
+// implementation.md section 4.3), mapped to a short human sentence.
+const STATUS_REASON_MESSAGES: Record<string, string> = {
+  password_protected: 'This file is password-protected. Remove the password and upload it again.',
+  unsupported_format: 'This file format is not supported. Upload a PDF or DOCX.',
+  too_large: 'This file is too large to process.',
+  unreadable: 'This file could not be read — it may be corrupted or a blank scan.',
+  no_text: 'No readable text was found in this file.',
+  extraction_failed: 'Processing failed while extracting the contract data.',
+  timeout: 'Processing timed out before it could finish.',
+  provider_unavailable: 'The document processing service is temporarily unavailable.',
+  storage_failed: 'The file could not be stored.',
+};
+
+function statusReasonMessage(reason?: string | null): string {
+  if (reason && STATUS_REASON_MESSAGES[reason]) return STATUS_REASON_MESSAGES[reason];
+  return 'Processing failed. You can try uploading again.';
+}
+
+const POLL_TIMEOUT_MS = 5 * 60 * 1000;
 
 interface DoneState {
   contractId: string;
@@ -25,6 +53,9 @@ interface WizardState {
   paperOrigin: PaperOrigin;
   mode: IntakeMode;
   runId: string | null;
+  pollContractId: string | null;
+  pollStartedAt: number | null;
+  duplicateContractId: string | null;
   done: DoneState | null;
   errorMessage: string | null;
   contractType: string;
@@ -38,6 +69,9 @@ const INITIAL: WizardState = {
   paperOrigin: 'counterparty',
   mode: 'process',
   runId: null,
+  pollContractId: null,
+  pollStartedAt: null,
+  duplicateContractId: null,
   done: null,
   errorMessage: null,
   contractType: '',
@@ -74,6 +108,15 @@ export function NewContractSlideOver({ open, onClose }: NewContractSlideOverProp
   const uploadReview = useRunReviewUpload();
   const reviewRunQuery = useReviewRun(state.runId ?? '');
 
+  // "Process only" polling: on the 202 from POST /documents, poll
+  // GET /api/documents/{id} (via useContract's built-in 2s refetchInterval)
+  // until `status` is `ready` or `failed`, capped at 5 minutes.
+  const isDocumentPolling = state.step === 'polling' && !!state.pollContractId;
+  const documentQuery = useContract(state.pollContractId ?? '', { enabled: isDocumentPolling });
+  const doneClausesQuery = useContractClauses(
+    state.step === 'done' ? state.done?.contractId ?? '' : ''
+  );
+
   useEffect(() => {
     if (state.step !== 'polling' || !state.runId || !reviewRunQuery.data) return;
     const { status, contract_id, gate_decision } = reviewRunQuery.data;
@@ -92,6 +135,39 @@ export function NewContractSlideOver({ open, onClose }: NewContractSlideOverProp
     }
   }, [state.step, state.runId, reviewRunQuery.data]);
 
+  useEffect(() => {
+    if (!isDocumentPolling || !documentQuery.data) return;
+    const { id, status, status_reason, counterparty_id } = documentQuery.data;
+    if (status === 'ready') {
+      setState((s) => ({
+        ...s,
+        step: 'done',
+        done: { contractId: id, counterpartyDetected: !!counterparty_id },
+      }));
+    } else if (status === 'failed') {
+      setState((s) => ({ ...s, step: 'error', errorMessage: statusReasonMessage(status_reason) }));
+    }
+  }, [isDocumentPolling, documentQuery.data]);
+
+  // 5-minute client-side cap on the document poll, independent of react-
+  // query's refetchInterval (which itself stops once status is terminal).
+  useEffect(() => {
+    if (!isDocumentPolling || !state.pollStartedAt) return;
+    const timer = setTimeout(() => {
+      setState((s) =>
+        s.step === 'polling'
+          ? {
+              ...s,
+              step: 'error',
+              errorMessage:
+                'Processing is taking longer than expected (over 5 minutes). It may still finish in the background — check the contract again shortly.',
+            }
+          : s
+      );
+    }, Math.max(0, POLL_TIMEOUT_MS - (Date.now() - state.pollStartedAt)));
+    return () => clearTimeout(timer);
+  }, [isDocumentPolling, state.pollStartedAt]);
+
   function handleFileSelect(file: File) {
     setState((s) => ({ ...s, file }));
   }
@@ -104,7 +180,7 @@ export function NewContractSlideOver({ open, onClose }: NewContractSlideOverProp
     }
   }
 
-  function handleSubmit() {
+  function handleSubmit(force = false) {
     if (!state.file) return;
     setState((s) => ({ ...s, step: 'submitting' }));
 
@@ -129,24 +205,36 @@ export function NewContractSlideOver({ open, onClose }: NewContractSlideOverProp
           contract_type: state.contractType || undefined,
           party_role: state.partyRole || undefined,
           context,
+          force,
         },
         {
           onSuccess: (data) => {
+            // 202: the ingest runs in the background. Switch to polling
+            // GET /api/documents/{id} until status is ready/failed.
             setState((s) => ({
               ...s,
-              step: 'done',
-              done: {
-                contractId: data.contract_id,
-                clauseCount: data.clauses.length,
-                counterpartyDetected: !!data.counterparty_id,
-              },
+              step: 'polling',
+              pollContractId: data.contract_id,
+              pollStartedAt: Date.now(),
+              duplicateContractId: null,
             }));
           },
           onError: (err) => {
+            if (err instanceof ApiError && err.code === 'duplicate_file') {
+              const detail = err.detail as DuplicateFileDetail | undefined;
+              setState((s) => ({
+                ...s,
+                step: 'error',
+                errorMessage: 'A contract with this exact file already exists.',
+                duplicateContractId: detail?.existing_contract_id ?? null,
+              }));
+              return;
+            }
             setState((s) => ({
               ...s,
               step: 'error',
               errorMessage: err instanceof Error ? err.message : 'Upload failed. Please try again.',
+              duplicateContractId: null,
             }));
           },
         }
@@ -173,6 +261,12 @@ export function NewContractSlideOver({ open, onClose }: NewContractSlideOverProp
   function handleOpenContract() {
     if (!state.done?.contractId) return;
     router.push(`/contracts/${state.done.contractId}`);
+    handleDismiss();
+  }
+
+  function handleOpenDuplicate() {
+    if (!state.duplicateContractId) return;
+    router.push(`/contracts/${state.duplicateContractId}`);
     handleDismiss();
   }
 
@@ -384,7 +478,7 @@ export function NewContractSlideOver({ open, onClose }: NewContractSlideOverProp
               >
                 Back
               </Button>
-              <Button className="flex-1" onClick={handleSubmit}>
+              <Button className="flex-1" onClick={() => handleSubmit()}>
                 Submit
               </Button>
             </div>
@@ -398,8 +492,10 @@ export function NewContractSlideOver({ open, onClose }: NewContractSlideOverProp
             <div className="text-center">
               <p className="text-sm font-medium">
                 {state.step === 'submitting'
-                  ? 'Uploading & processing…'
-                  : 'Running autonomous review…'}
+                  ? 'Uploading…'
+                  : state.mode === 'review'
+                    ? 'Running autonomous review…'
+                    : 'Processing document…'}
               </p>
               {state.file && (
                 <p className="mt-1 text-xs text-muted-foreground">{state.file.name}</p>
@@ -427,9 +523,9 @@ export function NewContractSlideOver({ open, onClose }: NewContractSlideOverProp
             </div>
             <div className="space-y-1">
               <p className="text-sm font-semibold">Contract processed</p>
-              {state.done.clauseCount !== undefined && (
+              {doneClausesQuery.data !== undefined && (
                 <p className="text-xs text-muted-foreground">
-                  {state.done.clauseCount} clauses extracted
+                  {doneClausesQuery.data.length} clauses extracted
                 </p>
               )}
               {state.done.counterpartyDetected && (
@@ -457,12 +553,25 @@ export function NewContractSlideOver({ open, onClose }: NewContractSlideOverProp
               <X className="size-6 text-destructive" />
             </div>
             <div className="space-y-1">
-              <p className="text-sm font-semibold">Something went wrong</p>
+              <p className="text-sm font-semibold">
+                {state.duplicateContractId ? 'This contract already exists' : 'Something went wrong'}
+              </p>
               <p className="max-w-xs text-xs text-muted-foreground">{state.errorMessage}</p>
             </div>
-            <Button variant="outline" onClick={handleReset}>
-              Try again
-            </Button>
+            <div className="flex gap-2">
+              {state.duplicateContractId ? (
+                <>
+                  <Button onClick={handleOpenDuplicate}>Open existing contract</Button>
+                  <Button variant="outline" onClick={() => handleSubmit(true)}>
+                    Upload anyway
+                  </Button>
+                </>
+              ) : (
+                <Button variant="outline" onClick={handleReset}>
+                  Try again
+                </Button>
+              )}
+            </div>
           </div>
         )}
       </div>

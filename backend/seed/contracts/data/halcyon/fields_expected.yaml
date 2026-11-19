@@ -1,0 +1,789 @@
+# Field answers for the 12 Halcyon seed contracts (task 6.1).
+#
+# Source: backend/seed/contracts/data/halcyon/source/*.md (do not edit those files).
+# contract_type and counterparty are copied from expected.yaml (do not edit that file either).
+# "Us" = Halcyon Care, Inc. (and its subsidiary Halcyon Care Ireland Ltd in files 04/06), per
+# playbook_implementation.md section 2. Every value below carries an inline comment with the
+# section number/heading in the source file it was traced to. `null` means the contract does not
+# state that field. clause_family values are restricted to the 31 real keys: the 29 inserted by
+# migrations/versions/010_playbook_lookups.py (baseline, nda, saas_msa, dpa, vendor_msa, hipaa,
+# gdpr, indemnification, limitation_of_liability, termination, confidentiality,
+# intellectual_property, governing_law, dispute_resolution, payment, warranties, force_majeure,
+# assignment, entire_agreement, amendment, notices, definitions, term, compliance,
+# data_protection, audit, insurance, other, service_levels, security, subprocessors,
+# breach_notification, data_transfers, publicity, non_solicitation, suspension) plus preamble and
+# signature_block, added by migrations/versions/016_doc_proc_schema_a.py.
+#
+# Note on signatories: none of the 12 source files contain actual signatory names, titles or
+# signed/unsigned status - each ends with a generic reference to "the signature page" (e.g. file
+# 01 has no execution block at all; file 03 line 269 "IN WITNESS WHEREOF ... each on the
+# signature page attached to this Agreement"; files 08-12 Section "Signatories" / "Execution and
+# Approval" clauses refer to an unpopulated signature page). So `signatories: null` for all 12,
+# each with that trace.
+#
+# Note on mixed-topic top-level sections (e.g. "TERM AND TERMINATION", "GENERAL PROVISIONS"):
+# clause_family records the single best-fit family for the section as a whole; a short note is
+# added only where the choice is non-obvious. The section number and title are themselves the
+# trace back to the source heading.
+
+contracts:
+
+# ---------------------------------------------------------------------------
+- id: 1
+  file: 01_saas_msa_own_clean
+  title: Master Subscription Agreement  # line 1
+  contract_type: saas_msa  # expected.yaml id 1
+  parties:
+    us:
+      name: Halcyon Care, Inc.  # preamble, line 3
+      role_label: Halcyon  # preamble, line 3 ("Halcyon")
+      entity_type: Delaware corporation  # preamble, line 3
+      jurisdiction: Delaware  # preamble, line 3
+    counterparty:
+      name: Meridian Physician Partners, LLC  # preamble, line 3
+      role_label: Customer  # preamble, line 3
+      entity_type: physician group (LLC)  # preamble, line 3 ("a physician group organized under the laws of Ohio")
+      jurisdiction: Ohio  # preamble, line 3
+  counterparty: Meridian Physician Partners, LLC  # expected.yaml id 1
+  fields:
+    effective_date: "2026-03-03"  # preamble, line 3 ("as of March 3, 2026")
+    expiry_date: null  # no fixed calendar expiry stated; term runs from Effective Date, section 4.1
+    initial_term_months: 36  # 4.1, line 73 ("thirty-six (36) months")
+    auto_renewal: true  # 4.2, line 75 ("automatically renews")
+    renewal_term_months: 12  # 4.2, line 75 ("successive twelve (12)-month terms")
+    renewal_notice_days: 60  # 4.2, line 75 ("at least sixty (60) days before the end")
+    governing_law: Delaware  # 16.1, line 149
+    dispute_resolution: senior-management escalation before formal proceedings  # 30.1, line 227
+    dispute_venue: state and federal courts located in Delaware  # 16.1, line 149
+    liability_cap_amount: null  # formula only, no fixed dollar figure; see liability_cap_basis
+    liability_cap_basis: fees paid and payable by Customer in the 12 months preceding the first event giving rise to liability  # 11.1, line 121
+    total_value_amount: "$180,000 annual subscription fee plus $12,000 one-time implementation fee"  # 33.5, line 249
+    currency: USD  # 33.5, line 249 ("$")
+    payment_terms_days: 30  # 3.1, line 63 ("Net 30")
+    termination_for_convenience: false  # section 4 has no convenience-termination clause, only for-cause (4.3, line 77)
+    termination_for_convenience_party: null  # no termination-for-convenience clause present
+    termination_notice_days: null  # only the 30-day cure period for material breach is stated, 4.3 line 77; not a convenience-notice period
+  signatories: null  # no execution/signature block appears in this file at all
+  sections:
+  - {number: preamble, title: "Preamble and Recitals", clause_family: preamble}
+  - {number: "1", title: "Definitions", clause_family: definitions}
+  - {number: "2", title: "Services", clause_family: other}  # 2.2/2.3 warranty+disclaimer, 2.7/2.8 representations
+  - {number: "3", title: "Fees and Payment", clause_family: payment}
+  - {number: "4", title: "Term and Termination", clause_family: term}
+  - {number: "5", title: "Suspension", clause_family: suspension}
+  - {number: "6", title: "Service Levels", clause_family: service_levels}
+  - {number: "7", title: "Confidentiality", clause_family: confidentiality}
+  - {number: "8", title: "Data Protection and Security", clause_family: data_protection}
+  - {number: "9", title: "Audit", clause_family: audit}
+  - {number: "10", title: "Compliance", clause_family: compliance}
+  - {number: "11", title: "Limitation of Liability", clause_family: limitation_of_liability}
+  - {number: "12", title: "Indemnification", clause_family: indemnification}
+  - {number: "13", title: "Intellectual Property", clause_family: intellectual_property}
+  - {number: "14", title: "Insurance", clause_family: insurance}
+  - {number: "15", title: "Publicity", clause_family: publicity}
+  - {number: "16", title: "Governing Law", clause_family: governing_law}
+  - {number: "17", title: "General Provisions", clause_family: other}  # assignment, amendment, entire_agreement, force_majeure, notices all bundled
+  - {number: "18", title: "Customer Responsibilities", clause_family: other}
+  - {number: "19", title: "Support Services", clause_family: other}
+  - {number: "20", title: "Changes to the Services", clause_family: other}
+  - {number: "21", title: "Third-Party Services and Integrations", clause_family: other}
+  - {number: "22", title: "Export Control and Sanctions Compliance", clause_family: compliance}
+  - {number: "23", title: "Relationship of the Parties", clause_family: other}
+  - {number: "24", title: "Severability", clause_family: other}
+  - {number: "25", title: "Waiver", clause_family: other}
+  - {number: "26", title: "Counterparts and Electronic Signatures", clause_family: other}
+  - {number: "27", title: "Survival", clause_family: other}
+  - {number: "28", title: "No Third-Party Beneficiaries", clause_family: other}
+  - {number: "29", title: "Non-Solicitation", clause_family: non_solicitation}
+  - {number: "30", title: "Dispute Resolution; Informal Escalation", clause_family: dispute_resolution}
+  - {number: "31", title: "Headings and Construction", clause_family: other}
+  - {number: "32", title: "Further Assurances", clause_family: other}
+  - {number: "33", title: "Exhibit A: Sample Order Form", clause_family: other}
+
+# ---------------------------------------------------------------------------
+- id: 2
+  file: 02_saas_msa_own_midmarket_yellow
+  title: Master Subscription Agreement  # line 1
+  contract_type: saas_msa  # expected.yaml id 2
+  parties:
+    us:
+      name: Halcyon Care, Inc.  # preamble, line 3
+      role_label: Halcyon  # preamble, line 3
+      entity_type: Delaware corporation  # preamble, line 3
+      jurisdiction: Delaware  # preamble, line 3
+    counterparty:
+      name: Lakeshore Regional Health Group  # preamble, line 3
+      role_label: Customer  # preamble, line 3
+      entity_type: regional physician network  # preamble, line 3
+      jurisdiction: Wisconsin  # preamble, line 3
+  counterparty: Lakeshore Regional Health Group  # expected.yaml id 2
+  fields:
+    effective_date: "2026-04-14"  # preamble, line 3 ("as of April 14, 2026")
+    expiry_date: null  # no fixed calendar expiry; term runs from Effective Date, 4.1
+    initial_term_months: 36  # 4.1, line 75
+    auto_renewal: true  # 4.2, line 77
+    renewal_term_months: 12  # 4.2, line 77
+    renewal_notice_days: 60  # 4.2, line 77
+    governing_law: Delaware  # 16.1, line 167
+    dispute_resolution: senior-management escalation before formal proceedings  # 30.1, line 249
+    dispute_venue: state and federal courts located in Delaware  # 16.1, line 167
+    liability_cap_amount: null  # formula only
+    liability_cap_basis: fees paid and payable by Customer in the 12 months preceding the first event giving rise to liability  # 11.1, line 137
+    total_value_amount: "$210,000 annual subscription fee plus $15,000 one-time implementation fee"  # 33.5, line 271
+    currency: USD  # 33.5, line 271
+    payment_terms_days: 60  # 3.1, line 63 ("Net 60" - deviation 1 of 4 from the Halcyon-standard Net 30, per the inline note at line 65)
+    termination_for_convenience: false  # only for-cause termination present, 4.3 line 79
+    termination_for_convenience_party: null
+    termination_notice_days: null  # only the (shortened) 15-day cure period for material breach, 4.3 line 79 - deviation 2 of 4
+  signatories: null  # no signatory names given; only a generic "Legal Department" notice attention line, 17.5/33.8
+  sections:
+  - {number: preamble, title: "Preamble and Recitals", clause_family: preamble}
+  - {number: "1", title: "Definitions", clause_family: definitions}
+  - {number: "2", title: "Services", clause_family: other}
+  - {number: "3", title: "Fees and Payment", clause_family: payment}
+  - {number: "4", title: "Term and Termination", clause_family: term}
+  - {number: "5", title: "Suspension", clause_family: suspension}
+  - {number: "6", title: "Service Levels", clause_family: service_levels}
+  - {number: "7", title: "Confidentiality", clause_family: confidentiality}
+  - {number: "8", title: "Data Protection and Security", clause_family: data_protection}
+  - {number: "9", title: "Audit", clause_family: audit}
+  - {number: "10", title: "Compliance", clause_family: compliance}
+  - {number: "11", title: "Limitation of Liability", clause_family: limitation_of_liability}
+  - {number: "12", title: "Indemnification", clause_family: indemnification}
+  - {number: "13", title: "Intellectual Property", clause_family: intellectual_property}
+  - {number: "14", title: "Insurance", clause_family: insurance}
+  - {number: "15", title: "Publicity", clause_family: publicity}
+  - {number: "16", title: "Governing Law", clause_family: governing_law}
+  - {number: "17", title: "General Provisions", clause_family: other}
+  - {number: "18", title: "Customer Responsibilities", clause_family: other}
+  - {number: "19", title: "Support Services", clause_family: other}
+  - {number: "20", title: "Changes to the Services", clause_family: other}
+  - {number: "21", title: "Third-Party Services and Integrations", clause_family: other}
+  - {number: "22", title: "Export Control and Sanctions Compliance", clause_family: compliance}
+  - {number: "23", title: "Relationship of the Parties", clause_family: other}
+  - {number: "24", title: "Severability", clause_family: other}
+  - {number: "25", title: "Waiver", clause_family: other}
+  - {number: "26", title: "Counterparts and Electronic Signatures", clause_family: other}
+  - {number: "27", title: "Survival", clause_family: other}
+  - {number: "28", title: "No Third-Party Beneficiaries", clause_family: other}
+  - {number: "29", title: "Non-Solicitation", clause_family: non_solicitation}
+  - {number: "30", title: "Dispute Resolution; Informal Escalation", clause_family: dispute_resolution}
+  - {number: "31", title: "Headings and Construction", clause_family: other}
+  - {number: "32", title: "Further Assurances", clause_family: other}
+  - {number: "33", title: "Exhibit A: Sample Order Form", clause_family: other}
+
+# ---------------------------------------------------------------------------
+- id: 3
+  file: 03_saas_msa_hipaa_counterparty_hospital_red
+  title: Software Subscription and Services Agreement  # line 1
+  contract_type: saas_msa  # expected.yaml id 3
+  parties:
+    us:
+      name: Halcyon Care, Inc.  # preamble, line 3
+      role_label: Halcyon  # preamble, line 3
+      entity_type: Delaware corporation  # preamble, line 3
+      jurisdiction: Delaware  # preamble, line 3
+    counterparty:
+      name: Castleview Memorial Hospital System  # preamble, line 3
+      role_label: Customer  # preamble, line 3
+      entity_type: not-for-profit hospital system  # preamble, line 3
+      jurisdiction: Illinois  # preamble, line 3
+  counterparty: Castleview Memorial Hospital System  # expected.yaml id 3
+  fields:
+    effective_date: "2026-01-12"  # preamble, line 3 ("as of January 12, 2026")
+    expiry_date: null  # no fixed calendar expiry; term runs from Effective Date, 4.1
+    initial_term_months: 36  # 4.1, line 77
+    auto_renewal: true  # 4.1, line 77 ("renewing automatically")
+    renewal_term_months: 12  # 4.1, line 77 ("successive one-year terms")
+    renewal_notice_days: 60  # 4.1, line 77
+    governing_law: Illinois  # 13.1, line 147
+    dispute_resolution: senior-management escalation before formal proceedings; injunctive relief carved out  # 29.1-29.2, lines 243-245
+    dispute_venue: state courts located in Cook County, Illinois  # 13.1, line 147
+    liability_cap_amount: "unlimited (no cap)"  # 6.1, line 95 ("liability ... SHALL BE UNLIMITED ... NO CAP ON EITHER PARTY'S LIABILITY SHALL APPLY")
+    liability_cap_basis: "none; liability expressly uncapped"  # 6.1, line 95
+    total_value_amount: "$720,000 annual subscription fee plus $40,000 one-time implementation fee"  # 31.5, line 261
+    currency: USD  # 31.5, line 261
+    payment_terms_days: 45  # 3.1, line 71
+    termination_for_convenience: false  # only for-cause termination present, 4.2 line 79
+    termination_for_convenience_party: null
+    termination_notice_days: null  # only the 30-day cure period for material breach, 4.2 line 79
+  signatories: null  # execution clause at line 269 refers only to "the signature page attached to this Agreement"; no names given
+  sections:
+  - {number: preamble, title: "Preamble and Recitals", clause_family: preamble}
+  - {number: "1", title: "Definitions", clause_family: definitions}
+  - {number: "2", title: "Services and Warranties", clause_family: warranties}
+  - {number: "3", title: "Fees and Payment", clause_family: payment}
+  - {number: "4", title: "Term and Termination", clause_family: term}
+  - {number: "5", title: "Service Levels", clause_family: service_levels}
+  - {number: "6", title: "Limitation of Liability", clause_family: limitation_of_liability}
+  - {number: "7", title: "Indemnification", clause_family: indemnification}
+  - {number: "8", title: "Confidentiality and Data Protection", clause_family: data_protection}
+  - {number: "9", title: "Security", clause_family: security}
+  - {number: "10", title: "Subcontractors", clause_family: subprocessors}
+  - {number: "11", title: "Intellectual Property", clause_family: intellectual_property}
+  - {number: "12", title: "Audit", clause_family: audit}
+  - {number: "13", title: "Governing Law", clause_family: governing_law}
+  - {number: "14", title: "Insurance", clause_family: insurance}
+  - {number: "15", title: "General Provisions", clause_family: other}
+  - {number: "16", title: "Customer Responsibilities", clause_family: other}
+  - {number: "17", title: "Support Services", clause_family: other}
+  - {number: "18", title: "Changes to the Services", clause_family: other}
+  - {number: "19", title: "Third-Party Services and Integrations", clause_family: other}
+  - {number: "20", title: "Export Control and Sanctions Compliance", clause_family: compliance}
+  - {number: "21", title: "Relationship of the Parties", clause_family: other}
+  - {number: "22", title: "Severability", clause_family: other}
+  - {number: "23", title: "Waiver", clause_family: other}
+  - {number: "24", title: "Counterparts and Electronic Signatures", clause_family: other}
+  - {number: "25", title: "Survival", clause_family: other}
+  - {number: "26", title: "No Third-Party Beneficiaries", clause_family: other}
+  - {number: "27", title: "Non-Solicitation", clause_family: non_solicitation}
+  - {number: "28", title: "Further Assurances", clause_family: other}
+  - {number: "29", title: "Dispute Resolution; Informal Escalation", clause_family: dispute_resolution}
+  - {number: "30", title: "Headings and Construction", clause_family: other}
+  - {number: "31", title: "Exhibit A: Subscription Fees and Term", clause_family: other}
+  - {number: signature, title: "IN WITNESS WHEREOF (execution clause)", clause_family: signature_block}
+
+# ---------------------------------------------------------------------------
+- id: 4
+  file: 04_saas_msa_gdpr_counterparty_euclinic_yellow
+  title: Services Agreement  # line 1
+  contract_type: saas_msa  # expected.yaml id 4
+  parties:
+    us:
+      name: Halcyon Care Ireland Ltd  # preamble, line 3
+      role_label: Halcyon  # preamble, line 3
+      entity_type: private company  # preamble, line 3
+      jurisdiction: Ireland  # preamble, line 3
+    counterparty:
+      name: Clairvoie Clinique Group SA  # preamble, line 3
+      role_label: Customer  # preamble, line 3
+      entity_type: clinic network  # preamble, line 3
+      jurisdiction: France  # preamble, line 3
+  counterparty: Clairvoie Clinique Group SA  # expected.yaml id 4
+  fields:
+    effective_date: "2026-02-20"  # preamble, line 3 ("as of February 20, 2026")
+    expiry_date: null  # no fixed calendar expiry; term runs from the agreement date, 4.1
+    initial_term_months: 36  # 4.1, line 63
+    auto_renewal: true  # 4.1, line 63 ("renewing automatically")
+    renewal_term_months: 12  # 4.1, line 63 ("successive twelve-month terms")
+    renewal_notice_days: 60  # 4.1, line 63
+    governing_law: Ireland  # 13.1, line 135
+    dispute_resolution: null  # no ADR/escalation clause stated; only the jurisdiction clause at 13.1
+    dispute_venue: courts of Ireland  # 13.1, line 135
+    liability_cap_amount: null  # formula only
+    liability_cap_basis: fees paid by Customer in the 12 months preceding the claim  # 6.1, line 75
+    total_value_amount: null  # Order Form says fees are "as set out in the invoice schedule delivered with this Order Form" - no figure given, Exhibit A line 187
+    currency: EUR  # 3.2, line 59 ("stated and invoiced in euros")
+    payment_terms_days: 30  # 3.1, line 57
+    termination_for_convenience: false  # only for-cause termination present, 4.2 line 65
+    termination_for_convenience_party: null
+    termination_notice_days: null  # only the 30-day cure period for material breach, 4.2 line 65
+  signatories: null  # preamble para 2 (line 7) states the signatory "is duly authorized", but no name/title is given anywhere in the file
+  sections:
+  - {number: preamble, title: "Preamble (no numbered recitals)", clause_family: preamble}
+  - {number: "1", title: "Definitions", clause_family: definitions}
+  - {number: "2", title: "Services and Warranties", clause_family: warranties}
+  - {number: "3", title: "Fees and Payment", clause_family: payment}
+  - {number: "4", title: "Term and Termination", clause_family: term}
+  - {number: "5", title: "Service Levels", clause_family: service_levels}
+  - {number: "6", title: "Limitation of Liability", clause_family: limitation_of_liability}
+  - {number: "7", title: "Confidentiality", clause_family: confidentiality}
+  - {number: "8", title: "Intellectual Property and Indemnification", clause_family: intellectual_property}
+  - {number: "9", title: "Data Protection", clause_family: data_protection}
+  - {number: "10", title: "Security", clause_family: security}
+  - {number: "11", title: "Audit", clause_family: audit}
+  - {number: "12", title: "Insurance", clause_family: insurance}
+  - {number: "13", title: "Governing Law", clause_family: governing_law}
+  - {number: "14", title: "General Provisions", clause_family: other}
+  - {number: "15", title: "Representations and Compliance", clause_family: compliance}
+  - {number: exhibit_a, title: "Exhibit A - Sample Order Form", clause_family: other}
+  - {number: exhibit_b, title: "Exhibit B - Data Processing Addendum", clause_family: data_protection}
+  - {number: exhibit_c, title: "Exhibit C - Support and Maintenance", clause_family: service_levels}
+
+# ---------------------------------------------------------------------------
+- id: 5
+  file: 05_saas_msa_counterparty_strategic
+  title: Enterprise Software Agreement  # line 1
+  contract_type: saas_msa  # expected.yaml id 5
+  parties:
+    us:
+      name: Halcyon Care, Inc.  # preamble, line 3
+      role_label: Halcyon  # preamble, line 3
+      entity_type: Delaware corporation  # preamble, line 3
+      jurisdiction: Delaware  # preamble, line 3
+    counterparty:
+      name: Pinnacle National Health Alliance  # preamble, line 3
+      role_label: Customer  # preamble, line 3
+      entity_type: multi-state hospital network  # preamble, line 3
+      jurisdiction: New York  # preamble, line 3
+  counterparty: Pinnacle National Health Alliance  # expected.yaml id 5
+  fields:
+    effective_date: "2026-05-01"  # preamble, line 3 ("as of May 1, 2026")
+    expiry_date: null  # no fixed calendar expiry; term runs from the agreement date, 4.1
+    initial_term_months: 36  # 4.1, line 67
+    auto_renewal: true  # 4.1, line 67 ("renewing automatically")
+    renewal_term_months: 12  # 4.1, line 67
+    renewal_notice_days: 60  # 4.1, line 67
+    governing_law: Delaware  # 13.1, line 151
+    dispute_resolution: null  # no ADR/escalation clause stated; only the jurisdiction clause at 13.1
+    dispute_venue: courts of Delaware  # 13.1, line 151
+    liability_cap_amount: null  # general cap is formula-based (36 months' Fees); data-breach super-cap is 3x annual Fees capped at $5,000,000, 6.2 line 93
+    liability_cap_basis: fees paid by Customer in the 36 months preceding the claim (strategic-deal fallback); data breach liability separately capped at 3x annual Fees, maximum $5,000,000  # 6.1-6.2, lines 89-93
+    total_value_amount: "exceeds $1,800,000 annually"  # preamble line 3 and 1.4 line 17
+    currency: USD  # preamble/1.4, "$1,800,000"
+    payment_terms_days: 30  # 3.1, line 57
+    termination_for_convenience: true  # 4.3, line 71 ("Customer may additionally terminate this Agreement for convenience ... after the twelfth month")
+    termination_for_convenience_party: Customer  # 4.3, line 71
+    termination_notice_days: 90  # 4.3, line 71
+  signatories: null  # preamble states the signatory "is duly authorized to do so" (line 5) but gives no name/title
+  sections:
+  - {number: preamble, title: "Preamble (no numbered recitals)", clause_family: preamble}
+  - {number: "1", title: "Definitions", clause_family: definitions}
+  - {number: "2", title: "Services and Warranties", clause_family: warranties}
+  - {number: "3", title: "Fees and Payment", clause_family: payment}
+  - {number: "4", title: "Term and Termination", clause_family: term}
+  - {number: "5", title: "Service Levels", clause_family: service_levels}
+  - {number: "6", title: "Limitation of Liability", clause_family: limitation_of_liability}
+  - {number: "7", title: "Confidentiality", clause_family: confidentiality}
+  - {number: "8", title: "Intellectual Property and Indemnification", clause_family: intellectual_property}
+  - {number: "9", title: "Data Protection", clause_family: data_protection}
+  - {number: "10", title: "Security", clause_family: security}
+  - {number: "11", title: "Audit", clause_family: audit}
+  - {number: "12", title: "Insurance", clause_family: insurance}
+  - {number: "13", title: "Governing Law", clause_family: governing_law}
+  - {number: "14", title: "General Provisions", clause_family: other}
+  - {number: "15", title: "Representations and Compliance", clause_family: compliance}
+  - {number: exhibit_a, title: "Exhibit A - Sample Order Form", clause_family: other}
+  - {number: exhibit_b, title: "Exhibit B - Support and Maintenance", clause_family: service_levels}
+  - {number: exhibit_c, title: "Exhibit C - Governance and Reporting", clause_family: other}
+
+# ---------------------------------------------------------------------------
+- id: 6
+  file: 06_dpa_gdpr_own_clean
+  title: Data Processing Addendum  # line 1
+  contract_type: dpa  # expected.yaml id 6
+  parties:
+    us:
+      name: Halcyon Care Ireland Ltd  # preamble, line 3
+      role_label: Processor  # preamble, line 3
+      entity_type: company  # (inherited; not restated in this addendum)
+      jurisdiction: Ireland  # 12.2, line 123 ("governed by the laws of Ireland")
+    counterparty:
+      name: Solheim Clinic Network AB  # preamble, line 3
+      role_label: Controller  # preamble, line 3
+      entity_type: clinic operator  # preamble, line 3
+      jurisdiction: Sweden  # preamble, line 3
+  counterparty: Solheim Clinic Network AB  # expected.yaml id 6
+  fields:
+    effective_date: "2026-03-30"  # preamble, line 3 ("entered into as of March 30, 2026"; also the Master Subscription Agreement date)
+    expiry_date: null  # tied to the term of the underlying Agreement, which this Addendum does not itself state (preamble, line 3)
+    initial_term_months: null  # this Addendum has no independent term; it supplements the Agreement's term (preamble, line 3)
+    auto_renewal: null  # not stated in this Addendum
+    renewal_term_months: null  # not stated
+    renewal_notice_days: null  # not stated
+    governing_law: Ireland  # 12.2, line 123
+    dispute_resolution: null  # not stated in this Addendum
+    dispute_venue: null  # not stated in this Addendum
+    liability_cap_amount: null  # 12.1 (line 121) defers entirely to the Agreement's own limitation of liability; no figure restated here
+    liability_cap_basis: subject to the limitations of liability set out in the Agreement, aggregated with Agreement liability  # 12.1, line 121
+    total_value_amount: null  # this Addendum states no fees
+    currency: null  # not stated
+    payment_terms_days: null  # not stated
+    termination_for_convenience: null  # not stated; this Addendum terminates automatically with the Agreement (implied by preamble, not a convenience right)
+    termination_for_convenience_party: null
+    termination_notice_days: null  # not stated
+  signatories: null  # no signature block or signatory names appear in this file
+  sections:
+  - {number: preamble, title: "Preamble (no numbered recitals)", clause_family: preamble}
+  - {number: "0", title: "Definitions", clause_family: definitions}
+  - {number: "1", title: "Roles of the Parties", clause_family: definitions}  # matches expected.yaml rule_key definitions.roles_of_parties
+  - {number: "2", title: "Subject Matter and Instructions", clause_family: data_protection}
+  - {number: "3", title: "Data Subject Requests", clause_family: data_protection}
+  - {number: "4", title: "Personnel", clause_family: data_protection}
+  - {number: "5", title: "Security", clause_family: security}
+  - {number: "6", title: "Data Protection Impact Assessments", clause_family: data_protection}
+  - {number: "7", title: "Breach Notification", clause_family: breach_notification}
+  - {number: "8", title: "Sub-processors", clause_family: subprocessors}
+  - {number: "9", title: "International Transfers", clause_family: data_transfers}
+  - {number: "10", title: "Audit and Cooperation", clause_family: audit}
+  - {number: "11", title: "Return and Deletion", clause_family: data_protection}
+  - {number: "12", title: "Liability and Governing Law", clause_family: limitation_of_liability}
+  - {number: "13", title: "Compliance with Data Protection Laws", clause_family: compliance}
+  - {number: "14", title: "Records of Processing", clause_family: data_protection}
+  - {number: "15", title: "General Provisions", clause_family: other}
+  - {number: annex_1, title: "Annex 1 - Description of Processing", clause_family: data_protection}
+  - {number: annex_2, title: "Annex 2 - Technical and Organisational Measures", clause_family: security}
+  - {number: annex_3, title: "Annex 3 - Breach Notification Content", clause_family: breach_notification}
+
+# ---------------------------------------------------------------------------
+- id: 7
+  file: 07_dpa_counterparty_subprocessor_breach
+  title: Data Processing Agreement  # line 1
+  contract_type: dpa  # expected.yaml id 7
+  parties:
+    us:
+      name: Halcyon Care, Inc.  # preamble, line 3
+      role_label: Processor  # preamble, line 3
+      entity_type: null  # not restated here (defined in the Services Agreement)
+      jurisdiction: null  # not restated here
+    counterparty:
+      name: Vantage Point Diagnostics, Inc.  # preamble, line 3
+      role_label: Controller  # preamble, line 3
+      entity_type: diagnostic laboratory network  # preamble, line 3
+      jurisdiction: New Jersey  # preamble, line 3
+  counterparty: Vantage Point Diagnostics, Inc.  # expected.yaml id 7
+  fields:
+    effective_date: "2026-06-09"  # preamble, line 3 ("entered into as of June 9, 2026")
+    expiry_date: null  # tied to the underlying Services Agreement's term, not stated here
+    initial_term_months: null  # not stated; "for the term of the Services Agreement", Annex 1 line 203
+    auto_renewal: null  # not stated
+    renewal_term_months: null  # not stated
+    renewal_notice_days: null  # not stated
+    governing_law: Delaware  # 14.1, line 145
+    dispute_resolution: null  # not stated in this Agreement
+    dispute_venue: null  # not stated in this Agreement
+    liability_cap_amount: null  # 13.1 (line 141) defers to the underlying services agreement; no figure restated here
+    liability_cap_basis: subject to the limitations of liability set out in the underlying services agreement  # 13.1, line 141
+    total_value_amount: null  # not stated
+    currency: null  # not stated
+    payment_terms_days: null  # not stated
+    termination_for_convenience: null  # not stated; this Agreement terminates automatically with the Services Agreement, 22.3 line 185
+    termination_for_convenience_party: null
+    termination_notice_days: null  # not stated
+  signatories: null  # Annex 3 (line 243) refers to "the individual identified on the signature page" without giving a name
+  sections:
+  - {number: preamble, title: "Preamble and Recitals", clause_family: preamble}
+  - {number: "1", title: "Roles of the Parties", clause_family: definitions}
+  - {number: "2", title: "Processing Instructions", clause_family: data_protection}
+  - {number: "3", title: "Purpose Limitation", clause_family: data_protection}
+  - {number: "4", title: "Data Subject Requests", clause_family: data_protection}
+  - {number: "5", title: "Personnel Confidentiality", clause_family: data_protection}
+  - {number: "6", title: "Return and Deletion", clause_family: data_protection}
+  - {number: "7", title: "Security", clause_family: security}
+  - {number: "8", title: "Breach Notification", clause_family: breach_notification}
+  - {number: "9", title: "Sub-processors", clause_family: subprocessors}
+  - {number: "10", title: "International Transfers", clause_family: data_transfers}
+  - {number: "11", title: "Retention", clause_family: data_protection}
+  - {number: "12", title: "Audit", clause_family: audit}
+  - {number: "13", title: "Liability", clause_family: limitation_of_liability}
+  - {number: "14", title: "Governing Law", clause_family: governing_law}
+  - {number: "15", title: "General Provisions", clause_family: other}
+  - {number: "16", title: "Independent Contractor Status", clause_family: other}
+  - {number: "17", title: "No Third-Party Beneficiaries", clause_family: other}
+  - {number: "18", title: "Further Assurances", clause_family: other}
+  - {number: "19", title: "Counterparts and Electronic Signature", clause_family: other}
+  - {number: "20", title: "Interpretation", clause_family: other}
+  - {number: "21", title: "Severability", clause_family: other}
+  - {number: "22", title: "Relationship to the Services Agreement", clause_family: other}
+  - {number: "23", title: "Survival", clause_family: other}
+  - {number: "24", title: "Export Control", clause_family: compliance}
+  - {number: annex_1, title: "Annex 1: Description of Processing", clause_family: data_protection}
+  - {number: annex_2, title: "Annex 2: Schedule of Safeguards", clause_family: security}
+  - {number: annex_3, title: "Annex 3: Points of Contact", clause_family: other}
+
+# ---------------------------------------------------------------------------
+- id: 8
+  file: 08_baa_hipaa_counterparty_missing
+  title: Business Associate Agreement  # line 1
+  contract_type: hipaa  # expected.yaml id 8
+  parties:
+    us:
+      name: Halcyon Care, Inc.  # preamble, line 3
+      role_label: Business Associate  # preamble, line 3
+      entity_type: null  # not restated here
+      jurisdiction: null  # not restated here
+    counterparty:
+      name: Brightwater County Hospital  # preamble, line 3
+      role_label: Covered Entity  # preamble, line 3
+      entity_type: county hospital  # preamble, line 3; Recital A line 7
+      jurisdiction: Texas  # preamble, line 3
+  counterparty: Brightwater County Hospital  # expected.yaml id 8
+  fields:
+    effective_date: "2026-07-07"  # preamble, line 3 ("entered into as of July 7, 2026")
+    expiry_date: null  # terminates automatically with the Underlying Agreement, 8.1 line 69; no fixed date
+    initial_term_months: null  # tied to the Underlying Agreement's term, not stated here
+    auto_renewal: null  # not stated
+    renewal_term_months: null  # not stated
+    renewal_notice_days: null  # not stated
+    governing_law: Texas  # 10.1, line 81
+    dispute_resolution: null  # 10.2 (line 83) defers to the Underlying Agreement's dispute resolution provisions without restating them
+    dispute_venue: null  # 10.2 (line 83) defers to the Underlying Agreement's venue provisions without restating them
+    liability_cap_amount: null  # this BAA contains no liability-cap clause of its own
+    liability_cap_basis: null  # not stated
+    total_value_amount: null  # not stated
+    currency: null  # not stated
+    payment_terms_days: null  # not stated; payment terms are in the Underlying Agreement, not this BAA
+    termination_for_convenience: null  # 8.1 (line 69) ties termination to the Underlying Agreement and to breach only; 18.2 (line 155) adds a funding-non-appropriation termination, not a general convenience right
+    termination_for_convenience_party: null
+    termination_notice_days: null  # not stated
+  signatories: null  # Schedule 4 (line 199-203) describes an execution/signature page but gives no signatory name, title or date
+  sections:
+  - {number: preamble, title: "Preamble and Recitals", clause_family: preamble}
+  - {number: "1", title: "Definitions", clause_family: definitions}
+  - {number: "2", title: "Permitted Uses and Disclosures", clause_family: data_protection}
+  - {number: "3", title: "Breach Notification", clause_family: breach_notification}
+  - {number: "4", title: "Safeguards", clause_family: security}  # Gap Note only, line 51-53: no actual safeguards provision in the source
+  - {number: "5", title: "Individual Rights", clause_family: data_protection}  # Gap Note only, line 55-57
+  - {number: "6", title: "Subcontractors", clause_family: subprocessors}  # Gap Note only, line 59-61
+  - {number: "7", title: "Access by the Secretary", clause_family: audit}  # Gap Note only, line 63-65
+  - {number: "8", title: "Term and Termination", clause_family: term}
+  - {number: "9", title: "General Compliance", clause_family: compliance}  # Gap Note only, line 75-77
+  - {number: "10", title: "Governing Law", clause_family: governing_law}
+  - {number: "11", title: "General Provisions", clause_family: other}
+  - {number: "12", title: "Independent Contractor Status", clause_family: other}
+  - {number: "13", title: "No Third-Party Beneficiaries", clause_family: other}
+  - {number: "14", title: "Interpretation", clause_family: other}
+  - {number: "15", title: "Severability", clause_family: other}
+  - {number: "16", title: "Administration of this BAA", clause_family: other}
+  - {number: schedule_1, title: "Schedule 1: Description of Services", clause_family: other}
+  - {number: schedule_2, title: "Schedule 2: Points of Contact", clause_family: other}
+  - {number: "17", title: "Public Information", clause_family: other}
+  - {number: "18", title: "Funding and Appropriations", clause_family: other}
+  - {number: "19", title: "Waiver", clause_family: other}
+  - {number: "20", title: "Further Assurances", clause_family: other}
+  - {number: "21", title: "Export Control", clause_family: compliance}
+  - {number: schedule_6, title: "Schedule 6: Background on Business Associate", clause_family: other}
+  - {number: schedule_8, title: "Schedule 8: Notices Checklist", clause_family: other}
+  - {number: schedule_9, title: "Schedule 9: Relationship to Future Versions of this BAA", clause_family: other}
+  - {number: schedule_7, title: "Schedule 7: Defined Terms Cross-Reference", clause_family: definitions}
+  - {number: schedule_3, title: "Schedule 3: Underlying Agreement Cross-Reference", clause_family: other}
+  - {number: schedule_4, title: "Schedule 4: Execution and Approval", clause_family: signature_block}
+  - {number: schedule_5, title: "Schedule 5: Amendment History", clause_family: amendment}
+
+# ---------------------------------------------------------------------------
+- id: 9
+  file: 09_mutual_nda_own_clean
+  title: Mutual Non-Disclosure Agreement  # line 1
+  contract_type: nda  # expected.yaml id 9
+  parties:
+    us:
+      name: Halcyon Care, Inc.  # preamble, line 3
+      role_label: Halcyon (Disclosing Party / Receiving Party, as context requires)  # preamble, line 3
+      entity_type: Delaware corporation  # preamble, line 3
+      jurisdiction: Delaware  # preamble, line 3
+    counterparty:
+      name: Juniper Analytics Corp  # preamble, line 3
+      role_label: Counterparty (Disclosing Party / Receiving Party, as context requires)  # preamble, line 3
+      entity_type: healthcare analytics company  # preamble, line 3
+      jurisdiction: Delaware  # preamble, line 3
+  counterparty: Juniper Analytics Corp  # expected.yaml id 9
+  fields:
+    effective_date: "2026-02-02"  # preamble, line 3 ("entered into as of February 2, 2026")
+    expiry_date: null  # no fixed calendar date; a 2-year duration is stated instead, 8.1
+    initial_term_months: 24  # 8.1, line 79 ("two (2) years")
+    auto_renewal: false  # 8.1 states only a fixed 2-year term; Schedule B line 177 allows extension only "by mutual written agreement", not automatically
+    renewal_term_months: null  # no stated renewal term; extensions are negotiated case by case, Schedule B line 177
+    renewal_notice_days: null  # not stated
+    governing_law: Delaware  # 12.1, line 107
+    dispute_resolution: null  # no ADR/escalation clause; only the governing-law clause at 12.1
+    dispute_venue: null  # not stated
+    liability_cap_amount: null  # this NDA contains no liability-cap clause
+    liability_cap_basis: null  # not stated
+    total_value_amount: null  # not applicable; no fees in an NDA
+    currency: null  # not stated
+    payment_terms_days: null  # not stated
+    termination_for_convenience: null  # this NDA has a fixed term (8.1) and no termination-for-convenience clause
+    termination_for_convenience_party: null
+    termination_notice_days: null  # not stated
+  signatories: null  # Schedule D (line 191-193) describes a signature page but gives no signatory name, title or date
+  sections:
+  - {number: preamble, title: "Preamble and Recitals", clause_family: preamble}
+  - {number: "1", title: "Definitions", clause_family: definitions}
+  - {number: "2", title: "Confidentiality Obligations", clause_family: confidentiality}
+  - {number: "3", title: "Exclusions", clause_family: confidentiality}
+  - {number: "4", title: "Compelled Disclosure", clause_family: confidentiality}
+  - {number: "5", title: "Residuals", clause_family: confidentiality}  # matches expected.yaml rule_key confidentiality.residuals
+  - {number: "6", title: "Equitable Relief", clause_family: other}
+  - {number: "7", title: "No License", clause_family: intellectual_property}
+  - {number: "8", title: "Term and Survival", clause_family: term}
+  - {number: "9", title: "Return or Destruction", clause_family: confidentiality}
+  - {number: "10", title: "Non-Solicitation", clause_family: non_solicitation}
+  - {number: "11", title: "Publicity", clause_family: publicity}
+  - {number: "12", title: "Governing Law", clause_family: governing_law}
+  - {number: "13", title: "General Provisions", clause_family: other}
+  - {number: "14", title: "Independent Contractor Status", clause_family: other}
+  - {number: "15", title: "No Third-Party Beneficiaries", clause_family: other}
+  - {number: "16", title: "Further Assurances", clause_family: other}
+  - {number: "17", title: "Counterparts and Electronic Signature", clause_family: other}
+  - {number: "18", title: "Interpretation", clause_family: other}
+  - {number: "19", title: "Severability", clause_family: other}
+  - {number: "20", title: "Waiver", clause_family: other}
+  - {number: "21", title: "Export Control", clause_family: compliance}
+  - {number: "22", title: "Survival of Terms", clause_family: other}
+  - {number: "23", title: "Relationship to Future Agreements", clause_family: other}
+  - {number: schedule_a, title: "Schedule A: Illustrative Discussion Topics", clause_family: other}
+  - {number: schedule_b, title: "Schedule B: Administration of this Agreement", clause_family: other}
+  - {number: schedule_c, title: "Schedule C: Background Information", clause_family: other}
+  - {number: schedule_d, title: "Schedule D: Signature and Execution", clause_family: signature_block}
+  - {number: schedule_e, title: "Schedule E: Defined Terms Cross-Reference", clause_family: definitions}
+  - {number: schedule_f, title: "Schedule F: Notices Checklist", clause_family: notices}
+
+# ---------------------------------------------------------------------------
+- id: 10
+  file: 10_mutual_nda_counterparty_residuals
+  title: Mutual Nondisclosure Agreement  # line 1
+  contract_type: nda  # expected.yaml id 10
+  parties:
+    us:
+      name: Halcyon Care, Inc.  # preamble, line 3
+      role_label: Halcyon  # preamble, line 3
+      entity_type: null  # not restated in this file
+      jurisdiction: null  # not restated in this file
+    counterparty:
+      name: Omnivault Technologies, Inc.  # preamble, line 3
+      role_label: Omnivault  # preamble, line 3
+      entity_type: large enterprise software company  # preamble, line 3
+      jurisdiction: California  # preamble, line 3
+  counterparty: Omnivault Technologies, Inc.  # expected.yaml id 10
+  fields:
+    effective_date: "2026-08-11"  # preamble, line 3 ("made as of August 11, 2026")
+    expiry_date: null  # no fixed calendar date; a 3-year duration is stated instead, 8.1
+    initial_term_months: 36  # 8.1, line 97 ("three (3) years")
+    auto_renewal: false  # 8.1 states only a fixed 3-year term, with no renewal clause
+    renewal_term_months: null  # not stated
+    renewal_notice_days: null  # not stated
+    governing_law: Delaware  # 11.1, line 121
+    dispute_resolution: null  # no ADR/escalation clause; only the governing-law clause at 11.1
+    dispute_venue: null  # not stated
+    liability_cap_amount: null  # this NDA contains no liability-cap clause; 12.12 (line 147) disclaims warranty/liability generally but states no cap
+    liability_cap_basis: null  # not stated
+    total_value_amount: null  # not applicable; no fees in an NDA
+    currency: null  # not stated
+    payment_terms_days: null  # not stated
+    termination_for_convenience: true  # 12.11, line 145 ("either party may terminate discussions regarding the Purpose at any time ... without liability")
+    termination_for_convenience_party: either party  # 12.11, line 145
+    termination_notice_days: null  # 12.11 (line 145) requires only "written notice", no stated number of days
+  signatories: null  # 12.16 (line 155) and 13.1 (line 159) describe signatory authority representations but give no actual name or title
+  sections:
+  - {number: preamble, title: "Preamble and Recitals", clause_family: preamble}
+  - {number: "1", title: "Definitions", clause_family: definitions}
+  - {number: "2", title: "Confidentiality Obligations", clause_family: confidentiality}
+  - {number: "3", title: "Exclusions", clause_family: confidentiality}
+  - {number: "4", title: "Compelled Disclosure", clause_family: confidentiality}
+  - {number: "5", title: "Residuals", clause_family: confidentiality}
+  - {number: "6", title: "Equitable Relief", clause_family: other}
+  - {number: "7", title: "No License", clause_family: intellectual_property}
+  - {number: "8", title: "Term and Survival", clause_family: term}
+  - {number: "9", title: "Return or Destruction", clause_family: confidentiality}
+  - {number: "10", title: "Publicity", clause_family: publicity}
+  - {number: "11", title: "Governing Law", clause_family: governing_law}
+  - {number: "12", title: "General Provisions", clause_family: other}
+  - {number: "13", title: "Acknowledgements", clause_family: other}
+  - {number: "14", title: "Confidentiality of this Agreement", clause_family: confidentiality}
+  - {number: schedule_a, title: "Schedule A - Illustrative Topics for Discussion", clause_family: other}
+
+# ---------------------------------------------------------------------------
+- id: 11
+  file: 11_vendor_msa_counterparty_lowcap
+  title: Master Services Agreement  # line 1
+  contract_type: vendor_msa  # expected.yaml id 11
+  parties:
+    us:
+      name: Halcyon Care, Inc.  # preamble, line 3
+      role_label: Halcyon  # preamble, line 3
+      entity_type: Delaware corporation  # preamble, line 3
+      jurisdiction: Delaware  # preamble, line 3
+    counterparty:
+      name: Swiftline Cloud Services LLC  # preamble, line 3
+      role_label: Vendor  # preamble, line 3
+      entity_type: cloud messaging vendor (LLC)  # preamble, line 3
+      jurisdiction: Nevada  # preamble, line 3
+  counterparty: Swiftline Cloud Services LLC  # expected.yaml id 11
+  fields:
+    effective_date: null  # preamble (line 3) gives the agreement date, "made as of September 15, 2026", but "Effective Date" is used undefined in 4.1 without a parenthetical definition tying it to that date
+    expiry_date: null  # no fixed calendar expiry; term runs from the Effective Date, 4.1
+    initial_term_months: 12  # 4.1, line 67 ("twelve (12) months")
+    auto_renewal: true  # 4.1, line 67 ("renewing automatically")
+    renewal_term_months: 12  # 4.1, line 67 ("successive twelve-month terms")
+    renewal_notice_days: 60  # 4.1, line 67
+    governing_law: Nevada  # 16.4, line 161
+    dispute_resolution: null  # no ADR/escalation clause stated
+    dispute_venue: null  # no separate venue/jurisdiction clause beyond 16.4 governing law
+    liability_cap_amount: null  # formula only
+    liability_cap_basis: total Fees paid by Halcyon in the 3 months preceding the event giving rise to the claim  # 6.1, line 85 (flagged in-line as below Halcyon's 12-month buy-side floor, line 87)
+    total_value_amount: null  # Fees are set in the Order Form, not stated numerically in this Agreement, 1.2 line 27
+    currency: USD  # 3.4, line 63 ("stated and payable in United States dollars")
+    payment_terms_days: 30  # 3.1, line 55
+    termination_for_convenience: false  # only for-cause termination present, 4.2 line 69
+    termination_for_convenience_party: null
+    termination_notice_days: null  # only the 15-day cure period for material breach, 4.2 line 69
+  signatories: null  # 16.16 (line 211) describes a signatory-authority representation but gives no actual name or title
+  sections:
+  - {number: preamble, title: "Preamble and Recitals", clause_family: preamble}
+  - {number: "1", title: "Definitions", clause_family: definitions}
+  - {number: "2", title: "Services", clause_family: other}
+  - {number: "3", title: "Fees and Payment", clause_family: payment}
+  - {number: "4", title: "Term and Termination", clause_family: term}
+  - {number: "5", title: "Service Levels", clause_family: service_levels}
+  - {number: "6", title: "Limitation of Liability", clause_family: limitation_of_liability}
+  - {number: "7", title: "Indemnification", clause_family: indemnification}
+  - {number: "8", title: "Warranties", clause_family: warranties}
+  - {number: "9", title: "Insurance", clause_family: insurance}
+  - {number: "10", title: "Intellectual Property", clause_family: intellectual_property}
+  - {number: "11", title: "Confidentiality", clause_family: confidentiality}
+  - {number: "12", title: "Security", clause_family: security}
+  - {number: "13", title: "Security Incidents", clause_family: breach_notification}
+  - {number: "14", title: "Subcontractors", clause_family: subprocessors}
+  - {number: "15", title: "Audit", clause_family: audit}
+  - {number: "16", title: "General Provisions", clause_family: other}
+  - {number: "17", title: "Statements of Work and Order of Precedence", clause_family: other}
+  - {number: exhibit_a, title: "Exhibit A - Sample Statement of Work (Illustrative Form)", clause_family: other}
+  - {number: "18", title: "Survival", clause_family: other}
+
+# ---------------------------------------------------------------------------
+- id: 12
+  file: 12_vendor_msa_counterparty_reasonable
+  title: Master Services Agreement  # line 1
+  contract_type: vendor_msa  # expected.yaml id 12
+  parties:
+    us:
+      name: Halcyon Care, Inc.  # preamble, line 3
+      role_label: Halcyon  # preamble, line 3
+      entity_type: Delaware corporation  # preamble, line 3
+      jurisdiction: Delaware  # preamble, line 3
+    counterparty:
+      name: Cornerstone Analytics Partners, Inc.  # preamble, line 3
+      role_label: Vendor  # preamble, line 3
+      entity_type: data analytics vendor  # preamble, line 3
+      jurisdiction: Massachusetts  # preamble, line 3
+  counterparty: Cornerstone Analytics Partners, Inc.  # expected.yaml id 12
+  fields:
+    effective_date: null  # preamble (line 3) gives the agreement date, "made as of October 2, 2026", but "Effective Date" is used undefined in 4.1 without a parenthetical definition tying it to that date
+    expiry_date: null  # no fixed calendar expiry; term runs from the Effective Date, 4.1
+    initial_term_months: 24  # 4.1, line 63 ("twenty-four (24) months" - in Halcyon's buy-side green range, per inline note line 65)
+    auto_renewal: true  # 4.1, line 63 ("renewing automatically")
+    renewal_term_months: 12  # 4.1, line 63 ("successive twelve-month terms")
+    renewal_notice_days: 60  # 4.1, line 63
+    governing_law: Massachusetts  # 16.4, line 165 ("the Commonwealth of Massachusetts")
+    dispute_resolution: null  # no ADR/escalation clause stated
+    dispute_venue: null  # no separate venue/jurisdiction clause beyond 16.4 governing law
+    liability_cap_amount: null  # general cap is formula-based (24 months' Fees); data-breach super-cap is 5x annual Fees, 6.1 line 87
+    liability_cap_basis: total Fees paid by Halcyon in the 24 months preceding the claim, with liability for a data breach capped at 5x annual Fees paid  # 6.1, line 87 (flagged as matching Halcyon's buy-side green position, line 89)
+    total_value_amount: null  # Fees are set in the Order Form, not stated numerically in this Agreement, 1.2 line 25
+    currency: USD  # 3.4, line 59
+    payment_terms_days: 45  # 3.1, line 51 ("Net 45", flagged as within Halcyon's buy-side green range, line 53)
+    termination_for_convenience: false  # only for-cause termination present, 4.2 line 67
+    termination_for_convenience_party: null
+    termination_notice_days: null  # only the 20-day cure period for material breach, 4.2 line 67 (flagged as within Halcyon's buy-side green range, line 69)
+  signatories: null  # no signatory-name representation or signature block appears in this file
+  sections:
+  - {number: preamble, title: "Preamble and Recitals", clause_family: preamble}
+  - {number: "1", title: "Definitions", clause_family: definitions}
+  - {number: "2", title: "Services", clause_family: other}
+  - {number: "3", title: "Fees and Payment", clause_family: payment}
+  - {number: "4", title: "Term and Termination", clause_family: term}
+  - {number: "5", title: "Service Levels", clause_family: service_levels}
+  - {number: "6", title: "Limitation of Liability", clause_family: limitation_of_liability}
+  - {number: "7", title: "Indemnification", clause_family: indemnification}
+  - {number: "8", title: "Warranties", clause_family: warranties}
+  - {number: "9", title: "Insurance", clause_family: insurance}
+  - {number: "10", title: "Intellectual Property", clause_family: intellectual_property}
+  - {number: "11", title: "Confidentiality", clause_family: confidentiality}
+  - {number: "12", title: "Security", clause_family: security}
+  - {number: "13", title: "Security Incidents", clause_family: breach_notification}
+  - {number: "14", title: "Subcontractors", clause_family: subprocessors}
+  - {number: "15", title: "Audit", clause_family: audit}
+  - {number: "16", title: "General Provisions", clause_family: other}
+  - {number: "17", title: "Statements of Work and Order of Precedence", clause_family: other}
+  - {number: exhibit_a, title: "Exhibit A - Sample Statement of Work (Illustrative Form)", clause_family: other}
+  - {number: "18", title: "Survival", clause_family: other}

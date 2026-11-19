@@ -35,7 +35,7 @@ class ReviewRun(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     contract_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("contract.id", name="fk_review_run_contract"),
+        ForeignKey("contract.id", name="fk_review_run_contract", ondelete="CASCADE"),
         nullable=False,
     )
     trigger: Mapped[str] = mapped_column(Text, nullable=False)

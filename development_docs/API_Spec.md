@@ -15,18 +15,59 @@ Notation: request/response bodies are described by their key fields; full shapes
 
 ## S1 — Document Processing  `/api/documents`
 
+Ingestion runs through Extend AI (Parse + Extract) in the background, so upload is **asynchronous**: `POST` returns `202` immediately and the client polls `GET /{id}` until `status` is `ready` or `failed` (`document_processing_plan.md` §3.6, §5.1; `document_processing_implementation.md` §4.3).
+
 | Method | Path | Purpose |
 |---|---|---|
-| `POST` | `/api/documents` | Upload + process a contract. Multipart file + `paper_origin` (own\|counterparty). Returns the `ProcessedContract` (contract_id, clauses[], metadata, counterparty_id). Stores bytes in object storage under the project prefix, rows in DB. **†** Optional form fields `contract_type`, `party_role` (vendor\|customer\|mutual) and `context` (JSON string), validated against `agreement_type` and `context_dimension`; invalid values return 400. See "Contract type and context" below. |
-| `GET` | `/api/documents/{contract_id}` | Fetch contract record + metadata. |
-| `GET` | `/api/documents/{contract_id}/clauses` | Clause array with `clause_type`, `char_start/end`, text. |
-| `GET` | `/api/documents/{contract_id}/text` | Canonical text (for offset resolution / display). |
+| `POST` | `/api/documents` | Upload a contract. Multipart `file`, `paper_origin`, optional `contract_type`, `party_role`, `context` (JSON string), optional `force` (boolean). Validates and stores the file, writes `contract` + `contract_version` (version 1) with `status = processing`, schedules the background ingest, and returns before Extend is called. |
+| `GET` | `/api/documents/{contract_id}` | Fetch the contract, its parties, signatories, fields with evidence, and any warnings. |
+| `GET` | `/api/documents/{contract_id}/clauses` | Clause array. Query parameter `level`: `1` (default, top-level sections only) or `all`. |
+| `GET` | `/api/documents/{contract_id}/text` | Canonical text (for offset resolution / display). Unchanged. |
+| `POST` | `/api/documents/{contract_id}/reprocess` | Re-run ingest against the stored file. `409 has_analysis` when a flag or redline already exists for the contract, unless `force=true` (which deletes that analysis first). |
 
-### Contract type and context †
+**`POST` responses:**
 
-Playbook resolution needs to know what the contract is and the deal it belongs to. Today `contract.contract_type` is never written, so no rule reaches a contract; this is the first wiring task.
+- `202` — `{"contract_id": "<uuid>", "version_id": "<uuid>", "status": "processing"}`
+- `400` — `invalid_paper_origin`, `invalid_contract_type`, `invalid_party_role`, `invalid_context`, `unsupported_format`, `empty_file`
+- `409` — `duplicate_file` with `{"existing_contract_id": "<uuid>"}` (the file's sha256 already exists; bypass with `force=true`)
+- `413` — `file_too_large`
 
-- `contract_type` not supplied → one structured LLM call (fast tier) classifies it from the title and the first 3,000 characters. The result is stored; it stays null when confidence is low. This is the only LLM call in S1, and it is skipped whenever the uploader supplies the type.
+**`GET /{id}` response shape:**
+
+```json
+{
+  "id": "…", "title": "…", "original_filename": "…", "status": "ready",
+  "status_reason": null, "paper_origin": "own", "source_format": "docx",
+  "contract_type": "saas_msa", "contract_type_source": "extracted",
+  "party_role": "vendor", "context": {}, "counterparty_id": "…",
+  "current_version_id": "…", "page_count": 9,
+  "created_at": "…", "updated_at": "…",
+  "parties": [{"party_id": "…", "name": "…", "role": "counterparty", "role_label": "Customer",
+               "entity_type": "…", "jurisdiction": "…", "address": "…"}],
+  "signatories": [{"printed_name": "…", "title": "…", "party_name": "…", "is_signed": true, "signed_date": "2026-01-12"}],
+  "fields": [{"field_key": "governing_law", "value": "Delaware", "source": "extract", "confidence": "high",
+              "quote": "…", "page": 7, "char_start": 18230, "char_end": 18262, "clause_id": "…"}],
+  "metadata": {"effective_date": "2026-01-12", "expiry_date": "2029-01-12", "expiry_is_derived": true, "…": "…"},
+  "warnings": []
+}
+```
+
+`fields` holds the value in force per key (`user` over `extract` over `derived`). While `status` is `processing`, the lists are empty. When `failed`, `status_reason` is one of `password_protected`, `unsupported_format`, `too_large`, `unreadable`, `no_text`, `extraction_failed`, `timeout`, `provider_unavailable`.
+
+**`GET /{id}/clauses` item shape:**
+
+```json
+{"id": "<uuid>", "clause_key": "<uuid>", "ordinal": 4, "level": 1, "parent_id": null,
+ "section_number": "6", "title": "Limitation of Liability", "heading_text": "6. LIMITATION OF LIABILITY",
+ "clause_type": "limitation_of_liability", "type_source": "extract", "issue_keys": [],
+ "text": "…", "char_start": 5120, "char_end": 6480, "page_start": 3, "page_end": 3}
+```
+
+### Contract type and context
+
+Playbook resolution needs to know what the contract is and the deal it belongs to.
+
+- `contract_type` not supplied → taken from one field in the Extend Extract schema (an enum generated from `agreement_type`), returned alongside every other field in the same run; `contract_type_source` is `extracted`. A user-supplied value at upload always wins and is recorded as `contract_type_source = "user"`. There is no separate classification call.
 - `regimes` not supplied → derived by deterministic keyword rules: `hipaa` if the text mentions PHI or business-associate terms, `gdpr` if it mentions GDPR, controller and processor.
 - `deal_value_band` → derived from a supplied deal value using the band boundaries in `context_dimension`.
 - With no context dimensions defined (no seed loaded), the context is accepted as given; validation and band derivation are skipped.

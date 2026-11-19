@@ -1,6 +1,6 @@
 BUSINESS ASSOCIATE AGREEMENT
 
-This Business Associate Agreement (this "BAA") is entered into as of July 7, 2026, between Brightwater County Hospital, a county hospital organized under the laws of Texas ("Covered Entity"), and Halcyon Care, Inc. ("Business Associate"), and supplements the Master Subscription Agreement between the parties (the "Underlying Agreement"). This BAA is drafted on Covered Entity's standard county-procurement BAA template. Several terms that Halcyon's own template would ordinarily include have been omitted from Covered Entity's template, as reflected in the Gap Notes following each section.
+This Business Associate Agreement (this "BAA") is entered into as of July 7, 2026, between Brightwater County Hospital, a county hospital organized under the laws of Texas ("Covered Entity"), and Halcyon Care, Inc. ("Business Associate"), and supplements the Master Subscription Agreement between the parties (the "Underlying Agreement"). This BAA is drafted on Covered Entity's standard county-procurement BAA template.
 
 RECITALS
 
@@ -170,7 +170,7 @@ Business Associate's point of contact for notices under Section 3 is Business As
 
 SCHEDULE 6: BACKGROUND ON BUSINESS ASSOCIATE
 
-This Schedule is provided for background and context only. It does not add to, modify, or substitute for any obligation of Business Associate stated in Sections 1 through 20 of this BAA, and it does not cure any gap identified in a Gap Note elsewhere in this BAA.
+This Schedule is provided for background and context only. It does not add to, modify, or substitute for any obligation of Business Associate stated in Sections 1 through 20 of this BAA.
 
 Business Associate carries cyber and technology errors and omissions insurance and general liability insurance in the ordinary course of its business and across its customer base generally, consistent with the certificate of insurance Business Associate may make available under Section 11.3. Nothing in this Schedule states that any particular insurance commitment described in this Schedule is a term of this BAA; a Covered Entity that wishes to rely on any matter described in this Schedule as a contractual commitment should request that it be added as an operative term of this BAA.
 

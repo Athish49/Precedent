@@ -1,0 +1,36 @@
+{
+ "object": "parse_run",
+ "id": "pr_corrupt",
+ "status": "PROCESSED",
+ "failureReason": null,
+ "failureMessage": null,
+ "output": {
+  "chunks": [
+   {
+    "object": "chunk",
+    "id": "chunk_corrupt_1",
+    "type": "document",
+    "content": "xW\u0000\u0001\u0003\u001f\u0012\u0007",
+    "metadata": {
+     "pageRange": {"start": 1, "end": 1}
+    },
+    "blocks": [
+     {
+      "object": "block",
+      "id": "block_corrupt_1",
+      "type": "text",
+      "content": "xW\u0000\u0001\u0003\u001f\u0012\u0007",
+      "details": {},
+      "metadata": {
+       "page": {
+        "number": 1,
+        "width": 612,
+        "height": 792
+       }
+      }
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,43 @@
+{
+ "object": "extract_run",
+ "id": "exr_nosec_000000000000000000",
+ "extractor": null,
+ "extractorVersion": null,
+ "status": "PROCESSED",
+ "parseRunId": "pr_nosec",
+ "output": {
+  "value": {
+   "title": "Services Agreement",
+   "clauses": [],
+   "parties": [
+    {
+     "name": "Acme Corp",
+     "address": null,
+     "role_label": "Supplier",
+     "entity_type": "corporation",
+     "jurisdiction": "Delaware"
+    }
+   ],
+   "currency": "USD",
+   "signatories": [],
+   "effective_date": "2025-01-01",
+   "governing_law": "California"
+  },
+  "metadata": {
+   "title": {
+    "ocrConfidence": 0.95,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": []
+   },
+   "clauses": {
+    "ocrConfidence": null,
+    "logprobsConfidence": null,
+    "reviewAgentScore": null,
+    "citations": []
+   }
+  }
+ },
+ "failureReason": null,
+ "failureMessage": null
+}

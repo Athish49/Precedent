@@ -35,7 +35,7 @@ class PlaybookException(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     contract_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("contract.id", name="fk_playbook_exception_contract"),
+        ForeignKey("contract.id", name="fk_playbook_exception_contract", ondelete="CASCADE"),
         nullable=False,
     )
     review_run_id: Mapped[uuid.UUID | None] = mapped_column(

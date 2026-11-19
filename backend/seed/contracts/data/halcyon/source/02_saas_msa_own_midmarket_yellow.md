@@ -2,7 +2,7 @@ MASTER SUBSCRIPTION AGREEMENT
 
 This Master Subscription Agreement (this "Agreement") is entered into as of April 14, 2026 (the "Effective Date") by and between Halcyon Care, Inc., a Delaware corporation with its principal place of business in Boston, Massachusetts ("Halcyon"), and Lakeshore Regional Health Group, a regional physician network organized under the laws of Wisconsin ("Customer"). Halcyon and Customer are each a "Party" and together the "Parties."
 
-This Agreement is based on Halcyon's standard template, as negotiated and marked up by Customer's procurement team. Four departures from Halcyon's standard terms are noted below.
+This Agreement is based on Halcyon's standard template, as negotiated and marked up by Customer's procurement team.
 
 RECITALS
 

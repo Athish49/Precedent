@@ -22,7 +22,7 @@ Since there is no auth or multi-user (see Non-Goals), there is a single implicit
 Each suite maps to one or more services (see Architecture.md). All are **in scope** for the backend.
 
 ### 3.1 Contract review & redlining (S1, S2, S3)
-- Deterministic ingestion: PDF/DOCX → clauses with character offsets + ~50 metadata fields + clause-type tags.
+- Ingestion via Extend AI (Parse + Extract, Light tier): PDF/DOCX → clauses with character offsets + structured fields with evidence + clause-type tags. Our own code builds the canonical text and cuts clause boundaries from Extend's blocks; Extend never produces the offsets or the stored clause text (`document_processing_plan.md` sections 3 and 5). Each file version is processed once, with pinned processor versions, and the raw responses are stored; nothing downstream regenerates text or offsets.
 - Issue detection: missing required clauses and phrase/regex red lines (deterministic), position matching, parameter extraction, semantic red lines and non-standard/high-risk/vague/inconsistent language (LLM extraction), per-clause + per-contract risk scoring (deterministic, severity-weighted, normalised to 0–1).
 - Every governed finding cites its playbook rule and carries a **zone** — green, yellow or red — assigned by deterministic code from the extracted facts, never by the model.
 - Paper-origin-aware analysis: own paper → standard analysis; counterparty paper → deviation-vs-playbook analysis (plus risk/vague detection).
@@ -113,7 +113,7 @@ Seed content is separate from the product. A demonstration playbook for a fictio
 - **FR-5** The autonomous gate must never auto-apply when a hard-stop condition is present: any yellow or red finding, or a redline quality failure.
 - **FR-6** LLM calls go through a single **LLM gateway** abstraction (see Tech_Stack.md) — no service calls the Anthropic SDK directly.
 - **FR-7** All LLM structured outputs are schema-validated (Pydantic); a malformed/refused response is surfaced as an error, never silently passed downstream.
-- **FR-8** Determinism where claimed: deterministic services must produce identical output for identical input. LLM temperature/effort is fixed per task; outputs are treated as non-deterministic and never used for control flow.
+- **FR-8** Determinism where claimed: deterministic services must produce identical output for identical input. LLM temperature/effort is fixed per task; outputs are treated as non-deterministic and never used for control flow. Document processing (S1) is the one exception to "deterministic service" framing: it calls Extend AI, a model behind an API, for Parse and Extract. Its commitment is not bit-identical output but that each file version is processed once, with pinned processor versions, and the raw responses are stored; nothing downstream regenerates text or offsets (`document_processing_plan.md` section 3.6).
 - **FR-9** Zones are assigned by deterministic code. The model extracts facts (matched position, parameter values, semantic red-line answers) with quotes; it never assigns a zone or a gate decision.
 - **FR-10** A published playbook version is immutable. Every finding, redline, decision event and exception records the rule key and playbook version it came from; every review run records its pinned versions.
 - **FR-11** Playbook changes go through draft, test and publish, and every rule-level change is written to the change log.
@@ -146,7 +146,7 @@ Deferred entirely for this project — do **not** build them, and do not add hoo
 
 ## 7. Success criteria
 
-- **SC-1** A contract (PDF or DOCX) can be uploaded and fully processed (S1) with clauses, offsets, metadata, and clause types, with zero LLM calls.
+- **SC-1** A contract (PDF or DOCX) can be uploaded and fully processed (S1) with clauses, offsets, metadata, and clause types. S1 calls Extend AI (Parse + Extract) to do this; the commitment is not zero model calls but that each file version is processed once, with pinned processor versions, and the raw responses are stored — nothing downstream regenerates text or offsets.
 - **SC-2** A counterparty contract can be run end-to-end through the Review Pipeline and produce redlines with rationale + citations, gated correctly by the three-zone logic.
 - **SC-3** A playbook can be bootstrapped from a corpus into a draft and then edited via CRUD; S2/S3 consume it.
 - **SC-9** An uploaded contract resolves a non-empty, version-pinned rule set.

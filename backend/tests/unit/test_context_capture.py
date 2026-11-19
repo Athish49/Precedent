@@ -1,10 +1,14 @@
-"""Unit tests for contract type and context capture (task 4.1).
+"""Unit tests for contract type and context capture.
 
-Covers classification (via the fake LLM gateway), deterministic regime
-detection, deal_value_band derivation (from context_dimension and from the
-hardcoded fallback), and validation of contract_type / party_role / context
-against the agreement_type / context_dimension lookup tables, including
-their graceful handling when those tables are empty.
+Covers deterministic regime detection, deal_value_band derivation (from
+context_dimension and from the hardcoded fallback), and validation of
+contract_type / party_role / context against the agreement_type /
+context_dimension lookup tables, including their graceful handling when
+those tables are empty.
+
+Contract-type classification by model call was removed in task 3.4 (it is
+no longer part of this module); there is accordingly no test for it here
+any more.
 """
 
 from __future__ import annotations
@@ -14,9 +18,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from app.api.errors import AppError
-from app.core.llm.schemas.classification import ContractTypeClassification
 from app.services.document_processing import context_capture as cc
-from tests.fake_llm import FakeLLMGateway
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -64,106 +66,16 @@ _AGREEMENT_TYPES = [
 ]
 
 
-# ── classify_contract_type ──────────────────────────────────────────────────
+# ── no model call (task 3.4) ─────────────────────────────────────────────────
 
 
-@pytest.mark.asyncio
-async def test_classify_high_confidence_returns_type(monkeypatch: pytest.MonkeyPatch) -> None:
-    fake = FakeLLMGateway(
-        structured_responses={
-            "contract_type_classify": ContractTypeClassification(
-                contract_type="saas_msa", confidence=0.95
-            )
-        }
-    )
-    monkeypatch.setattr(cc, "gateway", fake)
-    session = _session_returning(_scalars_result(_AGREEMENT_TYPES))
-
-    result = await cc.classify_contract_type(session, title="SaaS Agreement", text_excerpt="...")
-
-    assert result == "saas_msa"
-    assert len(fake.calls) == 1
-    assert fake.calls[0]["task"] == "contract_type_classify"
-
-
-@pytest.mark.asyncio
-async def test_classify_low_confidence_returns_none(monkeypatch: pytest.MonkeyPatch) -> None:
-    fake = FakeLLMGateway(
-        structured_responses={
-            "contract_type_classify": ContractTypeClassification(
-                contract_type="saas_msa", confidence=0.2
-            )
-        }
-    )
-    monkeypatch.setattr(cc, "gateway", fake)
-    session = _session_returning(_scalars_result(_AGREEMENT_TYPES))
-
-    result = await cc.classify_contract_type(session, title="Ambiguous Doc", text_excerpt="...")
-
-    assert result is None
-
-
-@pytest.mark.asyncio
-async def test_classify_hallucinated_type_returns_none(monkeypatch: pytest.MonkeyPatch) -> None:
-    fake = FakeLLMGateway(
-        structured_responses={
-            "contract_type_classify": ContractTypeClassification(
-                contract_type="made_up_type", confidence=0.99
-            )
-        }
-    )
-    monkeypatch.setattr(cc, "gateway", fake)
-    session = _session_returning(_scalars_result(_AGREEMENT_TYPES))
-
-    result = await cc.classify_contract_type(session, title="Doc", text_excerpt="...")
-
-    assert result is None
-
-
-@pytest.mark.asyncio
-async def test_classify_null_type_returns_none(monkeypatch: pytest.MonkeyPatch) -> None:
-    fake = FakeLLMGateway(
-        structured_responses={
-            "contract_type_classify": ContractTypeClassification(contract_type=None, confidence=0.1)
-        }
-    )
-    monkeypatch.setattr(cc, "gateway", fake)
-    session = _session_returning(_scalars_result(_AGREEMENT_TYPES))
-
-    result = await cc.classify_contract_type(session, title="Doc", text_excerpt="...")
-
-    assert result is None
-
-
-@pytest.mark.asyncio
-async def test_classify_no_candidates_skips_model_call(monkeypatch: pytest.MonkeyPatch) -> None:
-    fake = FakeLLMGateway()
-    monkeypatch.setattr(cc, "gateway", fake)
-    session = _session_returning(_scalars_result([]))
-
-    result = await cc.classify_contract_type(session, title="Doc", text_excerpt="...")
-
-    assert result is None
-    assert fake.calls == []
-
-
-@pytest.mark.asyncio
-async def test_classify_truncates_excerpt_to_3000_chars(monkeypatch: pytest.MonkeyPatch) -> None:
-    fake = FakeLLMGateway(
-        structured_responses={
-            "contract_type_classify": ContractTypeClassification(contract_type="nda", confidence=0.9)
-        }
-    )
-    monkeypatch.setattr(cc, "gateway", fake)
-    session = _session_returning(_scalars_result(_AGREEMENT_TYPES))
-
-    long_text = "x" * 10_000
-    await cc.classify_contract_type(session, title="Doc", text_excerpt=long_text)
-
-    user_message = fake.calls[0]["messages"][1]["content"]
-    # Only the first 3000 characters of the excerpt should appear in the prompt.
-    assert "x" * 3000 in user_message
-    assert "x" * 3001 not in user_message
+def test_classify_contract_type_removed() -> None:
+    """Task 3.4 deleted the model-call classifier entirely: it must not be
+    importable from this module, and the module must not import core.llm."""
+    assert not hasattr(cc, "classify_contract_type")
+    assert not hasattr(cc, "CONFIDENCE_THRESHOLD")
+    assert not hasattr(cc, "gateway")
+    assert "core.llm" not in (cc.__doc__ or "")
 
 
 # ── derive_regimes ───────────────────────────────────────────────────────────

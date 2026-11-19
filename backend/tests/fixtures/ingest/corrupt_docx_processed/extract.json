@@ -1,0 +1,20 @@
+{
+ "object": "extract_run",
+ "id": "exr_corrupt_00000000000000000",
+ "extractor": null,
+ "extractorVersion": null,
+ "status": "PROCESSED",
+ "parseRunId": "pr_corrupt",
+ "output": {
+  "value": {
+   "title": null,
+   "clauses": [],
+   "parties": [],
+   "currency": null,
+   "signatories": []
+  },
+  "metadata": {}
+ },
+ "failureReason": null,
+ "failureMessage": null
+}

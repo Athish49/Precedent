@@ -1,0 +1,62 @@
+{
+ "object": "parse_run",
+ "id": "pr_nosec",
+ "status": "PROCESSED",
+ "failureReason": null,
+ "failureMessage": null,
+ "output": {
+  "chunks": [
+   {
+    "object": "chunk",
+    "id": "chunk_nosec_1",
+    "type": "document",
+    "content": "This agreement is entered into between Acme Corp and the Customer. The supplier shall provide services as requested. Payment is due within thirty days of invoice. Either party may terminate this agreement upon thirty days written notice to the other party.",
+    "metadata": {
+     "pageRange": {"start": 1, "end": 1}
+    },
+    "blocks": [
+     {
+      "object": "block",
+      "id": "block_nosec_1",
+      "type": "text",
+      "content": "This agreement is entered into between Acme Corp and the Customer.",
+      "details": {},
+      "metadata": {
+       "page": {"number": 1, "width": 612, "height": 792}
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_nosec_2",
+      "type": "text",
+      "content": "The supplier shall provide services as requested by the Customer from time to time.",
+      "details": {},
+      "metadata": {
+       "page": {"number": 1, "width": 612, "height": 792}
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_nosec_3",
+      "type": "text",
+      "content": "Payment is due within thirty (30) days of invoice date. Late payments accrue interest.",
+      "details": {},
+      "metadata": {
+       "page": {"number": 1, "width": 612, "height": 792}
+      }
+     },
+     {
+      "object": "block",
+      "id": "block_nosec_4",
+      "type": "text",
+      "content": "Either party may terminate this agreement upon thirty (30) days written notice to the other party.",
+      "details": {},
+      "metadata": {
+       "page": {"number": 1, "width": 612, "height": 792}
+      }
+     }
+    ]
+   }
+  ]
+ }
+}

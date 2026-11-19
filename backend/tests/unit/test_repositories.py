@@ -99,33 +99,43 @@ async def test_list_contracts_with_status_filter() -> None:
 
 @pytest.mark.asyncio
 async def test_upsert_party_existing() -> None:
+    """Task 1.3: upsert_party is now INSERT ... ON CONFLICT DO NOTHING
+    followed by a select, so it is always two execute() calls and never
+    calls session.add directly — the insert itself is a no-op when the row
+    already exists.
+    """
     existing_party = MagicMock(spec=Party)
     existing_party.normalized_name = "acme corp"
 
     session = _make_session()
-    session.execute.return_value = _scalar_result(existing_party)
+    insert_result = MagicMock()
+    select_result = _scalar_result(existing_party)
+    session.execute.side_effect = [insert_result, select_result]
     session.add = MagicMock()
 
     result = await contract_repo.upsert_party(session, "acme corp", "Acme Corp")
 
     assert result is existing_party
     session.add.assert_not_called()
+    assert session.execute.call_count == 2
 
 
 @pytest.mark.asyncio
 async def test_upsert_party_new() -> None:
     session = _make_session()
-    session.execute.return_value = _scalar_result(None)
+    inserted_party = MagicMock(spec=Party)
+    inserted_party.normalized_name = "new corp"
+    inserted_party.display_name = "New Corp"
+    insert_result = MagicMock()
+    select_result = _scalar_result(inserted_party)
+    session.execute.side_effect = [insert_result, select_result]
     session.add = MagicMock()
 
     result = await contract_repo.upsert_party(session, "new corp", "New Corp")
 
-    session.add.assert_called_once()
-    added = session.add.call_args[0][0]
-    assert isinstance(added, Party)
-    assert added.normalized_name == "new corp"
-    assert added.display_name == "New Corp"
-    assert result is added
+    session.add.assert_not_called()
+    assert session.execute.call_count == 2
+    assert result is inserted_party
 
 
 # ---------------------------------------------------------------------------

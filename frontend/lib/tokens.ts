@@ -47,6 +47,8 @@ export interface ProvenanceToken {
 
 export const contractStatusTokens: Record<ContractStatus, StatusToken> = {
   processing: { label: 'Processing', variant: 'outline', icon: 'Loader2' },
+  failed: { label: 'Failed', variant: 'destructive', icon: 'XCircle' },
+  ready: { label: 'Ready', variant: 'secondary', icon: 'CheckCircle2' },
   analyzed: { label: 'Analyzed', variant: 'default', icon: 'CheckCircle2' },
   redlined: { label: 'Redlined', variant: 'secondary', icon: 'Pencil' },
   executed: { label: 'Executed', variant: 'default', icon: 'BadgeCheck' },

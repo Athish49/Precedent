@@ -13,26 +13,8 @@ from app.core.config import get_settings
 from app.core.storage import get_storage
 from app.db.models.contract import ContractVersion
 from app.db.repositories.contract_repo import get_contract
-from app.services.document_processing.parsers import parse
-
-# ── Helpers ───────────────────────────────────────────────────────────────────
-
-_EXTENSION_TO_FORMAT: dict[str, str] = {
-    ".pdf": "pdf",
-    ".docx": "docx",
-}
-
-
-def _source_format_from_filename(filename: str) -> str:
-    """Derive source_format from the filename extension."""
-    suffix = ""
-    if "." in filename:
-        suffix = "." + filename.rsplit(".", 1)[-1].lower()
-    fmt = _EXTENSION_TO_FORMAT.get(suffix)
-    if fmt is None:
-        raise ValueError(f"Unsupported file format: {filename!r}")
-    return fmt
-
+from app.services.document_processing import ingest
+from app.services.document_processing.upload_validation import validate_upload
 
 # ── Service functions ─────────────────────────────────────────────────────────
 
@@ -85,13 +67,17 @@ async def store_version(
     else:
         parent_version_id = None
 
-    # 4. Parse file to get canonical_text
-    source_format = _source_format_from_filename(filename)
-    parsed = parse(file_bytes, source_format)  # type: ignore[arg-type]
+    # 4. Validate the upload (type, hash, size, safe filename) and extract
+    #    its canonical text via the new text-only ingest entry point (task
+    #    3.1's extract_canonical_text), in place of the deleted
+    #    parsers.parse / _source_format_from_filename.
+    settings = get_settings()
+    max_mb = int(getattr(settings, "max_upload_mb", 25))
+    validated = validate_upload(filename, file_bytes, max_mb)
+    canonical_text = await ingest.extract_canonical_text(file_bytes, filename)
 
     # 5. Put bytes to object storage
     object_key = f"contracts/{contract_id}/versions/{new_ver}/{filename}"
-    settings = get_settings()
     storage = get_storage(settings)
     storage.put(object_key, file_bytes)
 
@@ -102,8 +88,12 @@ async def store_version(
         version_number=new_ver,
         parent_version_id=parent_version_id,
         object_key=object_key,
-        canonical_text=parsed.canonical_text,
+        canonical_text=canonical_text,
         relation=relation,
+        file_sha256=validated.sha256,
+        file_size_bytes=validated.size_bytes,
+        source_format=validated.source_format,
+        original_filename=validated.safe_filename,
     )
     session.add(version)
     await session.flush()

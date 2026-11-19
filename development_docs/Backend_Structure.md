@@ -72,9 +72,12 @@ backend/
     │       ├── versions.py                # Version Comparison
     │       └── health.py
     ├── core/
-    │   ├── config.py                      # pydantic-settings Settings (env): project_namespace, db_schema, object_storage_prefix; storage settings required
+    │   ├── config.py                      # pydantic-settings Settings (env): project_namespace, db_schema, object_storage_prefix; storage settings required; extend_api_key, own_org_names
     │   ├── namespace.py                   # schema helpers, project object list, assert_namespace() write guard
     │   ├── logging.py
+    │   ├── extend/                        # the only code that calls Extend AI (S1 ingestion)
+    │   │   ├── client.py                  # httpx-based client: upload, extract (poll to completion), parse_output, parse
+    │   │   └── errors.py                  # ExtendError + ExtendRunFailed/ExtendTimeout/ExtendUnavailable/ExtendAuthError
     │   ├── llm/
     │   │   ├── gateway.py                 # THE LLM gateway (FR-6): call_structured/call_text/call_batch
     │   │   ├── registry.py                # per-task → model tier mapping (Tech_Stack §4.2)
@@ -100,7 +103,6 @@ backend/
     │   │       ├── research_synthesize.md
     │   │       ├── smart_search_filters.md
     │   │       ├── playbook_bootstrap.md
-    │   │       ├── contract_type_classify.md   # [planned] fast-tier contract-type classification
     │   │       ├── obligation_extract.md
     │   │       ├── renewal_compliance.md
     │   │       └── version_semantic_summary.md
@@ -148,12 +150,22 @@ backend/
     │   ├── review.py
     │   └── common.py                       # pagination, error envelope
     ├── services/
-    │   ├── document_processing/
-    │   │   ├── service.py                  # public: process(file, paper_origin) -> ProcessedContract
-    │   │   ├── parsers.py                  # pdfplumber / python-docx
-    │   │   ├── segmentation.py             # heading detection + boundaries
-    │   │   ├── clause_types.py             # synonym/fuzzy normalizer; synonyms load from clause_family into a process-wide cache at startup (task 5.5; the in-code _SYNONYMS dict is gone)
-    │   │   └── extraction.py               # NER + regex metadata + counterpartyId
+    │   ├── document_processing/            # TRANSITIONAL (2026-11-18): new pipeline below is what the live API route wires to. The old files in this
+    │   │   │                                # package (parsers.py, segmentation.py, clause_types.py, extraction.py, service.py) still physically exist
+    │   │   │                                # — they are not deleted until task 5.1 of document_processing_implementation.md, not yet run — but nothing
+    │   │   │                                # imports them from the live route. Do not add new code to the old files; they are dead weight pending deletion.
+    │   │   ├── ingest.py                   # orchestrator: create_contract, run_ingest, extract_canonical_text, sweep_stale — replaces service.py
+    │   │   ├── types.py                    # frozen dataclasses shared across this package (Block, CanonicalDocument, ClauseDraft, FieldValue, PartyDraft, SignatoryDraft, IngestResult)
+    │   │   ├── canonical.py                # Extend Parse blocks -> canonical text (header/footer/page-number dropping, hyphen/table joining) — replaces parsers.py
+    │   │   ├── sections.py                 # segmentation: anchors Extract's section list onto canonical text, then cuts sub-clauses — replaces segmentation.py
+    │   │   ├── clause_typing.py            # typing: Extract's family first (when a valid clause_family key), else synonym/fuzzy dictionary, else other — replaces clause_types.py
+    │   │   ├── fields.py                   # field registry (key/type/tier/question) + Extend Extract JSON-schema builder — replaces most of extraction.py
+    │   │   ├── mapping.py                  # Extract output -> FieldValue/PartyDraft/SignatoryDraft rows, evidence offset lookup, sanity checks, derived values
+    │   │   ├── parties.py                  # own-organisation matching (OWN_ORG_NAMES) and role assignment
+    │   │   ├── upload_validation.py        # size/magic-bytes/sha256/filename validation — replaces _source_format_from_filename
+    │   │   ├── invariants.py               # the guarantees in document_processing_plan.md §7.5, checked before each ingest commits
+    │   │   ├── pipeline.py                 # build_result: the pure, network-free assembly of the above into an IngestResult (replay-tested)
+    │   │   └── context_capture.py          # stays; loses the classify_contract_type model call (type now comes from Extract) — validators and derive_* helpers unchanged
     │   ├── contract_analysis/
     │   │   ├── service.py                  # public: analyze(contract_id) -> AnalysisResult
     │   │   ├── layer1_structural.py        # missing clauses + prohibited terms (deterministic); [planned] phrase/regex red lines with negation guard
@@ -214,7 +226,7 @@ backend/
 - **Service public interface:** each `services/<s>/service.py` exposes one class (e.g. `DocumentProcessingService`) or module-level functions; routers/workflows depend only on that. Internal helpers stay private to the package.
 - **No cross-service imports of internals.** S3 needing S7's diff engine uses `core/diff` (shared), not `services/repository` internals. S2 needing playbook data calls `S6.resolve()` or reads via a repository.
 - **LLM calls only via the gateway.** Grep test in CI: `import anthropic` may appear only in `core/llm/`.
-- **Determinism guard:** deterministic modules must not import the gateway. S1 and S9 packages never import `core/llm`.
+- **Determinism guard:** deterministic modules must not import the gateway. S1 and S9 packages never import `core/llm`. S1 instead imports `core/extend` (the Extend AI client) — guarded the same way: `api.extend.ai` appears only under `core/extend/`, and only `document_processing/` imports `core/extend`.
 - **Offsets & clause-type are sacred:** never regenerate `char_start/end` or `clause_type` downstream; carry them.
 - **Prompts are files, versioned:** editing a prompt = editing its `.md` template; keep a `# version:` header and keep the cached prefix byte-stable for prompt caching.
 - **Repositories return domain/ORM objects, routers return Pydantic schemas.** Convert at the service boundary.

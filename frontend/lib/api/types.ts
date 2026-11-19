@@ -1,7 +1,24 @@
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
 export type PaperOrigin = 'own' | 'counterparty';
-export type ContractStatus = 'processing' | 'analyzed' | 'redlined' | 'executed';
+export type ContractStatus = 'processing' | 'failed' | 'ready' | 'analyzed' | 'redlined' | 'executed';
+export type ContractTypeSource = 'user' | 'extracted';
+export type FieldSource = 'extract' | 'derived' | 'user';
+export type FieldConfidence = 'high' | 'low';
+export type ClauseTypeSource = 'extract' | 'dictionary' | 'none';
+export type PartyRole = 'own' | 'counterparty' | 'other';
+// `status_reason` values a `failed` contract can carry
+// (document_processing_implementation.md section 4.3).
+export type DocumentStatusReason =
+  | 'password_protected'
+  | 'unsupported_format'
+  | 'too_large'
+  | 'unreadable'
+  | 'no_text'
+  | 'extraction_failed'
+  | 'timeout'
+  | 'provider_unavailable'
+  | 'storage_failed';
 export type Severity = 'low' | 'medium' | 'high';
 export type FlagType =
   | 'missing'
@@ -54,18 +71,92 @@ export interface Contract {
   updated_at: string;
 }
 
+// Matches the `contract_metadata` projection columns surfaced by
+// `GET /api/documents/{id}` (`metadata`), per
+// document_processing_implementation.md section 4.3 / `_METADATA_FIELDS` in
+// `backend/app/api/routes/documents.py`. The legacy free-form columns this
+// interface used to mirror (see document_processing_implementation.md
+// section 4.1, task list item 1, for the full removal list) no longer exist
+// on the backend.
 export interface ContractMetadata {
-  parties: { name: string; role: string }[];
-  effective_date?: string;
-  expiry_date?: string;
-  governing_law?: string;
-  liability_cap?: { value: number; currency: string };
-  notice_period_days?: number;
-  auto_renewal?: boolean;
-  payment_terms?: string;
-  financial_fields?: Record<string, unknown>;
-  milestone_dates?: string[];
-  extracted?: Record<string, unknown>;
+  effective_date?: string | null;
+  expiry_date?: string | null;
+  expiry_is_derived?: boolean | null;
+  initial_term_months?: number | null;
+  renewal_term_months?: number | null;
+  renewal_notice_days?: number | null;
+  governing_law?: string | null;
+  dispute_resolution?: string | null;
+  total_value_amount?: number | null;
+  currency?: string | null;
+  liability_cap_amount?: number | null;
+  liability_cap_basis?: string | null;
+  payment_terms_days?: number | null;
+  termination_for_convenience?: boolean | null;
+  termination_notice_days?: number | null;
+}
+
+// `GET /api/documents/{id}` → `parties[]`.
+export interface ContractPartyRow {
+  party_id: string;
+  name: string;
+  role: PartyRole | string;
+  role_label?: string | null;
+  entity_type?: string | null;
+  jurisdiction?: string | null;
+  address?: string | null;
+}
+
+// `GET /api/documents/{id}` → `signatories[]`.
+export interface Signatory {
+  printed_name?: string | null;
+  title?: string | null;
+  party_name?: string | null;
+  is_signed?: boolean | null;
+  signed_date?: string | null;
+}
+
+// `GET /api/documents/{id}` → `fields[]` — the value in force per field key
+// (`user` over `extract` over `derived`).
+export interface ContractField {
+  field_key: string;
+  value: unknown;
+  source: FieldSource | string;
+  confidence?: FieldConfidence | string | null;
+  quote?: string | null;
+  page?: number | null;
+  char_start?: number | null;
+  char_end?: number | null;
+  clause_id?: string | null;
+}
+
+// `GET /api/documents/{id}` — the full document detail shape
+// (document_processing_implementation.md section 4.3). Replaces the old
+// `ProcessedContract` returned synchronously from the upload route; the
+// upload route now returns `UploadAcceptedResponse` (202) and this is
+// fetched/polled separately.
+export interface ContractDetail {
+  id: string;
+  title: string;
+  original_filename?: string | null;
+  status: ContractStatus;
+  status_reason?: DocumentStatusReason | string | null;
+  paper_origin: PaperOrigin;
+  source_format: 'pdf' | 'docx';
+  contract_type?: string | null;
+  contract_type_source?: ContractTypeSource | string | null;
+  party_role?: string | null;
+  context?: Record<string, unknown> | null;
+  counterparty_id?: string | null;
+  current_version_id?: string | null;
+  page_count?: number | null;
+  created_at: string;
+  updated_at: string;
+  parties: ContractPartyRow[];
+  signatories: Signatory[];
+  fields: ContractField[];
+  metadata: ContractMetadata;
+  warnings: string[];
 }
 
 export interface ContractRow {
@@ -82,26 +173,28 @@ export interface ContractRow {
   max_clause_severity?: Severity;
 }
 
-export interface ProcessedContract {
-  contract_id: string;
-  clauses: Clause[];
-  metadata: ContractMetadata;
-  paper_origin: PaperOrigin;
-  counterparty_id?: string;
-  contract_type?: string | null;
-  party_role?: string | null;
-  context?: Record<string, unknown> | null;
-}
-
+// `GET /api/documents/{id}/clauses`. `id` is a real UUID (not the old
+// synthetic `c0000`-style string); `clause_key` is a stable UUID that
+// survives re-ingestion. The old `ProcessedContract` (returned
+// synchronously from `POST /documents`) no longer exists — upload is now
+// `202` + poll (see `UploadAcceptedResponse` / `useUploadDocument`).
 export interface Clause {
   id: string;
-  contract_id: string;
+  clause_key: string;
   ordinal: number;
+  level: number;
+  parent_id?: string | null;
+  section_number?: string | null;
+  title?: string | null;
+  heading_text?: string | null;
   clause_type: string;
-  heading_text: string;
+  type_source: ClauseTypeSource | string;
+  issue_keys: string[];
   text: string;
   char_start: number;
   char_end: number;
+  page_start?: number | null;
+  page_end?: number | null;
 }
 
 export interface Citation {
@@ -613,6 +706,22 @@ export interface UploadDocumentBody {
   contract_type?: string;
   party_role?: string;
   context?: Record<string, unknown>;
+  /** Bypass the `409 duplicate_file` check (section 4.3). */
+  force?: boolean;
+}
+
+// `POST /api/documents` — 202 body (section 4.3). Upload is now
+// fire-and-poll: the route schedules the Extend ingest in the background
+// and returns immediately with the ids to poll via `useContract`.
+export interface UploadAcceptedResponse {
+  contract_id: string;
+  version_id: string;
+  status: 'processing';
+}
+
+// `409 duplicate_file` error body's `detail` (ApiError.detail).
+export interface DuplicateFileDetail {
+  existing_contract_id: string;
 }
 
 export interface ContractContextUpdateBody {
